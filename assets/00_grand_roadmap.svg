@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradMap" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="blueG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="purpleG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1100" height="620" rx="16" fill="url(#bgGradMap)" />
+
+  <!-- Badge -->
+  <rect x="50" y="30" width="310" height="34" rx="17" fill="rgba(59, 130, 246, 0.15)" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="205" y="52" fill="#60a5fa" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">🗺️ 全館拓樸篇 (Grand Roadmap)</text>
+
+  <text x="50" y="105" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="28" font-weight="800">資訊工程與深度學習宏偉圖書館：十大分館全景導覽地圖</text>
+  <text x="50" y="135" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="15">依據 ACM CCS 規格分類，共 19 卷旗艦典籍、65 條形式化 Agent 契約、雙向閉環導通</text>
+
+  <!-- 10 Wings Grid (5 columns x 2 rows) -->
+  <!-- Wing 00 -->
+  <g transform="translate(50, 165)">
+    <rect width="185" height="180" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 00</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">總覽與先修導覽</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-000 全域導覽索引</tspan>
+      <tspan x="15" dy="18">LIB-001 第一性原理先修</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• 學習六大基石</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 封裝真相與Debug</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 01 -->
+  <g transform="translate(255, 165)">
+    <rect width="185" height="180" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 01</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">數學與理論基石</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-101 線性代數幾何</tspan>
+      <tspan x="15" dy="18">LIB-104 凸最佳化梯度</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• 空間變換本質</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 一階二階下山幾何</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 02 -->
+  <g transform="translate(460, 165)">
+    <rect width="185" height="180" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 02</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">計算機硬體架構</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-203 體系結構對齊</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• GPU Warp 32 執行緒</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 記憶體合併讀取</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• Roofline 頻寬瓶頸</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 03 -->
+  <g transform="translate(665, 165)">
+    <rect width="185" height="180" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 03</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">機器學習統計原理</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-301 資料分佈偏差</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• 美式 7 空間負權重</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 領域漂移與泛化界</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 經驗風險最小化</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 04 -->
+  <g transform="translate(870, 165)">
+    <rect width="180" height="180" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+    <rect x="0" y="0" width="180" height="4" fill="url(#purpleG)" />
+    <text x="15" y="28" fill="#c084fc" font-family="monospace" font-size="11" font-weight="700">WING 04 • 旗艦</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">深度架構與機制</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-401 DNN空間與CNN</tspan>
+      <tspan x="15" dy="18">LIB-405 Transformer RoPE</tspan>
+      <tspan x="15" dy="18">LIB-406 生成前沿(SDE/FM)</tspan>
+      <tspan x="15" dy="25" fill="#c084fc">• DiT 縮放定律</tspan>
+    </text>
+  </g>
+
+  <!-- Row 2 -->
+  <!-- Wing 05 -->
+  <g transform="translate(50, 360)">
+    <rect width="185" height="175" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 05</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">視覺與高維感測</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-501 CV前處理質心</tspan>
+      <tspan x="15" dy="18">LIB-504 3D高斯潑濺</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• LeCun 重心對齊</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• 3DGS 實時光柵化</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 06 -->
+  <g transform="translate(255, 360)">
+    <rect width="185" height="175" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 06</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">自然語言與大模型</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-602 現代LLM解剖</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• Scaling Laws 冪律</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• SwiGLU / GQA</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• RMSNorm 數值穩定</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 07 -->
+  <g transform="translate(460, 360)">
+    <rect width="185" height="175" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#purpleG)" />
+    <text x="15" y="28" fill="#c084fc" font-family="monospace" font-size="11" font-weight="700">WING 07</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">強化學習與代理人</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-703 Agent認知協議</tspan>
+      <tspan x="15" dy="18">LIB-704 S1雙進程(Jev)</tspan>
+      <tspan x="15" dy="25" fill="#c084fc">• ReAct 閉環思考</tspan>
+      <tspan x="15" dy="18" fill="#c084fc">• 字節介面毫秒反射</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 08 -->
+  <g transform="translate(665, 360)">
+    <rect width="185" height="175" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#38bdf8" font-family="monospace" font-size="11" font-weight="700">WING 08</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">AI工程與部署</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-801 模型校準不確定</tspan>
+      <tspan x="15" dy="18">LIB-802 AWQ 模型量化</tspan>
+      <tspan x="15" dy="25" fill="#38bdf8">• 8層過度自信分析</tspan>
+      <tspan x="15" dy="18" fill="#38bdf8">• INT4 / FP8 低精度</tspan>
+    </text>
+  </g>
+
+  <!-- Wing 09 -->
+  <g transform="translate(870, 360)">
+    <rect width="180" height="175" rx="10" fill="#1e293b" stroke="#34d399" stroke-width="1.5" />
+    <rect x="0" y="0" width="180" height="4" fill="url(#blueG)" />
+    <text x="15" y="28" fill="#34d399" font-family="monospace" font-size="11" font-weight="700">WING 09 • 奠基</text>
+    <text x="15" y="52" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="14" font-weight="700">科研藍圖與復盤</text>
+    <text x="15" y="78" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="15" dy="0">LIB-901 MNIST專案復盤</tspan>
+      <tspan x="15" dy="18">LIB-903 專題推甄演進</tspan>
+      <tspan x="15" dy="18">LIB-904 教授實驗室體系</tspan>
+      <tspan x="15" dy="25" fill="#34d399">• 論文八階黃金閉環</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom Pathways Banner -->
+  <rect x="50" y="550" width="1000" height="45" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+  <text x="550" y="578" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13.5" font-weight="600" text-anchor="middle">
+    🧭 三大推薦路徑：【路線 A】學士資工基本功扎根 ➔ 【路線 B】大專生國科會與頂大推甄衝刺 ➔ 【路線 C】AI Agent 智慧代理人執行協議
+  </text>
+</svg>

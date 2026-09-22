@@ -1,0 +1,13 @@
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Obsidian workspace layout and cache (exclude private cache, keep standard notes)
+.obsidian/workspace*
+.obsidian/cache

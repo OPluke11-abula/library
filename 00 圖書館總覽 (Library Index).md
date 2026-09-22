@@ -1,24 +1,23 @@
 ---
 tags:
-  - 圖書館
-  - 索引導向
+  - 索引
+  - 導覽
 created: 2026-09-17
-updated: 2026-09-21
+updated: 2026-09-22
 ---
 
-> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (Agent Edition)](en/00_overview/00%20Library%20Index%20%28Agent%20EN%29.md)
+> 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English](en/00_overview/00%20Library%20Index%20%28Agent%20EN%29.md)
 
-# 資訊工程與深度學習宏偉圖書館 (CSIE & Deep Learning Grand Library)
+# 資訊工程與深度學習知識庫 (CS & Deep Learning Notes)
 
-> 🏛️ **圖書館系統已全面升級重構並注入 2024-2026 頂級同行評審期刊與論文！**
-> 本館藏依據 ACM CCS 與十進制圖書館分類法，建立具備十大分館與嚴密拓樸有向無環圖 (DAG) 的世界級知識庫。
+> 本知識庫收錄資訊工程、計算機視覺與深度學習理論與實作筆記，依據 ACM CCS 分類架構分為十大分部，並透過有向無環圖 (DAG) 建立前後置依賴關係。
 
-請前往最新總導覽館藏：
-👉 **[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]**
+主導覽文檔：
+**[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]**
 
 ---
 
-### 十大分館快速傳送門：
+### 分館快速索引
 - **00 總覽與拓樸導覽**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]
 - **01 數學理論基石**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]
 - **02 計算機系統與硬體**：[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]
@@ -30,4 +29,4 @@ updated: 2026-09-21
 - **08 AI系統工程與部署**：[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]
 - **09 科研方法與專題藍圖**：[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]
 
-*(歷史舊版作業筆記已妥善封存於 _archive_legacy/ 目錄)*
+*(歷史課堂作業筆記封存於 `_archive_legacy/` 目錄)*

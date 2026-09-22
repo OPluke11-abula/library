@@ -32,26 +32,18 @@ tags:
   - AI代理人導覽
 ---
 
-> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/00_overview/LIB-000%20Grand%20Library%20Index%20%26%20Navigator%20%28Agent%20EN%29.md)
+> 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English](../en/00_overview/LIB-000%20Grand%20Library%20Index%20%26%20Navigator%20%28Agent%20EN%29.md)
 
-# 資訊工程與深度學習宏偉圖書館 (CSIE & Deep Learning Grand Library)
-## 總目錄、分類體系與拓樸航海圖 (Master Index & Topological Navigator)
+# 資訊工程與深度學習知識庫 (CS & Deep Learning Notes)
+## 目錄索引、分類體系與知識拓樸圖 (Master Index & Topological Graph)
 
-> 「在電腦科學的殿堂中，沒有孤立的黑盒子。演算法是數學思想的映射，神經網路是統計高維空間的投影，而一切計算最終都必須在矽晶片與記憶體階層的物理定律中尋求對齊。」
-> —— *資訊工程與 AI 博士研究員導言*
+本知識庫由 **Luke** 整理與維護，涵蓋資訊工程、深度學習與計算機視覺的核心理論、底層硬體架構與系統工程實踐。
 
----
-
-## 🏛️ 圖書館宗旨與三位一體設計原則
-
-本圖書館為 **Luke** 為深入掌握資訊工程與深度學習所建立的個人自學宏偉知識庫，旨在將大學課堂實作、實證除錯踩坑、計算機底層硬體對齊、資料集文化偏差，以及現代神經網路校準理論，昇華為世界頂尖大學圖書館規格之宏偉體系。
-
-本館徹底打破「教材過於空泛膚淺」或「論文過於抽象晦澀」的兩極割裂，全面貫徹**「三位一體雙軌體例」**：
-1. 💡 **學士與初學者直觀心智模型 (Undergraduate Mental Model)**：透過第一性原理、物理比喻與直觀幾何，解釋前人發明該架構的本質痛點，消除數學焦慮。
-2. 🎓 **博士級數學形式化與嚴格推導 (PhD-Level Formal Rigor)**：提供完整符號化定義、目標函數閉式解、泛函極限證明與經典頂會文獻（CVPR, ICCV, NeurIPS, ICML, ICLR, SIGGRAPH, MLSys）引證。
-3. ⚙️ **計算機體系結構與硬體微架構映射 (Systems & Hardware Alignment)**：深入記憶體階層、Cache Line、GPU Warp 排程、Tensor Core GEMM Tiling、FlashAttention-3 與 Roofline 算力頻寬瓶頸。
-4. 💻 **工業級工程實作與防踩坑規範 (Production-grade Code)**：提供標註精確張量維度之 PyTorch / CUDA 程式碼與工程除錯邊界。
-5. 🤖 **AI Agent 推論協議與決策不變量 (Agent Protocols & Invariants)**：定義結構化規則與決策樹，供智能體在未來工程與科研中直接調用。
+為確保內容兼具理論深度與實作可行性，各單元皆依循四項原則撰寫：
+1. **概念與物理動機**：從第一性原理與直觀幾何出發，釐清模型與演算法設計的初衷與欲解決的根本問題。
+2. **數學形式化推導**：提供嚴謹符號定義、目標函數閉式解與收斂性質證明，引證同儕評審頂會與頂刊文獻（CVPR, ICCV, NeurIPS, ICML, ICLR, SIGGRAPH, MLSys, TPAMI）。
+3. **計算機系統與 GPU 協同**：分析記憶體階層、快取行（Cache Line）、GPU Warp 排程（32 執行緒對齊）、Tensor Core GEMM Tiling 與推論頻寬瓶頸。
+4. **工程實作與邊界防禦**：提供標註張量形狀的 PyTorch / CUDA 實作，並定義具備數值驗證條件的系統不變量（System Invariants）。
 
 ---
 
@@ -202,53 +194,48 @@ flowchart TD
 ---
 ---
 
-## 🤖 AI Agent 全域自主調度協議與決策不變量 (Agent Global Orchestration Protocol)
+## 系統架構規範與拓樸依賴規則 (Repository Specifications & Invariants)
 
-為使自主 AI 代理人（如 Antigravity, Codex, LLM-Agent-System）能夠零歧義調用本圖書館作為外部神經認知皮層，所有 Agent 必須遵循以下形式化合約：
+為維護知識庫的嚴謹性、代碼可執行度與跨筆記關聯性，所有內容維護與擴充皆依循以下規範：
 
-### [RULE-000-01] DAG 依賴拓樸排序合約 (Topological Dependency Invariant)
-- **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件**: Agent 接收到任何代碼修改、架構設計或演算法調優任務時，必須先解析目標節點的 `prerequisites` 列表。
-- **決策邊界**: 嚴禁在未讀取依賴節點前直接生成下游代碼。例如：
-  - 修改 Attention 機制代碼前，必須先調用 [[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]] 與 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]。
-  - 設計手寫辨識管線前，必須先調用 [[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]] 與 [[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
-- **執行保證**: 保證任何演算法參數皆具備完整的數學理論與底層硬體依據。
-- **例外回退**: 若依賴節點缺失或未讀取，Agent 必須先中斷執行並自動發起 `view_file` 或查詢指令加載該節點。
+### [RULE-000-01] DAG 依賴拓樸排序規則 (Topological Dependency Invariant)
+- **等級**: `CRITICAL_INVARIANT`
+- **原則**: 任何代碼實作或演算法調優任務，必須先滿足目標節點定義的 `prerequisites` 前置依賴。
+- **邊界條件**:
+  - 修改 Attention 機制前，須先參閱 [[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]] 與 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]。
+  - 設計視覺管線前，須先參閱 [[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]] 與 [[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
+- **保證**: 確保演算法實作與參數設計具備數理與底層硬體依據。
 
-### [RULE-000-02] 知識三位一體呈現合約 (Trinity Content Invariant)
-- **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件**: Agent 擴充、修訂或新增任何館藏筆記時。
-- **決策邊界**: 每篇筆記必須百分之百同時滿足三重視角，缺一不可：
-  1. **學士直覺 (Undergraduate Intuition)**：生動物理比喻，零行話障礙。
-  2. **博士數理 (PhD Mathematical Rigor)**：嚴密形式化定義、定理推導與幾何拓樸證明。
-  3. **硬體映射 (Hardware Alignment)**：快取、SIMD、Warp、Tensor Core 瓦片化對齊。
-  4. **工程代碼 (Executable Engineering)**：無外部黑盒子依賴之可運行 Python/PyTorch 實作。
-  5. **Agent 合約 (Actionable Invariants)**：具備量化閾值與 Python 斷言之規則。
-- **執行保證**: 確保知識庫對學士友善、對頂大推甄具說服力、對 AI 代理人可直接執行。
+### [RULE-000-02] 內容結構與多層次展開規則 (Multi-Perspective Content Invariant)
+- **等級**: `CRITICAL_INVARIANT`
+- **原則**: 新增或修訂核心筆記時，應兼顧四個維度：
+  1. **物理直觀**：說明架構發明的本質痛點與直觀幾何。
+  2. **數理嚴謹**：符號化定義、目標函數閉式解與收斂性質證明。
+  3. **硬體協同**：記憶體層級、Warp 排程與快取友善度分析。
+  4. **工程代碼**：具備張量維度標註的可執行實作與邊界斷言。
 
-### [RULE-000-03] 權威同行評審引證合約 (Peer-Reviewed Citation Invariant)
-- **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件**: 任何理論陳述、演算法聲明或經驗法則。
-- **決策邊界**: 嚴格禁止引用未經同行評審之農場文章或隨意網路部落格。所有引用文獻必須來自：
+### [RULE-000-03] 同儕評審文獻引證規則 (Peer-Reviewed Citation Invariant)
+- **等級**: `CRITICAL_INVARIANT`
+- **原則**: 任何理論陳述或演算法結論均須引證權威文獻，嚴禁引用未經同儕評審的二手農場文章。文獻來源包括：
   - **頂級會議**: NeurIPS, ICML, ICLR, CVPR, ICCV, ECCV, SIGGRAPH, MLSys, SOSP, OSDI。
   - **權威期刊**: IEEE TPAMI, IEEE TIT, ACM TOG, Communications of the ACM, Nature, Science, SIAM。
-  - **經典權威專著**: Strang, Boyd, Nesterov, Vapnik, LeCun, Hennessy & Patterson。
-- **執行保證**: 每條引用必須附帶作者、會議/期刊全名、發表年份與 DOI/arXiv 連結。
+  - **經典專著**: Strang, Boyd, Nesterov, Vapnik, LeCun, Hennessy & Patterson。
+- **格式規範**: 包含作者、出版年份、會議/期刊全名與 DOI/arXiv 連結。
 
-### [RULE-000-04] Obsidian 本地雙向鏈接完整性合約 (Obsidian Linkage & Integrity Invariant)
-- **合約等級**: `CRITICAL_INVARIANT`
-- **決策邊界**: 必須使用 Obsidian 原生雙向 Wikilink 格式（例如 `[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]`），嚴禁使用無檔名的相對路徑或不完整簡稱。
-- **執行保證**: 全館內部鏈接解析失效率必須為 0%（0 broken links），孤立筆記數 (Orphan notes) 必須為 0。
+### [RULE-000-04] 雙向鏈結完整性規則 (Obsidian Linkage & Integrity Invariant)
+- **等級**: `CRITICAL_INVARIANT`
+- **原則**: 內部跨筆記參照一律使用 Obsidian 原生雙向鏈結格式（例如 `[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]`）。
+- **驗證指標**: 全庫內部鏈結斷鏈數必須維持為 0（0 broken links），且無孤立節點（0 orphan notes）。
 - **驗證代碼**:
   ```python
-def verify_library_integrity(dag_graph: dict):
-    for node, prereqs in dag_graph.items():
-        for p in prereqs:
-            assert p in dag_graph, f"斷鏈警報: 節點 {node} 之依賴 {p} 不存在！"
+  def verify_library_integrity(dag_graph: dict):
+      for node, prereqs in dag_graph.items():
+          for p in prereqs:
+              assert p in dag_graph, f"斷鏈警報: 節點 {node} 之依賴 {p} 不存在！"
   ```
 ---
 
-## 六、📚 權威規範、分類體系與經典文獻 (Canonical & Standards References)
+## 六、標準分類體系與參考規範 (Canonical Standards & References)
 
 1. **ACM Computing Classification System (CCS)**
    - *Standard*: Association for Computing Machinery. (2012 / Updated 2024). *The 2012 ACM Computing Classification System*. ACM Official Nomenclature.

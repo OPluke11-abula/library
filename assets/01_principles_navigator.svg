@@ -1,39 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" height="100%">
   <defs>
     <style>
-      .canvas-bg { fill: #ffffff; }
-      .outer-border { fill: none; stroke: #e2e8f0; stroke-width: 1.5; rx: 12px; }
-      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #0f172a; letter-spacing: -0.01em; }
-      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #64748b; }
-      .meta-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 600; fill: #475569; }
-      .pillar-card { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.2; rx: 8px; }
+      .canvas-bg { fill: #0d1117; }
+      .outer-border { fill: none; stroke: #30363d; stroke-width: 1.5; rx: 12px; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 22px; font-weight: 700; fill: #f0f6fc; letter-spacing: -0.01em; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #8b949e; }
+      .meta-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 600; fill: #c9d1d9; }
+      .pillar-card { fill: #161b22; stroke: #30363d; stroke-width: 1.2; rx: 8px; }
       .pillar-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
-      .pillar-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14.5px; font-weight: 700; fill: #0f172a; }
-      .diagram-bg { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; rx: 6px; }
+      .pillar-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14.5px; font-weight: 700; fill: #f0f6fc; }
+      .diagram-bg { fill: #0d1117; stroke: #21262d; stroke-width: 1; rx: 6px; }
       .math-eq { font-family: "Cambria Math", "Times New Roman", serif; font-size: 12px; font-style: italic; }
-      .pillar-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; fill: #475569; line-height: 1.5; }
-      .plot-axis { stroke: #94a3b8; stroke-width: 1; stroke-linecap: round; }
-      .plot-grid { stroke: #e2e8f0; stroke-width: 0.8; stroke-dasharray: 3 3; }
-      .label-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #64748b; }
+      .pillar-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; fill: #8b949e; line-height: 1.5; }
+      .plot-axis { stroke: #484f58; stroke-width: 1; stroke-linecap: round; }
+      .plot-grid { stroke: #21262d; stroke-width: 0.8; stroke-dasharray: 3 3; }
+      .label-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #8b949e; }
     </style>
 
     <marker id="arr-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#58a6ff" />
     </marker>
     <marker id="arr-slate" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#8b949e" />
     </marker>
     <marker id="arr-emerald" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3fb950" />
     </marker>
     <marker id="arr-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d29922" />
     </marker>
     <marker id="arr-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f85149" />
     </marker>
     <marker id="arr-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7c3aed" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#bc8cff" />
     </marker>
   </defs>
 
@@ -48,21 +48,21 @@
 
     <!-- Meta Pill -->
     <g transform="translate(900, 4)">
-      <rect width="200" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-      <circle cx="16" cy="14" r="4" fill="#2563eb" />
+      <rect width="200" height="28" rx="14" fill="#161b22" stroke="#30363d" stroke-width="1" />
+      <circle cx="16" cy="14" r="4" fill="#58a6ff" />
       <text x="28" y="18" class="meta-tag">LIB-001 • 6 Pillars DAG</text>
     </g>
   </g>
 
-  <line x1="50" y1="74" x2="1150" y2="74" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="50" y1="74" x2="1150" y2="74" stroke="#30363d" stroke-width="1" />
 
   <!-- ================= ROW 1 (Pillars 01, 02, 03) ================= -->
 
   <!-- Pillar 01: Linear Map & High-Dim Projection -->
   <g transform="translate(50, 90)">
     <rect width="350" height="285" class="pillar-card" />
-    <rect width="350" height="4" fill="#2563eb" rx="2" />
-    <text x="20" y="26" class="pillar-tag" fill="#2563eb">PILLAR 01 • 幾何變換</text>
+    <rect width="350" height="4" fill="#58a6ff" rx="2" />
+    <text x="20" y="26" class="pillar-tag" fill="#58a6ff">PILLAR 01 • 幾何變換</text>
     <text x="20" y="48" class="pillar-title">高維空間投影 (Linear Map)</text>
 
     <!-- Visual Diagram Area -->
@@ -77,20 +77,20 @@
 
       <!-- Input Vector x -->
       <line x1="55" y1="100" x2="140" y2="48" stroke="#64748b" stroke-width="1.6" stroke-dasharray="3 3" marker-end="url(#arr-slate)" />
-      <circle cx="140" cy="48" r="3" fill="#64748b" />
+      <circle cx="140" cy="48" r="3" fill="#8b949e" />
       <text x="95" y="42" class="label-sub">x ∈ ℝ⁷⁸⁴</text>
 
       <!-- Transformation Arc W -->
       <path d="M 148 52 Q 180 36 210 66" fill="none" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arr-blue)" />
-      <text x="172" y="38" font-family="ui-monospace, monospace" font-size="10.5" fill="#2563eb" font-weight="700">W · x</text>
+      <text x="172" y="38" font-family="ui-monospace, monospace" font-size="10.5" fill="#58a6ff" font-weight="700">W · x</text>
 
       <!-- Projected Vector y -->
       <line x1="55" y1="100" x2="245" y2="70" stroke="#2563eb" stroke-width="2" marker-end="url(#arr-blue)" />
-      <circle cx="245" cy="70" r="3.5" fill="#2563eb" />
-      <text x="215" y="92" font-family="ui-monospace, monospace" font-size="10" fill="#2563eb" font-weight="700">y ∈ ℝ²⁵⁶</text>
+      <circle cx="245" cy="70" r="3.5" fill="#58a6ff" />
+      <text x="215" y="92" font-family="ui-monospace, monospace" font-size="10" fill="#58a6ff" font-weight="700">y ∈ ℝ²⁵⁶</text>
     </g>
 
-    <text x="20" y="202" class="math-eq" fill="#1e3a8a">y = W x + b \quad (W \in \mathbb{R}^{d_{\text{out}} \times d_{\text{in}}})</text>
+    <text x="20" y="202" class="math-eq" fill="#79c0ff">y = W x + b \quad (W \in \mathbb{R}^{d_{\text{out}} \times d_{\text{in}}})</text>
     <text x="20" y="224" class="pillar-desc">
       <tspan x="20" dy="0">電腦所見為 784 維像素空間向量，權重矩陣</tspan>
       <tspan x="20" dy="17">本質為高維旋轉、伸縮與超平面幾何投影。</tspan>
@@ -101,8 +101,8 @@
   <!-- Pillar 02: Forward Pass & Non-Linear Activation -->
   <g transform="translate(425, 90)">
     <rect width="350" height="285" class="pillar-card" />
-    <rect width="350" height="4" fill="#059669" rx="2" />
-    <text x="20" y="26" class="pillar-tag" fill="#059669">PILLAR 02 • 神經機制</text>
+    <rect width="350" height="4" fill="#3fb950" rx="2" />
+    <text x="20" y="26" class="pillar-tag" fill="#3fb950">PILLAR 02 • 神經機制</text>
     <text x="20" y="48" class="pillar-title">前向傳播與非線性激活 (Forward Pass)</text>
 
     <!-- Visual Diagram Area -->
@@ -112,36 +112,36 @@
       <!-- Mini Neural Synapse Lattice -->
       <g transform="translate(20, 14)">
         <!-- Input Layer -->
-        <circle cx="25" cy="20" r="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" />
-        <circle cx="25" cy="45" r="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" />
-        <circle cx="25" cy="70" r="6" fill="#f1f5f9" stroke="#64748b" stroke-width="1.2" />
+        <circle cx="25" cy="20" r="6" fill="#161b22" stroke="#484f58" stroke-width="1.2" />
+        <circle cx="25" cy="45" r="6" fill="#161b22" stroke="#484f58" stroke-width="1.2" />
+        <circle cx="25" cy="70" r="6" fill="#161b22" stroke="#484f58" stroke-width="1.2" />
         <!-- Hidden Layer -->
-        <circle cx="95" cy="32" r="7" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" />
-        <circle cx="95" cy="58" r="7" fill="#ecfdf5" stroke="#059669" stroke-width="1.5" />
+        <circle cx="95" cy="32" r="7" fill="#0e2a20" stroke="#3fb950" stroke-width="1.5" />
+        <circle cx="95" cy="58" r="7" fill="#0e2a20" stroke="#3fb950" stroke-width="1.5" />
         <!-- Synapse lines -->
-        <line x1="31" y1="20" x2="88" y2="32" stroke="#cbd5e1" stroke-width="1" />
-        <line x1="31" y1="45" x2="88" y2="32" stroke="#cbd5e1" stroke-width="1" />
-        <line x1="31" y1="45" x2="88" y2="58" stroke="#cbd5e1" stroke-width="1" />
-        <line x1="31" y1="70" x2="88" y2="58" stroke="#cbd5e1" stroke-width="1" />
+        <line x1="31" y1="20" x2="88" y2="32" stroke="#30363d" stroke-width="1" />
+        <line x1="31" y1="45" x2="88" y2="32" stroke="#30363d" stroke-width="1" />
+        <line x1="31" y1="45" x2="88" y2="58" stroke="#30363d" stroke-width="1" />
+        <line x1="31" y1="70" x2="88" y2="58" stroke="#30363d" stroke-width="1" />
         <text x="18" y="92" class="label-sub">輸入特徵</text>
         <text x="82" y="92" class="label-sub">隱藏單元</text>
       </g>
 
       <!-- Activation Function Curve (ReLU / GELU) -->
       <g transform="translate(170, 14)">
-        <rect width="125" height="90" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8" rx="4" />
+        <rect width="125" height="90" fill="#ffffff" stroke="#30363d" stroke-width="0.8" rx="4" />
         <!-- Axes -->
         <line x1="15" y1="65" x2="115" y2="65" stroke="#94a3b8" stroke-width="0.8" />
         <line x1="55" y1="12" x2="55" y2="78" stroke="#94a3b8" stroke-width="0.8" />
         <!-- Smooth GELU curve -->
         <path d="M 20 65 Q 45 66 55 60 Q 75 42 105 18" fill="none" stroke="#059669" stroke-width="2" />
-        <text x="62" y="24" font-family="ui-monospace, monospace" font-size="9.5" fill="#059669" font-weight="700">GELU(z)</text>
-        <text x="22" y="78" font-family="ui-monospace, monospace" font-size="8.5" fill="#64748b">z &lt; 0</text>
-        <text x="85" y="78" font-family="ui-monospace, monospace" font-size="8.5" fill="#64748b">z &gt; 0</text>
+        <text x="62" y="24" font-family="ui-monospace, monospace" font-size="9.5" fill="#3fb950" font-weight="700">GELU(z)</text>
+        <text x="22" y="78" font-family="ui-monospace, monospace" font-size="8.5" fill="#8b949e">z &lt; 0</text>
+        <text x="85" y="78" font-family="ui-monospace, monospace" font-size="8.5" fill="#8b949e">z &gt; 0</text>
       </g>
     </g>
 
-    <text x="20" y="202" class="math-eq" fill="#065f46">a = \sigma(z) = \text{GELU}(W x + b) \text{ 或 } \max(0, z)</text>
+    <text x="20" y="202" class="math-eq" fill="#7ee787">a = \sigma(z) = \text{GELU}(W x + b) \text{ 或 } \max(0, z)</text>
     <text x="20" y="224" class="pillar-desc">
       <tspan x="20" dy="0">純線性映射疊加仍為單一線性矩陣；非線性</tspan>
       <tspan x="20" dy="17">激活函數賦予網路扭曲空間的通用逼近能力，</tspan>
@@ -152,37 +152,37 @@
   <!-- Pillar 03: Loss Function & Probability Simplex -->
   <g transform="translate(800, 90)">
     <rect width="350" height="285" class="pillar-card" />
-    <rect width="350" height="4" fill="#d97706" rx="2" />
-    <text x="20" y="26" class="pillar-tag" fill="#d97706">PILLAR 03 • 距離度量</text>
+    <rect width="350" height="4" fill="#d29922" rx="2" />
+    <text x="20" y="26" class="pillar-tag" fill="#d29922">PILLAR 03 • 距離度量</text>
     <text x="20" y="48" class="pillar-title">損失函數打靶 (Loss Optimization)</text>
 
     <!-- Visual Diagram Area -->
     <g transform="translate(20, 62)">
       <rect width="310" height="118" class="diagram-bg" />
-      <text x="14" y="18" font-family="-apple-system, sans-serif" font-size="10.5" fill="#64748b">Softmax 輸出機率分佈 (真值類別 y = 7)</text>
+      <text x="14" y="18" font-family="-apple-system, sans-serif" font-size="10.5" fill="#8b949e">Softmax 輸出機率分佈 (真值類別 y = 7)</text>
       
       <!-- Bars Plot -->
       <g transform="translate(20, 26)">
         <!-- Bar 3 -->
-        <rect x="20" y="48" width="24" height="24" fill="#e2e8f0" stroke="#cbd5e1" rx="2" />
+        <rect x="20" y="48" width="24" height="24" fill="#e2e8f0" stroke="#30363d" rx="2" />
         <text x="25" y="85" class="label-sub">類別 3</text>
-        <text x="23" y="42" font-family="ui-monospace, monospace" font-size="9" fill="#64748b">0.08</text>
+        <text x="23" y="42" font-family="ui-monospace, monospace" font-size="9" fill="#8b949e">0.08</text>
 
         <!-- Bar 7 (Target) -->
-        <rect x="85" y="10" width="26" height="62" fill="#fef3c7" stroke="#d97706" stroke-width="1.4" rx="2" />
-        <text x="89" y="85" font-family="ui-monospace, monospace" font-size="10" fill="#d97706" font-weight="700">類別 7</text>
-        <text x="88" y="6" font-family="ui-monospace, monospace" font-size="9.5" fill="#d97706" font-weight="700">0.82</text>
+        <rect x="85" y="10" width="26" height="62" fill="#382405" stroke="#d29922" stroke-width="1.4" rx="2" />
+        <text x="89" y="85" font-family="ui-monospace, monospace" font-size="10" fill="#d29922" font-weight="700">類別 7</text>
+        <text x="88" y="6" font-family="ui-monospace, monospace" font-size="9.5" fill="#d29922" font-weight="700">0.82</text>
 
         <!-- Bar 8 -->
-        <rect x="150" y="55" width="24" height="17" fill="#e2e8f0" stroke="#cbd5e1" rx="2" />
+        <rect x="150" y="55" width="24" height="17" fill="#e2e8f0" stroke="#30363d" rx="2" />
         <text x="155" y="85" class="label-sub">類別 8</text>
-        <text x="153" y="48" font-family="ui-monospace, monospace" font-size="9" fill="#64748b">0.05</text>
+        <text x="153" y="48" font-family="ui-monospace, monospace" font-size="9" fill="#8b949e">0.05</text>
 
         <!-- Cross-Entropy Loss Badge -->
         <g transform="translate(195, 20)">
-          <rect width="85" height="42" rx="4" fill="#ffffff" stroke="#e2e8f0" />
+          <rect width="85" height="42" rx="4" fill="#ffffff" stroke="#30363d" />
           <text x="10" y="16" class="label-sub">交叉熵損失</text>
-          <text x="10" y="32" font-family="ui-monospace, monospace" font-size="12" fill="#d97706" font-weight="700">ℒ = 0.198</text>
+          <text x="10" y="32" font-family="ui-monospace, monospace" font-size="12" fill="#d29922" font-weight="700">ℒ = 0.198</text>
         </g>
       </g>
     </g>
@@ -200,8 +200,8 @@
   <!-- Pillar 04: Backpropagation & Chain Rule -->
   <g transform="translate(50, 395)">
     <rect width="350" height="285" class="pillar-card" />
-    <rect width="350" height="4" fill="#dc2626" rx="2" />
-    <text x="20" y="26" class="pillar-tag" fill="#dc2626">PILLAR 04 • 微積分連鎖律</text>
+    <rect width="350" height="4" fill="#f85149" rx="2" />
+    <text x="20" y="26" class="pillar-tag" fill="#f85149">PILLAR 04 • 微積分連鎖律</text>
     <text x="20" y="48" class="pillar-title">反向傳播與負梯度流 (Backpropagation)</text>
 
     <!-- Visual Diagram Area -->
@@ -211,21 +211,21 @@
       <!-- Contour Landscape -->
       <g transform="translate(15, 8)">
         <!-- Elliptical Contours -->
-        <ellipse cx="140" cy="50" rx="125" ry="42" fill="none" stroke="#e2e8f0" stroke-width="1.2" />
-        <ellipse cx="140" cy="50" rx="85" ry="28" fill="none" stroke="#cbd5e1" stroke-width="1.2" />
+        <ellipse cx="140" cy="50" rx="125" ry="42" fill="none" stroke="#30363d" stroke-width="1.2" />
+        <ellipse cx="140" cy="50" rx="85" ry="28" fill="none" stroke="#30363d" stroke-width="1.2" />
         <ellipse cx="140" cy="50" rx="42" ry="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="1.2" />
-        <circle cx="140" cy="50" r="3" fill="#dc2626" />
-        <text x="146" y="53" font-family="ui-monospace, monospace" font-size="9" fill="#dc2626" font-weight="700">w* (全局極小)</text>
+        <circle cx="140" cy="50" r="3" fill="#f85149" />
+        <text x="146" y="53" font-family="ui-monospace, monospace" font-size="9" fill="#f85149" font-weight="700">w* (全局極小)</text>
 
         <!-- Gradient Step Path -->
         <path d="M 45 22 L 78 38 L 108 46 L 132 49 L 138 50" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arr-red)" />
-        <circle cx="45" cy="22" r="3.5" fill="#dc2626" />
-        <text x="22" y="18" font-family="ui-monospace, monospace" font-size="8.5" fill="#64748b">w₀ (起點)</text>
-        <text x="82" y="32" font-family="ui-monospace, monospace" font-size="9" fill="#dc2626" font-weight="600">-η ∇ℒ</text>
+        <circle cx="45" cy="22" r="3.5" fill="#f85149" />
+        <text x="22" y="18" font-family="ui-monospace, monospace" font-size="8.5" fill="#8b949e">w₀ (起點)</text>
+        <text x="82" y="32" font-family="ui-monospace, monospace" font-size="9" fill="#f85149" font-weight="600">-η ∇ℒ</text>
       </g>
     </g>
 
-    <text x="20" y="202" class="math-eq" fill="#991b1b">\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T, \quad \delta^{[l]} = (W^{[l+1]})^T \delta^{[l+1]} \odot \sigma'(z^{[l]})</text>
+    <text x="20" y="202" class="math-eq" fill="#ff7b72">\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \delta^{[l]} (a^{[l-1]})^T, \quad \delta^{[l]} = (W^{[l+1]})^T \delta^{[l+1]} \odot \sigma'(z^{[l]})</text>
     <text x="20" y="224" class="pillar-desc">
       <tspan x="20" dy="0">高維空間不可盲目窮舉；微積分連鎖律是導航</tspan>
       <tspan x="20" dy="17">指南針。計算圖依拓樸排序逆向傳播誤差敏感度</tspan>
@@ -236,8 +236,8 @@
   <!-- Pillar 05: Optimizer Dynamics (SGD vs Adam) -->
   <g transform="translate(425, 395)">
     <rect width="350" height="285" class="pillar-card" />
-    <rect width="350" height="4" fill="#7c3aed" rx="2" />
-    <text x="20" y="26" class="pillar-tag" fill="#7c3aed">PILLAR 05 • 自適應巡航</text>
+    <rect width="350" height="4" fill="#bc8cff" rx="2" />
+    <text x="20" y="26" class="pillar-tag" fill="#bc8cff">PILLAR 05 • 自適應巡航</text>
     <text x="20" y="48" class="pillar-title">自適應動量優化 (Adam Dynamics)</text>
 
     <!-- Visual Diagram Area -->
@@ -247,17 +247,17 @@
       <!-- Valley Ravine Plot -->
       <g transform="translate(15, 10)">
         <!-- Ravine Walls -->
-        <path d="M 15 15 C 80 75 200 75 270 15" fill="none" stroke="#e2e8f0" stroke-width="1.2" />
-        <path d="M 35 30 C 85 70 195 70 250 30" fill="none" stroke="#cbd5e1" stroke-width="1.2" />
+        <path d="M 15 15 C 80 75 200 75 270 15" fill="none" stroke="#30363d" stroke-width="1.2" />
+        <path d="M 35 30 C 85 70 195 70 250 30" fill="none" stroke="#30363d" stroke-width="1.2" />
 
         <!-- SGD Oscillation (Red Dashed) -->
         <path d="M 45 35 L 75 75 L 105 25 L 135 70 L 165 30 L 195 60" fill="none" stroke="#dc2626" stroke-width="1.3" stroke-dasharray="2.5 2.5" />
-        <text x="75" y="90" font-family="ui-monospace, monospace" font-size="9" fill="#dc2626">SGD 橫向劇烈震盪</text>
+        <text x="75" y="90" font-family="ui-monospace, monospace" font-size="9" fill="#f85149">SGD 橫向劇烈震盪</text>
 
         <!-- Adam Smooth Cruise (Purple Solid) -->
         <path d="M 45 35 Q 110 55 210 50" fill="none" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arr-purple)" />
-        <circle cx="210" cy="50" r="3.5" fill="#7c3aed" />
-        <text x="165" y="40" font-family="ui-monospace, monospace" font-size="9.5" fill="#7c3aed" font-weight="700">Adam 平滑巡航</text>
+        <circle cx="210" cy="50" r="3.5" fill="#bc8cff" />
+        <text x="165" y="40" font-family="ui-monospace, monospace" font-size="9.5" fill="#bc8cff" font-weight="700">Adam 平滑巡航</text>
       </g>
     </g>
 
@@ -282,7 +282,7 @@
 
       <!-- Input 5x5 Grid -->
       <g transform="translate(20, 18)">
-        <rect width="70" height="70" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <rect width="70" height="70" fill="#ffffff" stroke="#30363d" stroke-width="1" />
         <line x1="14" y1="0" x2="14" y2="70" stroke="#f1f5f9" stroke-width="0.8" />
         <line x1="28" y1="0" x2="28" y2="70" stroke="#f1f5f9" stroke-width="0.8" />
         <line x1="42" y1="0" x2="42" y2="70" stroke="#f1f5f9" stroke-width="0.8" />
@@ -297,15 +297,15 @@
       </g>
 
       <!-- Asterisk Conv Symbol -->
-      <text x="110" y="58" font-family="-apple-system, sans-serif" font-size="16" fill="#64748b" font-weight="700">∗</text>
+      <text x="110" y="58" font-family="-apple-system, sans-serif" font-size="16" fill="#8b949e" font-weight="700">∗</text>
 
       <!-- 3x3 Kernel -->
       <g transform="translate(135, 28)">
         <rect width="45" height="45" fill="#f8fafc" stroke="#0284c7" stroke-width="1.2" />
-        <line x1="15" y1="0" x2="15" y2="45" stroke="#cbd5e1" stroke-width="0.8" />
-        <line x1="30" y1="0" x2="30" y2="45" stroke="#cbd5e1" stroke-width="0.8" />
-        <line x1="0" y1="15" x2="45" y2="15" stroke="#cbd5e1" stroke-width="0.8" />
-        <line x1="0" y1="30" x2="45" y2="30" stroke="#cbd5e1" stroke-width="0.8" />
+        <line x1="15" y1="0" x2="15" y2="45" stroke="#30363d" stroke-width="0.8" />
+        <line x1="30" y1="0" x2="30" y2="45" stroke="#30363d" stroke-width="0.8" />
+        <line x1="0" y1="15" x2="45" y2="15" stroke="#30363d" stroke-width="0.8" />
+        <line x1="0" y1="30" x2="45" y2="30" stroke="#30363d" stroke-width="0.8" />
         <text x="4" y="56" font-family="ui-monospace, monospace" font-size="8.5" fill="#0284c7">3×3 權重共享</text>
       </g>
 
@@ -314,7 +314,7 @@
 
       <!-- Output Feature Map -->
       <g transform="translate(235, 30)">
-        <rect width="42" height="42" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+        <rect width="42" height="42" fill="#ffffff" stroke="#30363d" stroke-width="1" />
         <rect x="14" y="14" width="14" height="14" fill="#0284c7" rx="1" />
         <text x="4" y="54" class="label-sub">等變活化值</text>
       </g>

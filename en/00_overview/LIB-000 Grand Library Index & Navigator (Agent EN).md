@@ -32,13 +32,13 @@ tags:
   - agent-protocols
 ---
 
-> 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../00_%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD/LIB-000%20%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD%E7%B3%BB%E7%B5%B1%20%28Grand%20Library%20Index%20%26%20Navigator%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
+> Language / 語言: [🇹🇼 繁體中文](../../00_%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD/LIB-000%20%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD%E7%B3%BB%E7%B5%B1%20%28Grand%20Library%20Index%20&%20Navigator%29.md) | 🇺🇸 **English**
 
-# CSIE & Deep Learning Grand Library: Master Topological Navigator
+# Computer Science & Deep Learning Notes: Master Topological Navigator
 
 ## 1. Mathematical Formalization of the Knowledge DAG
 
-The Grand Library is formalized as a finite, directed, acyclic graph:
+The knowledge base is formalized as a finite, directed, acyclic graph:
 $$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A})$$
 where:
 - $\mathcal{V} = \{v_1, v_2, \dots, v_{19}\}$ is the set of 19 flagship academic volumes.

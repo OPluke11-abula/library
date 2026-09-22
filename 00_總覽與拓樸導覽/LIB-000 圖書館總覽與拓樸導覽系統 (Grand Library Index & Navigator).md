@@ -76,95 +76,79 @@ tags:
 
 ```mermaid
 flowchart TD
-    LIB001["LIB-001 深度學習第一性原理先修六大基石"]
-    LIB101["LIB-101 線性代數與高維幾何"]
-    LIB104["LIB-104 凸最佳化與梯度下降幾何"]
-    LIB203["LIB-203 計算機體系結構與硬體對齊"]
-    LIB301["LIB-301 資料分佈偏差與空間懲罰"]
-    LIB401["LIB-401 DNN 極限與 CNN 歸納偏置"]
-    LIB405["LIB-405 注意力機制與 Transformer 革命"]
-    LIB406["LIB-406 擴散SDE、流匹配與DiT革命"]
-    LIB501["LIB-501 CV 影像前處理與質心演算法"]
-    LIB504["LIB-504 3D/4D 高斯潑濺 (3DGS) 理論與光柵化"]
-    LIB602["LIB-602 現代 LLM 架構解剖與縮放定律"]
-    LIB703["LIB-703 現代 LLM Agent 認知協議"]
-    LIB704["LIB-704 雙進程 S1/S2 代理人 (Jev/CUA-S1)"]
-    LIB801["LIB-801 模型校準、共形預測與不確定性"]
-    LIB802["LIB-802 AWQ 模型量化與低精度推論"]
-    LIB901["LIB-901 經典專案實證復盤(MNIST生產級重構)"]
-    LIB903["LIB-903 專題基石藍圖與科研演進"]
-    LIB904["LIB-904 指導教授研究體系與專題對齊"]
+    %% 全館三大分層宏偉知識有向無環圖 (3-Tier Grand Architecture)
 
-    LIB001 --> LIB101
-    LIB001 --> LIB104
-    LIB001 --> LIB401
-    LIB001 --> LIB501
-    LIB001 --> LIB901
+    subgraph Tier1["🏛️ 第一層：數理基石與系統硬體 (Foundations & Systems)"]
+        direction TB
+        LIB001["LIB-001 第一性原理先修精要<br/>(模型如何學習的六大基石)"]
+        LIB101["LIB-101 線性代數與高維幾何"]
+        LIB104["LIB-104 凸最佳化與梯度幾何"]
+        LIB203["LIB-203 計算機體系結構與硬體對齊"]
 
-    LIB101 --> LIB104
-    LIB101 --> LIB401
-    LIB101 --> LIB405
-    LIB101 --> LIB406
-    LIB101 --> LIB504
-    LIB101 --> LIB802
-    LIB101 --> LIB904
-    
-    LIB203 --> LIB401
-    LIB203 --> LIB405
-    LIB203 --> LIB406
-    LIB203 --> LIB504
-    LIB203 --> LIB704
-    LIB203 --> LIB801
-    LIB203 --> LIB802
-    LIB203 --> LIB901
+        LIB001 --> LIB101
+        LIB001 --> LIB104
+        LIB101 --> LIB104
+    end
 
-    LIB104 --> LIB401
-    LIB104 --> LIB406
-    LIB104 --> LIB602
-    LIB104 --> LIB801
+    subgraph Tier2["⚙️ 第二層：核心架構、前沿機制與系統工程 (Core Mechanisms & Frontiers)"]
+        direction TB
+        subgraph VisualAxis["視覺感測脈絡"]
+            LIB401["LIB-401 CNN 歸納偏置"]
+            LIB501["LIB-501 CV 前處理與質心演算法"]
+            LIB504["LIB-504 3D/4D 高斯潑濺 (3DGS)"]
+            LIB401 --> LIB501
+            LIB501 --> LIB504
+        end
 
-    LIB301 --> LIB801
-    LIB301 --> LIB903
+        subgraph SequenceAxis["序列、語言與生成前沿"]
+            LIB405["LIB-405 Transformer 與注意力"]
+            LIB406["LIB-406 擴散SDE、流匹配與DiT"]
+            LIB602["LIB-602 大語言模型與縮放定律"]
+            LIB405 --> LIB406
+            LIB405 --> LIB602
+        end
 
-    LIB401 --> LIB501
-    LIB401 --> LIB504
-    LIB401 --> LIB901
+        subgraph AgentAxis["自主代理人與雙進程決策"]
+            LIB703["LIB-703 LLM Agent 認知協議"]
+            LIB704["LIB-704 S1/S2 雙進程 (Jev/CUA-S1)"]
+            LIB703 --> LIB704
+        end
 
-    LIB405 --> LIB406
-    LIB405 --> LIB602
-    LIB405 --> LIB703
-    LIB405 --> LIB704
-    LIB405 --> LIB904
+        subgraph SystemAxis["分佈穩定與高效推論"]
+            LIB301["LIB-301 資料分佈偏差與空間懲罰"]
+            LIB801["LIB-801 模型校準與不確定性"]
+            LIB802["LIB-802 AWQ 模型量化與部署"]
+            LIB301 --> LIB801
+            LIB801 --> LIB802
+        end
+    end
 
-    LIB406 --> LIB504
-    LIB406 --> LIB802
-    LIB406 --> LIB903
-    LIB406 --> LIB904
+    subgraph Tier3["🎓 第三層：專案實證、推甄藍圖與實驗室科研 (Convergence & Capstone)"]
+        direction TB
+        LIB901["LIB-901 經典專案實證復盤<br/>(MNIST 生產級系統重構)"]
+        LIB903["LIB-903 專題基石藍圖與推甄演進<br/>(國科會 C801 與多模態演進)"]
+        LIB904["LIB-904 指導教授實驗室研究體系<br/>(莊啓宏博士團隊科研對齊)"]
 
-    LIB602 --> LIB703
-    LIB602 --> LIB802
+        LIB901 --> LIB903
+        LIB903 --> LIB904
+    end
 
-    LIB703 --> LIB704
-    LIB703 --> LIB903
+    %% 主幹跨層依賴鏈接 (Primary Cross-Tier Dependencies)
+    LIB101 ==> LIB401
+    LIB101 ==> LIB405
+    LIB203 ==> LIB401
+    LIB203 ==> LIB405
+    LIB203 ==> LIB802
+    LIB104 ==> LIB602
+    LIB104 ==> LIB406
 
-    LIB801 --> LIB704
-    LIB801 --> LIB802
-    LIB801 --> LIB903
-
-    LIB704 --> LIB802
-    LIB704 --> LIB903
-    LIB704 --> LIB904
-
-    LIB501 --> LIB901
-    LIB501 --> LIB903
-    LIB504 --> LIB903
-    LIB504 --> LIB904
-    LIB802 --> LIB903
-    LIB901 --> LIB301
-    LIB901 --> LIB801
-    LIB901 --> LIB903
-    LIB901 --> LIB904
-    LIB903 --> LIB904
+    VisualAxis ==> LIB901
+    VisualAxis ==> LIB904
+    SequenceAxis ==> LIB703
+    SequenceAxis ==> LIB904
+    AgentAxis ==> LIB802
+    SystemAxis ==> LIB901
+    SystemAxis ==> LIB903
 ```
 
 ---

@@ -1,190 +1,290 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" height="100%">
   <defs>
     <style>
-      .bg { fill: #0b0f17; }
-      .grid-line { stroke: #1e293b; stroke-width: 0.5; stroke-dasharray: 4 4; opacity: 0.4; }
-      .tier-bg { fill: #111827; stroke: #1f2937; stroke-width: 1; rx: 8px; }
-      .tier-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-      .node-box { fill: #182234; stroke: #334155; stroke-width: 1.2; rx: 6px; }
-      .node-box:hover { stroke: #38bdf8; }
-      .node-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: 600; fill: #f1f5f9; }
-      .node-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #94a3b8; }
-      .node-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; }
-      .path-arrow { fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-      .tag-pill { rx: 4px; }
-      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 24px; font-weight: 800; fill: #f8fafc; letter-spacing: -0.02em; }
-      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; fill: #94a3b8; }
-      .legend-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; fill: #cbd5e1; }
+      .canvas-bg { fill: #ffffff; }
+      .outer-border { fill: none; stroke: #e2e8f0; stroke-width: 1.5; rx: 12px; }
+      .tier-container { rx: 8px; stroke-width: 1.2; }
+      .tier-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+      .node-card { fill: #ffffff; stroke-width: 1.2; rx: 6px; }
+      .node-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 10.5px; font-weight: 700; }
+      .node-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; font-weight: 600; fill: #0f172a; }
+      .node-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10.5px; fill: #64748b; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 22px; font-weight: 700; fill: #0f172a; letter-spacing: -0.01em; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #64748b; }
+      .legend-text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #475569; }
+      .conn-line { fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
     </style>
-    <marker id="arrow-sky" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8" />
+    
+    <marker id="arr-navy" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#1e40af" />
     </marker>
-    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#10b981" />
+    <marker id="arr-teal" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#047857" />
     </marker>
-    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#818cf8" />
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#6d28d9" />
+    </marker>
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
     </marker>
   </defs>
 
-  <!-- Background Canvas -->
-  <rect width="1200" height="680" class="bg" />
+  <!-- Clean Canvas Background with subtle border -->
+  <rect width="1200" height="720" class="canvas-bg" />
+  <rect x="1" y="1" width="1198" height="718" class="outer-border" />
 
-  <!-- Technical Grid overlay -->
-  <line x1="60" y1="90" x2="1140" y2="90" class="grid-line" />
-  <line x1="60" y1="270" x2="1140" y2="270" class="grid-line" />
-  <line x1="60" y1="480" x2="1140" y2="480" class="grid-line" />
-
-  <!-- Top Header Bar -->
-  <g transform="translate(60, 35)">
-    <text class="header-title" x="0" y="24">全館知識拓樸航海圖 (Grand Library Topological Roadmap)</text>
-    <text class="header-sub" x="0" y="46">資訊工程與深度學習宏偉圖書館 • 十大分館三階層有向無環圖 (3-Tier DAG) • 20 卷典籍閉環導通</text>
-
-    <!-- Clean Status Indicators -->
-    <g transform="translate(850, 8)">
-      <rect width="230" height="32" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
-      <circle cx="18" cy="16" r="4" fill="#10b981" />
-      <text x="32" y="20" class="legend-text" font-weight="600">67 條形式化 Agent 契約守護</text>
+  <!-- Header Section -->
+  <g transform="translate(50, 28)">
+    <text class="header-title" x="0" y="20">全館知識拓樸航海圖 (Grand Library Topological Roadmap)</text>
+    <text class="header-sub" x="0" y="40">資訊工程與深度學習自學圖書館 • 十大分館三階層知識有向無環圖 (3-Tier DAG) • 20 卷典籍閉環導通</text>
+    
+    <!-- Status Pill -->
+    <g transform="translate(930, 4)">
+      <rect width="170" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+      <circle cx="16" cy="14" r="4" fill="#059669" />
+      <text x="28" y="18" class="legend-text" font-weight="600" fill="#0f172a">66 條 Agent 不變量守護</text>
     </g>
   </g>
 
+  <!-- Divider -->
+  <line x1="50" y1="78" x2="1150" y2="78" stroke="#e2e8f0" stroke-width="1" />
+
   <!-- ================= TIER 1: Foundations & Systems ================= -->
-  <g transform="translate(60, 105)">
-    <rect width="1080" height="150" class="tier-bg" />
-    <text x="24" y="26" class="tier-label" fill="#38bdf8">Tier 1 • 數理理論基石與計算機體系結構 (Foundations &amp; Systems Architecture)</text>
+  <g transform="translate(50, 95)">
+    <rect width="1100" height="165" class="tier-container" fill="#f8fafc" stroke="#cbd5e1" />
+    <text x="24" y="26" class="tier-label" fill="#1e3a8a">第 1 層 • 數理理論基石與計算機體系結構 (Foundations &amp; Systems Architecture)</text>
     
     <!-- LIB-001 -->
     <g transform="translate(24, 42)">
-      <rect width="240" height="92" class="node-box" stroke="#38bdf8" />
-      <text x="14" y="24" class="node-code" fill="#38bdf8">LIB-001 [先修基石]</text>
-      <text x="14" y="44" class="node-title">深度學習第一性原理先修</text>
-      <text x="14" y="64" class="node-sub">模型學習六大基石 • 封裝解密</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">Prereq: 無 • 入度: 6 • 出度: 6</text>
+      <rect width="245" height="105" class="node-card" stroke="#93c5fd" />
+      <text x="14" y="22" class="node-code" fill="#2563eb">LIB-001 [先修基石]</text>
+      <text x="14" y="42" class="node-title">深度學習第一性原理先修</text>
+      <text x="14" y="62" class="node-desc">六大數理支柱 • 矩陣/損失/梯度</text>
+      <text x="14" y="80" class="node-desc">反向傳播直覺 • Adam 幾何</text>
+      <rect x="14" y="88" width="130" height="12" rx="3" fill="#eff6ff" />
+      <text x="18" y="97" font-family="monospace" font-size="8.5" fill="#1d4ed8">INV: y = Wx + b</text>
     </g>
 
     <!-- LIB-101 -->
-    <g transform="translate(290, 42)">
-      <rect width="240" height="92" class="node-box" stroke="#f59e0b" />
-      <text x="14" y="24" class="node-code" fill="#f59e0b">LIB-101 [數學理論]</text>
-      <text x="14" y="44" class="node-title">線性代數與高維幾何變換</text>
-      <text x="14" y="64" class="node-sub">投影本質 • 矩陣奇異值分解 (SVD)</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">核心入度: 27 • 全館第一代數基石</text>
+    <g transform="translate(295, 42)">
+      <rect width="245" height="105" class="node-card" stroke="#93c5fd" />
+      <text x="14" y="22" class="node-code" fill="#2563eb">LIB-101 [數理基石]</text>
+      <text x="14" y="42" class="node-title">線性代數與高維幾何本質</text>
+      <text x="14" y="62" class="node-desc">奇異值分解 SVD • 旋轉縮放投影</text>
+      <text x="14" y="80" class="node-desc">特徵基底變換 • 降維流形拓樸</text>
+      <rect x="14" y="88" width="140" height="12" rx="3" fill="#eff6ff" />
+      <text x="18" y="97" font-family="monospace" font-size="8.5" fill="#1d4ed8">INV: A = U Σ V^T</text>
     </g>
 
     <!-- LIB-104 -->
-    <g transform="translate(555, 42)">
-      <rect width="240" height="92" class="node-box" stroke="#f59e0b" />
-      <text x="14" y="24" class="node-code" fill="#f59e0b">LIB-104 [最佳化理論]</text>
-      <text x="14" y="44" class="node-title">凸最佳化與梯度下降幾何</text>
-      <text x="14" y="64" class="node-sub">一階二階下降 • AdamW • 損失曲面</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">核心入度: 12 • 數值最佳化中樞</text>
+    <g transform="translate(565, 42)">
+      <rect width="245" height="105" class="node-card" stroke="#93c5fd" />
+      <text x="14" y="22" class="node-code" fill="#2563eb">LIB-104 [最佳化理論]</text>
+      <text x="14" y="42" class="node-title">凸最佳化與梯度下降幾何</text>
+      <text x="14" y="62" class="node-desc">Lipschitz 梯度連續 • Hessian 矩陣</text>
+      <text x="14" y="80" class="node-desc">一階動量慣性 • 二階自適應降速</text>
+      <rect x="14" y="88" width="135" height="12" rx="3" fill="#eff6ff" />
+      <text x="18" y="97" font-family="monospace" font-size="8.5" fill="#1d4ed8">INV: θ_{t+1} = θ_t - η v_t</text>
     </g>
 
     <!-- LIB-203 -->
-    <g transform="translate(820, 42)">
-      <rect width="236" height="92" class="node-box" stroke="#10b981" />
-      <text x="14" y="24" class="node-code" fill="#10b981">LIB-203 [硬體對齊]</text>
-      <text x="14" y="44" class="node-title">計算機體系結構與硬體對齊</text>
-      <text x="14" y="64" class="node-sub">CUDA Warp 32 • Tensor Core • TMA</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">核心入度: 32 (全館最高) • 硬體錨點</text>
+    <g transform="translate(835, 42)">
+      <rect width="240" height="105" class="node-card" stroke="#93c5fd" />
+      <text x="14" y="22" class="node-code" fill="#2563eb">LIB-203 [硬體架構]</text>
+      <text x="14" y="42" class="node-title">計算機體系結構與硬體對齊</text>
+      <text x="14" y="62" class="node-desc">GPU Warp (32 執行緒) 分支對齊</text>
+      <text x="14" y="80" class="node-desc">Tensor Core GEMM • 128B 合併</text>
+      <rect x="14" y="88" width="155" height="12" rx="3" fill="#eff6ff" />
+      <text x="18" y="97" font-family="monospace" font-size="8.5" fill="#1d4ed8">INV: dim % 32 == 0</text>
     </g>
   </g>
 
   <!-- Connectors Tier 1 -> Tier 2 -->
-  <path d="M 180 255 L 180 285" class="path-arrow" stroke="#38bdf8" marker-end="url(#arrow-sky)" />
-  <path d="M 440 255 L 440 285" class="path-arrow" stroke="#38bdf8" marker-end="url(#arrow-sky)" />
-  <path d="M 700 255 L 700 285" class="path-arrow" stroke="#38bdf8" marker-end="url(#arrow-sky)" />
-  <path d="M 960 255 L 960 285" class="path-arrow" stroke="#10b981" marker-end="url(#arrow-emerald)" />
+  <path d="M 220 260 L 220 280 L 150 280 L 150 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 440 260 L 440 280 L 330 280 L 330 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 440 260 L 440 280 L 485 280 L 485 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 710 260 L 710 280 L 640 280 L 640 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 980 260 L 980 280 L 795 280 L 795 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 980 260 L 980 280 L 950 280 L 950 300" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
 
-  <!-- ================= TIER 2: Core Architectures & Modalities ================= -->
-  <g transform="translate(60, 285)">
-    <rect width="1080" height="185" class="tier-bg" />
-    <text x="24" y="24" class="tier-label" fill="#818cf8">Tier 2 • 核心架構、感知前沿與系統工程 (Core Learning &amp; System Modalities)</text>
+  <!-- ================= TIER 2: Perception, Spatial & Architectures ================= -->
+  <g transform="translate(50, 305)">
+    <rect width="1100" height="185" class="tier-container" fill="#f0fdf4" stroke="#bbf7d0" />
+    <text x="24" y="26" class="tier-label" fill="#14532d">第 2 層 • 資料分佈、模型架構與高維感知 (Perception, Architectures &amp; Vision)</text>
 
-    <!-- Stream A: Visual Pipeline -->
-    <g transform="translate(24, 38)">
-      <rect width="250" height="132" rx="6" fill="#131d2e" stroke="#1e293b" />
-      <text x="12" y="20" class="node-code" fill="#0284c7">視覺感測與三維流 (CV &amp; 3DGS)</text>
-      <text x="12" y="42" class="node-title">LIB-401 CNN 歸納偏置</text>
-      <text x="12" y="60" class="node-sub">平移等變性 • 空間坐標死記破除</text>
-      <line x1="12" y1="70" x2="238" y2="70" stroke="#1e293b" />
-      <text x="12" y="88" class="node-title">LIB-501 CV 質心定位演算法</text>
-      <text x="12" y="106" class="node-title">LIB-504 3D/4D 高斯潑濺 (3DGS)</text>
-      <text x="12" y="122" class="node-sub" fill="#64748b">LeCun 重心限幅 • 視角解耦光柵化</text>
+    <!-- LIB-301 -->
+    <g transform="translate(24, 40)">
+      <rect width="145" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-301 [分佈偏差]</text>
+      <text x="10" y="38" class="node-title">資料集文化偏差</text>
+      <text x="10" y="56" class="node-desc">美式斜切 vs 直立 7</text>
+      <text x="10" y="74" class="node-desc">負權重禁區扣分</text>
+      <text x="10" y="92" class="node-desc">OOD 領域漂移幾何</text>
+      <rect x="10" y="104" width="125" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: P_train ≠ P_test</text>
     </g>
 
-    <!-- Stream B: Sequence & Generative -->
-    <g transform="translate(290, 38)">
-      <rect width="250" height="132" rx="6" fill="#131d2e" stroke="#1e293b" />
-      <text x="12" y="20" class="node-code" fill="#f43f5e">語言、注意力與生成 (LLM &amp; Generative)</text>
-      <text x="12" y="42" class="node-title">LIB-405 Transformer 與注意力</text>
-      <text x="12" y="60" class="node-sub">FlashAttention • RoPE 旋轉位置編碼</text>
-      <line x1="12" y1="70" x2="238" y2="70" stroke="#1e293b" />
-      <text x="12" y="88" class="node-title">LIB-602 大語言模型縮放定律</text>
-      <text x="12" y="106" class="node-title">LIB-406 流匹配 (Flow Matching) &amp; DiT</text>
-      <text x="12" y="122" class="node-sub" fill="#64748b">最佳傳輸直線軌跡 κ=0 • Chinchilla</text>
+    <!-- LIB-401 -->
+    <g transform="translate(180, 40)">
+      <rect width="145" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-401 [CNN 必然性]</text>
+      <text x="10" y="38" class="node-title">DNN 極限與 CNN</text>
+      <text x="10" y="56" class="node-desc">空間排列破壞盲區</text>
+      <text x="10" y="74" class="node-desc">局部感受野約束</text>
+      <text x="10" y="92" class="node-desc">平移等變性數學證明</text>
+      <rect x="10" y="104" width="125" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: f(g(x)) = g(f(x))</text>
     </g>
 
-    <!-- Stream C: Autonomous Agents -->
-    <g transform="translate(555, 38)">
-      <rect width="250" height="132" rx="6" fill="#131d2e" stroke="#1e293b" />
-      <text x="12" y="20" class="node-code" fill="#ea580c">智慧代理人與決策 (Autonomous Agents)</text>
-      <text x="12" y="42" class="node-title">LIB-703 LLM Agent 認知協議</text>
-      <text x="12" y="60" class="node-sub">ReAct 閉環思考 • 記憶體與外掛工具</text>
-      <line x1="12" y1="70" x2="238" y2="70" stroke="#1e293b" />
-      <text x="12" y="88" class="node-title">LIB-704 S1/S2 雙進程神經代理人</text>
-      <text x="12" y="108" class="node-sub">Jev 非自迴歸型態決策 • CUA-S1</text>
-      <text x="12" y="122" class="node-sub" fill="#64748b">50ms 螢幕反射決策 • RLCD 閾值 τ</text>
+    <!-- LIB-501 -->
+    <g transform="translate(335, 40)">
+      <rect width="145" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-501 [CV 前處理]</text>
+      <text x="10" y="38" class="node-title">前處理與質心定位</text>
+      <text x="10" y="56" class="node-desc">20x20 外接矩形邊界</text>
+      <text x="10" y="74" class="node-desc">墨水一階動差重心</text>
+      <text x="10" y="92" class="node-desc">±3px 硬鉗制限幅</text>
+      <rect x="10" y="104" width="125" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: x̄ = M10 / M00</text>
     </g>
 
-    <!-- Stream D: Robustness & Quantization -->
-    <g transform="translate(820, 38)">
-      <rect width="236" height="132" rx="6" fill="#131d2e" stroke="#1e293b" />
-      <text x="12" y="20" class="node-code" fill="#14b8a6">工程部署與校準 (Robustness &amp; Quant)</text>
-      <text x="12" y="42" class="node-title">LIB-301 資料分佈偏差與漂移</text>
-      <text x="12" y="60" class="node-sub">亞洲 7 與美式 7 • 空間負權重禁區</text>
-      <line x1="12" y1="70" x2="224" y2="70" stroke="#1e293b" />
-      <text x="12" y="88" class="node-title">LIB-801 模型校準與不確定性 (ECE)</text>
-      <text x="12" y="106" class="node-title">LIB-802 AWQ 模型量化推論</text>
-      <text x="12" y="122" class="node-sub" fill="#64748b">溫度縮放 • INT4/FP8 邊緣高效部署</text>
+    <!-- LIB-405 -->
+    <g transform="translate(490, 40)">
+      <rect width="145" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-405 [注意力革命]</text>
+      <text x="10" y="38" class="node-title">Transformer 架構</text>
+      <text x="10" y="56" class="node-desc">Scaled Dot-Product</text>
+      <text x="10" y="74" class="node-desc">RoPE 旋轉位置編碼</text>
+      <text x="10" y="92" class="node-desc">FlashAttention-3</text>
+      <rect x="10" y="104" width="125" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: QK^T / √d_k</text>
+    </g>
+
+    <!-- LIB-406 -->
+    <g transform="translate(645, 40)">
+      <rect width="145" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-406 [生成模型前沿]</text>
+      <text x="10" y="38" class="node-title">流匹配與 DiT 革命</text>
+      <text x="10" y="56" class="node-desc">Score-SDE 擴散積分</text>
+      <text x="10" y="74" class="node-desc">最佳傳輸直線 ODE</text>
+      <text x="10" y="92" class="node-desc">MM-DiT 雙流架構</text>
+      <rect x="10" y="104" width="125" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: dx/dt = x1 - x0</text>
+    </g>
+
+    <!-- LIB-504 -->
+    <g transform="translate(800, 40)">
+      <rect width="140" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-504 [3D 視覺前沿]</text>
+      <text x="10" y="38" class="node-title">3DGS 神經渲染</text>
+      <text x="10" y="56" class="node-desc">NeRF 連續輻射場</text>
+      <text x="10" y="74" class="node-desc">3D 高斯橢球集</text>
+      <text x="10" y="92" class="node-desc">可微分高速光柵化</text>
+      <rect x="10" y="104" width="120" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: α exp(-1/2 Δx^T Σ^-1 Δx)</text>
+    </g>
+
+    <!-- LIB-602 -->
+    <g transform="translate(950, 40)">
+      <rect width="130" height="128" class="node-card" stroke="#86efac" />
+      <text x="10" y="20" class="node-code" fill="#059669">LIB-602 [大語言模型]</text>
+      <text x="10" y="38" class="node-title">LLM 架構縮放定律</text>
+      <text x="10" y="56" class="node-desc">Chinchilla 最佳曲線</text>
+      <text x="10" y="74" class="node-desc">RMSNorm • SwiGLU</text>
+      <text x="10" y="92" class="node-desc">Grouped-Query (GQA)</text>
+      <rect x="10" y="104" width="110" height="12" rx="3" fill="#f0fdf4" />
+      <text x="14" y="113" font-family="monospace" font-size="8" fill="#047857">INV: N_opt ∝ C^0.5</text>
     </g>
   </g>
 
   <!-- Connectors Tier 2 -> Tier 3 -->
-  <path d="M 280 470 L 280 500" class="path-arrow" stroke="#818cf8" marker-end="url(#arrow-indigo)" />
-  <path d="M 600 470 L 600 500" class="path-arrow" stroke="#818cf8" marker-end="url(#arrow-indigo)" />
-  <path d="M 920 470 L 920 500" class="path-arrow" stroke="#818cf8" marker-end="url(#arrow-indigo)" />
+  <path d="M 120 490 L 120 510 L 190 510 L 190 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 405 490 L 405 510 L 190 510 L 190 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 560 490 L 560 510 L 370 510 L 370 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 720 490 L 720 510 L 530 510 L 530 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 870 490 L 870 510 L 1000 510 L 1000 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
+  <path d="M 1010 490 L 1010 510 L 690 510 L 690 530" class="conn-line" stroke="#64748b" marker-end="url(#arr-slate)" />
 
-  <!-- ================= TIER 3: Convergence & Capstone ================= -->
-  <g transform="translate(60, 500)">
-    <rect width="1080" height="145" class="tier-bg" />
-    <text x="24" y="24" class="tier-label" fill="#d946ef">Tier 3 • 專案實證、學術推甄與指導教授實驗室科研 (Convergence &amp; Lab Synergy)</text>
+  <!-- ================= TIER 3: Systems, Agents & Research Methodology ================= -->
+  <g transform="translate(50, 535)">
+    <rect width="1100" height="155" class="tier-container" fill="#faf5ff" stroke="#e9d5ff" />
+    <text x="24" y="24" class="tier-label" fill="#581c87">第 3 層 • 系統工程、自主代理人與學術科研文獻體系 (Systems, Agents &amp; Research Methodology)</text>
+
+    <!-- LIB-801 -->
+    <g transform="translate(24, 38)">
+      <rect width="140" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-801 [模型校準]</text>
+      <text x="10" y="36" class="node-title">不確定性與校準</text>
+      <text x="10" y="54" class="node-desc">8層盲信 vs 4層校準</text>
+      <text x="10" y="70" class="node-desc">ECE 度量 • 溫度縮放</text>
+      <rect x="10" y="80" width="120" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: ECE &lt; 0.05</text>
+    </g>
+
+    <!-- LIB-802 -->
+    <g transform="translate(175, 38)">
+      <rect width="140" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-802 [模型量化]</text>
+      <text x="10" y="36" class="node-title">低精度推論架構</text>
+      <text x="10" y="54" class="node-desc">AWQ • GPTQ 量化</text>
+      <text x="10" y="70" class="node-desc">INT4/FP8 Tensor Core</text>
+      <rect x="10" y="80" width="120" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: q = clip(round(x/S)+Z)</text>
+    </g>
+
+    <!-- LIB-703 -->
+    <g transform="translate(325, 38)">
+      <rect width="145" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-703 [智慧代理人]</text>
+      <text x="10" y="36" class="node-title">LLM 認知推論協議</text>
+      <text x="10" y="54" class="node-desc">ReAct 思考-行動迴圈</text>
+      <text x="10" y="70" class="node-desc">嚴格型別工具調用</text>
+      <rect x="10" y="80" width="125" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: Strict JSON-RPC</text>
+    </g>
+
+    <!-- LIB-704 -->
+    <g transform="translate(480, 38)">
+      <rect width="150" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-704 [雙進程代理人]</text>
+      <text x="10" y="36" class="node-title">S1 非自迴歸 + S2</text>
+      <text x="10" y="54" class="node-desc">Jev 型別決策引擎</text>
+      <text x="10" y="70" class="node-desc">CUA-S1 介面反射模型</text>
+      <rect x="10" y="80" width="130" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: Gating τ &gt;= 0.85</text>
+    </g>
 
     <!-- LIB-901 -->
-    <g transform="translate(24, 38)">
-      <rect width="325" height="92" class="node-box" stroke="#d946ef" />
-      <text x="14" y="24" class="node-code" fill="#d946ef">LIB-901 [實證復盤]</text>
-      <text x="14" y="44" class="node-title">課堂作業至生產級 MNIST 系統復盤</text>
-      <text x="14" y="64" class="node-sub">六大模組管線 • 消除過度自信 • Gradio 畫板</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">工程邊界驗證 • 出度: 27 • 實證落地錨點</text>
+    <g transform="translate(640, 38)">
+      <rect width="145" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-901 [專案實證復盤]</text>
+      <text x="10" y="36" class="node-title">MNIST 生產級管線</text>
+      <text x="10" y="54" class="node-desc">從課堂作業到生產系統</text>
+      <text x="10" y="70" class="node-desc">6 大模組全生命週期</text>
+      <rect x="10" y="80" width="125" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: Zero NaN / OOM</text>
     </g>
 
     <!-- LIB-903 -->
-    <g transform="translate(375, 38)">
-      <rect width="340" height="92" class="node-box" stroke="#d946ef" />
-      <text x="14" y="24" class="node-code" fill="#d946ef">LIB-903 [專題藍圖]</text>
-      <text x="14" y="44" class="node-title">專題基石藍圖、推甄與研究演進</text>
-      <text x="14" y="64" class="node-sub">國科會 C801 計畫書 • 頂大推甄戰略 • 論文八階</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">個人專題研究推進路徑 (Luke 自主研發體系)</text>
+    <g transform="translate(795, 38)">
+      <rect width="145" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-903 [專題基石藍圖]</text>
+      <text x="10" y="36" class="node-title">專題研究演進藍圖</text>
+      <text x="10" y="54" class="node-desc">國科會 C801 計畫書</text>
+      <text x="10" y="70" class="node-desc">消融實驗與研究矩陣</text>
+      <rect x="10" y="80" width="125" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: Luke Solo Research</text>
     </g>
 
     <!-- LIB-904 -->
-    <g transform="translate(740, 38)">
-      <rect width="316" height="92" class="node-box" stroke="#d946ef" />
-      <text x="14" y="24" class="node-code" fill="#d946ef">LIB-904 [科研文獻體系]</text>
-      <text x="14" y="44" class="node-title">學術科研文獻體系與前沿研究對齊</text>
-      <text x="14" y="64" class="node-sub">頂會頂刊文獻研讀 • 論文復現與科研方法論</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">CVPR / ICCV / NeurIPS / ICLR 前沿文獻</text>
+    <g transform="translate(950, 38)">
+      <rect width="135" height="102" class="node-card" stroke="#d8b4fe" />
+      <text x="10" y="18" class="node-code" fill="#7c3aed">LIB-904 [學術科研體系]</text>
+      <text x="10" y="36" class="node-title">前沿文獻研讀合成</text>
+      <text x="10" y="54" class="node-desc">3DGS LoRA • CA-Jaccard</text>
+      <text x="10" y="70" class="node-desc">Hilbert 序列化 • Bunch TTA</text>
+      <rect x="10" y="80" width="115" height="12" rx="3" fill="#faf5ff" />
+      <text x="14" y="89" font-family="monospace" font-size="8" fill="#6d28d9">INV: IEEE / MDPI SOTA</text>
     </g>
   </g>
 </svg>

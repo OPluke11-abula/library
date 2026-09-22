@@ -17,7 +17,7 @@ hardware_target:
   - Dynamic Memory Allocation in PyTorch Autograd
 invariants_count: 4
 created: 2026-09-22
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
 successors:
@@ -252,7 +252,7 @@ flowchart LR
 2. **第二階：損失定義 (Loss Function)** $\to$ 搞懂監考官如何將現實問題抽象為純量懲罰分數。
 3. **第三階：誤差反饋 (Backpropagation)** $\to$ 掌握連鎖律與梯度流動，理解旋鈕如何自主更新。
 4. **第四階：卷積視野 (CNN & Features)** $\to$ 引入平移不變性與局部感受野，終結全連接網路參數量爆炸問題。
-5. **第五階：物件偵測 (Object Detection)** $\to$ 從「整張圖是什麼」演進至「圖中有哪些東西、分別在哪裡」（對齊 YOLO 與莊啓鴻教授之微小物件偵測研究）。
+5. **第五階：物件偵測 (Object Detection)** $\to$ 從「整張圖是什麼」演進至「圖中有哪些東西、分別在哪裡」（對齊 YOLO 與高空遙感微小物件偵測研究）。
 6. **第六階：連續追蹤與注意力 (Tracking & Transformer)** $\to$ 引入時間軸（連續訊框追蹤）與全局關聯（Self-Attention），消滅卷積長距離依賴盲區（對齊行人 ReID 與大語言模型）。
 7. **第七階：生成革命 (GAN / Diffusion / Flow Matching)** $\to$ 從判別標籤躍升至學習真實分佈並從純雜訊中生成宇宙萬物（對齊館藏 [[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)|LIB-406]] 與 3DGS 視角生成）。
 
@@ -336,6 +336,6 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 4. **殘差學習里程碑 (ResNet / CVPR 2016 最佳論文)**
    * *Paper*: He, K., Zhang, X., Ren, S., & Sun, J. (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770-778.
    * *Contribution*: 提出 Shortcut 殘差連線，突破深層神經網路梯度消失瓶頸。
-5. **指導教授莊啓鴻博士核心教學專著 (2022)**
-   * *Book*: 莊啓鴻 博士 等著. (2022). 《深度學習－使用TensorFlow 2.x》. 全華圖書, ISBN: 9786263282223.
+5. **深度學習實踐專著 (2022)**
+   * *Book*: 《深度學習－使用TensorFlow 2.x》. 全華圖書, ISBN: 9786263282223.
    * *Contribution*: 深入淺出解析神經網路前向計算、反向自動微分與實務卷積視覺架構，對齊本卷教學實踐。

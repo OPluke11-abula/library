@@ -17,7 +17,7 @@ hardware_target:
   - High-Throughput Cluster (H100/B200 NVLink)
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"

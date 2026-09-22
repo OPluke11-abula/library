@@ -20,14 +20,14 @@ hardware_target:
   - Edge Embedded GPUs (NVIDIA Jetson)
 invariants_count: 4
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
 successors:
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
   - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 電腦視覺
@@ -36,7 +36,6 @@ tags:
   - MNIST
   - Lanczos
   - Bunch-TTA
-  - 莊啓宏教授
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-501%20CV%20Preprocessing%20%26%20Center%20of%20Mass%20Alignment%20%28Agent%20EN%29.md)
@@ -45,7 +44,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、數位訊號處理基礎。
-- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]。
+- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
 - **難度等級**：學士核心 / 視覺工程實戰。
 
 ---
@@ -96,9 +95,9 @@ $$\Delta x = 13.5 - c_x, \quad \Delta y = 13.5 - c_y$$
 $$\text{shift}_x = \text{clip}\left(\text{round}(\Delta x), \, -\delta_{\max}, \, \delta_{\max}\right), \quad \text{其中 } \delta_{\max} = 3\text{ 像素}$$
 $$\text{shift}_y = \text{clip}\left(\text{round}(\Delta y), \, -\delta_{\max}, \, \delta_{\max}\right)$$
 
-### 4. 推論端動態增強 (Bunch TTA) 與多變換凸組合融合 (*Electronics 2024*, Chuang et al.)
+### 4. 推論端動態增強 (Bunch TTA) 與多變換凸組合融合 (*Electronics 2024*)
 單一靜態前處理雖然解決了中心對齊，但對微弱筆劃邊緣、光照旋轉與偏斜視角依然存在單點估計脆弱性。
-指導教授莊啓宏博士團隊在論文 *"Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography"* (*Electronics 2024*) 中提出 **Bunch TTA (群聚測試時增強)** 範式，將推論從單向靜態投影升級為多變換李群空間的幾何凸組合：
+在前沿微小目標影像辨識研究 *"Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography"* (*Electronics 2024*) 中，學者提出 **Bunch TTA (群聚測試時增強)** 範式，將推論從單向靜態投影升級為多變換李群空間的幾何凸組合：
 $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\theta(\mathcal{T}_k(\mathbf{x}))\right), \quad \text{滿足 } \sum_{k=1}^K w_k = 1, \; w_k \ge 0$$
 - $\mathcal{T}_k$ 為一組正交保角變換群：恆等映射、旋轉 $\{90^\circ, 180^\circ, 270^\circ\}$、水平翻轉 $\text{HFlip}$ 與垂直翻轉 $\text{VFlip}$。
 - $\mathcal{T}_k^{-1}$ 為對應的幾何逆映射（Inverse Transformation）。
@@ -197,7 +196,7 @@ def preprocess_mnist_production_pipeline(input_image: np.ndarray) -> np.ndarray:
 
 def bunch_tta_predict(model_predict_fn, image_28x28: np.ndarray) -> np.ndarray:
     """
-    對齊莊啓宏教授團隊 (Electronics 2024) 之 Bunch TTA 測試時增強推論實作
+    # 對齊 Bunch TTA (Electronics 2024) 測試時增強推論實作
     對影像執行 4 種幾何對稱變換並加權平均機率分佈
     """
     # 1. 產生變換集合 (Identity, Rot90, HFlip, VFlip)

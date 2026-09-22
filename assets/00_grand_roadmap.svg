@@ -175,16 +175,16 @@
       <text x="14" y="24" class="node-code" fill="#d946ef">LIB-903 [專題藍圖]</text>
       <text x="14" y="44" class="node-title">專題基石藍圖、推甄與研究演進</text>
       <text x="14" y="64" class="node-sub">國科會 C801 計畫書 • 頂大推甄戰略 • 論文八階</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">專題獨立研發協同矩陣 (Luke 游啓揚,  游啓揚,  游啓揚)</text>
+      <text x="14" y="80" class="node-sub" fill="#64748b">個人專題研究推進路徑 (Luke 自主研發體系)</text>
     </g>
 
     <!-- LIB-904 -->
     <g transform="translate(740, 38)">
       <rect width="316" height="92" class="node-box" stroke="#d946ef" />
-      <text x="14" y="24" class="node-code" fill="#d946ef">LIB-904 [實驗室對齊]</text>
-      <text x="14" y="44" class="node-title">指導教授實驗室研究體系與專題對齊</text>
-      <text x="14" y="64" class="node-sub">中原資工莊啓宏博士 • AI &amp; Visual Analytics Lab</text>
-      <text x="14" y="80" class="node-sub" fill="#64748b">NVIDIA Campus Ambassador • 2024-2026 期刊</text>
+      <text x="14" y="24" class="node-code" fill="#d946ef">LIB-904 [科研文獻體系]</text>
+      <text x="14" y="44" class="node-title">學術科研文獻體系與前沿研究對齊</text>
+      <text x="14" y="64" class="node-sub">頂會頂刊文獻研讀 • 論文復現與科研方法論</text>
+      <text x="14" y="80" class="node-sub" fill="#64748b">CVPR / ICCV / NeurIPS / ICLR 前沿文獻</text>
     </g>
   </g>
 </svg>

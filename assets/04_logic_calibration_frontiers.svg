@@ -124,7 +124,7 @@
         Flow Matching / Rectified Flow 證明兩點之間直線最短（曲率 κ=0），僅需 5 步歐拉積分生成超高解析度。
       </text>
       <text x="0" y="175" class="col-desc">
-        對齊指導教授莊啓宏博士團隊最新 Electronics 2026 擴散模型自適應風格融合與 3DGS 試穿系統。
+        對齊前沿生成模型與擴散模型自適應內容風格融合，支撐 3DGS 跨模態視覺渲染。
       </text>
     </g>
   </g>

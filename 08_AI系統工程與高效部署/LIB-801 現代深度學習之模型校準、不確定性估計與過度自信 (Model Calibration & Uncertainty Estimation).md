@@ -17,7 +17,7 @@ hardware_target:
   - Low-Latency Inference Calibration Sidecar
 invariants_count: 3
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"

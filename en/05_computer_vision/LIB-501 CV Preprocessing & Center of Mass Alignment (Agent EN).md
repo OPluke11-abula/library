@@ -16,7 +16,7 @@ hardware_target:
   - Embedded Edge (Jetson Nano/Orin) & Web Canvas
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
   - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"

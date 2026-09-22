@@ -22,14 +22,14 @@ hardware_target:
   - NVIDIA Jetson Edge Embedded Modules & RTX 4090 Workstations
 invariants_count: 4
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
 successors:
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
   - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 計算機結構
@@ -40,7 +40,6 @@ tags:
   - NVIDIA-TensorRT
   - DLI-Ecosystem
   - 運算元融合
-  - 莊啓宏教授
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/02_computer_systems/LIB-203%20Computer%20Architecture%20%26%20Hardware-Aware%20Deep%20Learning%20%28Agent%20EN%29.md)
@@ -49,7 +48,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、計算機組織學基礎。
-- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]。
+- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
 - **難度等級**：學士核心 / 系統工程基石。
 
 ---
@@ -115,7 +114,7 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
 - 若起始位址未對齊在 128-byte 邊界，或存在跨步存取，該次請求將被拆解為多次交易，有效頻寬大幅縮水。
 
 ### 3. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
-指導教授莊啓宏博士身為 **NVIDIA 校園大使 (Campus Ambassador)** 與 **DLI 認證講師**，在實驗室教學與專案實作中深度整合了 NVIDIA 官方 GPU 加速生態：
+在高效能深度學習系統與工程實踐中，本庫深度整合了 NVIDIA 官方 GPU 加速生態與高效能編譯優化：
 - **垂直運算元融合 (Vertical Layer Fusion)**：
   在傳統框架中，$\text{Conv} \to \text{Bias} \to \text{ReLU}$ 需要將中介張量寫回全域顯存 (Global Memory / DRAM)，再從顯存讀出給下一層，造成嚴重的顯存頻寬浪費。
   NVIDIA TensorRT 推論引擎將這三者直接融合為單一 CUDA Kernel，中介特徵純粹保留在 SM 內部的暫存器 (Registers) 與 Shared Memory (SRAM) 中，消除高達 60% 的記憶體讀寫延遲。

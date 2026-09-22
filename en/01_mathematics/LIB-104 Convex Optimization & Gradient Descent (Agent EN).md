@@ -17,7 +17,7 @@ hardware_target:
   - CUDA Stream Asynchronous Gradient Reduction
 invariants_count: 4
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
 successors:

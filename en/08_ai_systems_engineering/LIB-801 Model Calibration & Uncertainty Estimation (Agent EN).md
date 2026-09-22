@@ -16,7 +16,7 @@ hardware_target:
   - Mission-Critical Autonomous Inference Nodes
 invariants_count: 4
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"

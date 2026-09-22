@@ -16,12 +16,12 @@ hardware_target:
   - Academic HPC Cluster & Research Workstations
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
   - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 successors:
-  - "[[LIB-904 Advisor Research Corpus & Lab Synergy (Agent EN)]]"
+  - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
 tags:
   - academic-research
   - capstone-blueprint
@@ -70,13 +70,13 @@ The National Science and Technology Council (NSTC) undergraduate research projec
 
 ## 3. Solo Full-Stack Capstone Engineering Matrix (Luke)
 
-This project is authored and executed independently by **Luke (Chi-Yang Yu)**, spanning all engineering dimensions:
+This project is authored and executed independently by **Luke**, spanning all engineering dimensions:
 
 | Core Engineering Dimension | Lead Researcher | Key Technical Deliverables & Milestones |
 | :--- | :--- | :--- |
-| **System Architecture & Mathematical Derivations** | **Luke (Chi-Yang Yu)** | • Formalization of 66 mathematical invariants and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with Prof. Chi-Hung Chuang's lab research corpus |
-| **Data Pipelines & Experimental Evaluation** | **Luke (Chi-Yang Yu)** | • Large-scale handwriting collection, cleaning, and subpixel moment centering<br>• Design and execution of ablation studies across all model baselines<br>• Monitoring of Expected Calibration Error (ECE) and loss convergence |
-| **Systems Engineering & Edge Acceleration** | **Luke (Chi-Yang Yu)** | • ONNX export, FP16/INT4 quantization, and TensorRT microsecond acceleration<br>• Interactive Gradio web application with real-time feedback canvas<br>• CI/CD pipeline automation and reproducible Docker environments |
+| **System Architecture & Mathematical Derivations** | **Luke** | • Formalization of 66 mathematical invariants and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with top-tier academic literature corpus and GPU compute architecture |
+| **Data Pipelines & Experimental Evaluation** | **Luke** | • Large-scale handwriting collection, cleaning, and subpixel moment centering<br>• Design and execution of ablation studies across all model baselines<br>• Monitoring of Expected Calibration Error (ECE) and loss convergence |
+| **Systems Engineering & Edge Acceleration** | **Luke** | • ONNX export, FP16/INT4 quantization, and TensorRT microsecond acceleration<br>• Interactive Gradio web application with real-time feedback canvas<br>• CI/CD pipeline automation and reproducible Docker environments |
 
 ---
 

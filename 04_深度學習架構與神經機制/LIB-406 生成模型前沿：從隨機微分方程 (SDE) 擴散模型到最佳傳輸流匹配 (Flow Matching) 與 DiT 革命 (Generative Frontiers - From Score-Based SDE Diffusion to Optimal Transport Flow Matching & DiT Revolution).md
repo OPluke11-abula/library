@@ -19,7 +19,7 @@ hardware_target:
   - High-Throughput Adaptive Step ODE Solvers
 invariants_count: 4
 created: 2026-09-22
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
@@ -30,7 +30,7 @@ successors:
   - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 深度學習
@@ -52,7 +52,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]（特徵值分解與投影幾何）、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]（連續時間微分方程極限）、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（Roofline 頻寬與 Tensor Core 運算）、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]（自注意力與交叉注意力）。
-- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]（2D 生成擴散引導 3D 虛擬試穿）、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]（少步數 ODE 求解與低精度推論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]（莊啓宏教授實驗室自適應風格融合論文）。
+- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]（2D 生成擴散引導 3D 虛擬試穿）、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]（少步數 ODE 求解與低精度推論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]（前沿自適應風格融合論文）。
 - **核心主題**：全面解構現代生成式 AI（Generative AI）從隨機熱力學擴散（DDPM / Score-SDE）走向微分幾何最佳傳輸流匹配（Flow Matching / Rectified Flow），並與可擴展 Transformer 骨幹（DiT / MM-DiT）深度融合的完整數學形式化與工程落地體系。
 
 ---
@@ -449,6 +449,6 @@ def verify_adaln_zero_contract(ada_linear_layer: torch.nn.Linear):
 6. **多模態整流流 Transformer 旗艦架構 (Stable Diffusion 3)**
    - *Paper*: Esser, P., Kulal, S., Blattmann, A., Entezari, R., Müller, J., ... & Rombach, R. (2024). "Scaling Rectified Flow Transformers for High-Resolution Image Synthesis." *arXiv preprint arXiv:2403.03206*.
    - *Contribution*: 提出 MM-DiT 雙流架構與 QK-Normalization，成為 FLUX.1 與 SD3 的核心架構。
-7. **指導教授莊啓鴻博士團隊擴散模型最新期刊論文 (Electronics 2026)**
-   - *Paper*: Lee, Y.-F., Lee, C.-C., **Chuang, C.-H. (莊啓鴻)**, Lin, C.-L., & Fan, K.-C. (2026). "Adaptive Content and Style Fusion for Text-to-Image Generations." *Electronics*, 15(13), 2800. DOI: [10.3390/electronics15132800](https://doi.org/10.3390/electronics15132800).
-   - *Contribution*: 提出資訊熵感知自適應融合 (EAAF) 與漸進式特徵重加權 (PFR)，即插即用解決潛在擴散模型過度風格化問題，對齊本館 [[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)|LIB-904]]。
+7. **擴散模型自適應風格融合期刊論文 (Electronics 2026)**
+   - *Paper*: Lee, Y.-F., Lee, C.-C., Chuang, C.-H., Lin, C.-L., & Fan, K.-C. (2026). "Adaptive Content and Style Fusion for Text-to-Image Generations." *Electronics*, 15(13), 2800. DOI: [10.3390/electronics15132800](https://doi.org/10.3390/electronics15132800).
+   - *Contribution*: 提出資訊熵感知自適應融合 (EAAF) 與漸進式特徵重加權 (PFR)，即插即用解決潛在擴散模型過度風格化問題，對齊本館 [[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)|LIB-904]]。

@@ -31,7 +31,7 @@
 
 ## 📖 圖書館宗旨與三位一體雙軌體例
 
-本圖書館由 **游啓揚 (Luke, 中原資工三乙, 11327229)** 與 **AI Research Agent (Antigravity)** 獨立共同建立。知識庫全面對齊中原大學資訊工程學系 (CYCU ICE) **人工智慧與影像分析實驗室 (AI & Visual Analytics Lab，電學大樓 311A/311B)** 指導教授 **莊啓宏博士 (Prof. Chi-Hung Chuang，亦作莊啓鴻)** 之科研體系與 **NVIDIA 校園大使 (Campus Ambassador) / DLI 官方算力生態**。
+本圖書館由 **Luke** 獨立建立，作為個人深入掌握資訊工程與深度學習的宏偉自學知識庫。內容系統化整合頂尖國際學術會議文獻、計算機體系結構與 GPU 硬體加速生態。
 
 本館徹底打破「教材過於空泛膚淺」或「論文過於抽象晦澀」的兩極割裂，全面貫徹**「三位一體雙軌體例」**：
 1. 💡 **學士與初學者直觀心智模型 (Undergraduate Mental Model)**：透過第一性原理、物理比喻與直觀幾何，解釋前人發明該架構的本質痛點，消除數學焦慮。
@@ -103,7 +103,7 @@
     $$\bar{x} = \frac{\sum x \cdot I(x,y)}{\sum I(x,y)}, \quad \bar{y} = \frac{\sum y \cdot I(x,y)}{\sum I(x,y)}$$
     加入 $\pm 3$ 像素安全限幅 (`np.clip`)，穩穩平移回正中心，誤判現象徹底歸零！
 * 🚨 **推論端動態增強 (Bunch TTA) 突破**：
-  * 引入指導教授莊啓宏博士團隊 (*Electronics 2024*) 之群聚測試時增強範式，以旋轉與翻轉多視角凸組合消除邊緣遮擋盲區。
+  * 引入前沿研究 (*Electronics 2024*) 之群聚測試時增強範式，以旋轉與翻轉多視角凸組合消除邊緣遮擋盲區。
 
 * 📖 **詳細演算法與數學推導請參閱**：[LIB-501 計算機視覺前處理規範與影像質心定位演算法](05_計算機視覺與高維感測/LIB-501%20計算機視覺前處理規範與影像質心定位演算法%20(CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment).md) 與 [LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何](03_機器學習與統計學習原理/LIB-301%20資料分佈偏差、領域漂移與空間權重懲罰幾何%20(Dataset%20Bias,%20Domain%20Shift%20&%20Spatial%20Penalties).md)
 
@@ -131,8 +131,8 @@
 * **Score-based SDE 擴散模型**：熱力學隨機布朗運動加雜訊與去雜訊，依賴數十步積分。
 * **最佳傳輸流匹配 (Flow Matching / Rectified Flow)**：兩點之間直線最短，曲率 $\kappa=0$，5 步數值積分生成超高清影像！
 * **Diffusion Transformer (DiT)**：拋棄傳統 UNet，將圖片切成 Patch 塊，全面解鎖百億參數 Scaling Laws。
-* **指導教授實驗室對齊**：精準收錄**中原大學資工系莊啓宏博士實驗室**最新發表論文（MDPI Electronics 2026 擴散模型自適應風格融合、Electronics 2025 視角解耦 3DGS 試穿系統、Electronics 2024 水稻空拍 Bunch TTA、Algorithms 2025 非重疊相機 ReID）。
-* 📖 **詳見**：[LIB-406 生成模型前沿：隨機微分方程擴散、流匹配與 DiT 革命](04_深度學習架構與神經機制/LIB-406%20生成模型前沿：從隨機微分方程%20(SDE)%20擴散模型到最佳傳輸流匹配%20(Flow%20Matching)%20與%20DiT%20革命%20(Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20&%20DiT%20Revolution).md) 與 [LIB-904 指導教授實驗室研究體系與專題對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20指導教授實驗室研究體系與專題對齊%20(Advisor%20Research%20Corpus%20&%20Lab%20Synergy).md)
+* **學術前沿科研對齊**：精準解構同行評審權威論文（MDPI Electronics 2026 擴散模型自適應風格融合、Electronics 2025 視角解耦 3DGS 試穿系統、Electronics 2024 水稻空拍 Bunch TTA、Algorithms 2025 非重疊相機 ReID）。
+* 📖 **詳見**：[LIB-406 生成模型前沿：隨機微分方程擴散、流匹配與 DiT 革命](04_深度學習架構與神經機制/LIB-406%20生成模型前沿：從隨機微分方程%20(SDE)%20擴散模型到最佳傳輸流匹配%20(Flow%20Matching)%20與%20DiT%20革命%20(Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20&%20DiT%20Revolution).md) 與 [LIB-904 學術科研文獻體系與前沿研究對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20學術科研文獻體系與前沿研究對齊%20(Academic%20Research%20Corpus%20&%20Literature%20Synthesis).md)
 
 ### 3. S1/S2 雙進程智慧代理人 (Dual-Process Agent)
 * **System 1 (直覺快思)**：Jev / CUA-S1 非自迴歸型態決策引擎，拋棄緩慢的逐字 JSON 自迴歸，50ms 級螢幕字節反射決策。
@@ -170,7 +170,7 @@
 | **LIB-600 ~ 699** | **06 自然語言處理與大語言模型館** | 縮放定律、Decoder-Only、RMSNorm、SwiGLU、GQA | • [LIB-602 現代大語言模型架構解剖與縮放定律](06_自然語言處理與大語言模型/LIB-602%20現代大語言模型架構解剖與縮放定律%20(Modern%20LLM%20Architecture%20&%20Scaling%20Laws).md) |
 | **LIB-700 ~ 799** | **07 強化學習與智慧代理人館** | MDP、策略梯度、ReAct 迴圈、S1/S2 雙進程 (Jev/CUA-S1) | • [LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議](07_強化學習與智慧代理人/LIB-703%20現代大模型代理人%20(LLM%20Agent)%20認知架構與推論協議%20(LLM%20Agent%20Cognitive%20Architecture%20&%20Protocols).md)<br>• [LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎與字節級介面反射模型](07_強化學習與智慧代理人/LIB-704%20雙進程神經代理人：S1%20非自迴歸型態決策引擎%20(Jev)%20與字節級介面反射模型%20(CUA-S1)%20深度解剖%20(Dual-Process%20Neural%20Agent%20-%20S1%20Non-Autoregressive%20Typed%20Decision%20Engine%20(Jev)%20&%20Byte-Level%20Interface%20Reflex%20Model%20(CUA-S1)).md) |
 | **LIB-800 ~ 899** | **08 AI 系統工程與高效部署館** | 模型校準、共形預測、AWQ 量化、INT4/FP8 推論 | • [LIB-801 現代深度學習之模型校準、不確定性估計與過度自信](08_AI系統工程與高效部署/LIB-801%20現代深度學習之模型校準、不確定性估計與過度自信%20(Model%20Calibration%20&%20Uncertainty%20Estimation).md)<br>• [LIB-802 現代深度學習模型量化理論與低精度推論架構](08_AI系統工程與高效部署/LIB-802%20現代深度學習模型量化理論與低精度推論架構%20(Quantization%20Mathematics%20&%20Low-Precision%20Inference).md) |
-| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 頂大推甄戰略、國科會 C801 計畫、研究演進樹、指導教授研究體系、經典專案復盤 | • [LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統](09_科研方法論與頂尖專題藍圖/LIB-901%20經典專案實證復盤：從課堂作業到生產級%20MNIST%20手寫辨識系統%20(Classic%20Project%20Post-Mortem%20-%20From%20Class%20Assignment%20to%20Production%20MNIST%20System).md)<br>• [LIB-903 專題基石藍圖、學術推甄與多模態研究演進](09_科研方法論與頂尖專題藍圖/LIB-903%20專題基石藍圖、學術推甄與多模態研究演進%20(Capstone%20Blueprint%20&%20Academic%20Research%20Evolution).md)<br>• [LIB-904 指導教授實驗室研究體系與專題對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20指導教授實驗室研究體系與專題對齊%20(Advisor%20Research%20Corpus%20&%20Lab%20Synergy).md) |
+| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 專題戰略、研究計畫書、研究演進樹、前沿學術文獻體系、經典專案復盤 | • [LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統](09_科研方法論與頂尖專題藍圖/LIB-901%20經典專案實證復盤：從課堂作業到生產級%20MNIST%20手寫辨識系統%20(Classic%20Project%20Post-Mortem%20-%20From%20Class%20Assignment%20to%20Production%20MNIST%20System).md)<br>• [LIB-903 專題基石藍圖、學術推甄與多模態研究演進](09_科研方法論與頂尖專題藍圖/LIB-903%20專題基石藍圖、學術推甄與多模態研究演進%20(Capstone%20Blueprint%20&%20Academic%20Research%20Evolution).md)<br>• [LIB-904 學術科研文獻體系與前沿研究對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20學術科研文獻體系與前沿研究對齊%20(Academic%20Research%20Corpus%20&%20Literature%20Synthesis).md) |
 
 *(歷史課堂舊版筆記已妥善封存於 `_archive_legacy/` 目錄)*
 
@@ -197,7 +197,7 @@
 本知識庫遵循 [MIT License](LICENSE) 開源授權，歡迎學術研究、專題教學與非商業引用。引用請註明出處：
 ```bibtex
 @misc{luke2026library,
-  author = {Yu, Chi-Yang (Luke) and Antigravity Research Agent},
+  author = {Luke},
   title = {CSIE & Deep Learning Grand Library: From First Principles to Production Systems and Agent Protocols},
   year = {2026},
   publisher = {GitHub},

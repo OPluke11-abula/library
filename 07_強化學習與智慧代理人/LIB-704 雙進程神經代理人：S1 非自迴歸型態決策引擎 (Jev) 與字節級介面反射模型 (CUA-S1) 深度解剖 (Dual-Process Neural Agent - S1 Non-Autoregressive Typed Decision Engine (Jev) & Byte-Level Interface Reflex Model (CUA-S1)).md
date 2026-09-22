@@ -19,7 +19,7 @@ hardware_target:
   - Hierarchical Agent Routing Mesh
 invariants_count: 4
 created: 2026-09-22
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
   - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
@@ -29,7 +29,7 @@ prerequisites:
 successors:
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 強化學習
@@ -49,7 +49,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（快取命中與 Roofline 瓶頸）、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]（自注意力與交叉注意力）、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]（ReAct 迴圈與認知架構）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（模型校準與 ECE 度量）。
-- **後續節點**：[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]（極致邊緣落地）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]（專題獨立研發分工實戰）、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]（莊啓鴻教授實驗室邊緣計算課題）。
+- **後續節點**：[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]（極致邊緣落地）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]（專題獨立研發實戰）、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]（前沿嵌入式邊緣運算課題）。
 - **核心主題**：解析 2026 年 9 月橫空出世的兩大顛覆性 AI 模型——**CUA-S1-FORMS**（706K 參數字節級非自迴歸表單反射模型）與 **Jev**（TypeSafe AI 基於 RLCD 訓練之強型別非自迴歸決策引擎），構建徹底終結「大模型巨石迷思」之現代 S1/S2 階層式認知代理人架構。
 
 ---

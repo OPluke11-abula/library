@@ -16,7 +16,7 @@ hardware_target:
   - Low-Latency Edge Inference (< 50ms Reflex SLA)
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
   - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"

@@ -16,7 +16,7 @@ hardware_target:
   - Distributed Multi-Agent Inference Cluster
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"

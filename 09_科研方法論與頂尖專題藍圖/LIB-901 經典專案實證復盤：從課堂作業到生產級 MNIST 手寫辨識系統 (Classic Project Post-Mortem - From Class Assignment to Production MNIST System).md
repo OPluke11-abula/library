@@ -17,7 +17,7 @@ hardware_target:
   - Browser Web Client (Gradio Interface)
 invariants_count: 4
 created: 2026-09-22
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
   - "[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]"
@@ -28,7 +28,7 @@ successors:
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
   - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 專案復盤
@@ -50,7 +50,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]（模型學習六大基石）、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（GPU Warp 對齊）、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]（DNN 空間死記缺陷）、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]（LeCun 前處理規範）。
-- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]（美式 7 空間負權重）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（8 層過度自信與校準理論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]。
+- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]（美式 7 空間負權重）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（8 層過度自信與校準理論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
 - **核心定位**：本卷為整座圖書館的**「創生實戰案例典籍（Genesis Case Study）」**，原汁原味復盤中原大學資工系蔡老師課堂作業從陽春範本進化為生產級手寫辨識系統的完整工程與理論全景。
 
 ---
@@ -417,6 +417,6 @@ def preprocess_image(inp):
 4. **中原大學資工系蔡老師深度學習經典教材 (CYCU CSIE)**
    * *Curriculum*: 蔡老師. (2024). 《深度學習入門與手寫數字辨識實務》. 中原大學資訊工程學系.
    * *Application*: 本專題實證重構之原始課堂雛形與經典啟蒙教材。
-5. **指導教授莊啓鴻博士專著 (2022)**
-   * *Book*: 莊啓鴻 博士 等著. (2022). 《深度學習－使用TensorFlow 2.x》. 全華圖書, ISBN: 9786263282223.
+5. **深度學習工程專著 (2022)**
+   * *Book*: 《深度學習－使用TensorFlow 2.x》. 全華圖書, ISBN: 9786263282223.
    * *Application*: Keras 序列模型、Dense 全連結層與訓練管線工業級規範。

@@ -17,7 +17,7 @@ hardware_target:
   - Edge Embedded Systems (NVIDIA Jetson AGX Orin / Nano)
 invariants_count: 4
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
   - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
@@ -25,7 +25,7 @@ prerequisites:
   - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
   - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
 successors:
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 專題藍圖
@@ -34,7 +34,6 @@ tags:
   - 國科會C801
   - 研究所推甄
   - 中原大學資工系
-  - 莊啓宏教授
   - 臺大資工
   - 清大資工
   - 交大資工
@@ -46,7 +45,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：本圖書館全部核心卷冊之綜合集成（[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]）。
-- **後續節點**：[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]、國科會大專學生研究計畫 (C801)、頂大（台清交成）碩士班推甄書審。
+- **後續節點**：[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]、國科會大專學生研究計畫 (C801)、頂大（台清交成）碩士班推甄書審。
 - **難度等級**：學士畢業專題 / 碩士科研實戰。
 
 ---
@@ -60,7 +59,7 @@ tags:
 - 能否從「直立 7 誤判 8」的荒謬現象中，診斷出資料集文化偏見與負權重空間幾何？（[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]）
 - 能否從 8 層過擬合的盲目自信中，引證 ICML 經典文獻並實作溫度縮放校準？（[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]）
 - 能否在硬體層面精確計算 GPU Warp 排程與記憶體瓦片對齊？（[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]）
-- 能否全面承接指導教授的研究血脈與頂會/MDPI 論文資產？（[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]）
+- 能否全面承接指導教授的研究血脈與頂會/MDPI 論文資產？（[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]）
 
 當你把這一切實證、推導與除錯過程沉澱為具備學術規格的技術閉環時，這不再是一份課堂作業，而是**你叩關頂大資訊工程研究所、爭取國科會大專生計畫與指導教授極致推薦信的基石核武**！
 
@@ -134,8 +133,8 @@ tags:
          ▼                          ▼                          ▼
 [分支一：幾何抗變形 OCR]     [分支二：3DGS 視角生成]     [分支三：極致邊緣加速]
  • STN 仿射自適應旋轉       • 2D 特徵對齊 3D 空間       • INT8 / FP4 模型量化
- • CRNN + CTC 手寫行解碼    • 莊啓宏實驗室 3DGS 虛擬試穿• TensorRT 運算元融合
- • TrOCR 視覺 Transformer   • (詳見 LIB-904 實驗室體系) • WebAssembly 零伺服器
+ • CRNN + CTC 手寫行解碼    • 前沿 3DGS 虛擬試穿        • TensorRT 運算元融合
+ • TrOCR 視覺 Transformer   • (詳見 LIB-904 文獻體系)   • WebAssembly 零伺服器
          │                          │                          │
          └──────────────────────────┼──────────────────────────┘
                                     ▼
@@ -152,8 +151,8 @@ tags:
 - **序列化端到端手寫文字行辨識**：
   升級為 **CRNN (CNN + Bi-LSTM + CTC Loss)** 或 **TrOCR (Vision Transformer)**，從單個手寫字符躍遷至手寫筆記整行自動轉錄。
 
-### 2. 分支二：對齊莊啓宏教授實驗室之前沿 3DGS 視角生成
-- **實驗室核心研究**：中原大學資訊工程學系 (CYCU ICE) **人工智慧與影像分析實驗室 (AI & Visual Analytics Lab，電學大樓 311A/311B)** 莊啓宏博士 (Prof. Chi-Hung Chuang，亦作莊啓鴻) 致力於 3D Gaussian Splatting、視角生成、虛擬試穿與智慧視覺感知，依託其 NVIDIA 校園大使 (Campus Ambassador) 官方算力與 DLI 實驗室設備資源。
+### 2. 分支二：前沿 3DGS 視角生成與動態渲染
+- **前沿核心研究**：聚焦於 3D Gaussian Splatting、視角生成、虛擬試穿與智慧視覺感知，依託高階 GPU 算力與先進可微光柵化管線。
 - **科研對齊突破點**：
   將手寫/手繪 2D 線稿作為條件約束（ControlNet），利用 2D 骨幹提取多尺度幾何特徵，直接回歸預測 3D 高斯橢球的中心坐標 $\mu$、四元數旋轉 $q$、尺度 $s$ 與球諧色彩係數（參見 [[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]），實現**「單張手繪服裝草圖 $\to$ 即時 3D 虛擬試衣高斯渲染」**的突破性學術專題！
 
@@ -165,13 +164,13 @@ tags:
 
 ## 四、🛠️ 專題獨立研發與全棧工程交付矩陣 (Solo Capstone Engineering Matrix: Luke)
 
-本專案由 **Luke (游啓揚)** 獨立主導全域架構設計、演算法理論推導、高維資料管線、模型訓練校準、底層硬體加速對齊與前端服務部署：
+本專案由 **Luke** 獨立主導全域架構設計、演算法理論推導、高維資料管線、模型訓練校準、底層硬體加速對齊與前端服務部署：
 
 | 核心工程維度 | 負責人 | 核心技術交付物與成果 |
 | :--- | :--- | :--- |
-| **架構設計與演算法推導** | **Luke (游啓揚)** | • 統籌全域演算法架構設計與數學形式化推導<br>• 主筆國科會大專生研究計畫書 (C801) 與學術論文<br>• 深入指導教授莊啓宏博士實驗室科研體系與 NVIDIA DLI 算力生態 |
-| **資料管線與實驗評測** | **Luke (游啓揚)** | • 負責大規模手寫資料集（MNIST, EMNIST, IAM）收集、清理與質心動差校準<br>• 設計嚴格的消融實驗 (Ablation Study) 與基準對比測試<br>• 監控模型校準指標 (ECE) 與損失曲面收斂動態 |
-| **系統工程與邊緣加速部署** | **Luke (游啓揚)** | • 負責 ONNX / TensorRT 模型量化 (AWQ, INT4/FP8) 與微秒級硬體加速<br>• 研發高互動性 Gradio 即時手繪推論畫板與 3D 渲染展示服務<br>• 維護開源程式碼倉庫的 CI/CD、Docker 與性能基準測試 |
+| **架構設計與演算法推導** | **Luke** | • 統籌全域演算法架構設計與數學形式化推導<br>• 主筆國科會大專生研究計畫書 (C801) 與學術論文<br>• 深入前沿學術文獻體系與高效能 GPU 算力生態 |
+| **資料管線與實驗評測** | **Luke** | • 負責大規模手寫資料集（MNIST, EMNIST, IAM）收集、清理與質心動差校準<br>• 設計嚴格的消融實驗 (Ablation Study) 與基準對比測試<br>• 監控模型校準指標 (ECE) 與損失曲面收斂動態 |
+| **系統工程與邊緣加速部署** | **Luke** | • 負責 ONNX / TensorRT 模型量化 (AWQ, INT4/FP8) 與微秒級硬體加速<br>• 研發高互動性 Gradio 即時手繪推論畫板與 3D 渲染展示服務<br>• 維護開源程式碼倉庫的 CI/CD、Docker 與性能基準測試 |
 
 ## 五、📝 國科會大專學生研究計畫 (C801) 申請攻略與奪榜心法
 
@@ -199,8 +198,8 @@ tags:
    - 明確承諾可量化交付物（專案 GitHub 倉庫、模型 Checkpoint、原型展示系統、學術會議論文草稿）。
 4. **申請人之研究潛力與先修課程表現 (15%)**：
    - 著重資工核心科目（數學基石、演算法、機器學習、系統架構）之修課成績與大一至大三實作專案表現。
-5. **指導教授專長相關性與實驗室資源提供 (10%)**：
-   - 與指導教授莊啓宏博士近三年期刊成果（3DGS、點雲序列化、智慧交通、Bunch TTA）緊密扣合，並獲得實驗室伺服器算力（RTX 4090 / A100）及 NVIDIA DLI 官方資源全力奧援。
+5. **研究主題相關性與運算資源完備度 (10%)**：
+   - 與近三年頂會/期刊前沿成果（3DGS、點雲序列化、智慧交通、Bunch TTA）緊密扣合，並獲得高效能 GPU 伺服器算力（RTX 4090 / A100）全力奧援。
 
 ---
 

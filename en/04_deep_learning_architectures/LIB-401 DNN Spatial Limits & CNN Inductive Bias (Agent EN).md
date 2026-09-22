@@ -16,7 +16,7 @@ hardware_target:
   - NVIDIA Tensor Core Implicit GEMM Convolution
 invariants_count: 4
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"

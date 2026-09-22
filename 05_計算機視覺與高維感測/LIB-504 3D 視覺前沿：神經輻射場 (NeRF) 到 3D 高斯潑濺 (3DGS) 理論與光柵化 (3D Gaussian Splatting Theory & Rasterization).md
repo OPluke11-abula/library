@@ -17,7 +17,7 @@ hardware_target:
   - Fast Radix Sort on GPU DRAM
 invariants_count: 3
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
   - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
@@ -38,7 +38,7 @@ tags:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]。
-- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]（莊啓鴻教授實驗室核心課題）。
+- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]（多模態前沿渲染課題）。
 - **權威期刊/會議文獻出處**：
   - Mildenhall et al. (ECCV 2020) *NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis*.
   - Zwicker et al. (IEEE TVCG 2001) *Surface Splatting*.
@@ -105,7 +105,7 @@ $$P(u, v) = \exp\left(-\frac{u^2}{2\sigma_u^2} - \frac{v^2}{2\sigma_v^2}\right)$
 針對動態人體、布料擺動與自駕動態感知，Wu et al. (CVPR 2024) 提出了 **4DGS**：
 - 將高斯中心坐標擴展為時間函數：$\mu(t) = \mu_0 + \Delta \mu(t)$。
 - 利用 HexPlane（空間-時間六平面分解）或輕量級 MLP 預測高斯點的位移場 $\Delta \mu$、旋轉變化 $\Delta q$ 與尺度變化 $\Delta s$。
-- **實驗室課題對齊**：這為中原資工莊啓鴻教授實驗室的「手繪 2D 草圖引導之 3D 動態虛擬試衣」提供了最佳的實時動態渲染理論支撐！
+- **前沿應用對齊**：這為「手繪 2D 草圖引導之 3D 動態虛擬試衣」前沿研究提供了最佳的實時動態渲染理論支撐！
 
 ---
 

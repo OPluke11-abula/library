@@ -31,7 +31,7 @@
 
 ## 📖 Mission Statement & Agent Cognitive Framework
 
-This Grand Library was established and authored independently by **Luke (Chi-Yang Yu, CYCU ICE Class 3B, Student ID: 11327229)** in synergy with **AI Research Agent (Antigravity)**. The corpus aligns directly with the research methodologies of the **AI & Visual Analytics Lab (EE Building 311A/311B)** directed by **Prof. Chi-Hung Chuang, Ph.D.** at **Chung Yuan Christian University (CYCU ICE)** and the **NVIDIA Campus Ambassador / Deep Learning Institute (DLI)** compute ecosystem.
+This Grand Library was established and authored independently by **Luke** as an authoritative self-study knowledge repository in computer science and deep learning. The corpus systematically synthesizes peer-reviewed academic literature, computer systems architecture, and accelerated compute ecosystems.
 
 ### Purpose of the English Agent Edition
 While the Traditional Chinese edition is tailored for undergraduate intuition and human learning, this **English Edition** is explicitly optimized for autonomous AI Agents, LLM-based researchers, and programmatic retrieval engines:
@@ -134,7 +134,7 @@ While the Traditional Chinese edition is tailored for undergraduate intuition an
 | **LIB-802** | **08 Systems Eng** | [Quantization Mathematics & Low-Precision Inference](08_ai_systems_engineering/LIB-802%20Quantization%20Mathematics%20&%20Low-Precision%20Inference%20(Agent%20EN).md) | Affine quantization ($S, Z$), AWQ, GPTQ, INT4/FP8 hardware Tensor Core GEMM |
 | **LIB-901** | **09 Methodology** | [Classic Project Post-Mortem: Production MNIST](09_research_methodology/LIB-901%20Classic%20Project%20Post-Mortem%20-%20Production%20MNIST%20(Agent%20EN).md) | End-to-end post-mortem: from toy code to production web deployment |
 | **LIB-903** | **09 Methodology** | [Capstone Blueprint & Academic Research Evolution](09_research_methodology/LIB-903%20Capstone%20Blueprint%20&%20Academic%20Research%20Evolution%20(Agent%20EN).md) | NSTC C801 undergraduate proposal blueprint, research paper roadmap |
-| **LIB-904** | **09 Methodology** | [Advisor Research Corpus & Lab Synergy](09_research_methodology/LIB-904%20Advisor%20Research%20Corpus%20&%20Lab%20Synergy%20(Agent%20EN).md) | Deep alignment with Prof. Chi-Hung Chuang's lab corpus and NVIDIA DLI compute |
+| **LIB-904** | **09 Methodology** | [Academic Research Corpus & Literature Synthesis](09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20&%20Literature%20Synthesis%20(Agent%20EN).md) | Systematic paper reproduction methodology, metric verification, and literature synthesis |
 
 ---
 
@@ -142,7 +142,7 @@ While the Traditional Chinese edition is tailored for undergraduate intuition an
 
 ```bibtex
 @misc{luke2026library,
-  author = {Yu, Chi-Yang (Luke) and Antigravity Research Agent},
+  author = {Luke},
   title = {CSIE & Deep Learning Grand Library: From First Principles to Production Systems and Agent Protocols},
   year = {2026},
   publisher = {GitHub},

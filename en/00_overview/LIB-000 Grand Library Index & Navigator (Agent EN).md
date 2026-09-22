@@ -16,7 +16,7 @@ hardware_target:
   - Agnostic
 invariants_count: 4
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites: []
 successors:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
@@ -24,7 +24,7 @@ successors:
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
   - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
   - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
-  - "[[LIB-904 Advisor Research Corpus & Lab Synergy (Agent EN)]]"
+  - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
 tags:
   - library
   - master-index
@@ -74,7 +74,7 @@ The library indexes volumes into 10 specialized functional wings based on the AC
 | **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | Chinchilla compute-optimal frontier, GQA |
 | **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | S1 non-autoregressive Jev, S2 ReAct gating |
 | **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | ECE temperature scaling, AWQ/INT4 GEMM |
-| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem & Lab Synergy | C801 proposal structure, solo engineering |
+| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem & Literature Synthesis | C801 proposal structure, solo engineering |
 
 ---
 

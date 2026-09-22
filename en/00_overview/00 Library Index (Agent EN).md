@@ -5,7 +5,7 @@ tags:
   - agent-optimized
 created: 2026-09-17
 updated: 2026-09-22
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../00%20%E5%9C%96%E6%9B%B8%E9%A4%A8%E7%B8%BD%E8%A6%BD%20%28Library%20Index%29.md) | 🇺🇸 **English (Agent Edition)**
@@ -49,4 +49,4 @@ Primary Master Topological Entry Point:
 - **09 Research Methodology & Capstone Blueprints**:
   - [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]
   - [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]
-  - [[LIB-904 Advisor Research Corpus & Lab Synergy (Agent EN)]]
+  - [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]

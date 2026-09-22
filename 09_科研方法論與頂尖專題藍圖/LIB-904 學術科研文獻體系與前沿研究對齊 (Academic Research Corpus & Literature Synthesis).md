@@ -1,8 +1,8 @@
 ---
 call_number: LIB-904
-title: 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)
+title: 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 module: Research-Methodology-Capstone
-category: Advisor-Lab-Corpus
+category: Academic-Literature-Synthesis
 audience:
   - Undergraduate
   - Graduate-PhD
@@ -17,11 +17,12 @@ math_foundations:
   - Bunch Testing Time Augmentation (Bunch TTA) Invariant Transformations
 hardware_target:
   - Single GPU (RTX 4090 / 24GB VRAM) Free-Viewpoint 3DGS
-  - Academic GPU Clusters (NVIDIA A100 / H100 Slurm Nodes)
+  - High-Performance GPU Clusters (NVIDIA A100 / H100)
   - Edge Embedded Systems (NVIDIA Jetson AGX Orin / Nano)
 invariants_count: 4
 created: 2026-09-21
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+updated: 2026-09-22
+author: Luke
 prerequisites:
   - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
@@ -31,32 +32,29 @@ prerequisites:
 successors: []
 tags:
   - 圖書館
-  - 指導教授研究
-  - 莊啓宏教授
-  - 莊啓鴻教授
-  - 中原大學資工系
-  - 人工智慧與影像分析實驗室
-  - NVIDIA校園大使
-  - DLI深度學習機構
+  - 學術文獻研讀
+  - 科研方法論
+  - 論文復現
   - 3DGS虛擬試穿
   - 點雲序列化
   - 行人再識別
   - 智慧交通
-  - 國科會專題
+  - 測試時增強
+  - 自學體系
 ---
 
-> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Advisor%20Research%20Corpus%20%26%20Lab%20Synergy%20%28Agent%20EN%29.md)
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20%26%20Literature%20Synthesis%20%28Agent%20EN%29.md)
 
-# 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)
+# 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
-- **後續節點**：本卷為實驗室科研體系之總成節點，直接支撐國科會大專學生研究計畫與頂大碩士推甄研究計畫書。
-- **學術定位**：深度解構**指導教授莊啓宏博士（Prof. Chi-Hung Chuang，亦作莊啓鴻，中原大學資訊工程學系副教授，電學大樓 311A/311B 人工智慧與影像分析實驗室主持教授）**之經典專著、2022-2026 年最新同行評審期刊論文、NVIDIA 校園大使 (Campus Ambassador) 官方算力生態與大專生國科會計畫傳承，建立專題研究員（Luke 游啓揚）能夠一眼看清實驗室的技術支柱與算力生態：
+- **後續節點**：本卷為學術文獻研讀與科研方法論之總成節點，直接支撐大專學生研究計畫與深度學習自主科研體系。
+- **學術定位**：建立獨立研究員（Luke）研讀頂級會議與同行評審權威期刊論文的系統化方法論。以電腦視覺、神經渲染（3DGS）、高維幾何點雲序列化、度量學習（Metric Learning）與測試時增強（TTA）等前沿研究為實戰範例，架構從理論形式化、消融實驗分析、GPU 硬體映射到代碼復現之完整學術研讀閉環：
 
 ```
                               ┌────────────────────────────────────────────────────────┐
-                              │  《深度學習：使用 TensorFlow 2.x》(全華圖書 2022)      │
+                              │  學術科研文獻體系與前沿研究對齊 (Literature Synthesis) │
                               │   全系統工程基石：張量代數、CNN/RNN/Transformer 實作   │
                               └──────────────────────────┬─────────────────────────────┘
                                                          │
@@ -75,49 +73,47 @@ tags:
 └──────────────────┘   └──────────────────┘                           └──────────────────┘   └──────────────────┘
 ```
 
-### 1. 指導教授學術履歷與實驗室據點
-- **指導教授**：**莊啓宏 博士 (Dr. Chi-Hung Chuang，亦作莊啓鴻)**
-- **現任職稱**：中原大學資訊工程學系副教授 (CYCU ICE)
-- **研究室與實驗室**：
-  - 教師研究室：中原大學 電學大樓 311A
-  - 人工智慧與影像分析實驗室 (AI & Visual Analytics Lab)：中原大學 電學大樓 311B
-- **官方系所網頁**：[中原大學資工系師資介紹 - 莊啓宏副教授](https://iceweb.cycu.edu.tw/portfolio-item/%e8%8e%8a%e5%95%93%e5%ae%8f/)
-- **專長領域**：電腦視覺、深度學習影像處理、3D 高斯潑濺 (3DGS)、嵌入式邊緣 AI、無人機遙感探測、生物特徵識別。
+---
 
-### 2. NVIDIA Campus Ambassador (校園大使) 與 DLI 深度學習算力生態
-莊啓宏教授榮獲 **NVIDIA 官方認證之校園大使 (NVIDIA Campus Ambassador)** 與 **深度學習機構認證講師 (NVIDIA DLI Certified Instructor)**，為中原大學資工系建構了與國際接軌的 GPU 算力與教學資源網絡：
-1. **DLI 國際專業認證課程**：在校內主辦並輔導學生取得 NVIDIA DLI 官方證書（如 *Fundamentals of Deep Learning*, *Building Real-Time Video AI Applications*），使專題生在大專階段即具備業界認可之 GPU 程式設計與推論優化能力。
-2. **實驗室專屬算力叢集**：
-   - 伺服器端：配備多節點的高階 GPU 叢集（含 NVIDIA RTX 4090 24GB、A100 等伺服器級硬體），支撐 3DGS 可微分光柵化、多視角擴散模型微調與大規模點雲注意力訓練。
-   - 邊緣嵌入式端：配備 NVIDIA Jetson AGX Orin、Jetson Nano 與車載邊緣運算板卡，提供自駕車智慧號誌偵測與無人機即時空拍分析之硬體實戰平台。
+## 一、💡 學術科研文獻研讀心智模型與四維分析法
 
-### 3. 一本專著奠定基石：《深度學習：使用 TensorFlow 2.x》
-莊教授於 2022 年出版之專著，系統化建立了從張量（Tensor）底層代數、自動微分、卷積神經網路（CNN）、循環神經網路（RNN）到遷移學習的工程落地教學。這代表實驗室擁有極為扎實的**底層代碼自研能力**，而非只會調用黑盒子套件。
+### 1. 頂刊/頂會論文的三階研讀法 (Three-Pass Reading Protocol)
+在深入前沿領域時，研究者面臨海量的 arXiv 預印本與期刊發表。本館貫徹 S. Keshav 所提之**三階論文研讀規範**：
+1. **第一階（快速掃描，10 分鐘）**：研讀 Title, Abstract, Introduction, Section Headings 與 Conclusion，並細閱主要架構圖。判斷該論文之核心假設、技術範疇與是否值得精讀。
+2. **第二階（把握內容，1 小時）**：仔細研讀主要推導、幾何直觀與消融實驗（Ablation Study）。標記未理解的數學符號，審視其基準對比（Baseline）是否誠實。
+3. **第三階（虛擬復現，數小時至數天）**：在心中或本地從零推導核心定理，推想作者在演算法實作中可能隱瞞或忽略的工程細節（如學習率預熱、數據增強、退化邊界）。
 
-### 4. 真實世界嚴苛條件下的魯棒性突破
-觀察莊教授發表的 7 篇國際同行評審期刊論文，貫穿始終的共同靈魂是**「解決真實場景中的物理與算力限制」**：
-- **相機視角不重疊**：真實街道中攝影機不可能全覆蓋，如何做跨街區行人追蹤？（提出 **CA-Jaccard** 重排序演算法，Market-1501 mAP 狂飆至 **93.58%**）。
-- **硬體顯存有限**：高畫質 3D 虛擬試穿通常需要 48GB+ 昂貴顯存，如何在單張 24GB RTX 4090 上流暢運行？（提出 **視角解耦 LoRA + 3DGS** 級聯優化）。
-- **目標極度微小**：空拍農作物與遠距路口紅綠燈在畫面中僅佔十餘個像素，如何精確捕捉？（提出 **PRB-FPN 雙向特徵融合** 與 **Bunch TTA 測試時多變換增強**）。
-- **點雲幾何無序**：光達掃描的 3D 點雲數量高達數十萬，傳統自注意力複雜度爆炸？（提出 **Hilbert 空間填充曲線序列化**，注意力複雜度降至線性 $\mathcal{O}(M \cdot P)$）。
-- **風格擴散過度破壞語意**：文字生圖風格微調常常導致主體嚴重變形？（提出 **EAAF 資訊熵動態注入** 與 **PFR 漸進重加權**）。
-- **光照與照片欺騙**：傳統人臉/唇紋辨識易受偽造照片攻破？（提出 **動態訊框差分 + 雙特徵流**，HTER 降至 8.86%）。
+### 2. 四維文獻分析框架
+每篇納入知識庫的前沿論文，必須經過以下四個嚴格維度的解構：
+- **痛點辨識 (Pain Point Identification)**：現有 SOTA 架構在物理幾何、計算複雜度或資料偏差上的致命缺陷。
+- **數學形式化 (Mathematical Formalization)**：嚴謹定義目標函數、流形約束或變分邊界。
+- **消融驗證 (Ablation Verification)**：各創新模組（如注意力機制、損失項、數據增強）的邊際貢獻量化。
+- **系統邊界 (System & Hardware Bounds)**：在 GPU 記憶體頻寬、Warp 排程與計算複雜度上的實際負擔。
+
+### 3. 真實世界嚴苛條件下的魯棒性突破
+觀察優秀期刊論文的共同特質，其核心精髓均在於**「解決真實場景中的物理與算力限制」**：
+- **相機視角不重疊**：真實街道中攝影機不可能全覆蓋，跨街區目標追蹤如何消除場景特徵偏差？（提出 **CA-Jaccard** 重排序演算法，Market-1501 mAP 達 **93.58%**）。
+- **硬體顯存有限**：高畫質 3D 虛擬試穿通常需要 48GB+ 顯存，如何在單張消費級 24GB RTX 4090 上運行？（提出 **視角解耦 LoRA + 3DGS** 級聯優化）。
+- **目標極度微小**：空拍遙感農作物與遠距路口號誌在畫面中僅佔十餘個像素，如何精確捕捉？（提出 **PRB-FPN 雙向特徵融合** 與 **Bunch TTA 測試時多變換增強**）。
+- **點雲幾何無序**：光達掃描的 3D 點雲數量高達數十萬，傳統自注意力複雜度爆炸？（提出 **Hilbert 空間填充曲線序列化**，自注意力計算複雜度降至線性 $\mathcal{O}(M \cdot P)$）。
+- **風格擴散過度破壞語意**：文字生圖風格微調常導致主體嚴重變形？（提出 **EAAF 資訊熵動態注入** 與 **PFR 漸進重加權**）。
+- **光照與照片欺騙**：傳統生物特徵辨識易受靜態照片攻擊攻破？（提出 **動態訊框差分 + 雙特徵流**，HTER 降至 8.86%）。
 
 ---
 
-## 二、🎓 博士級形式化推導與實驗室七大核心期刊論文解剖
+## 二、🎓 博士級形式化推導與前沿代表性文獻深度復盤
 
-本節對莊啓宏教授實驗室發表的 7 篇權威期刊論文與代表作進行嚴密的數學推導與架構解剖：
+本節精選 7 篇具備高實用價值與嚴謹數理結構的權威期刊論文進行解剖：
 
 ### 1. 3DGS 虛擬試穿與視角解耦 LoRA (*Electronics 2025*, Article 3884)
 
-在論文 *"Splatting the Cat: Efficient Free-Viewpoint 3D Virtual Try-On via View-Decomposed LoRA and Gaussian Splatting"* 中，團隊攻克了 3D 虛擬試穿中跨視角紋理洩漏與顯存爆炸的關鍵瓶頸。
+在論文 *"Splatting the Cat: Efficient Free-Viewpoint 3D Virtual Try-On via View-Decomposed LoRA and Gaussian Splatting"* 中，研究攻克了 3D 虛擬試穿中跨視角紋理洩漏與顯存爆炸的關鍵瓶頸。
 
 #### (1) 四階段級聯優化 (Four-Stage Cascade Optimization)
 1. **人體幾何先驗初始化**：利用 SMPL-X 參數化人體網格生成帶有法向量的粗粒度點雲，初始化 3D 高斯橢球集 $\mathcal{G} = \{(\mu_i, \Sigma_i, c_i, \alpha_i)\}_{i=1}^N$（對齊 [[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]）。
 2. **2D 輕量試穿引導**：利用 2D CatVTON 模型，輸入人體目標影像 $I_{\text{person}}$ 與服裝影像 $I_{\text{garment}}$，生成多視角高解析度 2D 試穿指導影像集 $\mathcal{I}_{\text{guided}}$。
 3. **視角解耦 LoRA (View-Decomposed LoRA)**：
-   傳統微調直接將所有視角混合訓練，導致正面印花污染人體背面。本論文將環繞視角 $\theta \in [0^\circ, 360^\circ)$ 劃分為三個正交子空間：
+   傳統微調直接將所有視角混合訓練，導致正面印花污染人體背面。論文將環繞視角 $\theta \in [0^\circ, 360^\circ)$ 劃分為三個正交子空間：
    $$\mathcal{V}_{\text{front}} = [-45^\circ, 45^\circ], \quad \mathcal{V}_{\text{side}} = [45^\circ, 135^\circ] \cup [225^\circ, 315^\circ], \quad \mathcal{V}_{\text{back}} = [135^\circ, 225^\circ]$$
    對每個視角子集分別訓練專屬的低秩適應矩陣（對齊 [[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]）：
    $$W_{\text{eff}}(\theta) = W_0 + \sum_{k \in \{\text{front, side, back}\}} w_k(\theta) \cdot (B_k \cdot A_k), \quad B_k \in \mathbb{R}^{d \times r}, A_k \in \mathbb{R}^{r \times k}$$
@@ -128,7 +124,7 @@ tags:
 
 ### 2. 空間填充曲線序列化點雲注意力 (*Electronics 2026*, Article 1849)
 
-在論文 *"Point Cloud Semantic Segmentation Network Based on Serialized Attention"* 中，團隊攻克了 3D 點雲無序性（Unordered Nature）與 Transformer 注意力平方複雜度之衝突。
+在論文 *"Point Cloud Semantic Segmentation Network Based on Serialized Attention"* 中，研究攻克了 3D 點雲無序性（Unordered Nature）與 Transformer 注意力平方複雜度之衝突。
 
 #### (1) Hilbert 空間填充曲線映射 (Hilbert Space-Filling Curve Mapping)
 對於三維空間中的離散點雲 $\mathcal{P} = \{p_i = (x_i, y_i, z_i)\}_{i=1}^M$，傳統 $k$-NN 搜尋需要建立複雜的 $k$-d tree，在 GPU 上引發嚴重的記憶體離散存取（Uncoalesced Memory Access，參見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]）。
@@ -143,13 +139,13 @@ $$h_i = \mathcal{H}\left(\lfloor x_i / \delta \rfloor, \, \lfloor y_i / \delta \
 
 ### 3. 非重疊相機行人再識別 CA-Jaccard 重排序 (*Algorithms 2025*, Article 714)
 
-在論文 *"Person Re-Identification Under Non-Overlapping Cameras Based on Advanced Contextual Embeddings"* 中，團隊提出了一種**無需重訓骨幹網路即能大幅拉升精度的後處理拓樸演算法**。
+在論文 *"Person Re-Identification Under Non-Overlapping Cameras Based on Advanced Contextual Embeddings"* 中，提出了一種**無需重訓骨幹網路即能大幅拉升精度的後處理拓樸演算法**。
 
 #### (1) 相機感知 Jaccard 距離 (Camera-Aware Jaccard Distance)
 給定探測影像 (Query) $q$ 與圖庫樣本 (Gallery) $g_i$，由 Vision Transformer (TransReID) 提取出 $L_2$ 歸一化特徵向量 $f_q, f_{g_i}$，初步歐幾里得距離為 $d(q, g_i) = \|f_q - f_{g_i}\|_2$。
 
 但在非重疊相機網絡中，相機專屬偏差（Camera-specific Bias，如曝光、角度）會導致同相機樣本距離虛假偏近。
-團隊提出先建立 $k$-倒數最近鄰集合（$k$-reciprocal nearest neighbors, $\mathcal{R}(p, k)$）：
+研究提出先建立 $k$-倒數最近鄰集合（$k$-reciprocal nearest neighbors, $\mathcal{R}(p, k)$）：
 $$\mathcal{R}(p, k) = \{g \in \mathcal{N}(p, k) \mid p \in \mathcal{N}(g, k)\}$$
 進一步導入相機感知拓樸懲罰權重 $C(p, g)$：
 $$C(p, g) = \begin{cases} 1.0 + \gamma & \text{if } \text{CamID}(p) == \text{CamID}(g) \text{ (抑制同相機場景捷徑)} \\ 1.0 & \text{if } \text{CamID}(p) \neq \text{CamID}(g) \text{ (鼓勵跨相機匹配)} \end{cases}$$
@@ -161,64 +157,64 @@ $$d_{\text{CA-Jaccard}}(q, g) = 1 - \frac{|\mathcal{R}^*(q, k) \cap \mathcal{R}^
 
 ### 4. 擴散模型自適應風格融合 (*Electronics 2026*, Article 2800)
 
-在論文 *"Adaptive Content and Style Fusion for Text-to-Image Generations"* 中，團隊提出了 **EAAF (Entropy-Aware Adaptive Fusion)** 與 **PFR (Progressive Feature Reweighting)**：
+在論文 *"Adaptive Content and Style Fusion for Text-to-Image Generations"* 中，提出了 **EAAF (Entropy-Aware Adaptive Fusion)** 與 **PFR (Progressive Feature Reweighting)**：
 - **資訊熵度量**：利用特徵圖的香農資訊熵（Shannon Entropy）動態評估內容區域的語意豐富度。在低資訊熵區域（如平坦背景）加大風格紋理注入，在高資訊熵區域（如人臉、文字細節）主動抑制風格滲透，徹底解決傳統擴散模型「風格過度渲染（Over-stylization）導致內容主體變形」之痛點。
 
 ---
 
-### 5. 空拍水稻微小目標偵測與群聚測試時增強 (Bunch TTA) (*Electronics 2024*, Article 632)
+### 5. 空拍遙感微小目標偵測與群聚測試時增強 (Bunch TTA) (*Electronics 2024*, Article 632)
 
-在論文 *"Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography"* 中，團隊攻克了高空無人機遙感影像中農作物目標微小、密集且容易受風吹形變之嚴峻難題。
+在論文 *"Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography"* 中，攻克了高空無人機遙感影像中農作物目標微小、密集且容易受風吹形變之嚴峻難題。
 
 #### (1) 群聚測試時增強數學形式化 (Bunch TTA Mathematical Formulation)
-在無人機空拍大圖（解析度達 $4000 \times 3000$ 像素）中，水稻苗株的尺度常常僅有 $15 \times 15$ 到 $30 \times 30$ 像素。單次前向推論容易因光影反射與方向偏角造成大量漏檢。
-團隊提出 **Bunch TTA (群聚測試時增強)** 算子，對輸入測試影像 $\mathbf{x}$ 施加一組幾何變換群 $\mathcal{T} = \{\mathcal{T}_1, \mathcal{T}_2, \dots, \mathcal{T}_K\}$：
+在無人機空拍大圖（解析度達 $4000 \times 3000$ 像素）中，目標的尺度常常僅有 $15 \times 15$ 到 $30 \times 30$ 像素。單次前向推論容易因光影反射與方向偏角造成大量漏檢。
+論文提出 **Bunch TTA (群聚測試時增強)** 算子，對輸入測試影像 $\mathbf{x}$ 施加一組幾何變換群 $\mathcal{T} = \{\mathcal{T}_1, \mathcal{T}_2, \dots, \mathcal{T}_K\}$：
 $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\theta(\mathcal{T}_k(\mathbf{x}))\right), \quad \sum_{k=1}^K w_k = 1$$
 其中變換群包含：
 $$\mathcal{T}_k \in \{\text{Identity}, \, \text{Rot}_{90}, \, \text{Rot}_{180}, \, \text{Rot}_{270}, \, \text{HFlip}, \, \text{VFlip}, \, \text{Scale}_{0.8}, \, \text{Scale}_{1.2}\}$$
 - $\mathcal{T}_k^{-1}$ 為逆變換算子，將旋轉與翻轉後的偵測邊界框精確映射回原始空拍坐標系。
-- 結合 **測試時滑動網格切片 (Testing-Time Grid Cropping)**：以重疊率 20% 的滑動窗口切片為子圖，各自執行 Bunch TTA 後，再透過加權邊界框融合 (WBF / Soft-NMS) 合併。實測將無人機航拍水稻檢測漏檢率（False Negative Rate）大幅降低 38% 以上。
+- 結合 **測試時滑動網格切片 (Testing-Time Grid Cropping)**：以重疊率 20% 的滑動窗口切片為子圖，各自執行 Bunch TTA 後，再透過加權邊界框融合 (WBF / Soft-NMS) 合併。實測將無人機航拍目標檢測漏檢率（False Negative Rate）大幅降低 38% 以上。
 
 ---
 
 ### 6. 交通號誌特徵融合與注意力機制 (*Electronics 2023*, Article 3727)
 
-在論文 *"Traffic Light Detection by Integrating Feature Fusion and Attention Mechanism"* 中，團隊聚焦於自駕車與先進駕駛輔助系統 (ADAS) 在真實複雜路口之號誌辨識。
+在論文 *"Traffic Light Detection by Integrating Feature Fusion and Attention Mechanism"* 中，聚焦於自駕車與先進駕駛輔助系統 (ADAS) 在真實複雜路口之號誌辨識。
 
 #### (1) 平行殘差雙向特徵融合 (PRB-FPN)
-遠端紅綠燈在車載相機畫面中處於極小尺度（Sub-pixel 邊緣），深層特徵圖經過多次降採樣後語意幾何細節大量消散。
-團隊提出 **PRB-FPN (Parallel Residual Bi-Fusion Feature Pyramid Network)**，設計雙向並行特徵流：
+遠端號誌在車載相機畫面中處於極小尺度（Sub-pixel 邊緣），深層特徵圖經過多次降採樣後語意幾何細節大量消散。
+論文提出 **PRB-FPN (Parallel Residual Bi-Fusion Feature Pyramid Network)**，設計雙向並行特徵流：
 $$\mathbf{F}_{\text{fused}}^{(l)} = \text{Conv}_{1 \times 1}\left(\text{Concat}\left(\mathbf{F}_{\text{lateral}}^{(l)}, \, \mathcal{U}(\mathbf{F}_{\text{top}}^{(l+1)}), \, \mathcal{D}(\mathbf{F}_{\text{bottom}}^{(l-1)})\right)\right) + \mathbf{F}_{\text{lateral}}^{(l)}$$
 其中 $\mathcal{U}$ 為雙線性雙三次上採樣，$\mathcal{D}$ 為步長卷積下採樣。
-搭配空間與通道混合注意力機制（Spatial & Channel Attention），在強烈逆光與夜間霓虹干擾下，對紅綠黃三色微小燈號的偵測精確率達到 98.4%。
+搭配空間與通道混合注意力機制（Spatial & Channel Attention），在強烈逆光與夜間霓虹干擾下，對微小燈號的偵測精確率達到 98.4%。
 
 ---
 
-### 7. 擴增實境 (AR) 與聊天機器人多模態生物教學系統 (*Electronics 2023*, Article 222)
+### 7. 擴增實境 (AR) 與具身對話代理人系統 (*Electronics 2023*, Article 222)
 
-在論文 *"Integrating Chatbot and Augmented Reality Technology into Biology Learning during COVID-19"* 中，團隊開拓了**多模態對話代理人 (Conversational AI Agent) 與 3D 空間計算結合之教育前沿**：
+在論文 *"Integrating Chatbot and Augmented Reality Technology into Biology Learning during COVID-19"* 中，開拓了**多模態對話代理人 (Conversational AI Agent) 與 3D 空間計算結合之前沿**：
 - 整合自然語言對話狀態追蹤器 (Dialog State Tracker, DST) 與行動裝置端 Unity ARCore/ARKit。
-- 學生可透過語音與文字向 Chatbot 發問，Chatbot 理解語意後動態觸發 3D 虛擬生物器官之空間投影、自由視角剖面解剖與動態生理流動動畫，將抽象教科書知識轉化為具身認知（Embodied Cognition）體驗。
+- 使用者可透過語音與文字向 Chatbot 發問，Chatbot 理解語意後動態觸發 3D 虛擬物件之空間投影、自由視角剖面解剖與動態動畫，將抽象知識轉化為具身認知（Embodied Cognition）體驗。
 
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射
 
-莊教授研究的一大鮮明特色是**極致重視硬體資源與工程實施成本**：
+學術科研演算法的生命力取決於**硬體資源效率與工程落地可行性**：
 
 ### 1. 單卡 24GB 顯存約束與視角解耦 LoRA
 - 在 3D 虛擬試穿任務中，若同時載入 3DGS 密集點雲、SMPL-X 骨架與大型擴散模型，顯存開銷常突破 48GB（需 A100/H100 等伺服器級 GPU）。
-- 團隊利用 LoRA 將可訓練參數量壓縮 99%（小於 10MB），並透過視角子集分批快取交換（Paged Swap），使整個訓練與推論在單張消費級 **NVIDIA RTX 3090/4090 (24GB)** 上即可全速運算。
+- 利用 LoRA 將可訓練參數量壓縮 99%（小於 10MB），並透過視角子集分批快取交換（Paged Swap），使整個訓練與推論在單張消費級 **NVIDIA RTX 3090/4090 (24GB)** 上即可全速運算。
 
-### 2. 邊緣端無人機與交通監控的即時性優化
-- 在農作偵測（Electronics 2024）與號誌偵測（Electronics 2023）中，硬體多部署於嵌入式邊緣設備（如 NVIDIA Jetson 或無人機車載晶片）。
-- 透過 PRB-FPN 雙向金字塔消除冗餘跨層連線，並採用 16-bit 浮點 Tensor Core 對齊（參見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]），達成每秒 30+ FPS 之即時科技執法流。
+### 2. 邊緣端嵌入式運算與即時性優化
+- 在遙感農作偵測與號誌偵測中，硬體多部署於嵌入式邊緣設備（如 NVIDIA Jetson 或車載晶片）。
+- 透過 PRB-FPN 雙向金字塔消除冗餘跨層連線，並採用 16-bit 浮點 Tensor Core 對齊（參見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]），達成每秒 30+ FPS 之即時推論流。
 
 ---
 
 ## 四、💻 工業級工程實作：CA-Jaccard 距離重排序演算法
 
-以下代碼為莊教授團隊行人再識別演算法之純 NumPy / PyTorch 向量化實作，可直接用於驗證集後處理：
+以下代碼為相機感知 Jaccard 行人再識別演算法之純 NumPy / PyTorch 向量化實作，可直接用於特徵檢索與驗證集後處理：
 
 ```python
 import torch
@@ -231,6 +227,16 @@ def compute_ca_jaccard_distance(
     k2: int = 6, 
     gamma: float = 0.3
 ) -> np.ndarray:
+    """
+    相機感知 Jaccard 距離重排序演算法 (CA-Jaccard Reranking)
+    輸入:
+      features: (N, D) 已做 L2-norm 之神經特徵向量
+      cam_ids: (N,) 各樣本對應之攝影機 ID
+      k1, k2: 倒數近鄰擴展超參數
+      gamma: 同相機場景偏差懲罰係數
+    輸出:
+      final_distance: (N, N) 重排序後之對稱距離矩陣
+    """
     N = features.size(0)
     # 1. 計算原始歐氏距離平方矩陣 D
     dist_matrix = 2.0 - 2.0 * torch.matmul(features, features.T)
@@ -287,7 +293,7 @@ if __name__ == "__main__":
 
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
-為使自主 AI Agent 能夠直接協同實驗室專題與研究開發，本館制定了對齊莊教授研究之四大不變量合約：
+為使自主 AI Agent 在文獻研讀、演算法調用與系統架構設計中保持高標準，制定以下四大不變量合約：
 
 ### [RULE-904-01] 3DGS 視角解耦 LoRA 調度合約 (View-Decomposed LoRA Dispatch Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
@@ -327,28 +333,20 @@ if __name__ == "__main__":
 
 ---
 
-## 六、📚 權威專著與代表性期刊文獻全量清單 (Canonical Publications & MDPI Corpus)
+## 六、📚 權威期刊文獻與同行評審論文清單 (Canonical Publications & Academic Literature)
 
-### 1. 經典專著 (Textbook)
-1. **莊啓宏**（莊啓鴻）. (2022). 《深度學習－使用TensorFlow 2.x》. 臺北: 全華圖書. ISBN: 9786263282223.
+### 1. 深度學習工程專著 (Textbook)
+1. 《深度學習－使用TensorFlow 2.x》. (2022). 臺北: 全華圖書. ISBN: 9786263282223.
 
-### 2. 生物辨識與智慧交通代表作 (Biometrics & Transportation)
-2. **王重威, 郭政諺, 莊啓宏**. (2025). "Deep Learning Based Biometric Verification Using Dynamic Lip Features (基於深度學習之動態唇紋生物特徵驗證)." 《資訊、科技與社會學報》.
-3. **顏志平, 楊仲軒, 莊啓宏, 李俊傑, 范國清**. (2022). "影像辨識科技應用於違規停車偵測." 《影像與識別》, 28(3), pp. 1-14.
+### 2. 生物辨識與智慧交通期刊文獻 (Biometrics & Transportation)
+2. Wang, C.-W., Kuo, C.-Y., & Chuang, C.-H. (2025). "Deep Learning Based Biometric Verification Using Dynamic Lip Features." *Journal of Information, Technology and Society*.
+3. Yen, C.-P., Yang, C.-H., Chuang, C.-H., Lee, C.-C., & Fan, K.-C. (2022). "Vision-Based Technology for Illegal Parking Detection." *Journal of Image and Recognition*, 28(3), pp. 1-14.
 
-### 3. MDPI 權威同行評審期刊論文全集 (MDPI Journal Corpus: 7 Publications)
-4. **Lee, Y.-F., Lee, C.-C., Chuang, C.-H., Lin, C.-L., & Fan, K.-C.** (2026). "Adaptive Content and Style Fusion for Text-to-Image Generations." *Electronics*, 15(13), 2800. DOI: [10.3390/electronics15132800](https://doi.org/10.3390/electronics15132800).
-5. **Teng, C.-Y., Hsu, Y.-H., Chen, W.-H., Lin, C.-L., & Chuang, C.-H.** (2026). "Point Cloud Semantic Segmentation Network Based on Serialized Attention." *Electronics*, 15(9), 1849. DOI: [10.3390/electronics15091849](https://doi.org/10.3390/electronics15091849).
-6. **Wang, C.-W., Huang, H.-K., Lin, T.-Y., Hu, H.-W., & Chuang, C.-H.** (2025). "Splatting the Cat: Efficient Free-Viewpoint 3D Virtual Try-On via View-Decomposed LoRA and Gaussian Splatting." *Electronics*, 14(19), 3884. DOI: [10.3390/electronics14193884](https://doi.org/10.3390/electronics14193884).
-7. **Chuang, C.-H., Huang, T.-C., Wang, C.-W., Lo, J.-H., & Lin, C.-L.** (2025). "Person Re-Identification Under Non-Overlapping Cameras Based on Advanced Contextual Embeddings." *Algorithms*, 18(11), 714. DOI: [10.3390/a18110714](https://doi.org/10.3390/a18110714).
-8. **Zhang, Y.-M., Chuang, C.-H., Lee, C.-C., & Fan, K.-C.** (2024). "Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography." *Electronics*, 13(3), 632. DOI: [10.3390/electronics13030632](https://doi.org/10.3390/electronics13030632).
-9. **Chuang, C.-H., Lee, C.-C., Lo, J.-H., & Fan, K.-C.** (2023). "Traffic Light Detection by Integrating Feature Fusion and Attention Mechanism." *Electronics*, 12(17), 3727. DOI: [10.3390/electronics12173727](https://doi.org/10.3390/electronics12173727).
-10. **Chuang, C.-H., Lo, J.-H., & Wu, Y.-K.** (2023). "Integrating Chatbot and Augmented Reality Technology into Biology Learning during COVID-19." *Electronics*, 12(1), 222. DOI: [10.3390/electronics12010222](https://doi.org/10.3390/electronics12010222).
-
-### 4. 國際特刊客座主編與學術網絡 (MDPI Special Issues & SciProfiles)
-11. **Dr. Chi-Hung Chuang & Prof. Dr. Chih-Lung Lin (Guest Editors)**. "Digital Signal and Image Processing for Multimedia Technology, 2nd Edition." *Electronics* Special Issue. Call for Papers URL: [mdpi.com/si/electronics/9A8SS7Y1S6](https://www.mdpi.com/journal/electronics/special_issues/9A8SS7Y1S6).
-12. **Dr. Chi-Hung Chuang & Prof. Dr. Chih-Lung Lin (Guest Editors)**. "Deep Learning Applications in Image Processing and Edge Devices." *Electronics* Special Issue. Call for Papers URL: [mdpi.com/si/electronics/9QF14EPEGX](https://www.mdpi.com/journal/electronics/special_issues/9QF14EPEGX).
-13. **Prof. Dr. Chih-Lung Lin & Dr. Chi-Hung Chuang (Guest Editors)**. "Machine Learning for Pattern Recognition (4th Edition)." *Algorithms* Special Issue (Evolutionary Algorithms and Machine Learning Section). Call for Papers URL: [mdpi.com/si/algorithms/4E1A57L8N6](https://www.mdpi.com/journal/algorithms/special_issues/4E1A57L8N6).
-14. **Dr. Ying-Nong Chen & Dr. Chi-Hung Chuang (Guest Editors)**. "Remote Sensing and Image Processing in Environmental Field." *Sustainability* Special Issue. Call for Papers URL: [mdpi.com/si/sustainability/16I23OELMF](https://www.mdpi.com/journal/sustainability/special_issues/16I23OELMF).
-15. **Chi-Hung Chuang (莊啓宏 / 莊啓鴻 博士)**. 官方學術個人檔案與成果庫. *SciProfiles Profile ID: 2783099*. URL: [sciprofiles.com/profile/2783099](https://sciprofiles.com/profile/2783099).
-16. **中原大學資訊工程學系官方師資網頁**. *莊啓宏副教授學術資料庫與實驗室*. URL: [iceweb.cycu.edu.tw/portfolio-item/莊啓宏/](https://iceweb.cycu.edu.tw/portfolio-item/%e8%8e%8a%e5%95%93%e5%ae%8f/).
+### 3. 電腦視覺與多模態前沿期刊論文 (Computer Vision & Multimodal Literature)
+4. Lee, Y.-F., Lee, C.-C., Chuang, C.-H., Lin, C.-L., & Fan, K.-C. (2026). "Adaptive Content and Style Fusion for Text-to-Image Generations." *Electronics*, 15(13), 2800. DOI: [10.3390/electronics15132800](https://doi.org/10.3390/electronics15132800).
+5. Teng, C.-Y., Hsu, Y.-H., Chen, W.-H., Lin, C.-L., & Chuang, C.-H. (2026). "Point Cloud Semantic Segmentation Network Based on Serialized Attention." *Electronics*, 15(9), 1849. DOI: [10.3390/electronics15091849](https://doi.org/10.3390/electronics15091849).
+6. Wang, C.-W., Huang, H.-K., Lin, T.-Y., Hu, H.-W., & Chuang, C.-H. (2025). "Splatting the Cat: Efficient Free-Viewpoint 3D Virtual Try-On via View-Decomposed LoRA and Gaussian Splatting." *Electronics*, 14(19), 3884. DOI: [10.3390/electronics14193884](https://doi.org/10.3390/electronics14193884).
+7. Chuang, C.-H., Huang, T.-C., Wang, C.-W., Lo, J.-H., & Lin, C.-L. (2025). "Person Re-Identification Under Non-Overlapping Cameras Based on Advanced Contextual Embeddings." *Algorithms*, 18(11), 714. DOI: [10.3390/a18110714](https://doi.org/10.3390/a18110714).
+8. Zhang, Y.-M., Chuang, C.-H., Lee, C.-C., & Fan, K.-C. (2024). "Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography." *Electronics*, 13(3), 632. DOI: [10.3390/electronics13030632](https://doi.org/10.3390/electronics13030632).
+9. Chuang, C.-H., Lee, C.-C., Lo, J.-H., & Fan, K.-C. (2023). "Traffic Light Detection by Integrating Feature Fusion and Attention Mechanism." *Electronics*, 12(17), 3727. DOI: [10.3390/electronics12173727](https://doi.org/10.3390/electronics12173727).
+10. Chuang, C.-H., Lo, J.-H., & Wu, Y.-K. (2023). "Integrating Chatbot and Augmented Reality Technology into Biology Learning during COVID-19." *Electronics*, 12(1), 222. DOI: [10.3390/electronics12010222](https://doi.org/10.3390/electronics12010222).

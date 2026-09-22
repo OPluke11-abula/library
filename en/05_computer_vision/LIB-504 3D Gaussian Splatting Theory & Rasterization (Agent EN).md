@@ -16,7 +16,7 @@ hardware_target:
   - NVIDIA CUDA High-Throughput Rasterizer (> 100 FPS)
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"

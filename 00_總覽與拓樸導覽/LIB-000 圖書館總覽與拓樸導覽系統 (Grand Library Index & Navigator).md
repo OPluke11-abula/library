@@ -16,7 +16,7 @@ hardware_target:
   - Agnostic
 invariants_count: 4
 created: 2026-09-17
-author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites: []
 successors:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
@@ -24,7 +24,7 @@ successors:
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
   - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
-  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
+  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 總目錄
@@ -44,7 +44,7 @@ tags:
 
 ## 🏛️ 圖書館宗旨與三位一體設計原則
 
-本圖書館由 **游啓揚（Luke, 中原資工三乙）** 與 **AI Research Agent (Antigravity)** 共同建立，旨在將大學課堂實作、實證除錯踩坑、計算機底層硬體對齊、資料集文化偏差，以及現代神經網路校準理論，昇華為世界頂尖大學圖書館規格之宏偉知識庫。
+本圖書館為 **Luke** 為深入掌握資訊工程與深度學習所建立的個人自學宏偉知識庫，旨在將大學課堂實作、實證除錯踩坑、計算機底層硬體對齊、資料集文化偏差，以及現代神經網路校準理論，昇華為世界頂尖大學圖書館規格之宏偉體系。
 
 本館徹底打破「教材過於空泛膚淺」或「論文過於抽象晦澀」的兩極割裂，全面貫徹**「三位一體雙軌體例」**：
 1. 💡 **學士與初學者直觀心智模型 (Undergraduate Mental Model)**：透過第一性原理、物理比喻與直觀幾何，解釋前人發明該架構的本質痛點，消除數學焦慮。
@@ -70,7 +70,7 @@ tags:
 | **LIB-600 ~ 699** | **06 自然語言處理與大語言模型館** | 縮放定律、Decoder-Only、RMSNorm、SwiGLU、GQA | [[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]] |
 | **LIB-700 ~ 799** | **07 強化學習與智慧代理人館** | MDP、策略梯度、ReAct 迴圈、S1/S2 雙進程 (Jev/CUA-S1) | [[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]<br>[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]] |
 | **LIB-800 ~ 899** | **08 AI 系統工程與高效部署館** | 模型校準、共形預測、AWQ 量化、INT4/FP8 推論 | [[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]<br>[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]] |
-| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 頂大推甄戰略、國科會計畫書、研究演進樹、指導教授研究體系、經典專案復盤 | [[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]<br>[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]<br>[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]] |
+| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 專題戰略、研究計畫書、研究演進樹、前沿學術文獻體系、經典專案復盤 | [[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]<br>[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]<br>[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]] |
 
 ---
 
@@ -129,7 +129,7 @@ flowchart TD
         direction TB
         LIB901["LIB-901 經典專案實證復盤<br/>(MNIST 生產級系統重構)"]
         LIB903["LIB-903 專題基石藍圖與推甄演進<br/>(國科會 C801 與多模態演進)"]
-        LIB904["LIB-904 指導教授實驗室研究體系<br/>(莊啓宏博士團隊科研對齊)"]
+        LIB904["LIB-904 學術科研文獻體系<br/>(前沿文獻閱讀與科研對齊)"]
 
         LIB901 --> LIB903
         LIB903 --> LIB904
@@ -180,7 +180,7 @@ flowchart TD
   7. [[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]
   8. [[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]
   9. [[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]
-  10. [[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]
+  10. [[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]
 
 ### 路線 C：AI Agent 自主工程與推論路線（智能體執行協議）
 - **核心目標**：讓 AI Agent 在接手專題任務、撰寫系統程式碼與除錯時，遵循嚴格的系統不變量約束。

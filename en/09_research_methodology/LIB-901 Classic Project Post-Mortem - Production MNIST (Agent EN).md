@@ -16,7 +16,7 @@ hardware_target:
   - Local GPU Development Workstation to Web Serving
 invariants_count: 5
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
   - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"

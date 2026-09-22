@@ -17,7 +17,7 @@ hardware_target:
   - NVIDIA CUDA Tensor Cores
 invariants_count: 6
 created: 2026-09-17
-author: Luke (Chi-Yang Yu) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
 successors:

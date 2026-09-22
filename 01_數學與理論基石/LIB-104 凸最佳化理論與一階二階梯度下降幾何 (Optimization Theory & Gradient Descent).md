@@ -18,7 +18,7 @@ hardware_target:
   - FP32 Master Weights & Numerical Stability Underflow
 invariants_count: 3
 created: 2026-09-17
-author: [REDACTED_NAME] (Luke, 資訊三乙, [REDACTED_ID]) & AI Research Agent (Antigravity)
+author: Luke
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
 successors:

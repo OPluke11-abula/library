@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" height="100%">
   <defs>
     <style>
-      .canvas-bg { fill: #ffffff; }
-      .outer-border { fill: none; stroke: #e2e8f0; stroke-width: 1.5; rx: 12px; }
-      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #0f172a; letter-spacing: -0.01em; }
-      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #64748b; }
-      .meta-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 600; fill: #475569; }
-      .panel-card { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.2; rx: 8px; }
+      .canvas-bg { fill: #0d1117; }
+      .outer-border { fill: none; stroke: #30363d; stroke-width: 1.5; rx: 12px; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 22px; font-weight: 700; fill: #f0f6fc; letter-spacing: -0.01em; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #8b949e; }
+      .meta-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 600; fill: #c9d1d9; }
+      .panel-card { fill: #161b22; stroke: #30363d; stroke-width: 1.2; rx: 8px; }
       .tag-label { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
-      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15.5px; font-weight: 700; fill: #0f172a; }
-      .inner-box { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; rx: 6px; }
-      .math-formula { font-family: "Cambria Math", "Times New Roman", serif; font-size: 13.5px; font-style: italic; }
-      .panel-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #475569; line-height: 1.55; }
-      .rule-badge { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; fill: #059669; }
-      .label-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #64748b; }
+      .panel-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15.5px; font-weight: 700; fill: #f0f6fc; }
+      .inner-box { fill: #0d1117; stroke: #21262d; stroke-width: 1; rx: 6px; }
+      .math-formula { font-family: "Cambria Math", "Times New Roman", serif; font-size: 13.5px; font-style: italic; fill: #79c0ff; }
+      .panel-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #8b949e; line-height: 1.55; }
+      .rule-badge { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; font-weight: 600; fill: #3fb950; }
+      .label-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #8b949e; }
     </style>
 
     <marker id="arr-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#58a6ff" />
     </marker>
     <marker id="arr-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f85149" />
     </marker>
     <marker id="arr-emerald" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669" />
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3fb950" />
     </marker>
   </defs>
 
@@ -34,23 +34,23 @@
   <!-- Header Section -->
   <g transform="translate(50, 26)">
     <text class="header-title" x="0" y="20">真實世界計算機視覺前處理與質心演算法 (Real-World CV &amp; CoM)</text>
-    <text class="header-sub" x="0" y="40">徹底根治「畫 1 猜 5 尺度崩塌」與「直立 7 誤判為 8 文化偏誤」• LIB-501 與 LIB-301 核心演算法</text>
+    <text class="header-sub" x="0" y="40">解決尺度崩塌與墨水質量重心對齊 • LIB-501 與 LIB-301 演算法對齊</text>
 
     <!-- Meta Pill -->
     <g transform="translate(900, 4)">
-      <rect width="200" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
-      <circle cx="16" cy="14" r="4" fill="#2563eb" />
+      <rect width="200" height="28" rx="14" fill="#161b22" stroke="#30363d" stroke-width="1" />
+      <circle cx="16" cy="14" r="4" fill="#58a6ff" />
       <text x="28" y="18" class="meta-tag">LIB-501 • CV &amp; Moments</text>
     </g>
   </g>
 
-  <line x1="50" y1="74" x2="1150" y2="74" stroke="#e2e8f0" stroke-width="1" />
+  <line x1="50" y1="74" x2="1150" y2="74" stroke="#30363d" stroke-width="1" />
 
   <!-- ================= LEFT PANEL: Problem 1 - Bounding Box Scale Alignment ================= -->
   <g transform="translate(50, 90)">
     <rect width="535" height="595" class="panel-card" />
-    <rect width="535" height="4" fill="#dc2626" rx="2" />
-    <text x="24" y="28" class="tag-label" fill="#dc2626">CHALLENGE 01 • 幾何尺度崩塌</text>
+    <rect width="535" height="4" fill="#f85149" rx="2" />
+    <text x="24" y="28" class="tag-label" fill="#f85149">CHALLENGE 01 • 幾何尺度崩塌</text>
     <text x="24" y="52" class="panel-title">消滅「畫 1 猜成 5」的四周留白災難</text>
 
     <!-- Visual Diagram Area -->
@@ -60,46 +60,46 @@
       <!-- Left: Naive Resize (Wrong) -->
       <g transform="translate(25, 20)">
         <rect width="180" height="175" fill="#ffffff" stroke="#fca5a5" stroke-width="1.2" rx="4" />
-        <text x="14" y="22" font-family="ui-monospace, monospace" font-size="11" fill="#dc2626" font-weight="700">❌ 直接 Resize (28×28)</text>
+        <text x="14" y="22" font-family="ui-monospace, monospace" font-size="11" fill="#f85149" font-weight="700">❌ 直接 Resize (28×28)</text>
 
         <!-- Canvas with thinned stroke in corner -->
         <g transform="translate(45, 34)">
-          <rect width="90" height="90" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+          <rect width="90" height="90" fill="#161b22" stroke="#30363d" stroke-width="1" />
           <!-- Thinned line -->
           <line x1="45" y1="20" x2="45" y2="70" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" />
           <!-- Dashed whitespace warning zone -->
           <rect x="10" y="10" width="70" height="70" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="3 3" />
         </g>
         <text x="14" y="145" class="label-sub">留白率 &gt; 80% • 線條被壓碎</text>
-        <text x="14" y="162" font-family="ui-monospace, monospace" font-size="10.5" fill="#dc2626" font-weight="700">模型誤判 ➔ 5 (98.6%)</text>
+        <text x="14" y="162" font-family="ui-monospace, monospace" font-size="10.5" fill="#f85149" font-weight="700">模型誤判 ➔ 5 (98.6%)</text>
       </g>
 
       <!-- Center Transformation Arrow -->
       <g transform="translate(215, 95)">
         <path d="M 0 10 L 45 10" stroke="#2563eb" stroke-width="1.6" marker-end="url(#arr-blue)" />
-        <text x="-4" y="0" font-family="-apple-system, sans-serif" font-size="10" fill="#2563eb" font-weight="600">等比縮放規範</text>
+        <text x="-4" y="0" font-family="-apple-system, sans-serif" font-size="10" fill="#58a6ff" font-weight="600">等比縮放規範</text>
       </g>
 
       <!-- Right: Industrial Bounding Box (Correct) -->
       <g transform="translate(280, 20)">
         <rect width="180" height="175" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="4" />
-        <text x="14" y="22" font-family="ui-monospace, monospace" font-size="11" fill="#059669" font-weight="700">✓ 等比縮放 (20×20)</text>
+        <text x="14" y="22" font-family="ui-monospace, monospace" font-size="11" fill="#3fb950" font-weight="700">✓ 等比縮放 (20×20)</text>
 
         <!-- Scaled Canvas -->
         <g transform="translate(45, 34)">
-          <rect width="90" height="90" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+          <rect width="90" height="90" fill="#161b22" stroke="#30363d" stroke-width="1" />
           <!-- 4px margin zone -->
           <rect x="13" y="13" width="64" height="64" fill="#ecfdf5" stroke="#059669" stroke-width="1" stroke-dasharray="2 2" />
           <!-- Scaled full stroke -->
-          <line x1="45" y1="18" x2="45" y2="72" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round" />
+          <line x1="45" y1="18" x2="45" y2="72" stroke="#f0f6fc" stroke-width="4.5" stroke-linecap="round" />
         </g>
         <text x="14" y="145" class="label-sub">長邊對齊 20px + 4px 邊界補零</text>
-        <text x="14" y="162" font-family="ui-monospace, monospace" font-size="10.5" fill="#059669" font-weight="700">精準命中 ➔ 1 (99.8%)</text>
+        <text x="14" y="162" font-family="ui-monospace, monospace" font-size="10.5" fill="#3fb950" font-weight="700">精準命中 ➔ 1 (99.8%)</text>
       </g>
 
       <!-- Pipeline Step Indicator -->
       <g transform="translate(25, 205)">
-        <rect width="435" height="34" rx="4" fill="#ffffff" stroke="#e2e8f0" />
+        <rect width="435" height="34" rx="4" fill="#ffffff" stroke="#30363d" />
         <text x="14" y="22" font-family="ui-monospace, monospace" font-size="10.5" fill="#334155">
           標準步驟: [1] 墨水外接矩形 ➔ [2] 長邊縮至 20px ➔ [3] 4px 補零置中至 28×28
         </text>
@@ -108,7 +108,7 @@
 
     <!-- Mathematical Specification -->
     <g transform="translate(24, 345)">
-      <text x="0" y="18" font-family="ui-monospace, monospace" font-size="12" fill="#2563eb" font-weight="700">[數理定義] Bounding Box 保持長寬比投影演算法</text>
+      <text x="0" y="18" font-family="ui-monospace, monospace" font-size="12" fill="#58a6ff" font-weight="700">[數理定義] Bounding Box 保持長寬比投影演算法</text>
       <text x="0" y="44" class="math-formula" fill="#1e3a8a">s = \frac{20}{\max(H_{\text{box}}, W_{\text{box}})}, \quad I_{\text{scaled}} = \text{Resize}(I_{\text{crop}}, s)</text>
       <text x="0" y="74" class="panel-desc">
         <tspan x="0" dy="0">使用者手繪時筆劃常縮在角落或留白過大。若未經裁剪直接強制 Resize 至 28×28，</tspan>
@@ -133,52 +133,52 @@
 
       <!-- Left: Center comparison canvas -->
       <g transform="translate(25, 20)">
-        <rect width="210" height="175" fill="#ffffff" stroke="#cbd5e1" rx="4" />
-        <text x="14" y="20" font-family="ui-monospace, monospace" font-size="10.5" fill="#0f172a" font-weight="700">幾何外框中心 vs 墨水重心</text>
+        <rect width="210" height="175" fill="#05080f" stroke="#30363d" rx="4" />
+        <text x="14" y="20" font-family="ui-monospace, monospace" font-size="10.5" fill="#f0f6fc" font-weight="700">幾何外框中心 vs 墨水重心</text>
 
         <!-- Coordinate Grid -->
         <g transform="translate(45, 32)">
-          <rect width="110" height="110" fill="#f8fafc" stroke="#94a3b8" stroke-width="1" />
+          <rect width="110" height="110" fill="#0d1117" stroke="#94a3b8" stroke-width="1" />
           <!-- Crosshairs -->
-          <line x1="55" y1="0" x2="55" y2="110" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 2" />
-          <line x1="0" y1="55" x2="110" y2="55" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2 2" />
+          <line x1="55" y1="0" x2="55" y2="110" stroke="#30363d" stroke-width="1" stroke-dasharray="2 2" />
+          <line x1="0" y1="55" x2="110" y2="55" stroke="#30363d" stroke-width="1" stroke-dasharray="2 2" />
 
           <!-- Upright 7 Stroke -->
-          <path d="M 22 24 L 78 24 L 78 94" fill="none" stroke="#0f172a" stroke-width="5" stroke-linecap="square" />
+          <path d="M 22 24 L 78 24 L 78 94" fill="none" stroke="#f0f6fc" stroke-width="5" stroke-linecap="square" />
 
           <!-- Geometric Center (Red) -->
-          <circle cx="50" cy="59" r="4" fill="#dc2626" />
-          <text x="12" y="55" font-family="ui-monospace, monospace" font-size="8.5" fill="#dc2626" font-weight="600">幾何中心</text>
+          <circle cx="50" cy="59" r="4" fill="#f85149" />
+          <text x="12" y="55" font-family="ui-monospace, monospace" font-size="8.5" fill="#f85149" font-weight="600">幾何中心</text>
 
           <!-- True Ink Center of Mass (Green) -->
-          <circle cx="68" cy="46" r="4.5" fill="#059669" />
-          <text x="76" y="44" font-family="ui-monospace, monospace" font-size="8.5" fill="#059669" font-weight="700">墨水重心</text>
+          <circle cx="68" cy="46" r="4.5" fill="#3fb950" />
+          <text x="76" y="44" font-family="ui-monospace, monospace" font-size="8.5" fill="#3fb950" font-weight="700">墨水重心</text>
 
           <!-- Shift Vector Arrow -->
           <line x1="68" y1="46" x2="55" y2="55" stroke="#2563eb" stroke-width="1.8" marker-end="url(#arr-blue)" />
-          <text x="68" y="70" font-family="ui-monospace, monospace" font-size="8" fill="#2563eb">平移向量 v</text>
+          <text x="68" y="70" font-family="ui-monospace, monospace" font-size="8" fill="#58a6ff">平移向量 v</text>
         </g>
       </g>
 
       <!-- Right: Domain shift explanation box -->
       <g transform="translate(250, 20)">
-        <rect width="210" height="175" rx="4" fill="#ffffff" stroke="#e2e8f0" />
+        <rect width="210" height="175" rx="4" fill="#ffffff" stroke="#30363d" />
         <g transform="translate(14, 16)">
-          <text x="0" y="12" font-family="ui-monospace, monospace" font-size="10.5" fill="#dc2626" font-weight="700">踩中負權重扣分禁區:</text>
+          <text x="0" y="12" font-family="ui-monospace, monospace" font-size="10.5" fill="#f85149" font-weight="700">踩中負權重扣分禁區:</text>
           <text x="0" y="30" font-family="-apple-system, sans-serif" font-size="10" fill="#475569">亞洲直立 7 (無中央橫槓)</text>
           <text x="0" y="46" font-family="-apple-system, sans-serif" font-size="10" fill="#475569">純外框置中使長豎筆偏右</text>
           
-          <line x1="0" y1="58" x2="182" y2="58" stroke="#e2e8f0" stroke-width="1" />
+          <line x1="0" y1="58" x2="182" y2="58" stroke="#30363d" stroke-width="1" />
           
-          <text x="0" y="76" font-family="ui-monospace, monospace" font-size="10.5" fill="#059669" font-weight="700">質心平移校準 (±3px 限幅):</text>
-          <text x="0" y="94" font-family="-apple-system, sans-serif" font-size="10" fill="#0f172a">墨水一階動差對齊至 (14, 14)</text>
-          <text x="0" y="112" font-family="ui-monospace, monospace" font-size="10" fill="#059669" font-weight="700">誤判為 8 機率 ➔ 0.0% 歸零！</text>
+          <text x="0" y="76" font-family="ui-monospace, monospace" font-size="10.5" fill="#3fb950" font-weight="700">質心平移校準 (±3px 限幅):</text>
+          <text x="0" y="94" font-family="-apple-system, sans-serif" font-size="10" fill="#f0f6fc">墨水一階動差對齊至 (14, 14)</text>
+          <text x="0" y="112" font-family="ui-monospace, monospace" font-size="10" fill="#3fb950" font-weight="700">誤判為 8 機率 ➔ 0.0% 歸零！</text>
         </g>
       </g>
 
       <!-- Moment Formula Box -->
       <g transform="translate(25, 205)">
-        <rect width="435" height="34" rx="4" fill="#ffffff" stroke="#e2e8f0" />
+        <rect width="435" height="34" rx="4" fill="#ffffff" stroke="#30363d" />
         <text x="24" y="22" font-family="Cambria Math, serif" font-size="11.5" fill="#1e40af">
           \bar{x} = \frac{\sum x \cdot I(x,y)}{\sum I(x,y)}, \quad \bar{y} = \frac{\sum y \cdot I(x,y)}{\sum I(x,y)} \quad \text{[LeCun 1998 原生規範]}
         </text>

@@ -12,10 +12,13 @@ math_foundations:
   - Nyquist-Shannon Sampling Theorem & Aliasing Prevention
   - Lanczos-3 Sinc Reconstruction Resampling
   - Hu Image Moments & Exact Center-of-Mass Alignment
+  - Bunch Testing-Time Augmentation (Bunch TTA) Invariant Transformations
+  - Multi-Transform Convex Combination Inference
 hardware_target:
   - SIMD Vectorization
   - CUDA Texture Bilinear/Bicubic Filtering
-invariants_count: 3
+  - Edge Embedded GPUs (NVIDIA Jetson)
+invariants_count: 4
 created: 2026-09-17
 author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
 prerequisites:
@@ -24,6 +27,7 @@ successors:
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
   - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
 tags:
   - 圖書館
   - 電腦視覺
@@ -31,13 +35,15 @@ tags:
   - 質心對齊
   - MNIST
   - Lanczos
+  - Bunch-TTA
+  - 莊啓宏教授
 ---
 
 # 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、數位訊號處理基礎。
-- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]。
 - **難度等級**：學士核心 / 視覺工程實戰。
 
 ---
@@ -88,6 +94,14 @@ $$\Delta x = 13.5 - c_x, \quad \Delta y = 13.5 - c_y$$
 $$\text{shift}_x = \text{clip}\left(\text{round}(\Delta x), \, -\delta_{\max}, \, \delta_{\max}\right), \quad \text{其中 } \delta_{\max} = 3\text{ 像素}$$
 $$\text{shift}_y = \text{clip}\left(\text{round}(\Delta y), \, -\delta_{\max}, \, \delta_{\max}\right)$$
 
+### 4. 推論端動態增強 (Bunch TTA) 與多變換凸組合融合 (*Electronics 2024*, Chuang et al.)
+單一靜態前處理雖然解決了中心對齊，但對微弱筆劃邊緣、光照旋轉與偏斜視角依然存在單點估計脆弱性。
+指導教授莊啓宏博士團隊在論文 *"Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography"* (*Electronics 2024*) 中提出 **Bunch TTA (群聚測試時增強)** 範式，將推論從單向靜態投影升級為多變換李群空間的幾何凸組合：
+$$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\theta(\mathcal{T}_k(\mathbf{x}))\right), \quad \text{滿足 } \sum_{k=1}^K w_k = 1, \; w_k \ge 0$$
+- $\mathcal{T}_k$ 為一組正交保角變換群：恆等映射、旋轉 $\{90^\circ, 180^\circ, 270^\circ\}$、水平翻轉 $\text{HFlip}$ 與垂直翻轉 $\text{VFlip}$。
+- $\mathcal{T}_k^{-1}$ 為對應的幾何逆映射（Inverse Transformation）。
+- 透過在推論時多路並行前向傳播再加權融合，有效消除了相機視角偏斜與局部遮擋帶來的模型誤判，將微小目標與邊界敏感特徵的漏檢率大幅壓縮。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射
@@ -103,7 +117,7 @@ $$\text{shift}_y = \text{clip}\left(\text{round}(\Delta y), \, -\delta_{\max}, \
 
 ---
 
-## 四、💻 工業級工程實作：Yann LeCun 官方 MNIST 前處理重構管線
+## 四、💻 工業級工程實作：Yann LeCun 規範前處理與 Bunch TTA 動態融合管線
 
 ```python
 import numpy as np
@@ -115,16 +129,13 @@ def preprocess_mnist_production_pipeline(input_image: np.ndarray) -> np.ndarray:
     輸入: input_image (任意尺寸之 2D 灰階陣列，0 代表純黑背景，255 代表白色筆劃)
     輸出: [28, 28] 浮點陣列，數值範圍 [0, 1]，筆劃長邊嚴格等於 20 像素，墨水質心對齊於中心
     """
-    # 確保二維陣列
     if input_image.ndim == 3:
         input_image = np.mean(input_image, axis=-1)
     
-    # 閥值過濾微弱背景雜訊
     binary_mask = input_image > 30
     if not np.any(binary_mask):
         return np.zeros((28, 28), dtype=np.float32)
         
-    # 步驟 1: 計算緊緻邊界框 (Bounding Box) 並加入 5% 安全邊界
     coords = np.argwhere(binary_mask)
     y_min, x_min = coords.min(axis=0)
     y_max, x_max = coords.max(axis=0) + 1
@@ -140,7 +151,7 @@ def preprocess_mnist_production_pipeline(input_image: np.ndarray) -> np.ndarray:
     
     cropped = input_image[y_start:y_end, x_start:x_end]
     
-    # 步驟 2: LANCZOS 等比縮放 (長邊固定為 20 像素，短邊至少保留 4 像素避免筆劃斷裂)
+    # LANCZOS 等比縮放
     h, w = cropped.shape
     if h > w:
         new_h = 20
@@ -153,28 +164,23 @@ def preprocess_mnist_production_pipeline(input_image: np.ndarray) -> np.ndarray:
     resized = pil_img.resize((new_w, new_h), resample=Image.Resampling.LANCZOS)
     resized_arr = np.array(resized, dtype=np.float32)
     
-    # 步驟 3: 嵌入 28x28 純黑畫布幾何中央
+    # 嵌入 28x28 畫布
     canvas = np.zeros((28, 28), dtype=np.float32)
     offset_y = (28 - new_h) // 2
     offset_x = (28 - new_w) // 2
     canvas[offset_y:offset_y + new_h, offset_x:offset_x + new_w] = resized_arr
     
-    # 步驟 4: 墨水質心加權定位與安全限幅平移
+    # 質心對齊
     total_mass = np.sum(canvas)
     if total_mass > 1e-4:
-        # 向量化坐標矩計算
         y_indices, x_indices = np.indices((28, 28))
         c_y = np.sum(y_indices * canvas) / total_mass
         c_x = np.sum(x_indices * canvas) / total_mass
         
-        # 計算偏移並限幅在正負 3 像素之內
         shift_y = int(np.clip(np.round(13.5 - c_y), -3, 3))
         shift_x = int(np.clip(np.round(13.5 - c_x), -3, 3))
         
-        # 滾動平移
         aligned = np.roll(canvas, shift=(shift_y, shift_x), axis=(0, 1))
-        
-        # 清除滾動溢出的邊緣
         if shift_y > 0:
             aligned[:shift_y, :] = 0
         elif shift_y < 0:
@@ -185,36 +191,66 @@ def preprocess_mnist_production_pipeline(input_image: np.ndarray) -> np.ndarray:
             aligned[:, shift_x:] = 0
         canvas = aligned
         
-    # 數值歸一化至 [0, 1]
     return canvas / 255.0
+
+def bunch_tta_predict(model_predict_fn, image_28x28: np.ndarray) -> np.ndarray:
+    """
+    對齊莊啓宏教授團隊 (Electronics 2024) 之 Bunch TTA 測試時增強推論實作
+    對影像執行 4 種幾何對稱變換並加權平均機率分佈
+    """
+    # 1. 產生變換集合 (Identity, Rot90, HFlip, VFlip)
+    transforms = [
+        ("identity", lambda img: img),
+        ("rot90", lambda img: np.rot90(img, k=1)),
+        ("hflip", lambda img: np.fliplr(img)),
+        ("vflip", lambda img: np.flipud(img)),
+    ]
+    weights = [0.5, 0.2, 0.15, 0.15]
+    
+    accumulated_probs = np.zeros(10, dtype=np.float32)
+    for (name, t_fn), w in zip(transforms, weights):
+        aug_img = t_fn(image_28x28)
+        probs = model_predict_fn(aug_img)
+        accumulated_probs += w * probs
+        
+    return accumulated_probs
 
 if __name__ == "__main__":
     # 單元測試：合成手繪 1
     mock_canvas = np.zeros((400, 400), dtype=np.float32)
-    mock_canvas[150:250, 195:205] = 255.0 # 偏心細長直筆
+    mock_canvas[150:250, 195:205] = 255.0
     processed = preprocess_mnist_production_pipeline(mock_canvas)
     print(f"處理後影像形狀: {processed.shape}, 最大值: {processed.max():.2f}")
     assert processed.shape == (28, 28), "尺寸不符合 28x28！"
+    
+    # 測試 Bunch TTA 預測凸組合
+    def mock_model(x):
+        # 模擬一個簡單預測輸出
+        p = np.full(10, 0.05, dtype=np.float32)
+        p[1] = 0.55
+        return p
+        
+    final_probs = bunch_tta_predict(mock_model, processed)
+    print(f"Bunch TTA 融合後最大機率類別: {np.argmax(final_probs)}, 信心度: {final_probs.max():.4f}")
+    assert np.isclose(np.sum(final_probs), 1.0, atol=1e-4)
 ```
 
----
----
 ---
 
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
 ### [RULE-501-01] 影像降採樣抗混疊濾波合約 (Anti-Aliasing Resampling Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件 (Pre-conditions)**: 原始高解析度影像縮放至模型輸入尺寸。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: 原始高解析度影像縮放至模型輸入尺寸。
+- **量化決策邊界**:
   - 當縮放因子 $s = \frac{W_{\text{target}}}{W_{\text{src}}} < 0.5$（大比例縮小）時，**嚴禁**使用 Nearest-Neighbor 插值。
   - 必須強制使用 **Lanczos-3** 或高斯低通濾波加雙三次插值（Bicubic），以滿足奈奎斯特-夏農取樣定理。
 - **執行保證**: 杜絕筆劃邊緣斷裂、莫爾條紋與高頻偽影。
 
 ### [RULE-501-02] 前景有效像素與零階矩清洗合約 (Foreground Mask & Zero-Moment Filter)
 - **合約等級**: `BOUNDARY_GUARD`
-- **前置條件 (Pre-conditions)**: 影像前處理二值化遮罩生成。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: 影像前處理二值化遮罩生成。
+- **量化決策邊界**:
   - 零階矩（前景像素灰階總和）：$M_{00} = \sum_{x,y} I(x,y)$。
   - 最小筆劃有效閾值：$M_{00} \ge 15.0$。
   - 若 $M_{00} < 15.0$，判定影像為空白畫布或極端噪聲，直接中斷管線並拋出 `EmptyImageException`。
@@ -226,12 +262,21 @@ assert M00 >= 15.0, f"無效輸入影像: 筆劃總量 M00={M00} 低於法定閾
 
 ### [RULE-501-03] 質心幾何牽引與邊界硬鉗制合約 (Centroid Clamping & Canvas Boundary Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件 (Pre-conditions)**: 根據一階矩計算重心 $(\bar{x}, \bar{y}) = (M_{10}/M_{00}, M_{01}/M_{00})$ 並進行平移補償。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: 根據一階矩計算重心 $(\bar{x}, \bar{y}) = (M_{10}/M_{00}, M_{01}/M_{00})$ 並進行平移補償。
+- **量化決策邊界**:
   - 目標畫布中心為 $(13.5, 13.5)$。
   - 計算平移向量：$\Delta x = 13.5 - \bar{x}, \Delta y = 13.5 - \bar{y}$。
   - 硬鉗制範圍：強制限制 $\Delta x, \Delta y \in [-4.0, +4.0]$ 像素。
 - **執行保證**: 確保筆劃主體被拉回神經網路高權重感受野核心區，同時徹底杜絕筆劃飛出 $28 \times 28$ 畫布邊界的致命錯誤。
+
+### [RULE-501-04] 推論端動態幾何變換守恆合約 (Bunch TTA Geometric Invariant)
+- **合約等級**: `PERFORMANCE_CRITICAL`
+- **前置條件**: 執行低容錯率視覺推論或超微小目標偵測任務。
+- **量化決策邊界**:
+  - 嚴禁僅依賴單次靜態視角的前向輸出判定邊界目標。
+  - 必須強制施加不少於 3 種正交保角變換（例如旋轉、翻轉），各分支輸出需以權重凸組合 $\sum_k w_k = 1.0$ 融合。
+- **執行保證**: 在相機偏斜與光影反射下，大幅壓低假陰性漏檢率（FNR）。
+
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -248,6 +293,9 @@ assert M00 >= 15.0, f"無效輸入影像: 筆劃總量 M00={M00} 低於法定閾
 4. **影像二維幾何矩與不變量經典 (IEEE TIT 頂刊)**
    - *Paper*: Hu, M. K. (1962). "Visual pattern recognition by moment invariants." *IRE Transactions on Information Theory*, 8(2), 179-187. DOI: [10.1109/TIT.1962.1057692](https://doi.org/10.1109/TIT.1962.1057692).
    - *Core Contribution*: 形式化影像零階矩 $M_{00}$（質量/像素總和）與一階矩 $M_{10}, M_{01}$（質心座標），並推導出對平移、旋轉與尺度不變之 7 個胡氏不變矩。
-5. **電腦視覺權威教材**
+5. **群聚測試時增強 (Bunch TTA) 指標文獻**
+   - *Paper*: Zhang, Y.-M., Chuang, C.-H., Lee, C.-C., & Fan, K.-C. (2024). "Using a Bunch Testing Time Augmentations to Detect Rice Plants Based on Aerial Photography." *Electronics*, 13(3), 632. DOI: [10.3390/electronics13030632](https://doi.org/10.3390/electronics13030632).
+   - *Core Contribution*: 形式化 Bunch TTA 多變換幾何逆映射融合架構，實證無人機航拍高解析度影像微小目標漏檢率大幅降低。
+6. **電腦視覺權威教材**
    - *Book*: Szeliski, R. (2022). *Computer Vision: Algorithms and Applications* (2nd ed.). Springer. DOI: [10.1007/978-3-030-34372-9](https://doi.org/10.1007/978-3-030-34372-9).
    - *Core Contribution*: 數位影像採樣、雙線性/雙三次插值幾何與仿射變換微架構運算。

@@ -7,8 +7,9 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
+[![NVIDIA DLI](https://img.shields.io/badge/NVIDIA-Campus_Ambassador_%26_DLI-76B900.svg?logo=nvidia&logoColor=white)](https://www.nvidia.com/en-us/training/)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Vault_100%25_Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![Agent Invariants](https://img.shields.io/badge/Formal_Rules-65_Invariants-06B6D4.svg)](file:///00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20(Grand%20Library%20Index%20&%20Navigator).md)
+[![Agent Invariants](https://img.shields.io/badge/Formal_Rules-66_Invariants-06B6D4.svg)](file:///00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20(Grand%20Library%20Index%20&%20Navigator).md)
 
 <p align="center">
   <b>從學士第一性原理、工業級生產代碼，到頂尖學術科研與自主 AI Agent 決策不變量的全景雙軌知識庫</b>
@@ -28,14 +29,14 @@
 
 ## 📖 圖書館宗旨與三位一體雙軌體例
 
-本圖書館由 **游啓揚 (Luke, 中原資工三乙)** 與 **AI Research Agent (Antigravity)** 共同建立，旨在將大學課堂實作、實證除錯踩坑、計算機底層硬體對齊、資料集文化偏差，以及現代神經網路校準理論，昇華為世界頂尖大學圖書館規格之宏偉知識庫。
+本圖書館由 **游啓揚 (Luke, 中原資工三乙, 11327229)** 與 **AI Research Agent (Antigravity)** 獨立共同建立。知識庫全面對齊中原大學資訊工程學系 (CYCU ICE) **人工智慧與影像分析實驗室 (AI & Visual Analytics Lab，電學大樓 311A/311B)** 指導教授 **莊啓宏博士 (Prof. Chi-Hung Chuang，亦作莊啓鴻)** 之科研體系與 **NVIDIA 校園大使 (Campus Ambassador) / DLI 官方算力生態**。
 
 本館徹底打破「教材過於空泛膚淺」或「論文過於抽象晦澀」的兩極割裂，全面貫徹**「三位一體雙軌體例」**：
 1. 💡 **學士與初學者直觀心智模型 (Undergraduate Mental Model)**：透過第一性原理、物理比喻與直觀幾何，解釋前人發明該架構的本質痛點，消除數學焦慮。
-2. 🎓 **博士級數學形式化與嚴格推導 (PhD-Level Formal Rigor)**：提供完整符號化定義、目標函數閉式解、泛函極限證明與經典頂會文獻（CVPR, ICCV, NeurIPS, ICML, ICLR, SIGGRAPH, MLSys）引證。
-3. ⚙️ **計算機體系結構與硬體微架構映射 (Systems & Hardware Alignment)**：深入記憶體階層、Cache Line、GPU Warp 排程、Tensor Core GEMM Tiling、FlashAttention-3 與 Roofline 算力頻寬瓶頸。
+2. 🎓 **博士級數學形式化與嚴格推導 (PhD-Level Formal Rigor)**：提供完整符號化定義、目標函數閉式解、泛函極限證明與經典頂會/頂刊（CVPR, ICCV, NeurIPS, ICML, ICLR, MDPI Electronics/Algorithms）引證。
+3. ⚙️ **計算機體系結構與硬體微架構映射 (Systems & Hardware Alignment)**：深入記憶體階層、Cache Line、GPU Warp 排程、Tensor Core GEMM Tiling、TensorRT 運算元融合、FlashAttention-3 與 Roofline 算力頻寬極限。
 4. 💻 **工業級工程實作與防踩坑規範 (Production-grade Code)**：提供標註精確張量維度之 PyTorch / CUDA 程式碼與工程除錯邊界。
-5. 🤖 **AI Agent 推論協議與決策不變量 (Agent Protocols & Invariants)**：定義 65 條結構化契約與決策樹，供智能體在未來工程與科研中直接調用。
+5. 🤖 **AI Agent 推論協議與決策不變量 (Agent Protocols & Invariants)**：定義 66 條結構化契約與決策樹，供智能體在未來工程與科研中直接調用。
 
 ---
 
@@ -99,6 +100,8 @@
   * **工業解法**：遵循 Yann LeCun 1998 原著規範，計算墨水一階動差**質量重心 (Center of Mass)**：
     $$\bar{x} = \frac{\sum x \cdot I(x,y)}{\sum I(x,y)}, \quad \bar{y} = \frac{\sum y \cdot I(x,y)}{\sum I(x,y)}$$
     加入 $\pm 3$ 像素安全限幅 (`np.clip`)，穩穩平移回正中心，誤判現象徹底歸零！
+* 🚨 **推論端動態增強 (Bunch TTA) 突破**：
+  * 引入指導教授莊啓宏博士團隊 (*Electronics 2024*) 之群聚測試時增強範式，以旋轉與翻轉多視角凸組合消除邊緣遮擋盲區。
 
 * 📖 **詳細演算法與數學推導請參閱**：[LIB-501 計算機視覺前處理規範與影像質心定位演算法](05_計算機視覺與高維感測/LIB-501%20計算機視覺前處理規範與影像質心定位演算法%20(CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment).md) 與 [LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何](03_機器學習與統計學習原理/LIB-301%20資料分佈偏差、領域漂移與空間權重懲罰幾何%20(Dataset%20Bias,%20Domain%20Shift%20&%20Spatial%20Penalties).md)
 
@@ -126,12 +129,12 @@
 * **Score-based SDE 擴散模型**：熱力學隨機布朗運動加雜訊與去雜訊，依賴數十步積分。
 * **最佳傳輸流匹配 (Flow Matching / Rectified Flow)**：兩點之間直線最短，曲率 $\kappa=0$，5 步數值積分生成超高清影像！
 * **Diffusion Transformer (DiT)**：拋棄傳統 UNet，將圖片切成 Patch 塊，全面解鎖百億參數 Scaling Laws。
-* **指導教授實驗室對齊**：精準收錄**中原大學資工系莊啓鴻博士實驗室**最新發表論文（MDPI Electronics 2026 擴散模型自適應風格融合、Electronics 2025 視角解耦 3DGS 試穿系統）。
+* **指導教授實驗室對齊**：精準收錄**中原大學資工系莊啓宏博士實驗室**最新發表論文（MDPI Electronics 2026 擴散模型自適應風格融合、Electronics 2025 視角解耦 3DGS 試穿系統、Electronics 2024 水稻空拍 Bunch TTA、Algorithms 2025 非重疊相機 ReID）。
 * 📖 **詳見**：[LIB-406 生成模型前沿：隨機微分方程擴散、流匹配與 DiT 革命](04_深度學習架構與神經機制/LIB-406%20生成模型前沿：從隨機微分方程%20(SDE)%20擴散模型到最佳傳輸流匹配%20(Flow%20Matching)%20與%20DiT%20革命%20(Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20&%20DiT%20Revolution).md) 與 [LIB-904 指導教授實驗室研究體系與專題對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20指導教授實驗室研究體系與專題對齊%20(Advisor%20Research%20Corpus%20&%20Lab%20Synergy).md)
 
 ### 3. S1/S2 雙進程智慧代理人 (Dual-Process Agent)
 * **System 1 (直覺快思)**：Jev / CUA-S1 非自迴歸型態決策引擎，拋棄緩慢的逐字 JSON 自迴歸，50ms 級螢幕字節反射決策。
-* **System 2 (深度慢想)**：ReAct 閉環思考，依據全域 DAG 拓樸載入依賴，並由 65 條形式化不變量嚴格守護。
+* **System 2 (深度慢想)**：ReAct 閉環思考，依據全域 DAG 拓樸載入依賴，並由 66 條形式化不變量嚴格守護。
 * 📖 **詳見**：[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖](07_強化學習與智慧代理人/LIB-704%20雙進程神經代理人：S1%20非自迴歸型態決策引擎%20(Jev)%20與字節級介面反射模型%20(CUA-S1)%20深度解剖%20(Dual-Process%20Neural%20Agent%20-%20S1%20Non-Autoregressive%20Typed%20Decision%20Engine%20(Jev)%20&%20Byte-Level%20Interface%20Reflex%20Model%20(CUA-S1)).md)
 
 ---
@@ -146,9 +149,9 @@
 * **【路線 A】學士資工基本功扎根路線（小白無痛進階）**：
   `LIB-001` (先修基石) $\to$ `LIB-101` (線性代數) $\to$ `LIB-203` (硬體架構) $\to$ `LIB-401` (CNN偏置) $\to$ `LIB-501` (質心演算法) $\to$ `LIB-801` (模型校準) $\to$ `LIB-901` (MNIST 生產級復盤)。
 * **【路線 B】大專生國科會計畫與頂大推甄衝刺路線（學術科研與專題突破）**：
-  `LIB-001` $\to$ `LIB-104` (最佳化) $\to$ `LIB-301` (領域漂移) $\to$ `LIB-405` (Transformer) $\to$ `LIB-406` (流匹配/DiT) $\to$ `LIB-504` (3D高斯潑濺) $\to$ `LIB-602` (大語言模型) $\to$ `LIB-802` (模型量化) $\to$ `LIB-903` (論文八階閉環) $\to$ `LIB-904` (指導教授實驗室對齊)。
+  `LIB-001` $\to$ `LIB-104` (最佳化) $\to$ `LIB-301` (領域漂移) $\to$ `LIB-405` (Transformer) $\to$ `LIB-406` (流匹配/DiT) $\to$ `LIB-504` (3D高斯潑濺) $\to$ `LIB-602` (大語言模型) $\to$ `LIB-802` (模型量化) $\to$ `LIB-903` (論文八階閉環與C801心法) $\to$ `LIB-904` (指導教授實驗室對齊)。
 * **【路線 C】AI Agent 智慧代理人執行協議路線（智能體執行協議）**：
-  `LIB-203` (硬體記憶體階層) $\to$ `LIB-405` (注意力機制) $\to$ `LIB-602` (LLM縮放) $\to$ `LIB-703` (Agent協議) $\to$ `LIB-704` (S1/S2雙進程) $\to$ `LIB-802` (低精度量化部署)。
+  `LIB-203` (硬體記憶體階層與TensorRT) $\to$ `LIB-405` (注意力機制) $\to$ `LIB-602` (LLM縮放) $\to$ `LIB-703` (Agent協議) $\to$ `LIB-704` (S1/S2雙進程) $\to$ `LIB-802` (低精度量化部署)。
 
 ---
 
@@ -158,14 +161,14 @@
 | :--- | :--- | :--- | :--- |
 | **LIB-000 ~ 099** | **00 總覽與拓樸導覽館** | 知識圖譜、學習路徑、Agent 推論協議、第一性原理先修 | • [LIB-000 圖書館總覽與拓樸導覽系統](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20(Grand%20Library%20Index%20&%20Navigator).md)<br>• [LIB-001 深度學習第一性原理先修精要](00_總覽與拓樸導覽/LIB-001%20深度學習第一性原理先修精要：模型如何學習的六大基石%20(Deep%20Learning%20First%20Principles%20-%20The%20Six%20Pillars%20of%20How%20Models%20Learn).md) |
 | **LIB-100 ~ 199** | **01 數學物理與理論基石館** | 線性代數、微積分自動微分、資訊論、凸最佳化 | • [LIB-101 線性代數與高維幾何變換本質](01_數學與理論基石/LIB-101%20線性代數與高維幾何變換本質%20(Linear%20Algebra%20&%20High-Dimensional%20Geometry).md)<br>• [LIB-104 凸最佳化理論與一階二階梯度下降幾何](01_數學與理論基石/LIB-104%20凸最佳化理論與一階二階梯度下降幾何%20(Optimization%20Theory%20&%20Gradient%20Descent).md) |
-| **LIB-200 ~ 299** | **02 計算機系統與 AI 硬體架構館** | 記憶體階層、GPU SIMT、Tensor Cores、編譯器 | • [LIB-203 計算機體系結構與深度學習硬體對齊](02_計算機系統與硬體架構/LIB-203%20計算機體系結構與深度學習硬體對齊%20(Computer%20Architecture%20&%20Hardware-Aware%20Deep%20Learning).md) |
+| **LIB-200 ~ 299** | **02 計算機系統與 AI 硬體架構館** | 記憶體階層、GPU SIMT、Tensor Cores、TensorRT 運算元融合 | • [LIB-203 計算機體系結構與深度學習硬體對齊](02_計算機系統與硬體架構/LIB-203%20計算機體系結構與深度學習硬體對齊%20(Computer%20Architecture%20&%20Hardware-Aware%20Deep%20Learning).md) |
 | **LIB-300 ~ 399** | **03 機器學習與統計學習原理館** | 經驗風險、泛化界、偏差-方差權衡、OOD 漂移 | • [LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何](03_機器學習與統計學習原理/LIB-301%20資料分佈偏差、領域漂移與空間權重懲罰幾何%20(Dataset%20Bias,%20Domain%20Shift%20&%20Spatial%20Penalties).md) |
 | **LIB-400 ~ 499** | **04 深度學習架構與神經機制館** | 通用近似、CNN 歸納偏置、Transformer、流匹配與 DiT | • [LIB-401 全連結網路空間極限與卷積神經網路理論必然性](04_深度學習架構與神經機制/LIB-401%20全連結網路空間極限與卷積神經網路理論必然性%20(DNN%20Spatial%20Limits%20&%20CNN%20Inductive%20Bias).md)<br>• [LIB-405 注意力機制、Transformer 革命與位置編碼幾何](04_深度學習架構與神經機制/LIB-405%20注意力機制、Transformer%20革命與位置編碼幾何%20(Attention%20Mechanism%20&%20Transformer%20Revolution).md)<br>• [LIB-406 生成模型前沿：隨機微分方程擴散、流匹配與 DiT 革命](04_深度學習架構與神經機制/LIB-406%20生成模型前沿：從隨機微分方程%20(SDE)%20擴散模型到最佳傳輸流匹配%20(Flow%20Matching)%20與%20DiT%20革命%20(Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20&%20DiT%20Revolution).md) |
-| **LIB-500 ~ 599** | **05 計算機視覺與高維感測館** | 數位訊號處理、質心對齊、STN、2D/3D/4D 高斯潑濺 | • [LIB-501 計算機視覺前處理規範與影像質心定位演算法](05_計算機視覺與高維感測/LIB-501%20計算機視覺前處理規範與影像質心定位演算法%20(CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment).md)<br>• [LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化](05_計算機視覺與高維感測/LIB-504%203D%20視覺前沿：神經輻射場%20(NeRF)%20到%203D%20高斯潑濺%20(3DGS)%20理論與光柵化%20(3D%20Gaussian%20Splatting%20Theory%20&%20Rasterization).md) |
+| **LIB-500 ~ 599** | **05 計算機視覺與高維感測館** | 數位訊號處理、質心對齊、Bunch TTA、STN、2D/3D/4D 高斯潑濺 | • [LIB-501 計算機視覺前處理規範與影像質心定位演算法](05_計算機視覺與高維感測/LIB-501%20計算機視覺前處理規範與影像質心定位演算法%20(CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment).md)<br>• [LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化](05_計算機視覺與高維感測/LIB-504%203D%20視覺前沿：神經輻射場%20(NeRF)%20到%203D%20高斯潑濺%20(3DGS)%20理論與光柵化%20(3D%20Gaussian%20Splatting%20Theory%20&%20Rasterization).md) |
 | **LIB-600 ~ 699** | **06 自然語言處理與大語言模型館** | 縮放定律、Decoder-Only、RMSNorm、SwiGLU、GQA | • [LIB-602 現代大語言模型架構解剖與縮放定律](06_自然語言處理與大語言模型/LIB-602%20現代大語言模型架構解剖與縮放定律%20(Modern%20LLM%20Architecture%20&%20Scaling%20Laws).md) |
 | **LIB-700 ~ 799** | **07 強化學習與智慧代理人館** | MDP、策略梯度、ReAct 迴圈、S1/S2 雙進程 (Jev/CUA-S1) | • [LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議](07_強化學習與智慧代理人/LIB-703%20現代大模型代理人%20(LLM%20Agent)%20認知架構與推論協議%20(LLM%20Agent%20Cognitive%20Architecture%20&%20Protocols).md)<br>• [LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎與字節級介面反射模型](07_強化學習與智慧代理人/LIB-704%20雙進程神經代理人：S1%20非自迴歸型態決策引擎%20(Jev)%20與字節級介面反射模型%20(CUA-S1)%20深度解剖%20(Dual-Process%20Neural%20Agent%20-%20S1%20Non-Autoregressive%20Typed%20Decision%20Engine%20(Jev)%20&%20Byte-Level%20Interface%20Reflex%20Model%20(CUA-S1)).md) |
 | **LIB-800 ~ 899** | **08 AI 系統工程與高效部署館** | 模型校準、共形預測、AWQ 量化、INT4/FP8 推論 | • [LIB-801 現代深度學習之模型校準、不確定性估計與過度自信](08_AI系統工程與高效部署/LIB-801%20現代深度學習之模型校準、不確定性估計與過度自信%20(Model%20Calibration%20&%20Uncertainty%20Estimation).md)<br>• [LIB-802 現代深度學習模型量化理論與低精度推論架構](08_AI系統工程與高效部署/LIB-802%20現代深度學習模型量化理論與低精度推論架構%20(Quantization%20Mathematics%20&%20Low-Precision%20Inference).md) |
-| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 頂大推甄戰略、國科會計畫書、研究演進樹、指導教授研究體系、經典專案復盤 | • [LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統](09_科研方法論與頂尖專題藍圖/LIB-901%20經典專案實證復盤：從課堂作業到生產級%20MNIST%20手寫辨識系統%20(Classic%20Project%20Post-Mortem%20-%20From%20Class%20Assignment%20to%20Production%20MNIST%20System).md)<br>• [LIB-903 專題基石藍圖、學術推甄與多模態研究演進](09_科研方法論與頂尖專題藍圖/LIB-903%20專題基石藍圖、學術推甄與多模態研究演進%20(Capstone%20Blueprint%20&%20Academic%20Research%20Evolution).md)<br>• [LIB-904 指導教授實驗室研究體系與專題對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20指導教授實驗室研究體系與專題對齊%20(Advisor%20Research%20Corpus%20&%20Lab%20Synergy).md) |
+| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 頂大推甄戰略、國科會 C801 計畫、研究演進樹、指導教授研究體系、經典專案復盤 | • [LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統](09_科研方法論與頂尖專題藍圖/LIB-901%20經典專案實證復盤：從課堂作業到生產級%20MNIST%20手寫辨識系統%20(Classic%20Project%20Post-Mortem%20-%20From%20Class%20Assignment%20to%20Production%20MNIST%20System).md)<br>• [LIB-903 專題基石藍圖、學術推甄與多模態研究演進](09_科研方法論與頂尖專題藍圖/LIB-903%20專題基石藍圖、學術推甄與多模態研究演進%20(Capstone%20Blueprint%20&%20Academic%20Research%20Evolution).md)<br>• [LIB-904 指導教授實驗室研究體系與專題對齊](09_科研方法論與頂尖專題藍圖/LIB-904%20指導教授實驗室研究體系與專題對齊%20(Advisor%20Research%20Corpus%20&%20Lab%20Synergy).md) |
 
 *(歷史課堂舊版筆記已妥善封存於 `_archive_legacy/` 目錄)*
 

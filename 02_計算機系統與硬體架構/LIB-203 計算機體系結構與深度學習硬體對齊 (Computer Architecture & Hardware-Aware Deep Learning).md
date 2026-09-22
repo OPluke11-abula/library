@@ -12,11 +12,15 @@ math_foundations:
   - Williams Roofline Performance Model
   - Matrix Tiling Arithmetic Intensity Analysis
   - Memory Coalescing & Cache-Line Strides
+  - NVIDIA TensorRT Kernel/Layer Fusion Architecture
+  - FP16/INT8 Post-Training Quantization (PTQ) Calibration Engine
+  - CUDA Stream Concurrency & Asynchronous Pipeline
 hardware_target:
-  - NVIDIA Ampere/Hopper Tensor Cores (GEMM Units)
+  - NVIDIA Ampere/Hopper/Ada Tensor Cores (GEMM Units)
   - Warp Scheduler & SIMT Lockstep Execution
   - SRAM / HBM3 Memory Hierarchy & TMA
-invariants_count: 3
+  - NVIDIA Jetson Edge Embedded Modules & RTX 4090 Workstations
+invariants_count: 4
 created: 2026-09-17
 author: 游啓揚 (Luke, 資訊三乙, 11327229) & AI Research Agent (Antigravity)
 prerequisites:
@@ -25,6 +29,7 @@ successors:
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
   - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
+  - "[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]"
 tags:
   - 圖書館
   - 計算機結構
@@ -32,13 +37,17 @@ tags:
   - Roofline
   - TensorCore
   - GPU
+  - NVIDIA-TensorRT
+  - DLI-Ecosystem
+  - 運算元融合
+  - 莊啓宏教授
 ---
 
 # 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、計算機組織學基礎。
-- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
+- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-904 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)]]。
 - **難度等級**：學士核心 / 系統工程基石。
 
 ---
@@ -102,6 +111,20 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
 - GPU L2 快取與 DRAM 控制器的最小交易單位為 **32 位元組或 128 位元組** 對齊區塊。
 - 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）時，記憶體控制器以單次事務完成讀取。
 - 若起始位址未對齊在 128-byte 邊界，或存在跨步存取，該次請求將被拆解為多次交易，有效頻寬大幅縮水。
+
+### 3. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
+指導教授莊啓宏博士身為 **NVIDIA 校園大使 (Campus Ambassador)** 與 **DLI 認證講師**，在實驗室教學與專案實作中深度整合了 NVIDIA 官方 GPU 加速生態：
+- **垂直運算元融合 (Vertical Layer Fusion)**：
+  在傳統框架中，$\text{Conv} \to \text{Bias} \to \text{ReLU}$ 需要將中介張量寫回全域顯存 (Global Memory / DRAM)，再從顯存讀出給下一層，造成嚴重的顯存頻寬浪費。
+  NVIDIA TensorRT 推論引擎將這三者直接融合為單一 CUDA Kernel，中介特徵純粹保留在 SM 內部的暫存器 (Registers) 與 Shared Memory (SRAM) 中，消除高達 60% 的記憶體讀寫延遲。
+- **水平運算元融合 (Horizontal Layer Fusion)**：
+  將共享相同輸入且結構相同之獨立卷積層（例如 Inception 或注意力機制中 Q, K, V 投影）打包合併為單一大的 GEMM Kernel，大幅減少 Kernel 啟動開銷（Kernel Launch Overhead）。
+- **低精度量化校準 (INT8 PTQ via KL Divergence)**：
+  透過最小化對稱量化前後之相對熵（Kullback-Leibler Divergence）：
+  $$\mathcal{D}_{\text{KL}}(P \parallel Q) = \sum_{i=1}^N P(i) \log \left(\frac{P(i)}{Q(i)}\right)$$
+  在維持 FP32 原始準確率的前提下，使推論吞吐量提升 2~4 倍，並完全適配邊緣嵌入式晶片（NVIDIA Jetson AGX Orin / Nano）。
+- **非阻塞式 CUDA Stream 非同步管線**：
+  建立雙緩衝 (Double-Buffering) 機制，使主機到設備搬移 (H2D)、Tensor Core 運算與設備到主機搬移 (D2H) 三者完全重疊並發執行。
 
 ---
 
@@ -178,39 +201,46 @@ if __name__ == "__main__":
 ```
 
 ---
----
----
 
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
 ### [RULE-203-01] 神經網路層維度對齊合約 (Layer Sizing & Tensor Core Alignment Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
-- **前置條件 (Pre-conditions)**: 設計全連結層（`nn.Linear`）、卷積層通道數或 Transformer 隱藏維度 $d_{\text{model}}$。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: 設計全連結層（`nn.Linear`）、卷積層通道數或 Transformer 隱藏維度 $d_{\text{model}}$。
+- **量化決策邊界**:
   - 任何層之輸入與輸出維度必須嚴格滿足：
     $$\text{Dim} \pmod{8} = 0 \quad (\text{FP16/BF16 基準}), \quad \text{Dim} \pmod{16} = 0 \quad (\text{INT8 基準}), \quad \text{Dim} \pmod{32} = 0 \quad (\text{Hopper FP8 TMA})$$
   - 嚴禁設定如 35, 77, 100, 513 等無法被 Warp 與 Tensor Core 整除之奇異數值。
 - **執行保證**: 保證 GPU 核心佔用率達到 95% 以上，防止尾端線程空轉（Tail Effect）。
 - **可執行斷言**:
   ```python
-assert in_features % 8 == 0 and out_features % 8 == 0, f"層維度 ({in_features}, {out_features}) 未對齊 8 之倍數，將喪失 Tensor Core 瓦片硬體加速！"
+  assert in_features % 8 == 0 and out_features % 8 == 0, f"層維度 ({in_features}, {out_features}) 未對齊 8 之倍數，將喪失 Tensor Core 瓦片硬體加速！"
   ```
 
 ### [RULE-203-02] 批次大小 (Batch Size) 與 Warp 滿載合約 (Warp Saturation & Batch Sizing)
 - **合約等級**: `BOUNDARY_GUARD`
-- **前置條件 (Pre-conditions)**: DataLoader 批次大小配置。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: DataLoader 批次大小配置。
+- **量化決策邊界**:
   - 批次大小 $B$ 必須始終設為 32 的整數倍（如 32, 64, 128, 256）。
   - 若訓練時顯存不足，**嚴禁**將 Batch Size 降為非對齊數值（如 27）；必須將 Batch Size 鎖定為 32 或 16，並配合梯度累加（Gradient Accumulation Steps）。
 - **例外回退 (Fallback Protocol)**: 若極限情況下只能設為 $B=1$（如單樣本推論），必須依賴 GEMM 矩陣算子將權重維度放大，使算術強度最大化。
 
 ### [RULE-203-03] 記憶體排布與連續存取合約 (Memory Layout Channels-Last Invariant)
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
-- **前置條件 (Pre-conditions)**: 2D 卷積神經網路（CNN）部署至 NVIDIA GPU (TensorRT / cuDNN)。
-- **量化決策邊界 (Decision Thresholds)**:
+- **前置條件**: 2D 卷積神經網路（CNN）部署至 NVIDIA GPU (TensorRT / cuDNN)。
+- **量化決策邊界**:
   - 強制將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)**。
   - 在 PyTorch 中執行：`model.to(memory_format=torch.channels_last)` 與 `input.to(memory_format=torch.channels_last)`。
 - **執行保證**: 釋放 Tensor Core 2D 卷積原生計算通道，實測延遲降低 20% 至 35%。
+
+### [RULE-203-04] TensorRT 運算元融合與低精度編譯合約 (TensorRT Layer Fusion & Compilation Invariant)
+- **合約等級**: `PERFORMANCE_CRITICAL`
+- **前置條件**: 產線模型部署至 NVIDIA GPU 伺服器或 Jetson 邊緣端。
+- **量化決策邊界**:
+  - 嚴禁直接在即時推論環境中使用未優化的原生 PyTorch Python 直譯循環。
+  - 必須導出為 ONNX 格式並透過 TensorRT Builder 進行垂直融合（Vertical Fusion，如 `Conv+BN+ReLU`）與 INT8 KL 散度校準量化。
+- **執行保證**: 徹底消除顯存讀寫瓶頸，推論延遲壓制在 5ms 以內。
+
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -227,3 +257,6 @@ assert in_features % 8 == 0 and out_features % 8 == 0, f"層維度 ({in_features
 4. **NVIDIA H100 Hopper 架構技術白皮書**
    - *Report*: NVIDIA Corporation. (2023). "NVIDIA H100 Tensor Core GPU Architecture." *NVIDIA Whitepaper WP-10874-001_v01*.
    - *Core Contribution*: 揭示第四代 Tensor Cores (FP8 Transformer Engine)、非同步分散聚集記憶體單元 (TMA) 與跨 SM 執行緒叢集 (Thread Block Clusters)。
+5. **NVIDIA TensorRT 高效能深度學習推論架構**
+   - *Manual*: NVIDIA Corporation. (2024). *NVIDIA TensorRT Developer Guide: Optimization, Quantization and Kernel Fusion Architecture*. NVIDIA Developer Documentation.
+   - *Core Contribution*: 規範算子垂直與水平融合架構、INT8 後訓練量化之 KL 相對熵校準、以及非同步 CUDA Stream 執行機制。

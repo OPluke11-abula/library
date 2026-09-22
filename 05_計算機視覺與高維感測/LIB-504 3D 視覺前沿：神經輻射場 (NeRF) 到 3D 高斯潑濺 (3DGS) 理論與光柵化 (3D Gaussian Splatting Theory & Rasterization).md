@@ -32,6 +32,8 @@ tags:
   - 光柵化
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-504%203D%20Gaussian%20Splatting%20Theory%20%26%20Rasterization%20%28Agent%20EN%29.md)
+
 # 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)
 
 ## 🧭 拓樸導航與概念座標

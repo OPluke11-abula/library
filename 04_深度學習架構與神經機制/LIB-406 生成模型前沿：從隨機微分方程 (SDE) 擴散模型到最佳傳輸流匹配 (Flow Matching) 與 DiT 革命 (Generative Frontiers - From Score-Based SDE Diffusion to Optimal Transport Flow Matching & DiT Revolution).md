@@ -46,6 +46,8 @@ tags:
   - AdaLN-Zero
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/04_deep_learning_architectures/LIB-406%20Generative%20Frontiers%20-%20SDE%20Diffusion%20to%20Flow%20Matching%20%28Agent%20EN%29.md)
+
 # 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)
 
 ## 🧭 拓樸導航與概念座標

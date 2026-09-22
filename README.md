@@ -1,5 +1,7 @@
 # 資訊工程與深度學習宏偉圖書館 (CSIE & Deep Learning Grand Library)
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文 (人類閱讀導向)** | [🇺🇸 English (AI Agent & Research Edition)](en/README.md)
+
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

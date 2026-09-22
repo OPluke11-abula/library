@@ -39,6 +39,8 @@ tags:
   - 模型校準
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-901%20Classic%20Project%20Post-Mortem%20-%20Production%20MNIST%20%28Agent%20EN%29.md)
+
 # 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)
 
 > 「普通學生看作業只看到分數，頂尖工程師看作業看到的是通往生產級系統的缺陷、踩坑與技術演進。整座圖書館之所以拔地而起，正是始於這場將課堂玩具代碼徹底重構成工業級架構的實證戰役。」

@@ -35,6 +35,8 @@ tags:
   - RLCD
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/08_ai_systems_engineering/LIB-801%20Model%20Calibration%20%26%20Uncertainty%20Estimation%20%28Agent%20EN%29.md)
+
 # 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)
 
 ## 🧭 拓樸導航與概念座標

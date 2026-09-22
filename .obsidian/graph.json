@@ -78,6 +78,13 @@
       }
     },
     {
+      "query": "path:en",
+      "color": {
+        "a": 1,
+        "rgb": 440020
+      }
+    },
+    {
       "query": "path:_archive_legacy",
       "color": {
         "a": 0.5,

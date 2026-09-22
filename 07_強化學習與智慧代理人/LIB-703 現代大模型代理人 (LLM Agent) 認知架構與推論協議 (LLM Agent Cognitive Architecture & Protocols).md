@@ -34,6 +34,8 @@ tags:
   - POMDP
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/07_reinforcement_learning_and_agents/LIB-703%20LLM%20Agent%20Cognitive%20Architecture%20%26%20Protocols%20%28Agent%20EN%29.md)
+
 # 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)
 
 ## 🧭 拓樸導航與概念座標

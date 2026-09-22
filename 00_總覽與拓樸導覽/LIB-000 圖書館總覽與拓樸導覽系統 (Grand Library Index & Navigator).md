@@ -32,6 +32,8 @@ tags:
   - AI代理人導覽
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/00_overview/LIB-000%20Grand%20Library%20Index%20%26%20Navigator%20%28Agent%20EN%29.md)
+
 # 資訊工程與深度學習宏偉圖書館 (CSIE & Deep Learning Grand Library)
 ## 總目錄、分類體系與拓樸航海圖 (Master Index & Topological Navigator)
 

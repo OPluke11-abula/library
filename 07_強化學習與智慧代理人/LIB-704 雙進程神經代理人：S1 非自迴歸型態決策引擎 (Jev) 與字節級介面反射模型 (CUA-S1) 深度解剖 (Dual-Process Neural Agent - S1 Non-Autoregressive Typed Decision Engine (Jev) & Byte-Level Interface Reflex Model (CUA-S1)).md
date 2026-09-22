@@ -43,6 +43,8 @@ tags:
   - 邊緣推論
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/07_reinforcement_learning_and_agents/LIB-704%20Dual-Process%20Neural%20Agent%20S1-Jev%20%26%20Reflex%20CUA-S1%20%28Agent%20EN%29.md)
+
 # 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))
 
 ## 🧭 拓樸導航與概念座標

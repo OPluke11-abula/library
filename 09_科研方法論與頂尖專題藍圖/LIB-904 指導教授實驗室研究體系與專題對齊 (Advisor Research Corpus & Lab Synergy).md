@@ -45,6 +45,8 @@ tags:
   - 國科會專題
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Advisor%20Research%20Corpus%20%26%20Lab%20Synergy%20%28Agent%20EN%29.md)
+
 # 指導教授實驗室研究體系與專題對齊 (Advisor Research Corpus & Lab Synergy)
 
 ## 🧭 拓樸導航與概念座標

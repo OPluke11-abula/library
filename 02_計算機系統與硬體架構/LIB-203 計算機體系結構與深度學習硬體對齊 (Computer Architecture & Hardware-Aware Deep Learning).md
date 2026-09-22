@@ -43,6 +43,8 @@ tags:
   - 莊啓宏教授
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/02_computer_systems/LIB-203%20Computer%20Architecture%20%26%20Hardware-Aware%20Deep%20Learning%20%28Agent%20EN%29.md)
+
 # 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)
 
 ## 🧭 拓樸導航與概念座標

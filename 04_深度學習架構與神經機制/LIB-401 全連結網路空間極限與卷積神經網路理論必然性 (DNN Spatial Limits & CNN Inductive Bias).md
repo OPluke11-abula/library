@@ -34,6 +34,8 @@ tags:
   - 平移等變性
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/04_deep_learning_architectures/LIB-401%20DNN%20Spatial%20Limits%20%26%20CNN%20Inductive%20Bias%20%28Agent%20EN%29.md)
+
 # 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)
 
 ## 🧭 拓樸導航與概念座標

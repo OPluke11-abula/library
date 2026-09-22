@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <linearGradient id="accentAmber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.4" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+  </defs>
+
+  <rect width="1100" height="620" rx="16" fill="url(#bgGrad)" />
+
+  <!-- Title Badge -->
+  <rect x="50" y="30" width="300" height="34" rx="17" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" stroke-width="1.5" />
+  <text x="200" y="52" fill="#38bdf8" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" text-anchor="middle">💡 原理篇 (Principles Navigator)</text>
+
+  <text x="50" y="105" fill="#f8fafc" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800">深度學習第一性原理：模型如何學習的六大核心基石</text>
+  <text x="50" y="135" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="15">破除黑盒子迷思：從高維幾何向量到自適應優化與卷積歸納偏置</text>
+
+  <!-- 6 Step Cards -->
+  <!-- Card 1 -->
+  <g transform="translate(50, 165)" filter="url(#shadow)">
+    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentCyan)" />
+    <text x="20" y="35" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 01 • 數值與向量</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">高維空間投影 (Vector/Matrix)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13" line-height="1.5">
+      <tspan x="20" dy="0">電腦看圖只有矩陣 (28x28=784 像素)</tspan>
+      <tspan x="20" dy="22">權重 W 是空間旋轉縮放，偏置 b 是平移</tspan>
+      <tspan x="20" dy="22">對齊館藏：LIB-101 線性代數與高維幾何</tspan>
+    </text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <path d="M 370 250 L 395 250" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- Card 2 -->
+  <g transform="translate(400, 165)" filter="url(#shadow)">
+    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentCyan)" />
+    <text x="20" y="35" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 02 • 神經機制</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">網路骨架與前向傳播 (Forward)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
+      <tspan x="20" dy="0">Dense: 全連接牽線，矩陣乘法 z=Wx+b</tspan>
+      <tspan x="20" dy="22">Activation: ReLU 消除梯度消失、提供非線性</tspan>
+      <tspan x="20" dy="22">對齊館藏：LIB-001 第一性原理六大基石</tspan>
+    </text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <path d="M 720 250 L 745 250" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- Card 3 -->
+  <g transform="translate(750, 165)" filter="url(#shadow)">
+    <rect width="300" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="300" height="5" rx="2" fill="url(#accentPurple)" />
+    <text x="20" y="35" fill="#c084fc" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 03 • 誤差度量</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">損失函數打靶 (Loss Function)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
+      <tspan x="20" dy="0">模型如何知道自己錯了？</tspan>
+      <tspan x="20" dy="22">Categorical Cross-Entropy: 衡量分佈距離</tspan>
+      <tspan x="20" dy="22">Softmax 輸出 0~1 機率，算交叉熵懲罰</tspan>
+    </text>
+  </g>
+
+  <!-- Row 2 -->
+  <!-- Card 4 -->
+  <g transform="translate(50, 360)" filter="url(#shadow)">
+    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentPurple)" />
+    <text x="20" y="35" fill="#c084fc" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 04 • 修正引擎</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">反向傳播與梯度 (Backprop)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
+      <tspan x="20" dy="0">微積分連鎖律 (Chain Rule) 從後往前傳</tspan>
+      <tspan x="20" dy="22">梯度 Gradient: 下山最陡的方向 (方向指針)</tspan>
+      <tspan x="20" dy="22">對齊館藏：LIB-104 凸最佳化與梯度幾何</tspan>
+    </text>
+  </g>
+
+  <!-- Arrow 4 to 5 -->
+  <path d="M 370 445 L 395 445" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- Card 5 -->
+  <g transform="translate(400, 360)" filter="url(#shadow)">
+    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentAmber)" />
+    <text x="20" y="35" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 05 • 自適應巡航</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">優化器與學習率 (Optimizer)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
+      <tspan x="20" dy="0">SGD: 容易震盪或卡在鞍點</tspan>
+      <tspan x="20" dy="22">Adam: 一階慣性動量 + 二階自適應油門</tspan>
+      <tspan x="20" dy="22">陡坡自動踩煞車，平原自動踩油門加速</tspan>
+    </text>
+  </g>
+
+  <!-- Arrow 5 to 6 -->
+  <path d="M 720 445 L 745 445" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- Card 6 -->
+  <g transform="translate(750, 360)" filter="url(#shadow)">
+    <rect width="300" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="300" height="5" rx="2" fill="url(#accentAmber)" />
+    <text x="20" y="35" fill="#34d399" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 06 • 歸納偏置</text>
+    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">CNN 與平移不變性 (Inductive Bias)</text>
+    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
+      <tspan x="20" dy="0">DNN 空間座標死記 (稍微平移就崩潰)</tspan>
+      <tspan x="20" dy="22">CNN 局部受光野與權重共享，特徵平移不變</tspan>
+      <tspan x="20" dy="22">對齊館藏：LIB-401 DNN空間極限與CNN必然性</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom Banner Callout -->
+  <rect x="50" y="555" width="1000" height="45" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4,4" />
+  <text x="550" y="583" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">
+    💡 第一性原理真相：寫程式不用手刻數學公式，數學是模型出錯 (Gradient Vanishing / Mode Collapse / Overconfidence) 時的唯一 Debug 透視鏡！
+  </text>
+</svg>

@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradLogic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1035" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+    <filter id="shadowLogic">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <rect width="1100" height="620" rx="16" fill="url(#bgGradLogic)" />
+
+  <!-- Badge -->
+  <rect x="50" y="30" width="310" height="34" rx="17" fill="rgba(168, 85, 247, 0.15)" stroke="#a855f7" stroke-width="1.5" />
+  <text x="205" y="52" fill="#c084fc" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">🧠 邏輯篇 (Logic & Frontiers)</text>
+
+  <text x="50" y="105" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="28" font-weight="800">統計邏輯校準、前沿生成模型與神經代理人</text>
+  <text x="50" y="135" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="15">破除面試致命題：8層過度自信 vs 4層良好校準、擴散 SDE 到流匹配 (Flow Matching) 與 S1/S2 代理人</text>
+
+  <!-- 3 Big Logical Cards -->
+  <!-- Card 1: Calibration Logic -->
+  <g transform="translate(50, 165)" filter="url(#shadowLogic)">
+    <rect width="320" height="420" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="320" height="5" fill="#ef4444" />
+    <text x="20" y="35" fill="#f87171" font-family="system-ui, sans-serif" font-size="13" font-weight="700">STATISTICAL LOGIC 01</text>
+    <text x="20" y="65" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="18" font-weight="700">8層過度自信 vs 4層校準</text>
+    
+    <rect x="20" y="85" width="280" height="95" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="1" />
+    <text x="30" y="110" fill="#ef4444" font-family="system-ui, sans-serif" font-size="12" font-weight="700">8 層無約束網路 (Overconfidence):</text>
+    <text x="30" y="132" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="30" dy="0">• 測一張微傾斜的 8</tspan>
+      <tspan x="30" dy="18">• 輸出：3: 100%, 8: 0% (盲目誤判)</tspan>
+      <tspan x="30" dy="18">• 原因：Logits 膨脹，Softmax 飽和</tspan>
+    </text>
+
+    <rect x="20" y="195" width="280" height="110" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1" />
+    <text x="30" y="220" fill="#10b981" font-family="system-ui, sans-serif" font-size="12" font-weight="700">4 層正規化網路 (Well-Calibrated):</text>
+    <text x="30" y="242" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="30" dy="0">• 測同一張傾斜 8</tspan>
+      <tspan x="30" dy="18">• 輸出：8: 57%, 7: 29%, 9: 6%</tspan>
+      <tspan x="30" dy="18">• 第一名精準命中真值 8！</tspan>
+      <tspan x="30" dy="18">• 客觀表達手寫模糊性，具容錯力</tspan>
+    </text>
+
+    <text x="20" y="335" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">
+      <tspan x="20" dy="0">權威引證：Guo et al. ICML 2017</tspan>
+      <tspan x="20" dy="18">對齊館藏：LIB-801 模型校準與 ECE</tspan>
+    </text>
+  </g>
+
+  <!-- Card 2: Generative Frontiers -->
+  <g transform="translate(390, 165)" filter="url(#shadowLogic)">
+    <rect width="320" height="420" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+    <rect x="0" y="0" width="320" height="5" fill="#38bdf8" />
+    <text x="20" y="35" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13" font-weight="700">GENERATIVE FRONTIERS 02</text>
+    <text x="20" y="65" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="18" font-weight="700">生成模型進化：SDE到流匹配</text>
+    
+    <g transform="translate(20, 85)">
+      <rect width="280" height="60" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="15" y="25" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="12" font-weight="700">1. GAN (對抗式生成)</text>
+      <text x="15" y="45" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">手機 60FPS 濾鏡、超解析度重建、感知損失</text>
+    </g>
+
+    <g transform="translate(20, 155)">
+      <rect width="280" height="60" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="15" y="25" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="12" font-weight="700">2. Score SDE 擴散模型</text>
+      <text x="15" y="45" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="11">熱力學隨機布朗運動、50步數值積分</text>
+    </g>
+
+    <g transform="translate(20, 225)">
+      <rect width="280" height="60" rx="6" fill="#0f172a" stroke="#34d399" stroke-width="1.5" />
+      <text x="15" y="25" fill="#34d399" font-family="system-ui, sans-serif" font-size="12" font-weight="700">3. 流匹配 (Flow Matching)</text>
+      <text x="15" y="45" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="11">兩點直線最快，曲率=0，5步生成極致高清</text>
+    </g>
+
+    <g transform="translate(20, 295)">
+      <rect width="280" height="60" rx="6" fill="#0f172a" stroke="#c084fc" stroke-width="1.5" />
+      <text x="15" y="25" fill="#c084fc" font-family="system-ui, sans-serif" font-size="12" font-weight="700">4. DiT (Diffusion Transformer)</text>
+      <text x="15" y="45" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="11">Patch切塊，拋棄UNet，解鎖Scaling Laws</text>
+    </g>
+
+    <text x="20" y="385" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="12" font-weight="600">
+      <tspan x="20" dy="0">權威對齊：MDPI Electronics 2026</tspan>
+      <tspan x="20" dy="18">指導教授莊啓鴻博士實驗室擴散融合體系</tspan>
+    </text>
+  </g>
+
+  <!-- Card 3: Agent Dual Process -->
+  <g transform="translate(730, 165)" filter="url(#shadowLogic)">
+    <rect width="320" height="420" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+    <rect x="0" y="0" width="320" height="5" fill="#c084fc" />
+    <text x="20" y="35" fill="#c084fc" font-family="system-ui, sans-serif" font-size="13" font-weight="700">AI AGENT COGNITION 03</text>
+    <text x="20" y="65" fill="#f8fafc" font-family="system-ui, sans-serif" font-size="18" font-weight="700">S1/S2 雙進程智慧代理人</text>
+    
+    <rect x="20" y="85" width="280" height="100" rx="6" fill="#0f172a" stroke="#c084fc" stroke-width="1" />
+    <text x="30" y="110" fill="#c084fc" font-family="system-ui, sans-serif" font-size="12" font-weight="700">⚡ System 1: 快思直覺反射</text>
+    <text x="30" y="132" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="30" dy="0">• Jev / CUA-S1 非自迴歸型態引擎</tspan>
+      <tspan x="30" dy="18">• 拋棄緩慢 JSON 自迴歸逐字輸出</tspan>
+      <tspan x="30" dy="18">• 50ms 級滑鼠螢幕字節反射決策</tspan>
+    </text>
+
+    <rect x="20" y="200" width="280" height="100" rx="6" fill="#0f172a" stroke="#38bdf8" stroke-width="1" />
+    <text x="30" y="225" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="12" font-weight="700">🧠 System 2: 慢想深度推理</text>
+    <text x="30" y="247" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="11.5">
+      <tspan x="30" dy="0">• ReAct 閉環思考、自我反思糾錯</tspan>
+      <tspan x="30" dy="18">• 依賴圖譜拓樸排序加載</tspan>
+      <tspan x="30" dy="18">• 65 條形式化不變量約束保證</tspan>
+    </text>
+
+    <text x="20" y="335" fill="#c084fc" font-family="system-ui, sans-serif" font-size="12" font-weight="600">
+      <tspan x="20" dy="0">權威引證：ICML / ICLR 2024</tspan>
+      <tspan x="20" dy="18">對齊館藏：LIB-703, LIB-704 雙進程代理人</tspan>
+    </text>
+  </g>
+</svg>

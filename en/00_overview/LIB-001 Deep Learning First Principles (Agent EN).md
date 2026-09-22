@@ -138,3 +138,25 @@ class CanonicalPillarClassifier(nn.Module):
 - `INV-001-01 (Logit/Loss Coupling)`: Agents MUST pass raw unnormalized logits to `nn.CrossEntropyLoss()`. DO NOT apply explicit `F.softmax` prior to cross-entropy (prevents numerical underflow and catastrophic cancellation).
 - `INV-001-02 (Gradient Zeroing)`: `optimizer.zero_grad(set_to_none=True)` MUST be called before `loss.backward()`. Setting gradients to `None` frees memory buffers and improves throughput by ~5-10%.
 - `INV-001-03 (Activation Health)`: Monitor dead neuron ratios in ReLU activations ($P(z \le 0)$). If $> 40\%$, switch to LeakyReLU or GeLU.
+
+---
+
+## 5. Canonical Open Courseware Mapping & Textual Synthesis
+
+For rapid reference and cross-verification against foundational literature, this library indexes the canonical 6-part syllabus (Andrew Ng, DeepLearning.AI / Stanford Online):
+
+### 5.1 Open Courseware Index
+- **Unit 0 [ML Specialization]**: [Machine Learning Specialization](https://www.youtube.com/playlist?list=PLkDaE6sCZn6FNC6YRfRQc_FbeQrF8BwGI) (Linear/Logistic Regression, $L_1/L_2$ Regularization, Decision Trees, Ensembles, K-Means, PCA)
+- **Unit 1 [DL Specialization C1]**: [Neural Networks and Deep Learning](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Ec-XTbcX1uRg2_u4xOEky0) (Computation Graphs, Vectorization, Activations, $L$-layer Architectures)
+- **Unit 2 [DL Specialization C2]**: [Improving Deep Neural Networks](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Hn0vK8co82zjQtt3T2Nkqc) (Bias/Variance, Inverted Dropout, Mini-batch, Momentum, Adam, Batch Normalization)
+- **Unit 3 [DL Specialization C3]**: [Structuring Machine Learning Projects](https://www.youtube.com/playlist?list=PLkDaE6sCZn6E7jZ9sN_xHwSHOdjUxUW_b) (Orthogonalization, Single-number Metrics, Data Mismatch, Ceiling Analysis)
+- **Unit 4 [DL Specialization C4]**: [Convolutional Neural Networks](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF) (Convolutions, Padding/Strides, LeNet/AlexNet/VGG/ResNet, YOLO, Triplet Loss)
+- **Unit 5 [DL Specialization C5]**: [Sequence Models](https://www.youtube.com/playlist?list=PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6) (RNN, GRU, LSTM, Word2Vec, Scaled Dot-Product Attention & Transformer Foundation)
+
+### 5.2 Condensed Theoretical Invariants
+1. **Vectorization Rule**: Explicit loops across $m$ samples are prohibited; all forward/backward passes must execute via BLAS GEMM calls (`np.dot` / `torch.matmul`).
+2. **Symmetry Breaking**: Biases may initialize to zero, but weight tensors must initialize randomly (He initialization $\sigma = \sqrt{2/n_{\text{in}}}$ for ReLU networks) to prevent rank-1 manifold collapse.
+3. **Internal Covariate Shift**: Deep networks must utilize Batch Normalization or Layer Normalization to stabilize activation distributions across Mini-batches.
+4. **ResNet Identity Shortcut**: Highway paths $a^{[l+2]} = g(z^{[l+2]} + a^{[l]})$ prevent gradient extinction by establishing clean $\frac{\partial \mathcal{L}}{\partial a^{[l]}} = \frac{\partial \mathcal{L}}{\partial a^{[l+2]}} + \dots$ backpropagation channels.
+5. **Attention Scaling Factor**: The scalar $\frac{1}{\sqrt{d_k}}$ in $\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)$ prevents large dot-products from pushing softmax into vanishing gradient saturation regions.
+

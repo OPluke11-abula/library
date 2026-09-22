@@ -339,3 +339,151 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 5. **深度學習實踐專著 (2022)**
    * *Book*: 《深度學習－使用TensorFlow 2.x》. 全華圖書, ISBN: 9786263282223.
    * *Contribution*: 深入淺出解析神經網路前向計算、反向自動微分與實務卷積視覺架構，對齊本卷教學實踐。
+
+---
+
+## 📖 七、權威公開課對齊與文字精華速讀手冊 (Open Courseware & Full Textual Digest)
+
+> 💡 **學習提示**：本專題收錄由國際權威（Stanford Online / DeepLearning.AI Andrew Ng）講授之經典機器學習與深度學習課程影音對齊清單。若不習慣觀看英文影音，本手冊已將六大播放清單之**核心數理直觀、架構推導與工程經驗**全數萃取為以下高密度文字筆記，供直接閱讀自學。
+
+### 1. 權威影音文獻對齊索引 (Open Courseware Reference Index)
+* 📺 **單元 0 [經典機器學習專項]**：[Machine Learning Specialization](https://www.youtube.com/playlist?list=PLkDaE6sCZn6FNC6YRfRQc_FbeQrF8BwGI)（線性迴歸、邏輯迴歸、正則化、決策樹、隨機森林、無監督聚類）
+* 📺 **單元 1 [深度學習專項 C1]**：[Neural Networks and Deep Learning](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Ec-XTbcX1uRg2_u4xOEky0)（計算圖、向量化、激活函數、L 層神經網路）
+* 📺 **單元 2 [深度學習專項 C2]**：[Improving Deep Neural Networks](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Hn0vK8co82zjQtt3T2Nkqc)（偏差與方差、Dropout、Momentum、Adam、Batch Normalization）
+* 📺 **單元 3 [深度學習專項 C3]**：[Structuring Machine Learning Projects](https://www.youtube.com/playlist?list=PLkDaE6sCZn6E7jZ9sN_xHwSHOdjUxUW_b)（正交化、單一指標、Data Mismatch、錯誤天花板分析）
+* 📺 **單元 4 [深度學習專項 C4]**：[Convolutional Neural Networks](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF)（Padding、Stride、LeNet/AlexNet/VGG/ResNet、YOLO 物件偵測、Siamese 與三元組損失）
+* 📺 **單元 5 [深度學習專項 C5]**：[Sequence Models](https://www.youtube.com/playlist?list=PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6)（RNN、GRU、LSTM 門控、Word2Vec 詞嵌入、Scaled Dot-Product Attention 與 Transformer）
+
+---
+
+### 2. 六大單元文字精華速讀 (The Complete Textual Masterclass)
+
+#### 🔹 單元 0：經典機器學習第一性原理 (Machine Learning Foundations)
+1. **線性迴歸與梯度下降 (Linear Regression & Gradient Descent)**：
+   * 預測模型 $f_{w,b}(x) = wx + b$。代價函數（Cost Function）使用均方誤差 $\mathcal{J}(w,b) = \frac{1}{2m} \sum_{i=1}^m (f_{w,b}(x^{(i)}) - y^{(i)})^2$（除以 2 是為了求導時與平方項消去）。
+   * 梯度下降更新規則：$w := w - \alpha \frac{\partial \mathcal{J}}{\partial w}$。學習率 $\alpha$ 過大會震盪發散，過小則收斂極慢。
+   * **特徵縮放 (Feature Scaling)**：當各維度數值範圍差異過大（如房價坪數 20~100 與屋齡 1~50），損失曲面會變成極端狹長的橢圓山谷，導致梯度垂直震盪。透過 Z-score 標準化 $x_{\text{norm}} = \frac{x - \mu}{\sigma}$，可將等高線化為正圓，實現筆直快速下降。
+2. **邏輯迴歸與分類決策 (Logistic Regression & Classification)**：
+   * 透過 Sigmoid 激活函數 $g(z) = \frac{1}{1 + e^{-z}}$ 將線性實數映射至 $(0, 1)$ 機率區間：$f_{\vec{w},b}(\vec{x}) = g(\vec{w} \cdot \vec{x} + b) = P(y=1 \mid \vec{x})$。
+   * 決策邊界（Decision Boundary）由 $\vec{w} \cdot \vec{x} + b = 0$ 決定。
+   * **對數損失函數 (Binary Cross-Entropy Loss)**：若在邏輯迴歸中硬用 MSE，損失曲面會產生無數非凸（Non-convex）局部極小點。改用凸性對數損失 $\mathcal{L}(f, y) = -y \log(f) - (1-y) \log(1-f)$，能確保全域凸優化收斂。
+3. **過擬合防禦與正則化 (Overfitting & Regularization)**：
+   * 高偏差（High Bias / 欠擬合）：模型過於簡單，無法捕捉資料規律。
+   * 高方差（High Variance / 過擬合）：模型參數過多，強行死記訓練樣本雜訊，失去泛化力。
+   * **$L_2$ 正則化 (Ridge)**：在代價函數中加入 $\frac{\lambda}{2m} \sum w_j^2$，懲罰過大權重，使決策曲面更平滑。
+   * **$L_1$ 正則化 (Lasso)**：加入 $\frac{\lambda}{2m} \sum |w_j|$，促使次要特徵權重精確歸零，達到自動特徵篩選與稀疏化。
+4. **決策樹與集成家族 (Decision Trees & Ensemble)**：
+   * **決策樹**：以資訊熵（Entropy）$H(p) = -p \log_2(p) - (1-p) \log_2(1-p)$ 或吉尼不純度（Gini Impurity）為準繩，貪婪選取「資訊增益（Information Gain）」最大的特徵進行分支切分。
+   * **隨機森林 (Random Forest / Bagging)**：透過 Bootstrap 自助抽樣產生多個獨立數據子集，並在節點切分時隨機限制候選特徵，訓練數百棵獨立樹投票表決，顯著降低模型方差。
+   * **梯度提升樹 (XGBoost / Boosting)**：循序訓練樹模型，每一棵新樹專門擬合前一棵樹留下的殘差（Residuals），在表格化數據（Tabular Data）競賽中長年穩居霸主地位。
+5. **無監督聚類與降維 (Clustering & Dimensionality Reduction)**：
+   * **K-Means**：隨機初始化 $K$ 個質心，交替執行「將樣本指派至最近質心」與「重新計算簇內幾何重心」，以手肘法（Elbow Method）尋找失真度突變的最適 $K$ 值。
+   * **主成分分析 (PCA)**：計算資料協方差矩陣的特徵向量，將數據正交投影至方差最大的低維子空間，保留最主要的資訊能量，消除共線性。
+
+---
+
+#### 🔹 單元 1：神經網路與深度學習底層 (Neural Networks & Deep Learning)
+1. **單神經元到計算圖 (Computation Graph & Autograd)**：
+   * 邏輯迴歸實質上就是一個單一神經元。前向傳播計算 $z = w_1 x_1 + w_2 x_2 + b$ 與 $a = \sigma(z)$；反向傳播依據連鎖律反向推演：$da = -\frac{y}{a} + \frac{1-y}{1-a} \implies dz = \frac{dL}{da} \frac{da}{dz} = a - y$。這個極度優雅的差值公式 $dz = a - y$，直接指引了梯度的物理大小與方向。
+2. **向量化加速革命 (Vectorization via Matrix Broadcasting)**：
+   * 在深度學習中**嚴格禁止使用 for 迴圈遍歷訓練樣本**。
+   * 設輸入矩陣 $X \in \mathbb{R}^{n_x \times m}$（$m$ 為樣本數），權重 $W \in \mathbb{R}^{n_h \times n_x}$，偏置 $b \in \mathbb{R}^{n_h \times 1}$。
+   * 一行矩陣向量化代碼 `Z = np.dot(W, X) + b`，在底層呼叫 BLAS / SIMD / GPU 並行指令集，速度比傳統雙層 for 迴圈快上 300 到 1000 倍。
+3. **激活函數家族比較與選型策略**：
+   * **Sigmoid**：$\sigma(z) = \frac{1}{1 + e^{-z}}$。輸出介於 $(0, 1)$。致命缺點：當 $|z| > 4$ 時，導數趨近於 0，深層網路產生「梯度消失」；且其輸出均值不為零（Non-zero centered）。現今僅用於二元分類輸出層。
+   * **Tanh**：$\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}$。均值為 0，收斂速度優於 Sigmoid，但仍存在兩端梯度飽和問題。
+   * **ReLU**：$\text{ReLU}(z) = \max(0, z)$。在 $z > 0$ 區間導數恆為 $1$，徹底破解深層反向傳播梯度消失；計算極快（單純判斷大於零）。缺點是存在「Dead ReLU」（若學習率過大，部分神經元永久處於 $z \le 0$，輸出與梯度恆為 0）。
+   * **LeakyReLU / GELU**：引入負半軸微小斜率（如 $0.01z$），現代 Transformer 與大型模型全面普及 GELU（結合常態分佈累積分佈函數的平滑激活）。
+4. **破除對稱性與權重初始化 (Weight Initialization)**：
+   * **嚴禁將所有權重初始化為 0**：若所有權重初始為 0，隱藏層所有神經元將計算出完全相同的特徵值，反向傳播時獲得完全相同的梯度，對稱性永遠無法被打破（Symmetry Trap）。
+   * **Xavier (Glorot) 初始化**（適用 Tanh/Sigmoid）：$W \sim \mathcal{N}\left(0, \sqrt{\frac{1}{n_{\text{in}}}}\right)$。保持各層激活值與梯度的方差一致。
+   * **He (Kaiming) 初始化**（專為 ReLU 定制）：$W \sim \mathcal{N}\left(0, \sqrt{\frac{2}{n_{\text{in}}}}\right)$。因 ReLU 遮蔽了一半負數激活值，方差必須放大 2 倍以維護信號傳播強度。
+
+---
+
+#### 🔹 單元 2：深層網路優化與超參數調校 (Improving Deep Neural Networks)
+1. **偏差與方差的系統化診斷處方 (Bias / Variance Recipe)**：
+   * 步驟 1：檢查訓練集誤差（High Bias?）。若是，改用更大網路、增加隱藏層或訓練更久。
+   * 步驟 2：檢查驗證集與訓練集差距（High Variance?）。若是，收集更多數據、加入正則化（$L_2$、Dropout）或修改網路架構。
+2. **Dropout 正則化物理本質**：
+   * 在訓練階段，對每一層以機率 $p$（如保留率 $keep\_prob = 0.8$）隨機將部分神經元置零，並使用 **Inverted Dropout** 將剩餘值除以 $keep\_prob$（確保前向傳播期望值不變）。
+   * **物理直覺**：強迫神經元不能依賴任何單一輸入特徵，必須分散風險學會更穩健的表徵，等價於極度高效地集成了數千個瘦身子網路。**推論階段（Inference）必須嚴格關閉 Dropout**。
+3. **高維最優化器演進路線**：
+   * **Mini-batch SGD**：兼顧全資料集 Batch GD 的穩定向量化與純隨機 SGD 的高速更新。Batch 大小通常取 $2^n$（32, 64, 128, 256），精準對齊 GPU 記憶體架構。
+   * **Momentum（動量梯度下降）**：計算梯度的指數加權移動平均 $v_{dW} = \beta v_{dW} + (1-\beta) dW$。在上下震盪維度正負相消，在朝向山谷底部的維度持續加速。
+   * **RMSprop**：計算梯度平方的移動平均 $s_{dW} = \beta_2 s_{dW} + (1-\beta_2) (dW)^2$，更新時除以 $\sqrt{s_{dW} + \epsilon}$。有效壓抑陡峭維度的步幅，擴大平緩維度的探索。
+   * **Adam**：集 Momentum（一階動量）與 RMSprop（二階中心矩）之大成，並加入「偏差修正（Bias Correction）」解決初期估計偏向 0 的問題，為當代預設最強黃金優化器。
+4. **批量正規化 (Batch Normalization, BN)**：
+   * 對隱藏層輸入 $z$ 在當前 Mini-batch 內計算均值 $\mu_B$ 與方差 $\sigma_B^2$，標準化為 $\tilde{z} = \frac{z - \mu_B}{\sqrt{\sigma_B^2 + \epsilon}}$，再透過可學習參數轉換：$z_{\text{norm}} = \gamma \tilde{z} + \beta$。
+   * **核心價值**：大幅減弱內部協變量偏移（Internal Covariate Shift），使深層網路不再因淺層權重的微小變動而發生特徵分佈劇烈漂移；允許採用大上 10 倍的學習率，具備輕微正則化效果。
+
+---
+
+#### 🔹 單元 3：機器學習專案戰略結構 (Structuring Machine Learning Projects)
+1. **正交化原則 (Orthogonalization)**：
+   * 一套健康的系統，每一個旋鈕只負責單一目標。
+   * 旋鈕 1（擬合訓練集）：加大網路、更換優化器（Adam）。
+   * 旋鈕 2（擬合開發驗證集）：正則化、Dropout、收集更多資料。
+   * 旋鈕 3（擬合測試集）：增大開發驗證集規模。
+   * 旋鈕 4（真實世界表現）：修正開發/測試集標籤或損失函數目標。嚴禁調動一個超參數同時影響四個層面。
+2. **單一評估指標與約束指標 (Satisficing vs Optimizing Metrics)**：
+   * 團隊必須確立**單一優化指標（Optimizing Metric）**，例如 F1-score 或 Accuracy。
+   * 其餘次要條件列為**滿意約束指標（Satisficing Metrics）**，例如「推論延遲必須 $\le 100\text{ms}$」、「模型檔案大小 $\le 50\text{MB}$」。在滿足約束的前提下，唯一衝刺優化指標。
+3. **人類表現基準 (HLP) 與貝氏最優誤差 (Bayes Optimal Error)**：
+   * 人類水準（HLP）常作為貝氏理論極限的代理指標。
+   * 訓練誤差與 HLP 的差距稱為「可避免偏差（Avoidable Bias）」；驗證誤差與訓練誤差的差距稱為「方差（Variance）」。依據兩者相對大小決定下一步投資方向。
+4. **資料分佈不匹配 (Data Mismatch) 診斷技術**：
+   * 當訓練集來自網路高清抓圖（10 萬張），而使用者終端是手機模糊實拍照（1 萬張）時，千萬不能隨機混合打散。
+   * 正確做法：將手機實拍照分出 5000 張作為 Dev/Test 集。另外從訓練集中抽取 5000 張建立 **Training-Dev 集**。
+   * 若「訓練集」與「Training-Dev 集」差距大 $\implies$ **純方差問題（Overfitting）**。
+   * 若「Training-Dev 集」與「Dev 集」差距大 $\implies$ **資料分佈漂移問題（Data Mismatch）**，需針對真實場景進行數據合成或特徵校準。
+5. **錯誤分析天花板 (Ceiling Analysis)**：
+   * 隨機抽取 100 個驗證集預測錯誤的樣本，手動建立表格分類（如：圖像模糊佔 61%、反光佔 18%、標籤標錯佔 5%）。一眼看清解決哪一類問題能換取最高的潛在準確率提升，避免盲目調參。
+
+---
+
+#### 🔹 單元 4：卷積神經網路全域精華 (Convolutional Neural Networks)
+1. **卷積兩大核心優勢**：
+   * **權重共享 (Parameter Sharing)**：一個 $3 \times 3$ 卷積核在影像左上角能抓邊緣，滑到右下角依然有效，參數量與輸入影像解析度無關。
+   * **局部連接稀疏性 (Sparsity of Connections)**：每一個輸出特徵單元僅與前一層微小的受光野（Receptive Field）相連，徹底免除全連接層百萬權重的參數量詛咒。
+2. **Padding 與 Stride 幾何計算**：
+   * 設輸入維度 $n \times n$，卷積核 $f \times f$，填充 $p$，步長 $s$。
+   * 輸出維度公式：$\lfloor \frac{n + 2p - f}{s} + 1 \rfloor \times \lfloor \frac{n + 2p - f}{s} + 1 \rfloor$。
+   * **Same Padding**：設定 $p = \frac{f-1}{2}$（$f$ 通常為奇數 1, 3, 5），保證輸出尺寸與輸入尺寸完全一致。
+3. **經典架構里程碑演進**：
+   * **LeNet-5 (1998)**：Conv $\to$ Pool $\to$ Conv $\to$ Pool $\to$ FC，奠定手寫辨識與現代 CNN 雛形。
+   * **AlexNet (2012)**：首次在 ImageNet 引入 ReLU、Dropout、GPU 並行訓練，引爆深度學習革命。
+   * **VGG-16 (2014)**：證明兩個 $3 \times 3$ 卷積核堆疊具備與 $5 \times 5$ 相同的感受野，但參數量更少（$2 \times 9 = 18$ vs $25$）且多一次非線性激活，奠定純小卷積核標準。
+   * **ResNet (2015)**：提出殘差跳躍連線（Skip Connection）$a^{[l+2]} = g(z^{[l+2]} + a^{[l]})$。即使網路深達 152 層，梯度仍可沿恆等映射（Identity Path）無損反傳，徹底消滅深層退化問題。
+4. **物件偵測 (YOLO 演算法體系)**：
+   * **網格切分與單次預測**：將影像切為 $S \times S$ 網格，若物體中心落在某格內，該格即負責輸出向量 $[p_c, b_x, b_y, b_h, b_w, c_1, c_2, \dots]$。
+   * **交併比 (IoU)**：衡量預測框與真值框的重疊程度，工業門檻通常設為 $\ge 0.5$。
+   * **非極大值抑制 (NMS)**：先篩除信心度 $p_c \le 0.6$ 的雜訊框；針對同一類別，挑選最高信心的預測框，並將與其 IoU 超過閾值的鄰近重疊框全數剔除，留下唯一最準邊界。
+5. **人臉驗證與度量學習 (Face Recognition & Triplet Loss)**：
+   * 人臉驗證屬於 One-shot Learning。網路不直接分類人名，而是透過卷積網路學習映射函數 $f(x) \in \mathbb{R}^{128}$。
+   * **三元組損失 (Triplet Loss)**：挑選基準圖 Anchor ($A$)、同人正例 Positive ($P$) 與異人負例 Negative ($N$)，最小化目標：$\mathcal{L}(A, P, N) = \max(0, \|f(A)-f(P)\|^2 - \|f(A)-f(N)\|^2 + \alpha)$（$\alpha$ 為強制保持的邊際邊距 Margin）。
+
+---
+
+#### 🔹 單元 5：序列模型與注意力機制 (Sequence Models & Attention Mechanism)
+1. **循環神經網路 (RNN) 與長期記憶瓶頸**：
+   * RNN 透過循環狀態向量處理變長序列：$a^{\langle t \rangle} = g(W_{aa} a^{\langle t-1 \rangle} + W_{ax} x^{\langle t \rangle} + b_a)$。
+   * **致命缺陷**：隨時間步增長，反向傳播（BPTT）連乘導函數將引發指數級梯度消失，使一般 RNN 無法捕捉超過 10 個詞以上的長期依賴。
+2. **門控狀態單元演進：GRU 與 LSTM**：
+   * **GRU (Gated Recurrent Unit)**：引入重置門（Reset Gate）與更新門（Update Gate $z_t$），兼具長程記憶與運算簡練。
+   * **LSTM (Long Short-Term Memory)**：設計獨立的「細胞狀態輸送帶（Cell State $C^{\langle t \rangle}$）」，並配置三大閘門：
+     * **遺忘門 (Forget Gate $f$)**：決定拋棄多少舊記憶 $f_t = \sigma(W_f [a_{t-1}, x_t] + b_f)$。
+     * **輸入門 (Input Gate $i$)**：決定寫入多少新候選記憶 $\tilde{C}_t$。
+     * **輸出門 (Output Gate $o$)**：決定輸出多少細胞狀態至隱藏單元 $a_t$。
+     * 細胞狀態主要做線性加法操作，梯度能像 ResNet 般平順穿越上百步時間軸。
+3. **詞嵌入表示 (Word Embeddings)**：
+   * 傳統 One-Hot 編碼維度巨大且詞與詞之間內積恆為 0（完全孤立）。
+   * 詞嵌入將單字映射至低維連續稠密幾何空間（如 $\mathbb{R}^{300}$）。
+   * **幾何類比性質**：$v_{\text{King}} - v_{\text{Man}} + v_{\text{Woman}} \approx v_{\text{Queen}}$，單字之間的餘弦相似度能精準反映語意關聯。
+4. **注意力機制 (Attention Mechanism) 與 Transformer 序曲**：
+   * 傳統 Seq2Seq 編碼器將整句長文壓縮為固定維度的單一上下文向量（Context Vector），成為資訊傳輸的巨大瓶頸。
+   * **Attention 原理**：解碼器在生成每一個字時，自主計算與輸入句中各個字的注意力權重 $\alpha^{\langle t, t' \rangle}$，聚焦於最相關的上下文片段。
+   * 隨後發展為 Vaswani 等人提出的 **Scaled Dot-Product Attention**：
+     $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$$
+     徹底拋棄循環架構，開啟現代大語言模型（LLM）與 Vision Transformer（ViT）的全新紀元。
+

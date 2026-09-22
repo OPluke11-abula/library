@@ -9,9 +9,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
-[![NVIDIA DLI](https://img.shields.io/badge/NVIDIA-Campus_Ambassador_%26_DLI-76B900.svg?logo=nvidia&logoColor=white)](https://www.nvidia.com/en-us/training/)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Vault_100%25_Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![Agent Invariants](https://img.shields.io/badge/Formal_Rules-66_Invariants-06B6D4.svg)](file:///00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20(Grand%20Library%20Index%20&%20Navigator).md)
+[![Agent Invariants](https://img.shields.io/badge/Formal_Rules-66_Invariants-06B6D4.svg)](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20(Grand%20Library%20Index%20&%20Navigator).md)
 
 <p align="center">
   <b>從學士第一性原理、工業級生產代碼，到頂尖學術科研與自主 AI Agent 決策不變量的全景雙軌知識庫</b>

@@ -1,185 +1,220 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="100%" height="100%">
   <defs>
     <style>
-      .bg { fill: #0b0f17; }
-      .grid-line { stroke: #1e293b; stroke-width: 0.5; stroke-dasharray: 4 4; opacity: 0.35; }
-      .col-card { fill: #111827; stroke: #1f2937; stroke-width: 1.2; rx: 8px; }
-      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 24px; font-weight: 800; fill: #f8fafc; letter-spacing: -0.02em; }
-      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; fill: #94a3b8; }
-      .col-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; }
-      .col-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #f8fafc; }
-      .col-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; fill: #94a3b8; line-height: 1.5; }
-      .math-text { font-family: "Cambria Math", "Times New Roman", serif; font-size: 12px; fill: #38bdf8; font-style: italic; }
-      .inner-graph { fill: #0f172a; stroke: #1e293b; stroke-width: 1; rx: 6px; }
+      .canvas-bg { fill: #ffffff; }
+      .outer-border { fill: none; stroke: #e2e8f0; stroke-width: 1.5; rx: 12px; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #0f172a; letter-spacing: -0.01em; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12.5px; fill: #64748b; }
+      .meta-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 600; fill: #475569; }
+      .col-card { fill: #ffffff; stroke: #e2e8f0; stroke-width: 1.2; rx: 8px; }
+      .col-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+      .col-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #0f172a; }
+      .inner-graph { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1; rx: 6px; }
+      .math-text { font-family: "Cambria Math", "Times New Roman", serif; font-size: 12px; font-style: italic; }
+      .col-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11.5px; fill: #475569; line-height: 1.55; }
+      .label-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; fill: #64748b; }
+      .rule-badge { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 600; }
     </style>
-    <marker id="front-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8" />
+
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+    </marker>
+    <marker id="arr-amber" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+    </marker>
+    <marker id="arr-rose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#e11d48" />
+    </marker>
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#7c3aed" />
     </marker>
   </defs>
 
-  <rect width="1200" height="680" class="bg" />
+  <!-- Canvas Background -->
+  <rect width="1200" height="720" class="canvas-bg" />
+  <rect x="1" y="1" width="1198" height="718" class="outer-border" />
 
-  <!-- Technical Grid -->
-  <line x1="60" y1="90" x2="1140" y2="90" class="grid-line" />
+  <!-- Header Section -->
+  <g transform="translate(50, 26)">
+    <text class="header-title" x="0" y="20">統計邏輯校準、生成前沿與雙進程智慧代理人 (Logic &amp; Frontiers)</text>
+    <text class="header-sub" x="0" y="40">從 ECE 可靠度圖到流匹配最佳傳輸與 S1/S2 非自迴歸神經決策 • LIB-801, LIB-406 與 LIB-704 前沿演進</text>
 
-  <!-- Header -->
-  <g transform="translate(60, 35)">
-    <text class="header-title" x="0" y="24">統計邏輯校準、生成前沿與雙進程智慧代理人 (Logic &amp; Frontiers)</text>
-    <text class="header-sub" x="0" y="46">從 ECE 可靠度圖到流匹配最佳傳輸與 S1/S2 非自迴歸神經決策 • LIB-801, LIB-406 與 LIB-704 前沿演進</text>
+    <!-- Meta Pill -->
+    <g transform="translate(900, 4)">
+      <rect width="200" height="28" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+      <circle cx="16" cy="14" r="4" fill="#7c3aed" />
+      <text x="28" y="18" class="meta-tag">LIB-801/406/704 Frontiers</text>
+    </g>
   </g>
 
+  <line x1="50" y1="74" x2="1150" y2="74" stroke="#e2e8f0" stroke-width="1" />
+
   <!-- ================= COLUMN 1: Model Calibration & ECE ================= -->
-  <g transform="translate(60, 105)">
-    <rect width="345" height="535" class="col-card" stroke="#f59e0b" />
-    <text x="20" y="32" class="col-tag" fill="#f59e0b">01 • STATISTICAL LOGIC</text>
-    <text x="20" y="56" class="col-title">模型校準與過度自信 (ECE)</text>
+  <g transform="translate(50, 90)">
+    <rect width="350" height="595" class="col-card" />
+    <rect width="350" height="4" fill="#d97706" rx="2" />
+    <text x="20" y="28" class="col-tag" fill="#d97706">01 • STATISTICAL LOGIC</text>
+    <text x="20" y="52" class="col-title">模型校準與過度自信 (ECE)</text>
 
     <!-- Reliability Diagram Plot -->
-    <g transform="translate(20, 72)">
-      <rect width="305" height="230" class="inner-graph" />
-      <text x="14" y="22" font-family="monospace" font-size="10.5" fill="#94a3b8">可靠度圖 (Reliability Diagram)</text>
-      
+    <g transform="translate(20, 68)">
+      <rect width="310" height="235" class="inner-graph" />
+      <text x="14" y="20" font-family="-apple-system, sans-serif" font-size="10.5" fill="#64748b">可靠度圖 (Reliability Diagram)</text>
+
       <!-- Graph Axes -->
       <g transform="translate(45, 30)">
-        <line x1="0" y1="150" x2="210" y2="150" stroke="#334155" stroke-width="1.2" />
-        <line x1="0" y1="0" x2="0" y2="150" stroke="#334155" stroke-width="1.2" />
+        <line x1="0" y1="150" x2="210" y2="150" stroke="#94a3b8" stroke-width="1" />
+        <line x1="0" y1="0" x2="0" y2="150" stroke="#94a3b8" stroke-width="1" />
 
         <!-- Grid Lines -->
-        <line x1="0" y1="75" x2="210" y2="75" stroke="#1e293b" stroke-dasharray="2 2" />
-        <line x1="105" y1="0" x2="105" y2="150" stroke="#1e293b" stroke-dasharray="2 2" />
+        <line x1="0" y1="75" x2="200" y2="75" stroke="#e2e8f0" stroke-dasharray="2 2" />
+        <line x1="100" y1="0" x2="100" y2="150" stroke="#e2e8f0" stroke-dasharray="2 2" />
 
         <!-- Perfect Calibration Diagonal (y = x) -->
-        <line x1="0" y1="150" x2="200" y2="0" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3 3" />
-        <text x="135" y="45" font-family="monospace" font-size="9" fill="#64748b">完美校準 (y = x)</text>
+        <line x1="0" y1="150" x2="200" y2="0" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" />
+        <text x="135" y="42" class="label-sub">理想校準 y = x</text>
 
         <!-- Overconfident Curve (8-layer unregularized) -->
-        <path d="M 0 150 Q 150 145 200 40" fill="none" stroke="#ef4444" stroke-width="2" />
-        <text x="95" y="130" font-family="monospace" font-size="8.5" fill="#ef4444">8 層盲信 (ECE 巨大)</text>
+        <path d="M 0 150 Q 150 145 200 40" fill="none" stroke="#dc2626" stroke-width="2" />
+        <text x="95" y="132" font-family="ui-monospace, monospace" font-size="9" fill="#dc2626">8 層盲信 (ECE 巨大)</text>
 
         <!-- Well-calibrated 4-layer (Green) -->
-        <path d="M 0 150 L 50 115 L 100 78 L 150 40 L 200 5" fill="none" stroke="#10b981" stroke-width="2.2" />
-        <text x="50" y="70" font-family="monospace" font-size="8.5" fill="#10b981" font-weight="700">4 層校準網路</text>
+        <path d="M 0 150 L 50 115 L 100 78 L 150 40 L 200 5" fill="none" stroke="#059669" stroke-width="2.2" />
+        <text x="45" y="70" font-family="ui-monospace, monospace" font-size="9" fill="#059669" font-weight="700">4 層校準網路</text>
 
         <!-- Labels -->
-        <text x="65" y="168" font-family="sans-serif" font-size="9.5" fill="#94a3b8">Confidence (信心度)</text>
-        <text x="-35" y="80" font-family="sans-serif" font-size="9.5" fill="#94a3b8" transform="rotate(-90 -35 80)">Accuracy (精準度)</text>
+        <text x="65" y="168" class="label-sub">Confidence (信心度)</text>
+        <text x="-35" y="80" class="label-sub" transform="rotate(-90 -35 80)">Accuracy (精準度)</text>
       </g>
     </g>
 
-    <g transform="translate(20, 318)">
-      <text x="0" y="18" class="math-text">\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|</text>
-      <text x="0" y="42" font-family="monospace" font-size="11" fill="#f59e0b">Guo et al. (ICML 2017) 經典理論</text>
+    <g transform="translate(20, 320)">
+      <text x="0" y="18" class="math-text" fill="#92400e">\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|</text>
+      <text x="0" y="40" font-family="ui-monospace, monospace" font-size="11" fill="#d97706" font-weight="700">Guo et al. (ICML 2017) 經典度量</text>
       <text x="0" y="66" class="col-desc">
-        盲目堆疊 8 層無約束深層網路，Logits 數值極端膨脹，導致 Softmax 進入飽和盲區。面對微傾斜「8」模型武斷輸出「3: 100%」。
+        <tspan x="0" dy="0">盲目堆疊 8 層無約束深層網路，Logits 數值</tspan>
+        <tspan x="0" dy="18">極端膨脹，導致 Softmax 進入飽和盲信區。</tspan>
+        <tspan x="0" dy="18">面對微傾斜的「8」，模型武斷給出 99.9% 錯誤信度。</tspan>
       </text>
-      <text x="0" y="130" class="col-desc">
-        4 層金字塔架構搭配 BatchNorm 與 Dropout，輸出「8: 57%、7: 29%」，客觀反映模糊性，第一名命中真值，為良好校準模型。
+      <text x="0" y="140" class="col-desc">
+        <tspan x="0" dy="0">4 層金字塔架構搭配 BatchNorm 與 Dropout，</tspan>
+        <tspan x="0" dy="18">客觀輸出「8: 57%、7: 29%」，如實反映邊緣模糊</tspan>
+        <tspan x="0" dy="18">不確定性，兼顧預測精準與真實可靠。</tspan>
       </text>
-      <text x="0" y="195" font-family="monospace" font-size="10.5" fill="#10b981">✓ 溫度縮放: p̂_i = exp(z_i / T) / Σ exp(z_j / T)</text>
+      <text x="0" y="215" class="rule-badge" fill="#059669">✓ 溫度縮放: p̂_i = exp(z_i / T) / Σ exp(z_j / T)</text>
     </g>
   </g>
 
   <!-- ================= COLUMN 2: Generative Frontiers ================= -->
-  <g transform="translate(425, 105)">
-    <rect width="345" height="535" class="col-card" stroke="#f43f5e" />
-    <text x="20" y="32" class="col-tag" fill="#f43f5e">02 • GENERATIVE FRONTIERS</text>
-    <text x="20" y="56" class="col-title">生成演進：流匹配與 DiT 革命</text>
+  <g transform="translate(425, 90)">
+    <rect width="350" height="595" class="col-card" />
+    <rect width="350" height="4" fill="#e11d48" rx="2" />
+    <text x="20" y="28" class="col-tag" fill="#e11d48">02 • GENERATIVE FRONTIERS</text>
+    <text x="20" y="52" class="col-title">生成演進：流匹配與 DiT 革命</text>
 
     <!-- SDE vs Flow Matching Trajectory Diagram -->
-    <g transform="translate(20, 72)">
-      <rect width="305" height="230" class="inner-graph" />
-      <text x="14" y="22" font-family="monospace" font-size="10.5" fill="#94a3b8">擴散軌跡幾何對比 (ODE / SDE)</text>
+    <g transform="translate(20, 68)">
+      <rect width="310" height="235" class="inner-graph" />
+      <text x="14" y="20" font-family="-apple-system, sans-serif" font-size="10.5" fill="#64748b">擴散軌跡幾何對比 (ODE / SDE)</text>
 
-      <g transform="translate(25, 40)">
+      <g transform="translate(25, 36)">
         <!-- Points x0 (Noise) and x1 (Data) -->
-        <circle cx="25" cy="130" r="6" fill="#38bdf8" />
-        <text x="10" y="152" font-family="monospace" font-size="9.5" fill="#38bdf8">x₀ (雜訊)</text>
+        <circle cx="25" cy="135" r="5" fill="#2563eb" />
+        <text x="10" y="156" font-family="ui-monospace, monospace" font-size="9.5" fill="#2563eb" font-weight="600">x₀ (雜訊)</text>
 
-        <circle cx="235" cy="30" r="6" fill="#10b981" />
-        <text x="215" y="18" font-family="monospace" font-size="9.5" fill="#10b981">x₁ (真圖)</text>
+        <circle cx="235" cy="30" r="5" fill="#059669" />
+        <text x="215" y="18" font-family="ui-monospace, monospace" font-size="9.5" fill="#059669" font-weight="600">x₁ (真圖)</text>
 
-        <!-- SDE Curved Brownian Path (Orange) -->
-        <path d="M 25 130 Q 70 20 120 110 T 235 30" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="3 3" />
-        <text x="90" y="70" font-family="monospace" font-size="9" fill="#f59e0b">SDE 擴散曲折路徑 (50步)</text>
+        <!-- SDE Curved Brownian Path (Amber Dashed) -->
+        <path d="M 25 135 Q 70 20 120 115 T 235 30" fill="none" stroke="#d97706" stroke-width="1.6" stroke-dasharray="3 3" />
+        <text x="90" y="70" font-family="ui-monospace, monospace" font-size="9" fill="#d97706">SDE 曲折路徑 (50步積分)</text>
 
-        <!-- Rectified Flow Matching Straight Line (Pink) -->
-        <line x1="25" y1="130" x2="235" y2="30" stroke="#f43f5e" stroke-width="2.5" />
-        <text x="105" y="105" font-family="monospace" font-size="9.5" fill="#f43f5e" font-weight="700">流匹配直線 κ=0 (5步!)</text>
+        <!-- Rectified Flow Matching Straight Line (Rose Solid) -->
+        <line x1="25" y1="135" x2="235" y2="30" stroke="#e11d48" stroke-width="2.2" marker-end="url(#arr-rose)" />
+        <text x="105" y="105" font-family="ui-monospace, monospace" font-size="9.5" fill="#e11d48" font-weight="700">流匹配直線 κ=0 (5步速達)</text>
 
         <!-- DiT Patchification Box -->
-        <g transform="translate(20, 160)">
-          <rect width="220" height="24" rx="3" fill="#1e293b" stroke="#334155" />
-          <text x="12" y="16" font-family="monospace" font-size="9" fill="#f8fafc">DiT 革命: 拋棄 UNet • 圖片切成 Patch 塊</text>
+        <g transform="translate(10, 168)">
+          <rect width="240" height="26" rx="3" fill="#ffffff" stroke="#cbd5e1" />
+          <text x="12" y="17" font-family="ui-monospace, monospace" font-size="9.5" fill="#334155">DiT 革命: 拋棄 UNet • 圖片切成 Patch 塊</text>
         </g>
       </g>
     </g>
 
-    <g transform="translate(20, 318)">
-      <text x="0" y="18" class="math-text">\frac{d x_t}{d t} = v_t(x_t) = x_1 - x_0 \quad \text{[Optimal Transport]}</text>
-      <text x="0" y="42" font-family="monospace" font-size="11" fill="#f43f5e">最佳傳輸流匹配 (Flow Matching)</text>
+    <g transform="translate(20, 320)">
+      <text x="0" y="18" class="math-text" fill="#be123c">\frac{d x_t}{d t} = v_t(x_t) = x_1 - x_0 \quad \text{[Optimal Transport]}</text>
+      <text x="0" y="40" font-family="ui-monospace, monospace" font-size="11" fill="#e11d48" font-weight="700">最佳傳輸流匹配 (Flow Matching)</text>
       <text x="0" y="66" class="col-desc">
-        傳統 DDPM/SDE 模擬熱力學布朗運動，軌跡高度彎曲，依賴數十步數值積分。
+        <tspan x="0" dy="0">傳統 DDPM/SDE 模擬熱力學布朗運動擴散，</tspan>
+        <tspan x="0" dy="18">微分方程軌跡高度彎曲，依賴數十步微積分迭代。</tspan>
       </text>
       <text x="0" y="120" class="col-desc">
-        Flow Matching / Rectified Flow 證明兩點之間直線最短（曲率 κ=0），僅需 5 步歐拉積分生成超高解析度。
+        <tspan x="0" dy="0">Flow Matching 奠基於最佳傳輸理論，使先驗</tspan>
+        <tspan x="0" dy="18">分佈直達目標分佈（曲率 $\kappa=0$ 直線速度場），</tspan>
+        <tspan x="0" dy="18">僅需 4~5 步歐拉數值積分即生成超高解析細節。</tspan>
       </text>
-      <text x="0" y="175" class="col-desc">
-        對齊前沿生成模型與擴散模型自適應內容風格融合，支撐 3DGS 跨模態視覺渲染。
+      <text x="0" y="195" class="col-desc">
+        <tspan x="0" dy="0">架構與 3DGS 跨模態視覺渲染及最新擴散基礎模型</tspan>
+        <tspan x="0" dy="18">深度銜接，代表現代前沿生成式架構標準。</tspan>
       </text>
     </g>
   </g>
 
   <!-- ================= COLUMN 3: Dual-Process Neural Agent ================= -->
-  <g transform="translate(790, 105)">
-    <rect width="350" height="535" class="col-card" stroke="#818cf8" />
-    <text x="20" y="32" class="col-tag" fill="#818cf8">03 • COGNITIVE ARCHITECTURE</text>
-    <text x="20" y="56" class="col-title">雙進程神經代理人 (S1/S2)</text>
+  <g transform="translate(800, 90)">
+    <rect width="350" height="595" class="col-card" />
+    <rect width="350" height="4" fill="#7c3aed" rx="2" />
+    <text x="20" y="28" class="col-tag" fill="#7c3aed">03 • COGNITIVE ARCHITECTURE</text>
+    <text x="20" y="52" class="col-title">雙進程神經代理人 (S1/S2)</text>
 
     <!-- S1 vs S2 Diagram -->
-    <g transform="translate(20, 72)">
-      <rect width="310" height="230" class="inner-graph" />
-      <text x="14" y="22" font-family="monospace" font-size="10.5" fill="#94a3b8">快思慢想神經架構 (Jev / CUA-S1)</text>
+    <g transform="translate(20, 68)">
+      <rect width="310" height="235" class="inner-graph" />
+      <text x="14" y="20" font-family="-apple-system, sans-serif" font-size="10.5" fill="#64748b">快思慢想神經架構 (Jev / CUA-S1)</text>
 
-      <g transform="translate(20, 35)">
+      <g transform="translate(16, 36)">
         <!-- Input State -->
-        <rect x="0" y="10" width="80" height="40" rx="4" fill="#1e293b" stroke="#38bdf8" />
-        <text x="12" y="34" font-family="sans-serif" font-size="10" fill="#f8fafc">螢幕字節輸入</text>
+        <rect x="0" y="12" width="75" height="38" rx="4" fill="#ffffff" stroke="#93c5fd" />
+        <text x="8" y="34" font-family="-apple-system, sans-serif" font-size="9.5" fill="#1e40af" font-weight="600">環境感知輸入</text>
 
-        <!-- Branch Arrow -->
-        <path d="M 85 30 L 120 30" stroke="#38bdf8" stroke-width="1.5" marker-end="url(#front-arrow)" />
+        <!-- Forward Arrow -->
+        <path d="M 78 30 L 108 30" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr-blue)" />
 
         <!-- S1 System (Fast Reflex) -->
-        <g transform="translate(125, 0)">
-          <rect width="135" height="58" rx="4" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
-          <text x="10" y="22" font-family="monospace" font-size="10" fill="#10b981" font-weight="700">System 1 (直覺快思)</text>
-          <text x="10" y="38" font-family="sans-serif" font-size="9" fill="#94a3b8">Jev 非自迴歸型態反射</text>
-          <text x="10" y="50" font-family="monospace" font-size="9" fill="#10b981">延遲 &lt; 50ms • p_max ≥ τ</text>
+        <g transform="translate(114, 2)">
+          <rect width="158" height="56" rx="4" fill="#ffffff" stroke="#86efac" stroke-width="1.3" />
+          <text x="10" y="20" font-family="ui-monospace, monospace" font-size="10" fill="#059669" font-weight="700">System 1 (直覺快思)</text>
+          <text x="10" y="34" font-family="-apple-system, sans-serif" font-size="9" fill="#475569">Jev 非自迴歸型態反射</text>
+          <text x="10" y="48" font-family="ui-monospace, monospace" font-size="9" fill="#059669">延遲 &lt; 50ms • p_max ≥ 0.85</text>
         </g>
 
-        <!-- Escalation Threshold Gate -->
-        <path d="M 190 62 L 190 95" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2" />
-        <text x="105" y="82" font-family="monospace" font-size="8.5" fill="#f59e0b">若 p_max &lt; 0.85 升級 ➔</text>
+        <!-- Escalation Gate Arrow -->
+        <path d="M 190 62 L 190 92" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arr-amber)" />
+        <text x="80" y="80" font-family="ui-monospace, monospace" font-size="8.5" fill="#d97706">若 p_max &lt; 0.85 升級 ➔</text>
 
         <!-- S2 System (Slow Reasoning) -->
-        <g transform="translate(40, 100)">
-          <rect width="220" height="58" rx="4" fill="#1e293b" stroke="#818cf8" stroke-width="1.5" />
-          <text x="12" y="22" font-family="monospace" font-size="10" fill="#818cf8" font-weight="700">System 2 (深度慢想: ReAct)</text>
-          <text x="12" y="38" font-family="sans-serif" font-size="9" fill="#94a3b8">長程思維鏈 (CoT) • 工具調用</text>
-          <text x="12" y="50" font-family="monospace" font-size="9" fill="#818cf8">67 條形式化不變量嚴格守護</text>
+        <g transform="translate(30, 98)">
+          <rect width="242" height="58" rx="4" fill="#ffffff" stroke="#c4b5fd" stroke-width="1.3" />
+          <text x="12" y="20" font-family="ui-monospace, monospace" font-size="10" fill="#7c3aed" font-weight="700">System 2 (深度慢想: ReAct)</text>
+          <text x="12" y="34" font-family="-apple-system, sans-serif" font-size="9" fill="#475569">思維鏈推理 (CoT) • 閉環工具調用</text>
+          <text x="12" y="48" font-family="ui-monospace, monospace" font-size="9" fill="#7c3aed">66 條形式化不變量嚴格守護</text>
         </g>
       </g>
     </g>
 
-    <g transform="translate(20, 318)">
-      <text x="0" y="18" class="math-text">P(c_i \mid x) = \frac{\exp(\langle e_{\text{context}}, W_{c_i} \rangle / \tau)}{\sum_j \exp(\langle e_{\text{context}}, W_{c_j} \rangle / \tau)}</text>
-      <text x="0" y="42" font-family="monospace" font-size="11" fill="#818cf8">[RULE-704-01] 雙進程升級契約</text>
+    <g transform="translate(20, 320)">
+      <text x="0" y="18" class="math-text" fill="#5b21b6">P(c_i \mid x) = \frac{\exp(\langle e_{\text{context}}, W_{c_i} \rangle / \tau)}{\sum_j \exp(\langle e_{\text{context}}, W_{c_j} \rangle / \tau)}</text>
+      <text x="0" y="40" font-family="ui-monospace, monospace" font-size="11" fill="#7c3aed" font-weight="700">[RULE-704-01] 雙進程升級契約</text>
       <text x="0" y="66" class="col-desc">
-        傳統 LLM Agent 逐字自迴歸生成 JSON 極其緩慢（秒級延遲且常發生語法錯誤）。
+        <tspan x="0" dy="0">傳統自迴歸 LLM Agent 逐 token 生成速度慢</tspan>
+        <tspan x="0" dy="18">（秒級延遲）且易出現格式幻覺。</tspan>
       </text>
-      <text x="0" y="120" class="col-desc">
-        Jev / CUA-S1 採用非自迴歸分類頭直接預測具型態動作（50ms 反射）；一旦置信度低於閾值 τ=0.85，自動無縫提升至 S2 進行閉環邏輯推理。
+      <text x="0" y="115" class="col-desc">
+        <tspan x="0" dy="0">Jev / CUA-S1 採用非自迴歸分類頭直接預測</tspan>
+        <tspan x="0" dy="18">具型態動作（50ms 瞬間反射）；當置信度</tspan>
+        <tspan x="0" dy="18">低於安全閾值時，無縫升級至 S2 進行嚴密推理。</tspan>
       </text>
-      <text x="0" y="195" font-family="monospace" font-size="10.5" fill="#10b981">✓ 突破: 兼具即時反射速度與深度慢想嚴謹度</text>
+      <text x="0" y="195" class="rule-badge" fill="#059669">✓ 系統特質: 兼備快思反射效率與慢想邏輯穩健度</text>
     </g>
   </g>
 </svg>

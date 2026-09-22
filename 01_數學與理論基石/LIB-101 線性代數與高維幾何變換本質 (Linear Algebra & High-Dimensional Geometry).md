@@ -34,6 +34,8 @@ tags:
   - LoRA
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/01_mathematics/LIB-101%20Linear%20Algebra%20%26%20High-Dimensional%20Geometry%20%28Agent%20EN%29.md)
+
 # 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)
 
 ## 🧭 拓樸導航與概念座標

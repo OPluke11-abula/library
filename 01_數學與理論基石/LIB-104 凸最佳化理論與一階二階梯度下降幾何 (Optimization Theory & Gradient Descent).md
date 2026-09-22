@@ -33,6 +33,8 @@ tags:
   - Muon
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/01_mathematics/LIB-104%20Convex%20Optimization%20%26%20Gradient%20Descent%20%28Agent%20EN%29.md)
+
 # 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)
 
 ## 🧭 拓樸導航與概念座標

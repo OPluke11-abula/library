@@ -6,6 +6,8 @@ created: 2026-09-17
 updated: 2026-09-21
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (Agent Edition)](en/00_overview/00%20Library%20Index%20%28Agent%20EN%29.md)
+
 # 資訊工程與深度學習宏偉圖書館 (CSIE & Deep Learning Grand Library)
 
 > 🏛️ **圖書館系統已全面升級重構並注入 2024-2026 頂級同行評審期刊與論文！**

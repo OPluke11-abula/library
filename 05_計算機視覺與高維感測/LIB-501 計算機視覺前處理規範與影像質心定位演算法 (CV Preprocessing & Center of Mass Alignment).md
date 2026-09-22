@@ -39,6 +39,8 @@ tags:
   - 莊啓宏教授
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-501%20CV%20Preprocessing%20%26%20Center%20of%20Mass%20Alignment%20%28Agent%20EN%29.md)
+
 # 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)
 
 ## 🧭 拓樸導航與概念座標

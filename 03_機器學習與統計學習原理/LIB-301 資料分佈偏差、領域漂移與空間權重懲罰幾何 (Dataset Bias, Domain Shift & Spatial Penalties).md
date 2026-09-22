@@ -34,6 +34,8 @@ tags:
   - 空間懲罰
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/03_machine_learning/LIB-301%20Dataset%20Bias%2C%20Domain%20Shift%20%26%20Spatial%20Penalties%20%28Agent%20EN%29.md)
+
 # 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)
 
 ## 🧭 拓樸導航與概念座標

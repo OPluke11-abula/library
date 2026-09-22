@@ -35,6 +35,8 @@ tags:
   - RoPE
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/04_deep_learning_architectures/LIB-405%20Attention%20Mechanism%20%26%20Transformer%20Revolution%20%28Agent%20EN%29.md)
+
 # 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)
 
 ## 🧭 拓樸導航與概念座標

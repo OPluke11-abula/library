@@ -33,6 +33,8 @@ tags:
   - INT4
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/08_ai_systems_engineering/LIB-802%20Quantization%20Mathematics%20%26%20Low-Precision%20Inference%20%28Agent%20EN%29.md)
+
 # 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)
 
 ## 🧭 拓樸導航與概念座標

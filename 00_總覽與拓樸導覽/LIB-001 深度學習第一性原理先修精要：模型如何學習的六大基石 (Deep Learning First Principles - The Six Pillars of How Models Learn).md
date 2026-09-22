@@ -37,6 +37,8 @@ tags:
   - 評估指標
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/00_overview/LIB-001%20Deep%20Learning%20First%20Principles%20%28Agent%20EN%29.md)
+
 # 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)
 
 > 「在急於推導微積分連鎖律與證明損失函數凸性之前，我們必須先回答一個最根本的物理問題：機器究竟是透過什麼機制，將隨機的雜訊旋鈕調整為能夠辨識貓狗、理解語言與生成藝術的神經網路？」

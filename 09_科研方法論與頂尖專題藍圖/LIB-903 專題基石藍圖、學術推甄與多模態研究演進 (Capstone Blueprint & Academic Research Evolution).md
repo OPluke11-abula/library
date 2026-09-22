@@ -40,6 +40,8 @@ tags:
   - 交大資工
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-903%20Capstone%20Blueprint%20%26%20Academic%20Research%20Evolution%20%28Agent%20EN%29.md)
+
 # 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)
 
 ## 🧭 拓樸導航與概念座標

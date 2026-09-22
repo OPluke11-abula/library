@@ -36,6 +36,8 @@ tags:
   - GQA
 ---
 
+> 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20%26%20Scaling%20Laws%20%28Agent%20EN%29.md)
+
 # 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)
 
 ## 🧭 拓樸導航與概念座標

@@ -1,0 +1,99 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "path:00_總覽與拓樸導覽",
+      "color": {
+        "a": 1,
+        "rgb": 3719160
+      }
+    },
+    {
+      "query": "path:01_數學與理論基石",
+      "color": {
+        "a": 1,
+        "rgb": 16096779
+      }
+    },
+    {
+      "query": "path:02_計算機系統與硬體架構",
+      "color": {
+        "a": 1,
+        "rgb": 1096065
+      }
+    },
+    {
+      "query": "path:03_機器學習與統計學習原理",
+      "color": {
+        "a": 1,
+        "rgb": 9133302
+      }
+    },
+    {
+      "query": "path:04_深度學習架構與神經機制",
+      "color": {
+        "a": 1,
+        "rgb": 16007006
+      }
+    },
+    {
+      "query": "path:05_計算機視覺與高維感測",
+      "color": {
+        "a": 1,
+        "rgb": 440020
+      }
+    },
+    {
+      "query": "path:06_自然語言處理與大語言模型",
+      "color": {
+        "a": 1,
+        "rgb": 6514417
+      }
+    },
+    {
+      "query": "path:07_強化學習與智慧代理人",
+      "color": {
+        "a": 1,
+        "rgb": 15358092
+      }
+    },
+    {
+      "query": "path:08_AI系統工程與高效部署",
+      "color": {
+        "a": 1,
+        "rgb": 1358010
+      }
+    },
+    {
+      "query": "path:09_科研方法論與頂尖專題藍圖",
+      "color": {
+        "a": 1,
+        "rgb": 14239471
+      }
+    },
+    {
+      "query": "path:_archive_legacy",
+      "color": {
+        "a": 0.5,
+        "rgb": 6579307
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": true,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1.25,
+  "lineSizeMultiplier": 1.2,
+  "collapse-forces": false,
+  "linkStrength": 1,
+  "linkDistance": 240,
+  "repulsion": 12,
+  "gravity": 1.0,
+  "centerStrength": 0.35
+}

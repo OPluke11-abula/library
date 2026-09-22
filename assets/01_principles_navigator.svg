@@ -1,137 +1,248 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e1b4b" />
-    </linearGradient>
-    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b" />
-      <stop offset="100%" stop-color="#0f172a" />
-    </linearGradient>
-    <linearGradient id="accentCyan" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#06b6d4" />
-      <stop offset="100%" stop-color="#3b82f6" />
-    </linearGradient>
-    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#8b5cf6" />
-      <stop offset="100%" stop-color="#ec4899" />
-    </linearGradient>
-    <linearGradient id="accentAmber" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f59e0b" />
-      <stop offset="100%" stop-color="#10b981" />
-    </linearGradient>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
-      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.4" />
-    </filter>
-    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8" />
-    </marker>
+    <style>
+      .bg { fill: #0b0f17; }
+      .grid-line { stroke: #1e293b; stroke-width: 0.5; stroke-dasharray: 4 4; opacity: 0.35; }
+      .pillar-card { fill: #111827; stroke: #1f2937; stroke-width: 1.2; rx: 8px; }
+      .pillar-card:hover { stroke: #38bdf8; }
+      .header-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 24px; font-weight: 800; fill: #f8fafc; letter-spacing: -0.02em; }
+      .header-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; fill: #94a3b8; }
+      .pillar-tag { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; }
+      .pillar-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 15px; font-weight: 700; fill: #f8fafc; }
+      .pillar-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #94a3b8; line-height: 1.5; }
+      .math-eq { font-family: "Cambria Math", "Times New Roman", serif; font-size: 12.5px; fill: #38bdf8; font-style: italic; }
+      .diagram-bg { fill: #0f172a; stroke: #1e293b; stroke-width: 1; rx: 6px; }
+      .accent-line { stroke-width: 1.5; stroke-linecap: round; }
+    </style>
   </defs>
 
-  <rect width="1100" height="620" rx="16" fill="url(#bgGrad)" />
+  <rect width="1200" height="680" class="bg" />
 
-  <!-- Title Badge -->
-  <rect x="50" y="30" width="300" height="34" rx="17" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" stroke-width="1.5" />
-  <text x="200" y="52" fill="#38bdf8" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" text-anchor="middle">💡 原理篇 (Principles Navigator)</text>
+  <!-- Technical Grid -->
+  <line x1="60" y1="90" x2="1140" y2="90" class="grid-line" />
+  <line x1="60" y1="375" x2="1140" y2="375" class="grid-line" />
 
-  <text x="50" y="105" fill="#f8fafc" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800">深度學習第一性原理：模型如何學習的六大核心基石</text>
-  <text x="50" y="135" fill="#94a3b8" font-family="system-ui, -apple-system, sans-serif" font-size="15">破除黑盒子迷思：從高維幾何向量到自適應優化與卷積歸納偏置</text>
+  <!-- Header -->
+  <g transform="translate(60, 35)">
+    <text class="header-title" x="0" y="24">深度學習第一性原理先修導覽 (Deep Learning First Principles)</text>
+    <text class="header-sub" x="0" y="46">模型如何學習的六大數理基石與直觀幾何 • LIB-001 典籍核心理論架構映射</text>
+  </g>
 
-  <!-- 6 Step Cards -->
-  <!-- Card 1 -->
-  <g transform="translate(50, 165)" filter="url(#shadow)">
-    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentCyan)" />
-    <text x="20" y="35" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 01 • 數值與向量</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">高維空間投影 (Vector/Matrix)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13" line-height="1.5">
-      <tspan x="20" dy="0">電腦看圖只有矩陣 (28x28=784 像素)</tspan>
-      <tspan x="20" dy="22">權重 W 是空間旋轉縮放，偏置 b 是平移</tspan>
-      <tspan x="20" dy="22">對齊館藏：LIB-101 線性代數與高維幾何</tspan>
+  <!-- ================= ROW 1 (Pillars 01 - 03) ================= -->
+
+  <!-- Pillar 01: High-Dimensional Projection -->
+  <g transform="translate(60, 105)">
+    <rect width="345" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#38bdf8">PILLAR 01 • 幾何變換</text>
+    <text x="20" y="52" class="pillar-title">高維空間投影 (Linear Map)</text>
+    
+    <!-- Schematic: Vector Space Projection -->
+    <g transform="translate(20, 68)">
+      <rect width="305" height="110" class="diagram-bg" />
+      <!-- Coordinate Grid -->
+      <line x1="40" y1="95" x2="280" y2="95" stroke="#334155" stroke-width="1" />
+      <line x1="60" y1="15" x2="60" y2="100" stroke="#334155" stroke-width="1" />
+      <!-- Input Vector -->
+      <line x1="60" y1="95" x2="150" y2="45" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="3 3" />
+      <circle cx="150" cy="45" r="3" fill="#94a3b8" />
+      <text x="110" y="38" font-family="monospace" font-size="10" fill="#94a3b8">x ∈ ℝ⁷⁸⁴</text>
+      <!-- Transformation Matrix W -->
+      <path d="M 160 48 Q 185 30 210 55" fill="none" stroke="#38bdf8" stroke-width="1.5" />
+      <text x="175" y="28" font-family="monospace" font-size="11" fill="#38bdf8" font-weight="700">W · x</text>
+      <!-- Projected Vector -->
+      <line x1="60" y1="95" x2="250" y2="60" stroke="#38bdf8" stroke-width="2.2" />
+      <circle cx="250" cy="60" r="4" fill="#38bdf8" />
+      <text x="220" y="85" font-family="monospace" font-size="10" fill="#38bdf8">y ∈ ℝ²⁵⁶</text>
+    </g>
+
+    <text x="20" y="200" class="math-eq">y = W x + b \quad (W \in \mathbb{R}^{d_{out} \times d_{in}})</text>
+    <text x="20" y="222" class="pillar-desc">
+      電腦看到的是 784 維像素空間點，權重矩陣本質為高維旋轉、縮放與超平面投影。
     </text>
   </g>
 
-  <!-- Arrow 1 to 2 -->
-  <path d="M 370 250 L 395 250" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Pillar 02: Forward Pass & Activation -->
+  <g transform="translate(425, 105)">
+    <rect width="345" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#10b981">PILLAR 02 • 神經機制</text>
+    <text x="20" y="52" class="pillar-title">神經骨架與前向傳播 (Forward)</text>
+    
+    <!-- Schematic: Forward Layer with ReLU -->
+    <g transform="translate(20, 68)">
+      <rect width="305" height="110" class="diagram-bg" />
+      <!-- Input Layer Nodes -->
+      <circle cx="45" cy="35" r="7" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+      <circle cx="45" cy="60" r="7" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+      <circle cx="45" cy="85" r="7" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+      <!-- Hidden Layer Nodes -->
+      <circle cx="160" cy="45" r="9" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+      <circle cx="160" cy="75" r="9" fill="#1e293b" stroke="#10b981" stroke-width="1.5" />
+      <!-- Connections -->
+      <line x1="52" y1="35" x2="151" y2="45" stroke="#334155" stroke-width="1" />
+      <line x1="52" y1="60" x2="151" y2="45" stroke="#334155" stroke-width="1" />
+      <line x1="52" y1="85" x2="151" y2="75" stroke="#334155" stroke-width="1" />
+      <!-- ReLU plot box -->
+      <g transform="translate(215, 30)">
+        <rect width="75" height="60" fill="#0b0f17" stroke="#334155" stroke-width="0.8" rx="4" />
+        <line x1="10" y1="45" x2="65" y2="45" stroke="#475569" stroke-width="0.8" />
+        <line x1="38" y1="10" x2="38" y2="52" stroke="#475569" stroke-width="0.8" />
+        <!-- ReLU line -->
+        <line x1="10" y1="45" x2="38" y2="45" stroke="#10b981" stroke-width="2" />
+        <line x1="38" y1="45" x2="65" y2="18" stroke="#10b981" stroke-width="2" />
+        <text x="18" y="20" font-family="monospace" font-size="9" fill="#10b981">ReLU(z)</text>
+      </g>
+    </g>
 
-  <!-- Card 2 -->
-  <g transform="translate(400, 165)" filter="url(#shadow)">
-    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentCyan)" />
-    <text x="20" y="35" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 02 • 神經機制</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">網路骨架與前向傳播 (Forward)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
-      <tspan x="20" dy="0">Dense: 全連接牽線，矩陣乘法 z=Wx+b</tspan>
-      <tspan x="20" dy="22">Activation: ReLU 消除梯度消失、提供非線性</tspan>
-      <tspan x="20" dy="22">對齊館藏：LIB-001 第一性原理六大基石</tspan>
+    <text x="20" y="200" class="math-eq">a = \max(0, z) = \text{ReLU}(W x + b)</text>
+    <text x="20" y="222" class="pillar-desc">
+      線性疊加仍為線性；非線性激活函數使網路具備通用逼近能力，消除梯度飽和。
     </text>
   </g>
 
-  <!-- Arrow 2 to 3 -->
-  <path d="M 720 250 L 745 250" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Pillar 03: Loss Function & Probability Target -->
+  <g transform="translate(790, 105)">
+    <rect width="350" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#f59e0b">PILLAR 03 • 距離度量</text>
+    <text x="20" y="52" class="pillar-title">損失函數打靶 (Loss Optimization)</text>
+    
+    <!-- Schematic: Softmax vs True Distribution -->
+    <g transform="translate(20, 68)">
+      <rect width="310" height="110" class="diagram-bg" />
+      <text x="20" y="25" font-family="sans-serif" font-size="10.5" fill="#94a3b8">Logits ➔ Softmax 機率分佈對比 (真值 = 7)</text>
+      <!-- Bars -->
+      <g transform="translate(30, 40)">
+        <!-- Bar 3 -->
+        <rect x="10" y="35" width="22" height="20" fill="#334155" rx="2" />
+        <text x="14" y="68" font-family="monospace" font-size="9.5" fill="#94a3b8">3</text>
+        <text x="10" y="30" font-family="monospace" font-size="8.5" fill="#94a3b8">0.08</text>
 
-  <!-- Card 3 -->
-  <g transform="translate(750, 165)" filter="url(#shadow)">
-    <rect width="300" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="300" height="5" rx="2" fill="url(#accentPurple)" />
-    <text x="20" y="35" fill="#c084fc" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 03 • 誤差度量</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">損失函數打靶 (Loss Function)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
-      <tspan x="20" dy="0">模型如何知道自己錯了？</tspan>
-      <tspan x="20" dy="22">Categorical Cross-Entropy: 衡量分佈距離</tspan>
-      <tspan x="20" dy="22">Softmax 輸出 0~1 機率，算交叉熵懲罰</tspan>
+        <!-- Bar 7 (Target) -->
+        <rect x="70" y="5" width="24" height="50" fill="#f59e0b" rx="2" />
+        <text x="76" y="68" font-family="monospace" font-size="9.5" fill="#f59e0b" font-weight="700">7</text>
+        <text x="68" y="0" font-family="monospace" font-size="8.5" fill="#f59e0b" font-weight="700">0.82</text>
+
+        <!-- Bar 8 -->
+        <rect x="130" y="42" width="22" height="13" fill="#334155" rx="2" />
+        <text x="134" y="68" font-family="monospace" font-size="9.5" fill="#94a3b8">8</text>
+        <text x="130" y="37" font-family="monospace" font-size="8.5" fill="#94a3b8">0.05</text>
+
+        <!-- Cross-Entropy Arrow -->
+        <path d="M 190 28 L 245 28" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="3 3" />
+        <text x="185" y="18" font-family="monospace" font-size="9" fill="#f43f5e">D_KL(P || Q)</text>
+        <text x="200" y="48" font-family="monospace" font-size="10" fill="#f8fafc" font-weight="700">Loss: 0.198</text>
+      </g>
+    </g>
+
+    <text x="20" y="200" class="math-eq">\mathcal{L}_{\text{CE}} = - \sum_{i=1}^C y_i \log(\hat{y}_i) = -\log(\hat{y}_{\text{true}})</text>
+    <text x="20" y="222" class="pillar-desc">
+      Softmax 將任意 Logits 映射至標準機率流形；交叉熵損失度量模型分佈與真值的距離。
     </text>
   </g>
 
-  <!-- Row 2 -->
-  <!-- Card 4 -->
-  <g transform="translate(50, 360)" filter="url(#shadow)">
-    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentPurple)" />
-    <text x="20" y="35" fill="#c084fc" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 04 • 修正引擎</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">反向傳播與梯度 (Backprop)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
-      <tspan x="20" dy="0">微積分連鎖律 (Chain Rule) 從後往前傳</tspan>
-      <tspan x="20" dy="22">梯度 Gradient: 下山最陡的方向 (方向指針)</tspan>
-      <tspan x="20" dy="22">對齊館藏：LIB-104 凸最佳化與梯度幾何</tspan>
+  <!-- ================= ROW 2 (Pillars 04 - 06) ================= -->
+
+  <!-- Pillar 04: Backpropagation & Jacobians -->
+  <g transform="translate(60, 390)">
+    <rect width="345" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#f43f5e">PILLAR 04 • 微積分連鎖律</text>
+    <text x="20" y="52" class="pillar-title">反向傳播與負梯度流 (Backprop)</text>
+    
+    <!-- Schematic: Contour Map with Gradient Steps -->
+    <g transform="translate(20, 68)">
+      <rect width="305" height="110" class="diagram-bg" />
+      <!-- Valley Contours -->
+      <ellipse cx="150" cy="55" rx="120" ry="42" fill="none" stroke="#334155" stroke-width="1" />
+      <ellipse cx="150" cy="55" rx="85" ry="28" fill="none" stroke="#475569" stroke-width="1" />
+      <ellipse cx="150" cy="55" rx="45" ry="15" fill="none" stroke="#64748b" stroke-width="1" />
+      <circle cx="150" cy="55" r="3" fill="#10b981" />
+      <text x="156" y="58" font-family="monospace" font-size="9" fill="#10b981">w* (Min)</text>
+      <!-- Descent Trajectory -->
+      <path d="M 60 25 L 90 40 L 115 50 L 138 54 L 148 55" fill="none" stroke="#f43f5e" stroke-width="1.8" />
+      <circle cx="60" cy="25" r="3.5" fill="#f43f5e" />
+      <text x="45" y="18" font-family="monospace" font-size="9" fill="#f43f5e">w₀ (Start)</text>
+      <text x="100" y="32" font-family="monospace" font-size="8.5" fill="#f43f5e">-η ∇L</text>
+    </g>
+
+    <text x="20" y="200" class="math-eq">\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \frac{\partial \mathcal{L}}{\partial z^{[l]}} \cdot (a^{[l-1]})^T = \delta^{[l]} (a^{[l-1]})^T</text>
+    <text x="20" y="222" class="pillar-desc">
+      微積分連鎖律是高維下山的指南針；梯度指示損失山谷最陡峭的方向，沿負方向迭代。
     </text>
   </g>
 
-  <!-- Arrow 4 to 5 -->
-  <path d="M 370 445 L 395 445" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Pillar 05: Optimizer Dynamics -->
+  <g transform="translate(425, 390)">
+    <rect width="345" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#a855f7">PILLAR 05 • 自適應巡航</text>
+    <text x="20" y="52" class="pillar-title">自適應優化與學習率 (Optimizer)</text>
+    
+    <!-- Schematic: SGD vs Adam Trajectory -->
+    <g transform="translate(20, 68)">
+      <rect width="305" height="110" class="diagram-bg" />
+      <!-- Ravine -->
+      <path d="M 20 20 C 80 80 220 80 285 20" fill="none" stroke="#334155" stroke-width="1" />
+      <path d="M 40 35 C 90 75 210 75 265 35" fill="none" stroke="#475569" stroke-width="1" />
+      <!-- SGD oscillations (Red) -->
+      <path d="M 50 40 L 80 80 L 110 30 L 140 75 L 170 35 L 200 65" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="2 2" />
+      <text x="80" y="95" font-family="monospace" font-size="9" fill="#ef4444">SGD 劇烈震盪</text>
+      <!-- Adam smooth curve (Purple) -->
+      <path d="M 50 40 Q 110 60 210 55" fill="none" stroke="#a855f7" stroke-width="2.2" />
+      <circle cx="210" cy="55" r="3.5" fill="#a855f7" />
+      <text x="175" y="45" font-family="monospace" font-size="9" fill="#a855f7" font-weight="700">Adam 平滑巡航</text>
+    </g>
 
-  <!-- Card 5 -->
-  <g transform="translate(400, 360)" filter="url(#shadow)">
-    <rect width="310" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="310" height="5" rx="2" fill="url(#accentAmber)" />
-    <text x="20" y="35" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 05 • 自適應巡航</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">優化器與學習率 (Optimizer)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
-      <tspan x="20" dy="0">SGD: 容易震盪或卡在鞍點</tspan>
-      <tspan x="20" dy="22">Adam: 一階慣性動量 + 二階自適應油門</tspan>
-      <tspan x="20" dy="22">陡坡自動踩煞車，平原自動踩油門加速</tspan>
+    <text x="20" y="200" class="math-eq">m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t, \quad v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2</text>
+    <text x="20" y="222" class="pillar-desc">
+      一階動量帶慣性越過局部極小峽谷；二階動量依歷史梯度大小自適應縮放步長。
     </text>
   </g>
 
-  <!-- Arrow 5 to 6 -->
-  <path d="M 720 445 L 745 445" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- Pillar 06: CNN & Inductive Bias -->
+  <g transform="translate(790, 390)">
+    <rect width="350" height="255" class="pillar-card" />
+    <text x="20" y="28" class="pillar-tag" fill="#06b6d4">PILLAR 06 • 空間歸納偏置</text>
+    <text x="20" y="52" class="pillar-title">卷積與平移等變性 (CNN Bias)</text>
+    
+    <!-- Schematic: Convolution Sliding Kernel -->
+    <g transform="translate(20, 68)">
+      <rect width="310" height="110" class="diagram-bg" />
+      <!-- Input Feature Map Grid 5x5 -->
+      <g transform="translate(30, 20)">
+        <rect width="70" height="70" fill="#1e293b" stroke="#475569" stroke-width="1" />
+        <line x1="14" y1="0" x2="14" y2="70" stroke="#334155" stroke-width="0.6" />
+        <line x1="28" y1="0" x2="28" y2="70" stroke="#334155" stroke-width="0.6" />
+        <line x1="42" y1="0" x2="42" y2="70" stroke="#334155" stroke-width="0.6" />
+        <line x1="56" y1="0" x2="56" y2="70" stroke="#334155" stroke-width="0.6" />
+        <line x1="0" y1="14" x2="70" y2="14" stroke="#334155" stroke-width="0.6" />
+        <line x1="0" y1="28" x2="70" y2="28" stroke="#334155" stroke-width="0.6" />
+        <line x1="0" y1="42" x2="70" y2="42" stroke="#334155" stroke-width="0.6" />
+        <line x1="0" y1="56" x2="70" y2="56" stroke="#334155" stroke-width="0.6" />
+        <!-- Kernel Window 3x3 -->
+        <rect x="14" y="14" width="42" height="42" fill="rgba(6, 182, 212, 0.25)" stroke="#06b6d4" stroke-width="1.5" />
+      </g>
+      <!-- Convolution Symbol * -->
+      <text x="120" y="60" font-family="sans-serif" font-size="16" fill="#f8fafc" font-weight="700">∗</text>
+      <!-- Kernel Weights 3x3 -->
+      <g transform="translate(145, 30)">
+        <rect width="45" height="45" fill="#1e293b" stroke="#06b6d4" stroke-width="1" />
+        <line x1="15" y1="0" x2="15" y2="45" stroke="#334155" stroke-width="0.8" />
+        <line x1="30" y1="0" x2="30" y2="45" stroke="#334155" stroke-width="0.8" />
+        <line x1="0" y1="15" x2="45" y2="15" stroke="#334155" stroke-width="0.8" />
+        <line x1="0" y1="30" x2="45" y2="30" stroke="#334155" stroke-width="0.8" />
+        <text x="8" y="55" font-family="monospace" font-size="8.5" fill="#06b6d4">3×3 權重共享</text>
+      </g>
+      <!-- Arrow -->
+      <path d="M 205 52 L 230 52" stroke="#06b6d4" stroke-width="1.8" />
+      <!-- Output Feature Map -->
+      <g transform="translate(245, 32)">
+        <rect width="42" height="42" fill="#1e293b" stroke="#38bdf8" stroke-width="1" />
+        <rect x="14" y="14" width="14" height="14" fill="#06b6d4" />
+        <text x="5" y="53" font-family="monospace" font-size="8" fill="#94a3b8">平移等變特徵</text>
+      </g>
+    </g>
 
-  <!-- Card 6 -->
-  <g transform="translate(750, 360)" filter="url(#shadow)">
-    <rect width="300" height="175" rx="12" fill="url(#cardGrad)" stroke="#334155" stroke-width="1.5" />
-    <rect x="0" y="0" width="300" height="5" rx="2" fill="url(#accentAmber)" />
-    <text x="20" y="35" fill="#34d399" font-family="system-ui, sans-serif" font-size="13" font-weight="700">PILLAR 06 • 歸納偏置</text>
-    <text x="20" y="65" fill="#f1f5f9" font-family="system-ui, sans-serif" font-size="18" font-weight="700">CNN 與平移不變性 (Inductive Bias)</text>
-    <text x="20" y="95" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="13">
-      <tspan x="20" dy="0">DNN 空間座標死記 (稍微平移就崩潰)</tspan>
-      <tspan x="20" dy="22">CNN 局部受光野與權重共享，特徵平移不變</tspan>
-      <tspan x="20" dy="22">對齊館藏：LIB-401 DNN空間極限與CNN必然性</tspan>
+    <text x="20" y="200" class="math-eq">(f * g)(x) = \tau_h (f * g) \quad \text{[Translation Equivariance]}</text>
+    <text x="20" y="222" class="pillar-desc">
+      DNN 死記坐標導致平移即崩潰；CNN 以局部受光野與權重共享帶來強大的幾何不變性。
     </text>
   </g>
-
-  <!-- Bottom Banner Callout -->
-  <rect x="50" y="555" width="1000" height="45" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4,4" />
-  <text x="550" y="583" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">
-    💡 第一性原理真相：寫程式不用手刻數學公式，數學是模型出錯 (Gradient Vanishing / Mode Collapse / Overconfidence) 時的唯一 Debug 透視鏡！
-  </text>
 </svg>

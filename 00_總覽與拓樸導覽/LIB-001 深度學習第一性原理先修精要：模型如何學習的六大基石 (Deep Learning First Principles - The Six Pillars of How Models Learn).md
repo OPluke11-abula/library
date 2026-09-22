@@ -359,6 +359,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ### 2. 六大單元文字精華速讀 (The Complete Textual Masterclass)
 
 #### 🔹 單元 0：經典機器學習第一性原理 (Machine Learning Foundations)
+> 📺 **本單元對應影音清單**：[Machine Learning Specialization 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6FNC6YRfRQc_FbeQrF8BwGI)
+
 1. **線性迴歸與梯度下降 (Linear Regression & Gradient Descent)**：
    * 預測模型 $f_{w,b}(x) = wx + b$。代價函數（Cost Function）使用均方誤差 $\mathcal{J}(w,b) = \frac{1}{2m} \sum_{i=1}^m (f_{w,b}(x^{(i)}) - y^{(i)})^2$（除以 2 是為了求導時與平方項消去）。
    * 梯度下降更新規則：$w := w - \alpha \frac{\partial \mathcal{J}}{\partial w}$。學習率 $\alpha$ 過大會震盪發散，過小則收斂極慢。
@@ -383,6 +385,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ---
 
 #### 🔹 單元 1：神經網路與深度學習底層 (Neural Networks & Deep Learning)
+> 📺 **本單元對應影音清單**：[Deep Learning Course 1: Neural Networks and Deep Learning 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Ec-XTbcX1uRg2_u4xOEky0)
+
 1. **單神經元到計算圖 (Computation Graph & Autograd)**：
    * 邏輯迴歸實質上就是一個單一神經元。前向傳播計算 $z = w_1 x_1 + w_2 x_2 + b$ 與 $a = \sigma(z)$；反向傳播依據連鎖律反向推演：$da = -\frac{y}{a} + \frac{1-y}{1-a} \implies dz = \frac{dL}{da} \frac{da}{dz} = a - y$。這個極度優雅的差值公式 $dz = a - y$，直接指引了梯度的物理大小與方向。
 2. **向量化加速革命 (Vectorization via Matrix Broadcasting)**：
@@ -402,6 +406,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ---
 
 #### 🔹 單元 2：深層網路優化與超參數調校 (Improving Deep Neural Networks)
+> 📺 **本單元對應影音清單**：[Deep Learning Course 2: Improving Deep Neural Networks 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Hn0vK8co82zjQtt3T2Nkqc)
+
 1. **偏差與方差的系統化診斷處方 (Bias / Variance Recipe)**：
    * 步驟 1：檢查訓練集誤差（High Bias?）。若是，改用更大網路、增加隱藏層或訓練更久。
    * 步驟 2：檢查驗證集與訓練集差距（High Variance?）。若是，收集更多數據、加入正則化（$L_2$、Dropout）或修改網路架構。
@@ -420,6 +426,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ---
 
 #### 🔹 單元 3：機器學習專案戰略結構 (Structuring Machine Learning Projects)
+> 📺 **本單元對應影音清單**：[Deep Learning Course 3: Structuring Machine Learning Projects 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6E7jZ9sN_xHwSHOdjUxUW_b)
+
 1. **正交化原則 (Orthogonalization)**：
    * 一套健康的系統，每一個旋鈕只負責單一目標。
    * 旋鈕 1（擬合訓練集）：加大網路、更換優化器（Adam）。
@@ -443,6 +451,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ---
 
 #### 🔹 單元 4：卷積神經網路全域精華 (Convolutional Neural Networks)
+> 📺 **本單元對應影音清單**：[Deep Learning Course 4: Convolutional Neural Networks 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6Gl29AoE31iwdVwSG-KnDzF)
+
 1. **卷積兩大核心優勢**：
    * **權重共享 (Parameter Sharing)**：一個 $3 \times 3$ 卷積核在影像左上角能抓邊緣，滑到右下角依然有效，參數量與輸入影像解析度無關。
    * **局部連接稀疏性 (Sparsity of Connections)**：每一個輸出特徵單元僅與前一層微小的受光野（Receptive Field）相連，徹底免除全連接層百萬權重的參數量詛咒。
@@ -466,6 +476,8 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 ---
 
 #### 🔹 單元 5：序列模型與注意力機制 (Sequence Models & Attention Mechanism)
+> 📺 **本單元對應影音清單**：[Deep Learning Course 5: Sequence Models 播放清單 (YouTube)](https://www.youtube.com/playlist?list=PLkDaE6sCZn6F6wUI9tvS_Gw1vaFAx6rd6)
+
 1. **循環神經網路 (RNN) 與長期記憶瓶頸**：
    * RNN 透過循環狀態向量處理變長序列：$a^{\langle t \rangle} = g(W_{aa} a^{\langle t-1 \rangle} + W_{ax} x^{\langle t \rangle} + b_a)$。
    * **致命缺陷**：隨時間步增長，反向傳播（BPTT）連乘導函數將引發指數級梯度消失，使一般 RNN 無法捕捉超過 10 個詞以上的長期依賴。

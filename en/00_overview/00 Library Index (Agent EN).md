@@ -33,9 +33,13 @@ Primary Navigator:
   - [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]
   - [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]
   - [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]
+  - [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]
+  - [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]
 - **05 Computer Vision & High-Dimensional Sensing**:
   - [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]
   - [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]
+  - [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]
+  - [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]
 - **06 Natural Language Processing & Large Language Models**:
   - [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]
 - **07 Reinforcement Learning & Intelligent Agents**:
@@ -48,3 +52,4 @@ Primary Navigator:
   - [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]
   - [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]
   - [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]
+  - [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]

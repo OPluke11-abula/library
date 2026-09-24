@@ -53,9 +53,9 @@ The canonical 3-tier linear ingestion schedule for autonomous agents is:
 1. **Tier 1: Core Mathematical & Hardware Primitives**:
    $$\text{LIB-001} \to \text{LIB-101} \to \text{LIB-104} \to \text{LIB-203}$$
 2. **Tier 2: Perception, Spatial Biases & Neural Architectures**:
-   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-501} \to \text{LIB-405} \to \text{LIB-602} \to \text{LIB-406} \to \text{LIB-504}$$
+   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-501} \to \text{LIB-405} \to \text{LIB-602} \to \text{LIB-406} \to \text{LIB-504} \to \text{LIB-505} \to \text{LIB-506} \to \text{LIB-407} \to \text{LIB-408}$$
 3. **Tier 3: Systems Engineering, Agents & Empirical Research**:
-   $$\text{LIB-801} \to \text{LIB-802} \to \text{LIB-703} \to \text{LIB-704} \to \text{LIB-901} \to \text{LIB-903} \to \text{LIB-904}$$
+   $$\text{LIB-801} \to \text{LIB-802} \to \text{LIB-703} \to \text{LIB-704} \to \text{LIB-901} \to \text{LIB-903} \to \text{LIB-904} \to \text{LIB-905}$$
 
 ---
 
@@ -69,12 +69,12 @@ The library indexes volumes into 10 specialized functional wings based on the AC
 | **LIB-100 ~ 199** | **01 Mathematical Foundations** | Linear Algebra, SVD & Optimization | Spectral decomposition, Lipschitz gradients |
 | **LIB-200 ~ 299** | **02 Computer Systems & Hardware** | Memory Hierarchy & Microarchitecture | Warp coalescing, Tensor Core GEMM tiling |
 | **LIB-300 ~ 399** | **03 Machine Learning Principles** | Covariate Shift & Spatial Penalties | Out-of-Distribution bounds, cultural shift |
-| **LIB-400 ~ 499** | **04 Deep Learning Architectures** | CNNs, Transformers, Flow Matching | Equivariance, RoPE, OT velocity fields |
-| **LIB-500 ~ 599** | **05 Computer Vision & Sensing** | Centering Moments & 3D Splatting | Bilinear CoM shift, explicit 3D Gaussians |
+| **LIB-400 ~ 499** | **04 Deep Learning Architectures** | CNNs, Transformers, Flow Matching, Instruction Editing & Harmonization | Equivariance, RoPE, OT velocity fields, attention locking |
+| **LIB-500 ~ 599** | **05 Computer Vision & Sensing** | Centering Moments, 3DGS Splatting, Semantic Retrieval & Spatial QA | Bilinear CoM shift, explicit Gaussians, multi-view consensus |
 | **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | Chinchilla compute-optimal frontier, GQA |
 | **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | S1 non-autoregressive Jev, S2 ReAct gating |
 | **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | ECE temperature scaling, AWQ/INT4 GEMM |
-| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem & Literature Synthesis | C801 proposal structure, solo engineering |
+| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis & Five Frontier Blueprints | C801 proposal structure, solo engineering, ablation matrix |
 
 ---
 

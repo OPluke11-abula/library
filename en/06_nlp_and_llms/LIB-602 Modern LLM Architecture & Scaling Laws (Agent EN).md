@@ -1,5 +1,7 @@
 ---
 call_number: LIB-602
+status: source-verified
+invariants_count: 3
 title: Modern LLM Architecture & Scaling Laws (Agent Edition)
 module: LLM-Core
 category: Architecture-Core
@@ -7,22 +9,14 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - LLM-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Chinchilla Compute-Optimal Frontier (Hoffmann et al.)
   - SwiGLU Gated Activation Mathematics
   - Grouped-Query Attention (GQA) Memory Budgeting
 hardware_target:
   - Tensor Parallelism & Pipeline Parallelism Clusters
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-successors:
-  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
-  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 tags:
   - llm
   - scaling-laws
@@ -30,6 +24,14 @@ tags:
   - swiglu
   - gqa
   - rmsnorm
+prerequisites:
+  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+successors:
+  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
+  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../06_%E8%87%AA%E7%84%B6%E8%AA%9E%E8%A8%80%E8%99%95%E7%90%86%E8%88%87%E5%A4%A7%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B/LIB-602%20%E7%8F%BE%E4%BB%A3%E5%A4%A7%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%A7%8B%E8%A7%A3%E5%89%96%E8%88%87%E7%B8%AE%E6%94%BE%E5%AE%9A%E5%BE%8B%20%28Modern%20LLM%20Architecture%20%26%20Scaling%20Laws%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -77,6 +79,18 @@ $$\text{Memory} = 2 \times 4 \times 32768 \times 32 \times 8 \times 128 \times 2
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-602-01 (Compute-Optimal Ratio)`: Training runs MUST NOT exceed parameter-to-token ratios where $D < 20 N$, preventing premature model degradation.
-- `INV-602-02 (GQA KV Cache Allocation)`: In production serving environments, agents MUST specify GQA configurations ($H_{KV} \le H_Q / 4$) when deployment context length exceeds $16\text{K}$ tokens.
-- `INV-602-03 (RoPE Base Frequency Scaling)`: When extending context windows beyond pre-training length $L_0$, the RoPE base frequency $\theta_0 = 10,000$ MUST be scaled (e.g., to $500,000$ via YaRN or linear RoPE scaling) to prevent perplexity explosion.
+### [RULE-602-01] Chinchilla Optimal Compute Budget Allocation Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In autoregressive language model pretraining under compute budget $C pprox 6 N D$, model parameter count $N$ and training token count $D$ MUST be scaled in equal proportion ($N \propto \sqrt{C}, D \propto \sqrt{C}$), maintaining $D \ge 20 N$.
+- **Violation Consequence**: Training parameter-heavy models on insufficient token counts wastes compute and yields undertrained, suboptimal downstream models.
+
+### [RULE-602-02] KV Cache Memory Allocation Invariant
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Production LLM serving engines MUST deploy Grouped-Query Attention (GQA, $H_{KV} \le H_Q / 4$) or Multi-Query Attention (MQA) when serving contexts exceeding $16	ext{K}$ tokens. KV cache allocations MUST be pre-calculated using PagedAttention: $	ext{Mem}_{	ext{KV}} = 2 	imes 2 	imes n_{	ext{layers}} 	imes n_{	ext{heads, kv}} 	imes d_{	ext{head}} 	imes B 	imes L_{	ext{seq}}$ bytes.
+- **Violation Consequence**: Uncompressed multi-head attention KV caching consumes over $80\%$ of GPU memory, bottlenecking serving concurrency.
+
+### [RULE-602-03] RMSNorm Numerical Stability & Epsilon Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Root Mean Square Normalization (RMSNorm) MUST configure variance epsilon $\epsilon \ge 10^{-6}$ for FP16/BF16 execution to prevent division by zero during zero-mean activation states.
+- **Violation Consequence**: Inadequate epsilon values in RMSNorm cause division overflow and catastrophic `NaN` gradient propagation in deep Transformer blocks.
+

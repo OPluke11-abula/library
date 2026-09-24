@@ -1,5 +1,7 @@
 ---
 call_number: LIB-802
+status: source-verified
+invariants_count: 3
 title: Quantization Mathematics & Low-Precision Inference Architecture (Agent Edition)
 module: Systems-Quantization
 category: Engineering-Core
@@ -7,21 +9,14 @@ audience:
   - Autonomous-Agent
   - Systems-Architect
   - HPC-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Uniform Affine Quantization (Scale & Zero-Point)
   - Post-Training Quantization (PTQ) vs QAT (Straight-Through Estimator)
   - Second-Order Taylor Expansion & Optimal Brain Surgeon (GPTQ / AWQ)
 hardware_target:
   - NVIDIA Tensor Core INT8 / INT4 / FP8 (Ada/Hopper/Blackwell)
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-successors:
-  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 tags:
   - quantization
   - low-precision
@@ -30,6 +25,13 @@ tags:
   - awq
   - gptq
   - tensorrt
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
+successors:
+  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../08_AI%E7%B3%BB%E7%B5%B1%E5%B7%A5%E7%A8%8B%E8%88%87%E9%AB%98%E6%95%88%E9%83%A8%E7%BD%B2/LIB-802%20%E7%8F%BE%E4%BB%A3%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%A8%A1%E5%9E%8B%E9%87%8F%E5%8C%96%E7%90%86%E8%AB%96%E8%88%87%E4%BD%8E%E7%B2%BE%E5%BA%A6%E6%8E%A8%E8%AB%96%E6%9E%B6%E6%A7%8B%20%28Quantization%20Mathematics%20%26%20Low-Precision%20Inference%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -99,6 +101,19 @@ def dequantize_symmetric_int8(q: torch.Tensor, scale: torch.Tensor) -> torch.Ten
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-802-01 (Symmetric Weights Invariant)`: Weight tensors MUST be quantized using symmetric quantization ($Z = 0$) to eliminate runtime zero-point subtraction overhead during matrix multiplication.
-- `INV-802-02 (Outlier Channel Preservation)`: In 4-bit LLM quantization, activations with magnitude exceeding $3\sigma$ MUST remain in FP16 or be protected via AWQ scaling transforms.
-- `INV-802-03 (Accuracy Degradation Guard)`: Post-quantization inference MUST NOT degrade baseline validation accuracy by more than $0.5\%$. If exceeded, fallback from INT4 to INT8 or FP8.
+### [RULE-802-01] AWQ Salient Channel Weight Protection Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In Activation-aware Weight Quantization (AWQ) for low-bit LLM compression (e.g., INT4), the top $1\%$ salient weight channels exhibiting highest activation magnitude MUST be protected in higher precision (FP16) or scaled to prevent clipping distortion.
+- **Violation Consequence**: Uniform quantization of outlier channels causes catastrophic perplexity degradation in low-bit quantized models.
+
+### [RULE-802-02] Scale Factor & Zero-Point Numerical Validity Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Quantization scale factors $S$ and zero-points $Z$ MUST remain strictly valid: $S > 0$, $S 
+eq 	ext{NaN}$, and $Z \in [	ext{qmin}, 	ext{qmax}]$. Symmetric quantization MUST enforce $Z \equiv 0$.
+- **Violation Consequence**: Zero or invalid scale factors cause division by zero during dequantization ($x = S(q - Z)$), corrupting all downstream activations.
+
+### [RULE-802-03] Sub-Byte Packing & Memory Alignment Heuristic
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: Sub-byte weights (e.g., INT4, INT2) stored in global memory MUST be packed contiguously into 32-bit registers (e.g., 8 INT4 weights per `uint32_t`) aligned to 128-byte transaction boundaries.
+- **Violation Consequence**: Unpacked sub-byte weights waste memory storage and prevent Tensor Core SIMD sub-byte matrix multiplication instructions.
+

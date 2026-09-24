@@ -1,5 +1,7 @@
 ---
 call_number: LIB-602
+status: source-verified
+invariants_count: 3
 title: 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)
 module: NLP-Large-Language-Models
 category: LLM-Architecture
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Chinchilla Compute-Optimal Frontier (N_opt, D_opt)
   - RMSNorm Scale-Invariance Mathematics
@@ -16,16 +17,8 @@ math_foundations:
 hardware_target:
   - PagedAttention Virtual Memory Block Table
   - KV Cache High-Bandwidth Memory (HBM) Footprint
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-successors:
-  - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
-  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
 tags:
   - 圖書館
   - 自然語言處理
@@ -34,6 +27,14 @@ tags:
   - Chinchilla
   - PagedAttention
   - GQA
+prerequisites:
+  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
+successors:
+  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
+  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20%26%20Scaling%20Laws%20%28Agent%20EN%29.md)

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-704
+status: source-verified
+invariants_count: 4
 title: 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))
 module: Reinforcement-Learning-Agents
 category: Dual-Process-Agent-Architecture
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Reinforcement Learning for Calibrated Decisions (RLCD)
   - Brier Score & Strictly Proper Scoring Rules
@@ -17,19 +18,8 @@ hardware_target:
   - Edge Embedded CPU / Low-Power Cores
   - In-Browser WebAssembly / WebGPU (Zero-GPU Client Execution)
   - Hierarchical Agent Routing Mesh
-invariants_count: 4
 created: 2026-09-22
 author: Luke
-prerequisites:
-  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-  - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
-  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
-successors:
-  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 強化學習
@@ -41,6 +31,12 @@ tags:
   - RLCD
   - 非自迴歸
   - 邊緣推論
+prerequisites:
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
+  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
+successors:
+  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/07_reinforcement_learning_and_agents/LIB-704%20Dual-Process%20Neural%20Agent%20S1-Jev%20%26%20Reflex%20CUA-S1%20%28Agent%20EN%29.md)

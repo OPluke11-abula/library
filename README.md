@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-91_Invariants-0ea5e9.svg)](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20%28Grand%20Library%20Index%20&%20Navigator%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-84_Invariants-0ea5e9.svg)](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20%28Grand%20Library%20Index%20&%20Navigator%29.md)
 
 <p align="center">
   <b>結合理論推導、GPU 體系結構與工程實踐的深度學習自學筆記</b>
@@ -67,7 +67,7 @@
 2. **Module 02: 資料載入與互動視覺化**：封裝視覺化控制項，強制執行維度還原檢驗 `[RULE-901-01]`。
 3. **Module 03: 數值正規化與標籤編碼**：`float32 / 255.0` 縮放，防範重複除法與精度損失 `[RULE-901-02]`。
 4. **Module 04: 四層硬體對齊神經網路**：
-   - 隱藏層節點數設計為 $256 \to 128 \to 64 \to 32$，嚴格對齊 NVIDIA CUDA Warp 32 執行緒記憶體合併讀取 (Coalesced Access)。
+   - 隱藏層節點數設計為 $256 \to 128 \to 64 \to 32$，維度為 16/32 的整數倍以完全對齊 NVIDIA Tensor Core MMA 微瓦片運算與 GEMM 區塊劃分，避免邊界分支遮罩（Predication Masking）；底層並遵循 32 執行緒 Warp 記憶體合併存取原則。
    - 採用 `BatchNormalization()` 與 `Dropout(0.2)` 控制分佈漂移與過度擬合。
    - 參數量控制在 24.5 萬，相較未經正規化的深層網路減少 72% 計算開銷。
 5. **Module 05: 學習曲線監控與抽樣測試**：繪製收斂曲線，並以獨立抽樣確認泛化精度達 98% 以上。
@@ -89,11 +89,11 @@
 - **大面積留白導致筆劃斷裂**：
   - **問題機制**：畫布邊界過大時，直接縮小會使筆劃壓細甚至斷裂，觸發特徵盲區（例如將「1」誤判為「5」）。
   - **解法**：計算筆劃 Bounding Box 外接矩形，等比例縮放至 $20 \times 20$ 核心區域，四周填充 4 像素留白至 $28 \times 28$。
-- **書寫習慣與非對稱筆劃偏差**：
-  - **問題機制**：亞洲人書寫直立 7 時，若僅依據外框置中，會將實體筆劃推向右側，落入美式傾斜 7 的負權重懲罰區域，進而誤判為 8。
-  - **解法**：遵循 Yann LeCun 1998 原著規範，計算墨水一階動差**質量重心 (Center of Mass)**：
+- **筆劃形態分佈偏差與重心偏移**：
+  - **問題機制**：手寫「7」若採無橫槓垂直筆劃（Upright uncrossed 7），相較於美式傾斜筆劃，若僅依據外框幾何邊界置中，實體筆劃會偏向畫面右側，落入標準 7 的空間負權重區域，進而誤判為 8 或 1。
+  - **解法**：遵循 Yann LeCun 1998 規範計算零階與一階矩之**質量重心 (Center of Mass)**：
     $$\bar{x} = \frac{\sum x \cdot I(x,y)}{\sum I(x,y)}, \quad \bar{y} = \frac{\sum y \cdot I(x,y)}{\sum I(x,y)}$$
-    加上 $\pm 3$ 像素安全限幅平移至 $(13.5, 13.5)$ 中心。
+    將重心對齊至 $(13.5, 13.5)$ 中心，並引入工程安全限幅 $\pm 3$ 像素 [SAFETY_BOUND] 防止極端離群筆劃溢出畫布邊界。
 - **推論端增強 (Bunch TTA)**：
   - 引入多視角旋轉與翻轉的凸組合推論，降低遮擋與邊界噪聲影響（參考 Electronics 2024）。
 

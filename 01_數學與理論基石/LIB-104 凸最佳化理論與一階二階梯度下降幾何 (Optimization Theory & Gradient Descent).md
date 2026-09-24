@@ -1,5 +1,7 @@
 ---
 call_number: LIB-104
+status: source-verified
+invariants_count: 3
 title: 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)
 module: Mathematical-Foundations
 category: Optimization
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Lipschitz Continuity & Gradient Bound
   - Hessian Condition Number & Ill-Conditioned Ravines
@@ -16,14 +17,8 @@ math_foundations:
 hardware_target:
   - GPU VRAM Optimizer Footprint (8 Bytes/param for AdamW)
   - FP32 Master Weights & Numerical Stability Underflow
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-successors:
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
 tags:
   - 圖書館
   - 數學基石
@@ -31,6 +26,13 @@ tags:
   - 梯度下降
   - AdamW
   - Muon
+prerequisites:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+successors:
+  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
+  - "[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]"
+  - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
+  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/01_mathematics/LIB-104%20Convex%20Optimization%20%26%20Gradient%20Descent%20%28Agent%20EN%29.md)

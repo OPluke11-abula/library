@@ -1,12 +1,13 @@
 ---
 call_number: LIB-505
+status: source-verified
+invariants_count: 3
 title: Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Open-Vocabulary
 audience:
   - Autonomous-Agent
   - Graduate-PhD
-status: Verified-Authoritative-Production
 math_foundations:
   - Contrastive Language-Image Pretraining (CLIP) Embedding Geometries
   - Differentiable Semantic Feature Splatting
@@ -14,20 +15,19 @@ math_foundations:
 hardware_target:
   - NVIDIA Tensor Core Tile Rasterizer
   - Low-Dimensional Codebook Latent Feature Buffers
-invariants_count: 3
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-successors:
-  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
-  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 tags:
   - computer-vision
   - 3dgs
   - open-vocabulary
   - semantic-retrieval
   - clip
+prerequisites:
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+successors:
+  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
 
 > Language / 語言: [🇹🇼 繁體中文](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-505%20%E9%96%8B%E6%94%BE%E8%A9%9E%E5%BD%99%203D%20%E9%AB%98%E6%96%AF%E6%BD%91%E6%BF%BA%E8%88%87%E8%AA%9E%E6%84%8F%E5%A0%B4%E6%99%AF%E5%9C%96%E6%AA%A2%E7%B4%A2%20%28Open-Vocabulary%203D%20Gaussian%20Splatting%20&%20Semantic%20Retrieval%29.md) | 🇺🇸 **English**
@@ -55,11 +55,20 @@ where $S_{\text{view}}$ enforces cross-view consensus across training camera fru
 
 ## 2. Invariants & Implementation Specifications
 
-- `INV-505-01 (Feature Bottleneck)`: In-memory Gaussian primitives MUST NOT store uncompressed $>64$-dim embeddings. Latent codebook dimensionality $d \le 32$ is strictly enforced.
-- `INV-505-02 (Multi-View Consensus)`: Target candidate clusters MUST be validated across $\ge 60\%$ of unoccluded viewpoints to eliminate single-view specular artifacts.
-- `INV-505-03 (Spatial Density Outlier Filtering)`: Activated Gaussian subsets MUST pass DBSCAN spatial clustering ($eps=0.15\text{m}$, $min\_samples=10$) before computing bounding centroids.
+### [RULE-505-01] Semantic Feature Embedding Compression Ratio Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: High-dimensional vision-language feature embeddings (e.g., 512-dim CLIP vectors) associated with 3D Gaussians MUST be compressed via dimensionality reduction (PCA or trained Autoencoders) to $d \le 32$ before in-memory storage [SAFETY_BOUND].
+- **Violation Consequence**: Storing raw uncompressed 512-dim FP32 vectors across millions of Gaussians exhausts GPU VRAM, limiting scene scalability.
 
----
+### [RULE-505-02] Multi-View Observation Consensus Verification Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Candidate 3D semantic Gaussian clusters MUST be validated across at least $\ge 60\%$ of visible unoccluded camera viewpoints before confirmation [SAFETY_BOUND].
+- **Violation Consequence**: Single-view semantic assignment incorporates viewpoint-dependent specular reflections and occlusion artifacts into global 3D semantic representations.
+
+### [RULE-505-03] Spatial Outlier Point Connectivity Rejection
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Semantic Gaussians lacking at least $K \ge 5$ spatial neighbors of matching semantic label within a radius $R = 0.1	ext{m}$ MUST be pruned as isolated noise [HEURISTIC].
+- **Violation Consequence**: Unfiltered floating outlier Gaussians introduce severe spatial noise during open-vocabulary 3D scene querying.
 
 ## 3. Canonical References
 

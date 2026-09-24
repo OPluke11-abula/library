@@ -1,5 +1,7 @@
 ---
 call_number: LIB-405
+status: source-verified
+invariants_count: 3
 title: Attention Mechanism & Transformer Revolution (Agent Edition)
 module: DL-Architectures
 category: Architecture-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Senior-ML-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Scaled Dot-Product Attention & Softmax Scaling
   - Multi-Head Subspace Decomposition
@@ -15,21 +16,23 @@ math_foundations:
   - FlashAttention Online Softmax & IO Complexity
 hardware_target:
   - NVIDIA Hopper/Blackwell Tensor Core HGMMA / SRAM Tiling
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-successors:
-  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
-  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
 tags:
   - attention
   - transformer
   - flashattention
   - rope
   - multi-head-attention
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
+successors:
+  - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
+  - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-405%20%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%A9%9F%E5%88%B6%E3%80%81Transformer%20%E9%9D%A9%E5%91%BD%E8%88%87%E4%BD%8D%E7%BD%AE%E7%B7%A8%E7%A2%BC%E5%B9%BE%E4%BD%95%20%28Attention%20Mechanism%20%26%20Transformer%20Revolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -117,6 +120,18 @@ class ProductionMHA(nn.Module):
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-405-01 (Native Scaled Dot-Product Call)`: Agents MUST use `torch.nn.functional.scaled_dot_product_attention` in place of manual `Q @ K.T / sqrt(d) -> Softmax -> @ V` blocks to guarantee automatic hardware FlashAttention kernel dispatch.
-- `INV-405-02 (Head Dimension Tile Alignment)`: Head dimension $d_k$ MUST be a power-of-two divisor (ideally 64 or 128) to fit within GPU SRAM register bank configurations.
-- `INV-405-03 (Causal Masking Protocol)`: In autoregressive generation, causal masking MUST be enforced to prevent token $t$ from attending to future tokens $t' > t$.
+### [RULE-405-01] Scaled Dot-Product & Numerical Temperature Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Self-attention query-key dot products MUST be divided by $\sqrt{d_k}$ ($	ext{Softmax}(Q K^T / \sqrt{d_k}) V$). Omitting the $\sqrt{d_k}$ scaling factor is strictly prohibited.
+- **Violation Consequence**: For large projection dimensions $d_k$, dot product magnitudes scale with $O(d_k)$, pushing Softmax into near-zero gradient saturation regimes.
+
+### [RULE-405-02] FlashAttention Operator Dispatch & Tile Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: In Transformer inference and training where sequence lengths exceed $N > 1024$, attention implementations MUST dispatch IO-aware tiled FlashAttention kernels (FlashAttention-2/3) to bypass $O(N^2)$ DRAM materialization.
+- **Violation Consequence**: Standard attention materializes the full $N 	imes N$ attention matrix in HBM, causing quadratic memory allocation and memory bandwidth bottlenecks.
+
+### [RULE-405-03] Rotary Position Embedding (RoPE) Extrapolation Guardrail
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: When extending context length beyond pretraining windows using Rotary Position Embeddings (RoPE), agents MUST apply continuous frequency interpolation (e.g., NTK-aware or YaRN scaling) rather than naive linear extrapolation.
+- **Violation Consequence**: Unscaled rotational frequencies on out-of-distribution positions produce catastrophic perplexity degradation.
+

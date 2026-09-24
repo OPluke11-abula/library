@@ -1,5 +1,7 @@
 ---
 call_number: LIB-802
+status: source-verified
+invariants_count: 3
 title: 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)
 module: AI-Systems-Engineering
 category: Quantization-Inference
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Uniform Affine Quantization & Rounding Error Analysis
   - AWQ Activation-Aware Salient Channel Protection
@@ -15,15 +16,8 @@ math_foundations:
 hardware_target:
   - GPU INT4/FP8 Sub-byte Packing
   - Tensor Core CUTLASS High-Throughput Kernels
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
-successors:
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 tags:
   - 圖書館
   - AI系統工程
@@ -31,6 +25,13 @@ tags:
   - AWQ
   - SmoothQuant
   - INT4
+prerequisites:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
+  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
+successors:
+  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/08_ai_systems_engineering/LIB-802%20Quantization%20Mathematics%20%26%20Low-Precision%20Inference%20%28Agent%20EN%29.md)

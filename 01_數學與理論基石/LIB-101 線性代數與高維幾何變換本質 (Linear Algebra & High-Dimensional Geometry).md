@@ -1,5 +1,7 @@
 ---
 call_number: LIB-101
+status: source-verified
+invariants_count: 3
 title: 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)
 module: Mathematical-Foundations
 category: Linear-Algebra
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Spectral Theorem & Orthogonal Diagonalization
   - Singular Value Decomposition (SVD)
@@ -16,15 +17,8 @@ hardware_target:
   - GPU Tensor Core (M, N, K Alignment)
   - BLAS Level 1/2/3 Memory Bound vs Compute Bound
   - CPU/GPU Cache-Line Stride-1 Access
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites: []
-successors:
-  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
 tags:
   - 圖書館
   - 數學基石
@@ -32,6 +26,16 @@ tags:
   - 矩陣分解
   - SVD
   - LoRA
+prerequisites:
+  - "[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]"
+successors:
+  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
+  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
+  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
+  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/01_mathematics/LIB-101%20Linear%20Algebra%20%26%20High-Dimensional%20Geometry%20%28Agent%20EN%29.md)

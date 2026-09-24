@@ -1,5 +1,7 @@
 ---
 call_number: LIB-703
+status: source-verified
+invariants_count: 4
 title: LLM Agent Cognitive Architecture & Protocols (Agent Edition)
 module: Agent-Cognition
 category: Systems-Frontiers
@@ -7,28 +9,26 @@ audience:
   - Autonomous-Agent
   - Research-Scientist
   - Systems-Architect
-status: Verified-Authoritative-Production
 math_foundations:
   - Finite State Automata & ReAct Reasoning Loops
   - JSON-RPC Tool Use Schemas & Type Contracts
   - Memory Hierarchy (Context Buffer vs Episodic Vector Storage)
 hardware_target:
   - Distributed Multi-Agent Inference Cluster
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
-successors:
-  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
-  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
 tags:
   - llm-agents
   - react-protocol
   - tool-use
   - cognitive-architecture
   - memory-hierarchy
+prerequisites:
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+successors:
+  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../07_%E5%BC%B7%E5%8C%96%E5%AD%B8%E7%BF%92%E8%88%87%E6%99%BA%E6%85%A7%E4%BB%A3%E7%90%86%E4%BA%BA/LIB-703%20%E7%8F%BE%E4%BB%A3%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%BB%A3%E7%90%86%E4%BA%BA%20%28LLM%20Agent%29%20%E8%AA%8D%E7%9F%A5%E6%9E%B6%E6%A7%8B%E8%88%87%E6%8E%A8%E8%AB%96%E5%8D%94%E8%AD%B0%20%28LLM%20Agent%20Cognitive%20Architecture%20%26%20Protocols%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -92,6 +92,23 @@ To operate over infinite time horizons within finite token contexts:
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-703-01 (Strict Structured Tool Output)`: Agents invoking external APIs MUST emit strictly parseable JSON conforming to declared JSON-RPC schemas. Markdown backticks or commentary inside the JSON payload is STRICTLY FORBIDDEN.
-- `INV-703-02 (Loop Detection Guard)`: Agents MUST track state hashes $H(o_t, a_t)$. If an identical tool call fails 3 consecutive times with the same error, the agent MUST break the execution loop and invoke a reflection self-correction step.
-- `INV-703-03 (Idempotent Action Execution)`: Non-idempotent actions (such as git commit, file deletion, database modification) MUST verify pre-conditions prior to dispatch.
+### [RULE-703-01] ReAct Closed-Loop Tool Execution Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Autonomous agent cognitive architectures MUST enforce strict closed-loop execution: Thought $	o$ Action $	o$ Observation $	o$ Reflection. Tool execution outputs MUST be formally parsed and validated before advancing to subsequent reasoning steps.
+- **Violation Consequence**: Open-loop action sequences hallucinate intermediate tool results, compounding reasoning errors uncontrollably.
+
+### [RULE-703-02] External Cortex Persistence (Obsidian Vault) Invariant
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Critical architectural decisions, experiment outcomes, and system state transitions MUST be persisted into human- and agent-readable Markdown files within the local knowledge vault (`AGENTS.md`, `reports/`). Long-term state MUST NOT rely solely on volatile context window memory.
+- **Violation Consequence**: Ephemeral conversational context wipes out cumulative architectural memory between session restarts.
+
+### [RULE-703-03] Token Budget Conservation & Working Memory Pruning Heuristic
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: When active conversation context exceeds $70\%$ of the maximum token window, agents MUST summarize completed execution trajectories into structured summaries and prune redundant intermediate tool outputs.
+- **Violation Consequence**: Context exhaustion forces involuntary prompt truncation, triggering attention degradation and task failure.
+
+### [RULE-703-04] Reflexion Retry Limit & Fallback Guardrail
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: When tool execution fails, agents MUST limit automated retry attempts to a maximum of 3 consecutive iterations. After 2 consecutive identical failures, the agent MUST trigger internal reflection to modify strategy or escalate to human fallback.
+- **Violation Consequence**: Unbounded retries without strategy revision cause infinite loops and rapid API token exhaustion.
+

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-104
+status: source-verified
+invariants_count: 3
 title: Convex Optimization & Gradient Descent (Agent Edition)
 module: Math-Foundations
 category: Theory-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Senior-ML-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Convex Sets & Functions (Jensen's Inequality)
   - Lipschitz Gradient Continuity & Smoothness
@@ -15,19 +16,20 @@ math_foundations:
   - Stochastic Optimization Convergence Bounds
 hardware_target:
   - CUDA Stream Asynchronous Gradient Reduction
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-successors:
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-  - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
 tags:
   - optimization
   - gradient-descent
   - lipschitz-continuity
   - adam-dynamics
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+successors:
+  - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
+  - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../01_%E6%95%B8%E5%AD%B8%E8%88%87%E7%90%86%E8%AB%96%E5%9F%BA%E7%9F%B3/LIB-104%20%E5%87%B8%E6%9C%80%E4%BD%B3%E5%8C%96%E7%90%86%E8%AB%96%E8%88%87%E4%B8%80%E9%9A%8E%E4%BA%8C%E9%9A%8E%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%B9%BE%E4%BD%95%20%28Optimization%20Theory%20%26%20Gradient%20Descent%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -105,6 +107,20 @@ def compute_loss_surface_curvature(model: torch.nn.Module, loss_fn, x_batch, y_b
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-104-01 (Learning Rate Boundedness)`: Initial learning rate $\eta$ MUST NOT exceed $\frac{1}{\lambda_{\max}}$. If loss explodes to `NaN` or `Inf`, immediately reduce $\eta$ by factor of 10 and verify gradient norm.
-- `INV-104-02 (Gradient Norm Clipping)`: `torch.nn.utils.clip_grad_norm_(parameters, max_norm=1.0)` MUST be invoked in deep/recurrent pipelines to truncate heavy-tailed gradient outliers.
-- `INV-104-03 (Warmup Phase)`: Large-batch training ($B \ge 512$) MUST incorporate a linear learning rate warmup phase ($T_{\text{warm}} \ge 5$ epochs) to avoid early catastrophic divergence before second-moment vectors stabilize.
+### [RULE-104-01] Lipschitz Learning Rate & Gradient Clipping Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: For loss functions with $L$-Lipschitz continuous gradients ($\|
+abla f(x) - 
+abla f(y)\| \le L \|x - y\|$), the learning rate MUST satisfy $\eta < 2/L$. In deep neural networks where global $L$ cannot be determined analytically, adaptive gradient norm clipping $\|\mathbf{g}\| \le 	au_{	ext{clip}}$ (default $	au_{	ext{clip}} = 1.0$) MUST be enforced.
+- **Violation Consequence**: Step sizes violating Lipschitz bounds induce oscillatory divergence along steep loss valley boundaries.
+
+### [RULE-104-02] Optimizer Memory Footprint Constraint
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: When planning model training memory budgets, agents MUST account for optimizer state overhead. For standard AdamW, each parameter requires 8 bytes for 1st ($m_t$) and 2nd ($v_t$) FP32 moment tracking, plus 4 bytes for FP32 master weights. If model parameters occupy $M$ bytes, optimizer states MUST be budgeted as at least $2 	imes$ to $3 	imes M$.
+- **Violation Consequence**: Underestimating optimizer state memory requirements leads to unexpected CUDA Out-of-Memory (OOM) aborts at the initial backward pass.
+
+### [RULE-104-03] Numerical Stability & Subnormal Prevention
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: The second-moment denominator constant $\epsilon$ in adaptive optimizers (Adam/AdamW) MUST be configured to match numerical precision: $\epsilon \ge 10^{-8}$ for FP32, and $\epsilon \ge 10^{-6}$ for FP16/BF16 to prevent subnormal floating-point divisions.
+- **Violation Consequence**: Excessively small $\epsilon$ under half-precision generates subnormal denormalized numbers, causing severe hardware ALU pipeline stalls.
+

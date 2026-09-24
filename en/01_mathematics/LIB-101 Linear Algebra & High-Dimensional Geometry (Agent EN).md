@@ -1,5 +1,7 @@
 ---
 call_number: LIB-101
+status: source-verified
+invariants_count: 3
 title: Linear Algebra & High-Dimensional Geometry (Agent Edition)
 module: Math-Foundations
 category: Theory-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Senior-ML-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Spectral Theorem & Orthogonal Diagonalization
   - Singular Value Decomposition (SVD)
@@ -15,20 +16,23 @@ math_foundations:
   - Moore-Penrose Pseudoinverse
 hardware_target:
   - GPU Tensor Core GEMM Tiling (WMMA)
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-successors:
-  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 tags:
   - linear-algebra
   - svd
   - spectral-decomposition
   - high-dimensional-geometry
+prerequisites:
+  - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
+successors:
+  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
+  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../01_%E6%95%B8%E5%AD%B8%E8%88%87%E7%90%86%E8%AB%96%E5%9F%BA%E7%9F%B3/LIB-101%20%E7%B7%9A%E6%80%A7%E4%BB%A3%E6%95%B8%E8%88%87%E9%AB%98%E7%B6%AD%E5%B9%BE%E4%BD%95%E8%AE%8A%E6%8F%9B%E6%9C%AC%E8%B3%AA%20%28Linear%20Algebra%20%26%20High-Dimensional%20Geometry%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -100,6 +104,18 @@ def truncated_svd_projection(x: torch.Tensor, target_rank: int) -> torch.Tensor:
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-101-01 (Ill-Conditioned Matrix Guard)`: Before matrix inversion, agents MUST compute condition number $\kappa(A) = \sigma_{\max}/\sigma_{\min}$. If $\kappa(A) > 10^5$, inversion MUST be replaced by pseudoinverse with Tikhonov regularization: $(A^T A + \lambda I)^{-1} A^T$.
-- `INV-101-02 (LoRA Rank Initialization)`: In low-rank adaptation ($W = W_0 + \frac{\alpha}{r} B A$), matrix $A$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ and matrix $B$ MUST be initialized to $0$, ensuring $\Delta W = 0$ at $t = 0$.
-- `INV-101-03 (Dimension Alignment for Hardware)`: Matrix inner dimensions $K$ in GEMM $M \times K \times N$ SHOULD be multiples of 16 (for FP16) or 32 (for INT8/FP8) to exploit NVIDIA Tensor Core warp tile efficiency.
+### [RULE-101-01] Dimension Compatibility & Tensor Core Alignment
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Inner reduction dimensions $K$ and outer dimensions $M, N$ in matrix multiplications ($M 	imes K 	imes N$) MUST be integer multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with NVIDIA Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile boundaries without thread masking or padding penalties.
+- **Violation Consequence**: Non-aligned matrix dimensions disable Tensor Core hardware fast paths, degrading GEMM compute throughput by up to $60\%$.
+
+### [RULE-101-02] Condition Number & Rank Collapse Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Prior to executing matrix inversion or solving linear systems $A x = b$, agents MUST evaluate the condition number $\kappa(A) = \sigma_{\max} / \sigma_{\min}$. If $\kappa(A) > 10^5$, explicit matrix inversion MUST be substituted by truncated SVD or Tikhonov regularized pseudoinversion: $(A^T A + \lambda I)^{-1} A^T$.
+- **Violation Consequence**: Inverting ill-conditioned matrices amplifies floating-point roundoff errors exponentially, causing loss explosions and catastrophic numerical instability.
+
+### [RULE-101-03] LoRA Rank Selection & Initialization Heuristic
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: In low-rank adaptation ($W = W_0 + rac{lpha}{r} B A$), adapter matrix $A \in \mathbb{R}^{r 	imes d_{	ext{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (e.g., Kaiming uniform/normal) and matrix $B \in \mathbb{R}^{d_{	ext{out}} 	imes r}$ MUST be initialized strictly to zero ($B = 0$). This ensures $\Delta W = 0$ at step $t = 0$. Adapter rank $r$ MUST satisfy $r \ll \min(d_{	ext{in}}, d_{	ext{out}})$.
+- **Violation Consequence**: Non-zero initialization of $B$ perturbs pretrained parameter manifolds before any adaptation signal is observed.
+

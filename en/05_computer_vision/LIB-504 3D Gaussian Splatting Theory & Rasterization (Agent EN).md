@@ -1,5 +1,7 @@
 ---
 call_number: LIB-504
+status: source-verified
+invariants_count: 3
 title: 3D Gaussian Splatting Theory & Rasterization (Agent Edition)
 module: 3D-Vision
 category: Frontiers-Perception
@@ -7,27 +9,28 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Graphics-Research-Scientist
-status: Verified-Authoritative-Production
 math_foundations:
   - 3D Covariance Matrix Decomposition (Quaternions & Scaling)
   - Projective Geometry & 2D Screen Space Projection (Zwicker EWA)
   - Differentiable Tile-Based Alpha-Blending & Radiance Sorting
 hardware_target:
   - NVIDIA CUDA High-Throughput Rasterizer (> 100 FPS)
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-successors:
-  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
 tags:
   - 3d-gaussian-splatting
   - nerf
   - radiance-fields
   - real-time-rendering
   - differential-rasterization
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
+successors:
+  - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
+  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-504%203D%20%E8%A6%96%E8%A6%BA%E5%89%8D%E6%B2%BF%EF%BC%9A%E7%A5%9E%E7%B6%93%E8%BC%BB%E5%B0%84%E5%A0%B4%20%28NeRF%29%20%E5%88%B0%203D%20%E9%AB%98%E6%96%AF%E6%BD%91%E6%BF%BA%20%283DGS%29%20%E7%90%86%E8%AB%96%E8%88%87%E5%85%89%E6%9F%B5%E5%8C%96%20%283D%20Gaussian%20Splatting%20Theory%20%26%20Rasterization%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -100,6 +103,18 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-504-01 (Quaternion Normalization)`: Quaternions representing 3D Gaussian rotations MUST be normalized to unit norm ($\|q\| = 1$) before evaluating rotation matrices to avoid non-orthogonal shearing.
-- `INV-504-02 (Adaptive Density Control)`: During training, Gaussians with positional gradient magnitude $\|\nabla_\mu L\|_2 > \tau_{\text{grad}} = 0.0002$ MUST be split (if scale is large) or cloned (if scale is small) to resolve under-reconstruction.
-- `INV-504-03 (Tile Radix Sorting)`: The rasterizer MUST bin Gaussians into $16 \times 16$ pixel tiles and execute 64-bit key Radix Sort on depth values before invoking alpha-blending warps.
+### [RULE-504-01] Positive Semi-Definite Covariance Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In 3D Gaussian Splatting, 3D covariance matrices $\Sigma = R S S^T R^T$ MUST remain mathematically positive semi-definite. Scaling parameters $s \in \mathbb{R}^3$ MUST be constrained via positive exponential activation ($s = \exp(s_{	ext{raw}})$) and rotation quaternions $q$ MUST be normalized to unit norm ($\|q\| = 1$).
+- **Violation Consequence**: Unnormalized quaternions or negative scaling parameters produce indefinite covariance matrices, causing 2D projection Jacobian breakdown and catastrophic rendering artifacts.
+
+### [RULE-504-02] 2D Screen-Space Low-Pass Anti-Aliasing Guardrail
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: When projecting 3D Gaussians to 2D screen space, a low-pass filter variance $\sigma_{	ext{filter}}^2 = 0.3	ext{ px}^2$ MUST be added to the 2D projected covariance $\Sigma_{2D}' = J \Sigma J^T + \sigma_{	ext{filter}}^2 I_{2 	imes 2}$.
+- **Violation Consequence**: Omitting the screen-space low-pass footprint causes severe high-frequency pixel popping and aliasing during camera translation.
+
+### [RULE-504-03] Ray Transmittance Early-Exit Heuristic
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: During tiled front-to-back alpha blending rasterization ($T_i = \prod_{j=1}^{i-1} (1 - lpha_j)$), thread evaluation for a given pixel MUST terminate immediately when accumulated opacity reaches $1 - T_i \ge 0.9999$.
+- **Violation Consequence**: Continuing ray integration past near-opaque surfaces consumes unnecessary memory bandwidth without altering output color values.
+

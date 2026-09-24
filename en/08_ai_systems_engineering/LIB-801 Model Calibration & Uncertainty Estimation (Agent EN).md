@@ -1,5 +1,7 @@
 ---
 call_number: LIB-801
+status: source-verified
+invariants_count: 3
 title: Model Calibration, Uncertainty Estimation & Overconfidence (Agent Edition)
 module: Systems-Reliability
 category: Engineering-Core
@@ -7,28 +9,27 @@ audience:
   - Autonomous-Agent
   - Senior-ML-Engineer
   - Reliability-Architect
-status: Verified-Authoritative-Production
 math_foundations:
   - Expected Calibration Error (ECE) & Reliability Diagrams
   - Maximum Calibration Error (MCE)
   - Temperature Scaling Optimization via Negative Log-Likelihood (NLL)
 hardware_target:
   - Mission-Critical Autonomous Inference Nodes
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
-  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
-successors:
-  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
-  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 tags:
   - calibration
   - ece
   - temperature-scaling
   - uncertainty-estimation
   - reliability
+prerequisites:
+  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
+  - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
+successors:
+  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
+  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
+  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../08_AI%E7%B3%BB%E7%B5%B1%E5%B7%A5%E7%A8%8B%E8%88%87%E9%AB%98%E6%95%88%E9%83%A8%E7%BD%B2/LIB-801%20%E7%8F%BE%E4%BB%A3%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E4%B9%8B%E6%A8%A1%E5%9E%8B%E6%A0%A1%E6%BA%96%E3%80%81%E4%B8%8D%E7%A2%BA%E5%AE%9A%E6%80%A7%E4%BC%B0%E8%A8%88%E8%88%87%E9%81%8E%E5%BA%A6%E8%87%AA%E4%BF%A1%20%28Model%20Calibration%20%26%20Uncertainty%20Estimation%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -76,8 +77,10 @@ import torch.optim as optim
 
 class TemperatureScaler(nn.Module):
     """
-    Optimizes a single temperature parameter T > 0 on validation set.
-    Guarantees monotonic ECE reduction without degrading top-1 accuracy.
+    Optimizes a single temperature parameter T > 0 on validation set via NLL minimization.
+    Preserves top-1 accuracy rank ordering while empirically minimizing calibration error.
+    Note: NLL minimization does not mathematically guarantee monotonic reduction of binned
+    ECE due to non-smooth bin boundary discretization.
     """
     def __init__(self):
         super().__init__()
@@ -106,6 +109,18 @@ class TemperatureScaler(nn.Module):
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-801-01 (Mandatory ECE Evaluation)`: Any classification model emitted to production MUST report its ECE alongside Top-1 Accuracy. Models with $\text{ECE} > 0.05$ (5%) MUST undergo post-hoc calibration.
-- `INV-801-02 (Separation of Calibration Dataset)`: Optimization of temperature $T$ MUST be performed on a held-out validation set and NEVER on the training set (prevents overfitting to overconfident training logits).
-- `INV-801-03 (Uncertainty Fallback)`: When calibrated confidence $\hat{p} < 0.70$ on safety-critical tasks, the decision MUST be halted and routed to human review or S2 deliberate verification.
+### [RULE-801-01] Expected Calibration Error (ECE) Release Gate
+- **Contract Level**: `QUALITY_BOUND`
+- **Specification**: Classification models submitted for production release MUST report Expected Calibration Error (ECE) across a minimum of 15 bins alongside Top-1 Accuracy. Models exhibiting $	ext{ECE} > 0.05$ (5%) MUST undergo post-hoc temperature scaling or conformal calibration [DESIGN_DECISION / TARGET].
+- **Violation Consequence**: Uncalibrated models produce severe overconfidence on ambiguous edge-case inputs, creating critical reliability risks in automated decision systems.
+
+### [RULE-801-02] Temperature Scaling Parameter Range Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: When optimizing temperature scaling parameter $T$ via negative log-likelihood (NLL) minimization on a held-out validation set, $T$ MUST be strictly positive ($T > 0$) and bounded within $T \in [0.1, 5.0]$. Note: NLL minimization optimizes continuous likelihood, which empirically reduces calibration error but does NOT mathematically guarantee monotonic reduction of discrete binned ECE due to non-smooth bin boundary partitioning.
+- **Violation Consequence**: Setting $T \le 0$ causes division by zero or sign inversion that flips top-1 rank predictions; unconstrained $T \gg 5$ drives all predictive distributions toward uniform randomness.
+
+### [RULE-801-03] Conformal Prediction Distribution-Free Coverage Guarantee
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $P(Y \in \mathcal{C}(X)) \ge 1 - lpha$ for user-specified significance $lpha$.
+- **Violation Consequence**: Relying on uncalibrated point predictions provides zero rigorous statistical guarantees against distribution shifts.
+

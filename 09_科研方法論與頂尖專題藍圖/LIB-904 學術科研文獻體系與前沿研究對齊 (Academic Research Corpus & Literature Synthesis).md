@@ -1,5 +1,7 @@
 ---
 call_number: LIB-904
+status: source-verified
+invariants_count: 4
 title: 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 module: Research-Methodology-Capstone
 category: Academic-Literature-Synthesis
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - View-Decomposed LoRA & 3DGS Cascaded Optimization
   - Space-Filling Curves (Hilbert & Z-Order) Point Cloud Serialization
@@ -19,17 +20,9 @@ hardware_target:
   - Single GPU (RTX 4090 / 24GB VRAM) Free-Viewpoint 3DGS
   - High-Performance GPU Clusters (NVIDIA A100 / H100)
   - Edge Embedded Systems (NVIDIA Jetson AGX Orin / Nano)
-invariants_count: 4
 created: 2026-09-21
 updated: 2026-09-22
 author: Luke
-prerequisites:
-  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-successors: []
 tags:
   - 圖書館
   - 學術文獻研讀
@@ -41,6 +34,9 @@ tags:
   - 智慧交通
   - 測試時增強
   - 自學體系
+prerequisites:
+  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
+successors: []
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20%26%20Literature%20Synthesis%20%28Agent%20EN%29.md)

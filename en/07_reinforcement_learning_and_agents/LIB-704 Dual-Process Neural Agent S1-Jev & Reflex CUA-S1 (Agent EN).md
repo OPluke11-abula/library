@@ -1,5 +1,7 @@
 ---
 call_number: LIB-704
+status: source-verified
+invariants_count: 4
 title: Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1) (Agent Edition)
 module: Agent-Frontiers
 category: Systems-Frontiers
@@ -7,22 +9,14 @@ audience:
   - Autonomous-Agent
   - Systems-Architect
   - Research-Scientist
-status: Verified-Authoritative-Production
 math_foundations:
   - Kahneman Dual-Process Cognitive Theory (System 1 vs System 2)
   - Non-Autoregressive Generation (NAR) & Parallel Decoding
   - Confidence Gating & Threshold Escalation
 hardware_target:
   - Low-Latency Edge Inference (< 50ms Reflex SLA)
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
-  - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
-successors:
-  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
 tags:
   - dual-process
   - system1-system2
@@ -30,6 +24,12 @@ tags:
   - cua-s1
   - jev-engine
   - low-latency-agents
+prerequisites:
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
+  - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
+successors:
+  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../07_%E5%BC%B7%E5%8C%96%E5%AD%B8%E7%BF%92%E8%88%87%E6%99%BA%E6%85%A7%E4%BB%A3%E7%90%86%E4%BA%BA/LIB-704%20%E9%9B%99%E9%80%B2%E7%A8%8B%E7%A5%9E%E7%B6%93%E4%BB%A3%E7%90%86%E4%BA%BA%EF%BC%9AS1%20%E9%9D%9E%E8%87%AA%E8%BF%B4%E6%AD%B8%E5%9E%8B%E6%85%8B%E6%B1%BA%E7%AD%96%E5%BC%95%E6%93%8E%20%28Jev%29%20%E8%88%87%E5%AD%97%E7%AF%80%E7%B4%9A%E4%BB%8B%E9%9D%A2%E5%8F%8D%E5%B0%84%E6%A8%A1%E5%9E%8B%20%28CUA-S1%29%20%E6%B7%B1%E5%BA%A6%E8%A7%A3%E5%89%96%20%28Dual-Process%20Neural%20Agent%20-%20S1%20Non-Autoregressive%20Typed%20Decision%20Engine%20%28Jev%29%20%26%20Byte-Level%20Interface%20Reflex%20Model%20%28CUA-S1%29%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -139,6 +139,23 @@ class DualProcessController:
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-704-01 (Strict Gating Invariant)`: System 1 actions MUST NOT be dispatched if $p_{\max} < 0.85$. Low-confidence states MUST be escalated to System 2.
-- `INV-704-02 (Sub-50ms S1 Latency SLA)`: System 1 forward pass latency MUST be strictly bounded under $50\text{ms}$ on target hardware.
-- `INV-704-03 (Calibration Requirement)`: Probabilities $P(a \mid x)$ in System 1 MUST be temperature-calibrated (LIB-801) on out-of-distribution validation sets before setting gating thresholds.
+### [RULE-704-01] Micro-Decision System 1 Fast-Path Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Deterministic low-latency decisions (e.g., UI element clicking, parameter parsing, single-step intent dispatch) MUST be routed through specialized System 1 non-autoregressive models rather than large autoregressive LLMs.
+- **Violation Consequence**: Routing micro-actions to heavy LLMs introduces hundreds of milliseconds of latency and excessive inference compute costs.
+
+### [RULE-704-02] RLCD Confidence Escalation Invariant
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: In dual-process neural architectures, System 1 actions MUST NOT be dispatched autonomously if predicted top-1 confidence falls below threshold $	au_{	ext{conf}} = 0.85$ [SAFETY_BOUND]. Low-confidence states MUST be escalated to System 2 deliberative planning.
+- **Violation Consequence**: Uncalibrated low-confidence execution by fast-path models causes unrecoverable environmental errors.
+
+### [RULE-704-03] Strongly Typed Structured Output Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: System 1 decisions MUST emit strictly typed structured schemas (`Bool`, `Choice`, `Score`) rather than arbitrary free-form markdown or unvalidated strings.
+- **Violation Consequence**: Free-form text outputs from fast models require complex parsing heuristics and produce silent runtime exceptions.
+
+### [RULE-704-04] Byte-Level Zero-Tokenizer Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: Edge-deployed System 1 decision models SHOULD operate directly on raw byte-level embeddings (257 tokens: 0-255 bytes + 1 EOS), bypassing large BPE/SentencePiece vocabulary tables.
+- **Violation Consequence**: Bundling multi-megabyte tokenizer vocabulary files increases cold-start binary footprints and introduces Out-of-Vocabulary (OOV) token handling errors.
+

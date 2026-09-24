@@ -1,5 +1,7 @@
 ---
 call_number: LIB-000
+status: reviewed
+invariants_count: 4
 title: 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)
 module: Grand-Navigator
 category: Architecture-Index
@@ -7,29 +9,22 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Graph Theory & DAG Topological Sort
   - ACM Computing Classification System (CCS)
   - Dewey Decimal Classification (DDC)
 hardware_target:
   - Agnostic
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites: []
-successors:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
-  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 總目錄
   - 知識拓樸
   - AI代理人導覽
+prerequisites: []
+successors:
+  - "[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]"
 ---
 
 > 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English](../en/00_overview/LIB-000%20Grand%20Library%20Index%20%26%20Navigator%20%28Agent%20EN%29.md)
@@ -44,6 +39,33 @@ tags:
 2. **數學形式化推導**：提供嚴謹符號定義、目標函數閉式解與收斂性質證明，引證同儕評審頂會與頂刊文獻（CVPR, ICCV, NeurIPS, ICML, ICLR, SIGGRAPH, MLSys, TPAMI）。
 3. **計算機系統與 GPU 協同**：分析記憶體階層、快取行（Cache Line）、GPU Warp 排程（32 執行緒對齊）、Tensor Core GEMM Tiling 與推論頻寬瓶頸。
 4. **工程實作與邊界防禦**：提供標註張量形狀的 PyTorch / CUDA 實作，並定義具備數值驗證條件的系統不變量（System Invariants）。
+
+---
+
+## 🛡️ 典籍品質信賴模型與狀態分類體系 (Defensible Status Taxonomy)
+
+為建立具備學術嚴謹度與可信度的知識庫，本庫徹底摒棄未經檢驗的宣稱式狀態，嚴格實施五階狀態分類體系：
+1. `draft`：草稿撰寫與初步文獻整理階段，尚未完成同行交互審核。
+2. `reviewed`：概念架構、論點組織與知識拓樸前後依賴關係已完成內部同儕覆核。
+3. `source-verified`：核心數理推導、定理結論與關鍵數據已直接對照國際同行評審頂會頂刊原著論文與權威專著（CVPR, ICCV, NeurIPS, ICML, ICLR, MLSys, TPAMI）逐條核實，無斷章取義或推論瑕疵；不隨意主張未經本地環境驗證的實體實驗成果。
+4. `experiment-verified`：代碼管線、核心演算法或數值基準已在本機環境下通過可重複執行的自動化測試腳本或消融驗證。
+5. `production-validated`：系統架構已於真實生產環境或線上服務完整部署，具備可觀測性監控與長效穩定性實測資料。
+
+---
+
+## 🔬 證據溯源標記規範 (Evidence Provenance Conventions)
+
+知識庫中所有數值指標、閾值與關鍵技術主張，皆強制標註證據來源屬性，避免未經佐證的經驗猜測被誤判為客觀定律：
+- `[FACT]`：數理公理、既定幾何定義或客觀物理定律。
+- `[DERIVATION]`：符號化閉式數學推導，具備嚴密代數連貫性。
+- `[LITERATURE_RESULT]`：同行評審頂會/頂刊文獻明確報告之實驗基準數據，需標註作者、出處與測試條件。
+- `[EMPIRICAL_RESULT]`：本機代碼管線或可復現實驗實測結果。
+- `[HEURISTIC]`：工程實踐中之經驗法則或啟發式策略，非不可違反之數理定律。
+- `[DESIGN_DECISION]`：架構設計權衡下的主動工程選擇。
+- `[TARGET]`：專題研發或消融實證之預期目標，待後續實驗檢驗。
+- `[SAFETY_BOUND]`：防禦性編程之數值截斷或安全邊界約束。
+- `[HYPOTHESIS]`：技術假設或待驗證之理論猜想。
+- `[OPEN_QUESTION]`：當前學界或產業界尚未徹底解決之開放問題。
 
 ---
 

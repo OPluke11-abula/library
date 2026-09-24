@@ -1,5 +1,7 @@
 ---
 call_number: LIB-407
+status: source-verified
+invariants_count: 3
 title: 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)
 module: Deep-Learning-Architectures
 category: Generative-Diffusion-Editing
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Conditional Diffusion SDE/ODE Reverse Trajectory
   - Cross-Attention Heatmap Spatial Modulation
@@ -17,15 +18,8 @@ hardware_target:
   - Tensor Core Attention Matrix GEMM (FP16 / BF16)
   - FlashAttention-2 / xFormers Memory Efficient Attention
   - Latent Diffusion U-Net / DiT Tiling
-invariants_count: 4
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-  - "[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]"
-successors:
-  - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
-  - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 tags:
   - 深度學習
   - 擴散模型
@@ -33,6 +27,12 @@ tags:
   - 跨注意力
   - InstructPix2Pix
   - 內容保持
+prerequisites:
+  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
+  - "[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]"
+successors:
+  - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
+  - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 ---
 
 > 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English (Agent Edition)](../en/04_deep_learning_architectures/LIB-407%20Fine-Grained%20Instruction%20Image%20Editing%20%26%20Cross-Attention%20Preservation%20%28Agent%20EN%29.md)

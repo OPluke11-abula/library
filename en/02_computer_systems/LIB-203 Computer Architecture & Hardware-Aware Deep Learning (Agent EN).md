@@ -1,5 +1,7 @@
 ---
 call_number: LIB-203
+status: source-verified
+invariants_count: 4
 title: Computer Architecture & Hardware-Aware Deep Learning (Agent Edition)
 module: Systems-Hardware
 category: Engineering-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Systems-Architect
   - HPC-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Williams Roofline Arithmetic Intensity Model
   - Little's Law & Concurrency Scaling
@@ -15,21 +16,24 @@ math_foundations:
 hardware_target:
   - NVIDIA Ampere/Hopper/Blackwell (A100/H100/B200)
   - Edge Embedded Systems (NVIDIA Jetson AGX Orin)
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-successors:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 tags:
   - computer-architecture
   - cuda
   - roofline-model
   - memory-hierarchy
   - warp-divergence
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+successors:
+  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
+  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
+  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../02_%E8%A8%88%E7%AE%97%E6%A9%9F%E7%B3%BB%E7%B5%B1%E8%88%87%E7%A1%AC%E9%AB%94%E6%9E%B6%E6%A7%8B/LIB-203%20%E8%A8%88%E7%AE%97%E6%A9%9F%E9%AB%94%E7%B3%BB%E7%B5%90%E6%A7%8B%E8%88%87%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E7%A1%AC%E9%AB%94%E5%B0%8D%E9%BD%8A%20%28Computer%20Architecture%20%26%20Hardware-Aware%20Deep%20Learning%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -71,11 +75,13 @@ $$\text{Machine Balance } I^* = \frac{P_{\text{peak}}}{B_{\text{mem}}} \approx \
 | **High Bandwidth Memory (HBM3)**| 80 GB - 144 GB | ~400 - 800 cycles | 2.0 - 3.35 TB/s |
 | **PCIe Gen 5 Host Transfer** | System DRAM | > 10,000 cycles | 64 GB/s (x16 duplex) |
 
-### 2. The Warp Execution Primitive
+### 2. The Warp Execution Primitive & Microarchitectural Alignment
 On NVIDIA GPUs:
 - **Thread Warp**: 32 threads executing concurrently under Single Instruction, Multiple Threads (SIMT).
-- **Coalesced Memory Access**: When 32 threads in a warp access consecutive 4-byte words aligned to a 128-byte cache boundary, the transfer is fulfilled in a **single memory transaction**.
-- **Warp Divergence Penalty**: If threads within a warp take different conditional branches (`if (threadIdx.x % 2 == 0)`), both branches are executed serially, dropping throughput by up to $50\%$.
+- **Coalesced Memory Access (32-Byte Sectors)**: Modern NVIDIA architectures (Kepler through Hopper/Blackwell) structure 128-byte L1/L2 cache lines into four discrete 32-byte sectors. When 32 threads in a warp access consecutive 4-byte words aligned to a 128-byte boundary, the hardware services the warp in a single consolidated transaction covering four 32-byte sectors. Strided or unaligned access splits the transaction across multiple sectors, degrading bus efficiency down to $12.5\%$.
+- **Decoupling Layer Sizing from Coalescing**: Layer dimension alignment to multiples of 16/32/64 ($256 	o 128 	o 64 	o 32$) is dictated by **Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile dimensions (e.g., m16n8k16)** and shared memory bank conflict avoidance, NOT global memory coalescing. Global coalescing depends on tensor memory contiguity (`.is_contiguous()`).
+- **Host-to-Device Memory Pinning Trade-Offs**: Utilizing `pin_memory=True` locks host memory pages into physical RAM, enabling asynchronous DMA copies via GPU copy engines. However, pinned memory cannot be paged out by the OS virtual memory subsystem; over-allocating pinned RAM across multiple DataLoader workers exhausts host physical RAM and risks host system OOM errors.
+- **Warp Divergence Penalty**: If threads within a warp take divergent branches (`if (threadIdx.x % 2 == 0)`), both paths execute serially, reducing compute throughput by up to $50\%$.
 
 ---
 
@@ -124,6 +130,23 @@ def benchmark_memory_coalescing(batch_size: int = 4096, dim: int = 1024):
 
 ## 5. Agent Invariants & Decision Protocols
 
-- `INV-203-01 (Non-Blocking Transfer)`: Host-to-Device data movement MUST use `pin_memory=True` in `DataLoader` combined with `non_blocking=True` on `.to(device)` to overlap PCIe transfers with compute.
-- `INV-203-02 (Memory Contiguity)`: After tensor reshaping (`permute`, `transpose`), agents MUST check `.is_contiguous()`. If memory is non-contiguous before a heavy kernel, invoke `.contiguous()` to guarantee coalesced vector reads.
-- `INV-203-03 (Operator Fusion for Memory-Bound Layers)`: Pointwise element-wise sequences (`x = relu(bias_add(x))`) SHOULD be compiled via `torch.compile(mode="reduce-overhead")` to fuse kernels and avoid intermediate DRAM round-trips.
+### [RULE-203-01] Layer Sizing & Tensor Core Alignment Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: All dense layer widths (`nn.Linear`), convolutional channel counts, and Transformer hidden dimensions $d_{	ext{model}}$ MUST be configured as multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with hardware MMA (Matrix Multiply-Accumulate) micro-tiles.
+- **Violation Consequence**: Misaligned layer widths force hardware warp thread masking, reducing Tensor Core compute utilization below $40\%$.
+
+### [RULE-203-02] Warp Saturation & Batch Sizing Guardrail
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Batch sizes $B$ in DataLoader configurations SHOULD be multiples of 32 (matching the 32-thread hardware Warp). If memory constraints prevent $B \ge 32$, agents MUST select powers of two (e.g., 16, 8) coupled with gradient accumulation, avoiding odd batch sizes.
+- **Violation Consequence**: Odd batch sizes leave final warp threads idle (warp divergence), causing severe execution inefficiencies on Streaming Multiprocessors.
+
+### [RULE-203-03] Memory Layout Channels-Last Invariant
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: 2D vision models deployed on modern NVIDIA architectures (Ampere, Ada, Hopper) SHOULD utilize the Channels-Last memory format (`torch.channels_last` / NHWC).
+- **Violation Consequence**: Operating in default NCHW format requires runtime memory transposition inside cuDNN Tensor Core convolution kernels, introducing unnecessary bandwidth overhead.
+
+### [RULE-203-04] TensorRT Layer Fusion & Compilation Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: Production inference pipelines deployed on NVIDIA GPUs MUST undergo graph optimization via TensorRT, enforcing vertical kernel fusion ($	ext{Conv} + 	ext{Bias} + 	ext{ReLU}$) and horizontal GEMM fusion.
+- **Violation Consequence**: Unfused eager execution writes intermediate activation tensors to DRAM between successive layers, consuming up to $60\%$ of total inference latency on memory round-trips.
+

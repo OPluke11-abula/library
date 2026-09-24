@@ -1,5 +1,7 @@
 ---
 call_number: LIB-203
+status: source-verified
+invariants_count: 4
 title: 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)
 module: Computer-Systems-Architecture
 category: Hardware-Alignment
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Williams Roofline Performance Model
   - Matrix Tiling Arithmetic Intensity Analysis
@@ -20,16 +21,8 @@ hardware_target:
   - Warp Scheduler & SIMT Lockstep Execution
   - SRAM / HBM3 Memory Hierarchy & TMA
   - NVIDIA Jetson Edge Embedded Modules & RTX 4090 Workstations
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-successors:
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
-  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
-  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 計算機結構
@@ -40,6 +33,16 @@ tags:
   - NVIDIA-TensorRT
   - DLI-Ecosystem
   - 運算元融合
+prerequisites:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+successors:
+  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
+  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
+  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
+  - "[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]"
+  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
+  - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/02_computer_systems/LIB-203%20Computer%20Architecture%20%26%20Hardware-Aware%20Deep%20Learning%20%28Agent%20EN%29.md)
@@ -55,7 +58,7 @@ tags:
 
 ## 一、💡 學士直觀心智模型：裝蛋盒子與高速公路收費站
 
-在深度學習初學者的眼裡，隱藏層神經元數量（Hidden Dimension）似乎可以隨意填寫：你可以設為 250、300 甚至是 777。然而，在任何有資工背景的工程師眼裡，這是一種對底層晶片算力的嚴重浪費。為什麼全世界的經典模型（ResNet、BERT、LLaMA）都清一色採用 $2^n$（如 256, 128, 64, 32）？
+在深度學習初學者的眼裡，隱藏層神經元數量（Hidden Dimension）似乎可以隨意填寫：你可以設為 250、300 甚至是 777。然而，在任何有資工背景的工程師眼裡，這是一種對底層晶片算力的嚴重浪費。為什麼全世界的經典模型（ResNet、BERT、LLaMA）都清一色採用 $2^n$（如 256, 128, 64, 32）？在體系結構層面，這涉及兩個正交的硬體機制：一是全域顯存存取的 **Warp 記憶體合併 (Memory Coalescing)**，二是計算單元的 **Tensor Core MMA 硬體微瓦片 (Hardware Micro-Tiles) 幾何對齊**。
 
 ### 1. 裝蛋盒子的比喻 (The Egg Carton Analogy)
 想像工廠有一種自動化封裝盒，每個盒子剛好能卡住 **32 顆雞蛋**。
@@ -124,8 +127,10 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
   透過最小化對稱量化前後之相對熵（Kullback-Leibler Divergence）：
   $$\mathcal{D}_{\text{KL}}(P \parallel Q) = \sum_{i=1}^N P(i) \log \left(\frac{P(i)}{Q(i)}\right)$$
   在維持 FP32 原始準確率的前提下，使推論吞吐量提升 2~4 倍，並完全適配邊緣嵌入式晶片（NVIDIA Jetson AGX Orin / Nano）。
-- **非阻塞式 CUDA Stream 非同步管線**：
+- **非阻塞式 CUDA Stream 非同步管線與 Pinned Memory 權衡**：
   建立雙緩衝 (Double-Buffering) 機制，使主機到設備搬移 (H2D)、Tensor Core 運算與設備到主機搬移 (D2H) 三者完全重疊並發執行。
+  - **鎖頁記憶體 (Pinned Memory) 機制**：DataLoader 啟用 `pin_memory=True` 將主機虛擬記憶體鎖定在實體 RAM，允許 GPU 複製引擎（Copy Engine）透過 PCIe 執行非阻塞 DMA 傳輸，無須 CPU 介入。
+  - **實體 RAM 資源權衡與風險**：鎖頁記憶體不可被作業系統換頁至磁碟（Page Fault/Swap 停用）。若在多進程 DataLoader（`num_workers > 0`）中無節制配置 Pinned Memory，會大幅縮減 OS 檔案快取並耗盡主機實體記憶體，引發系統層級 OOM 或 Kernel Panic。
 
 ---
 

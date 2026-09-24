@@ -1,5 +1,7 @@
 ---
 call_number: LIB-001
+status: source-verified
+invariants_count: 4
 title: 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)
 module: Fundamentals-First-Principles
 category: Deep-Learning-Primer
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Beginner-CSIE
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - High-Dimensional Vector Spaces & Linear Maps
   - Directional Derivatives & Negative Gradient Flow
@@ -15,16 +16,8 @@ math_foundations:
 hardware_target:
   - CPU / GPU Tensor Cores
   - Dynamic Memory Allocation in PyTorch Autograd
-invariants_count: 4
 created: 2026-09-22
 author: Luke
-prerequisites:
-  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
-successors:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
 tags:
   - 圖書館
   - 第一性原理
@@ -35,6 +28,10 @@ tags:
   - 最佳化器
   - CNN特徵提取
   - 評估指標
+prerequisites:
+  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
+successors:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/00_overview/LIB-001%20Deep%20Learning%20First%20Principles%20%28Agent%20EN%29.md)

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-905
+status: reviewed
+invariants_count: 5
 title: 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)
 module: Research-Methodology
 category: Capstone-Engineering-Blueprints
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Multimodal Contrastive & Diffusion Objective Formulations
   - End-to-End System Evaluation Metrics (mAP, LPIPS, CLIP-Score, Navigation SLA)
@@ -15,18 +16,8 @@ math_foundations:
 hardware_target:
   - Workstation with Single/Dual NVIDIA RTX 4090 (24GB)
   - Unity 3D Engine & WebXR / Mobile Edge Deployment
-invariants_count: 5
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]"
-  - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
-  - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
-  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-successors:
-  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
 tags:
   - 專題藍圖
   - 3DGS
@@ -34,6 +25,14 @@ tags:
   - 物件生成
   - 智慧導覽
   - 國科會專題
+prerequisites:
+  - "[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]"
+  - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
+  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
+  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
+successors: []
 ---
 
 > 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English (Agent Edition)](../en/09_research_methodology/LIB-905%20Frontier%20Vision%20%26%20Multimodal%20Capstone%20Blueprints%20%28Agent%20EN%29.md)
@@ -93,7 +92,7 @@ tags:
   1. **指令解析**：解析「把汽車輪框改成黑色，其他地方不要變」 $\to$ 目標 Token: `wheels`, 屬性: `black`, 保持: `car body, background`。
   2. **注意力增強與抑制**：$A_{\text{target}} \times 1.5$，$A_{\text{bg}} \times 0.2$。
   3. **非目標特徵鎖定 (MasaCtrl 範式)**：在 U-Net 自注意力層中，背景像素直接抄取 DDIM Inversion 原始影像的 Key/Value，徹底杜絕背景重繪。
-- **量化指標**：背景 $\text{LPIPS} \le 0.04$、編輯成功率 $\ge 90\%$、CLIP Score $\ge 28.5$。
+- **量化指標**：背景 $\text{LPIPS} \le 0.04$ [TARGET]、編輯成功率 $\ge 90\%$ [TARGET]、CLIP Score $\ge 28.5$ [TARGET]。
 
 ### 題目 5：情境感知物件生成與光照幾何一致性影像融合 (LIB-408)
 - **五階段物理融合管線**：

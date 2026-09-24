@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-91_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-84_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
 
 <p align="center">
   <b>Technical Notes on Mathematical Foundations, GPU Systems, and Production Deep Learning</b>
@@ -67,7 +67,7 @@ Taking handwritten digit recognition as a concrete case study, production deploy
 2. **Module 02: Dataset Ingestion & Validation**: Safe dimension checking and visualization controls `[RULE-901-01]`.
 3. **Module 03: Normalization & One-Hot Encoding**: Exact `float32 / 255.0` scaling without double division `[RULE-901-02]`.
 4. **Module 04: Hardware-Aligned Neural Network**:
-   - Nodes: $256 \to 128 \to 64 \to 32$, strictly aligned with 32-thread NVIDIA CUDA Warp coalescing boundaries.
+   - Nodes: $256 \to 128 \to 64 \to 32$, structured as multiples of 16/32 to align with NVIDIA Tensor Core MMA hardware micro-tiles and GEMM block partitions, alongside 32-thread Warp memory coalescing.
    - Normalization: `BatchNormalization()` for covariate shift stabilization, coupled with `Dropout(0.2)`.
    - Parameter budget: 245K parameters, saving 72% compute compared to unconstrained deep MLPs.
 5. **Module 05: Convergence Monitoring & Validation**: Loss/Accuracy trajectories evaluated on hold-out splits.
@@ -88,10 +88,10 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
   - *Failure*: Resizing a large canvas directly crushes small strokes into unrecognizable noise.
   - *Solution*: Extract bounding box, scale longest side to 20 px with Lanczos-3 interpolation, and pad to $28 \times 28$.
 - **Geometric vs. Mass Centering**:
-  - *Failure*: Geometric bounding-box centering pushes straight strokes (e.g., upright 7) into off-center negative weight regions.
-  - *Solution*: Calculate ink moments for the true center of mass:
+  - *Failure*: Geometric bounding-box centering pushes upright uncrossed strokes (e.g., upright 7) into off-center negative weight regions.
+  - *Solution*: Calculate zero-th and first-order ink moments following LeCun et al. (1998) for the true center of mass:
     $$\bar{x} = \frac{\sum x \cdot I(x, y)}{\sum I(x, y)}, \quad \bar{y} = \frac{\sum y \cdot I(x, y)}{\sum I(x, y)}$$
-    Apply translation with a safe $\pm 3\text{ px}$ clamp to align with $(13.5, 13.5)$.
+    Aligning the centroid with $(13.5, 13.5)$, combined with a defensive engineering clamp [SAFETY_BOUND] ($\pm 3\text{ px}$) to prevent eccentric strokes from clipping frame boundaries.
 - **Test-Time Augmentation (Bunch TTA)**:
   - Multi-view rotation and reflection convex combination inference to suppress boundary noise (Electronics 2024).
 

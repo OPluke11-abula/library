@@ -1,5 +1,7 @@
 ---
 call_number: LIB-001
+status: source-verified
+invariants_count: 4
 title: Deep Learning First Principles - The Six Pillars of How Models Learn
 module: DL-Foundations
 category: Theory-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Senior-ML-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - High-Dimensional Vector Spaces
   - Non-Linear Activations & Universal Approximation
@@ -15,20 +16,17 @@ math_foundations:
   - Automatic Differentiation (Reverse Mode)
 hardware_target:
   - NVIDIA CUDA Tensor Cores
-invariants_count: 6
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-successors:
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
-  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
 tags:
   - first-principles
   - six-pillars
   - backpropagation
   - cross-entropy
+prerequisites:
+  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
+successors:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../00_%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD/LIB-001%20%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E7%AC%AC%E4%B8%80%E6%80%A7%E5%8E%9F%E7%90%86%E5%85%88%E4%BF%AE%E7%B2%BE%E8%A6%81%EF%BC%9A%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E5%AD%B8%E7%BF%92%E7%9A%84%E5%85%AD%E5%A4%A7%E5%9F%BA%E7%9F%B3%20%28Deep%20Learning%20First%20Principles%20-%20The%20Six%20Pillars%20of%20How%20Models%20Learn%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -135,11 +133,25 @@ class CanonicalPillarClassifier(nn.Module):
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-001-01 (Logit/Loss Coupling)`: Agents MUST pass raw unnormalized logits to `nn.CrossEntropyLoss()`. DO NOT apply explicit `F.softmax` prior to cross-entropy (prevents numerical underflow and catastrophic cancellation).
-- `INV-001-02 (Gradient Zeroing)`: `optimizer.zero_grad(set_to_none=True)` MUST be called before `loss.backward()`. Setting gradients to `None` frees memory buffers and improves throughput by ~5-10%.
-- `INV-001-03 (Activation Health)`: Monitor dead neuron ratios in ReLU activations ($P(z \le 0)$). If $> 40\%$, switch to LeakyReLU or GeLU.
+### [RULE-001-01] Zero Gradient & Backpropagation Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In any gradient-based optimization step, parameter gradients MUST be explicitly zeroed (`optimizer.zero_grad(set_to_none=True)`) before calling `loss.backward()`. Accumulating gradients across multiple iterations without resetting is strictly prohibited unless explicitly managed by a verified distributed gradient accumulation protocol.
+- **Violation Consequence**: Stale gradients compound additively across batches, effectively scaling the learning rate uncontrollably and triggering immediate parameter divergence.
 
----
+### [RULE-001-02] Learning Rate Stability & Floating-Point Range Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: If training loss produces `NaN` or `Inf` within the first 5 optimization epochs, autonomous agents MUST decay the base learning rate by at least one order of magnitude ($	imes 0.1$) and verify that input features satisfy bounded $Z$-score or $[0, 1]$ normalization.
+- **Violation Consequence**: Unbounded input activations paired with aggressive step sizes cause intermediate matrix products to exceed FP16/FP32 representable dynamic ranges.
+
+### [RULE-001-03] Metric Integrity & Class Imbalance Guardrail
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: When evaluation class imbalance exceeds a $3:1$ ratio, reporting raw classification Accuracy as the primary deployment criterion is STRICTLY FORBIDDEN. Evaluation reports MUST present balanced Precision, Recall, macro F1-score, and full confusion matrix distributions.
+- **Violation Consequence**: Optimizing naive accuracy under severe class skew masks catastrophic false-negative rates on critical minority subpopulations.
+
+### [RULE-001-04] Tensor Shape Trace & Downsampling Guardrail
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: When constructing neural architectures, spatial tensor dimensions `(Batch, Channel, Height, Width)` MUST be formally traced across every strided convolution and pooling layer. Spatial feature map dimensions MUST NOT collapse to $< 1 	imes 1$ before the terminal classification head.
+- **Violation Consequence**: Premature spatial dimension collapse obliterates convolutional inductive biases and causes irrecoverable spatial feature truncation.
 
 ## 5. Canonical Open Courseware Mapping & Textual Synthesis
 

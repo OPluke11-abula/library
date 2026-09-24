@@ -1,5 +1,7 @@
 ---
 call_number: LIB-501
+status: source-verified
+invariants_count: 4
 title: 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)
 module: Computer-Vision
 category: Image-Processing
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Nyquist-Shannon Sampling Theorem & Aliasing Prevention
   - Lanczos-3 Sinc Reconstruction Resampling
@@ -18,16 +19,8 @@ hardware_target:
   - SIMD Vectorization
   - CUDA Texture Bilinear/Bicubic Filtering
   - Edge Embedded GPUs (NVIDIA Jetson)
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-successors:
-  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
-  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 電腦視覺
@@ -36,6 +29,12 @@ tags:
   - MNIST
   - Lanczos
   - Bunch-TTA
+prerequisites:
+  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
+successors:
+  - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
+  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-501%20CV%20Preprocessing%20%26%20Center%20of%20Mass%20Alignment%20%28Agent%20EN%29.md)

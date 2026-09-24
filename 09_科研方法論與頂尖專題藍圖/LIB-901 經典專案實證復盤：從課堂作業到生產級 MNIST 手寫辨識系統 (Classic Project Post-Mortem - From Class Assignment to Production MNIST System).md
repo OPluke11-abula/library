@@ -1,5 +1,7 @@
 ---
 call_number: LIB-901
+status: reviewed
+invariants_count: 4
 title: 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)
 module: Capstone-Engineering-Case-Study
 category: Practical-Production-AI
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - CSIE-Junior
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Discrete Image Center of Mass (CoM) First Moments
   - Categorical Cross-Entropy Loss & Softmax Likelihood
@@ -15,20 +16,8 @@ math_foundations:
 hardware_target:
   - GPU CUDA Warp Coalescing (32 Threads)
   - Browser Web Client (Gradio Interface)
-invariants_count: 4
 created: 2026-09-22
 author: Luke
-prerequisites:
-  - "[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]"
-  - "[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
-successors:
-  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
-  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-  - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 tags:
   - 圖書館
   - 專案復盤
@@ -37,6 +26,13 @@ tags:
   - Gradio
   - 質心對齊
   - 模型校準
+prerequisites:
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
+  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
+  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
+successors:
+  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-901%20Classic%20Project%20Post-Mortem%20-%20Production%20MNIST%20%28Agent%20EN%29.md)
@@ -378,7 +374,7 @@ def preprocess_image(inp):
 1. **硬體原理**：$2^n$ 節點與 GPU CUDA Warp 32 執行緒記憶體合併讀取對齊（[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。
 2. **架構選型**：全連接網路 DNN 座標死記缺陷 vs 卷積神經網路 CNN 空間平移不變性（[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)|LIB-401]]）。
 3. **視覺前處理**：邊界框裁切、20x20 等比縮放、重心質心對齊公式與 $\pm 3$ 安全限幅（[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)|LIB-501]]）。
-4. **文化偏差**：美式 7 的空間負權重禁區 vs 亞洲直立 7 空間重疊（[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)|LIB-301]]）。
+4. **形態分佈偏差**：傾斜筆劃 7 的空間負權重禁區 vs 直挺無橫槓 7 空間重疊（[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)|LIB-301]]）。
 5. **統計理論**：模型過度自信 vs 模型校準與期望校準誤差 ECE（[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)|LIB-801]]）。
 
 ---

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-801
+status: source-verified
+invariants_count: 3
 title: 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)
 module: AI-Systems-Engineering
 category: Model-Calibration
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Expected Calibration Error (ECE) Formal Formulation
   - Platt Scaling & Temperature Scaling Optimization
@@ -15,16 +16,8 @@ math_foundations:
 hardware_target:
   - Log-Sum-Exp Numerically Stable Operators
   - Low-Latency Inference Calibration Sidecar
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
-  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
-successors:
-  - "[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]"
-  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 tags:
   - 圖書館
   - AI系統工程
@@ -33,6 +26,13 @@ tags:
   - 溫度縮放
   - 共形預測
   - RLCD
+prerequisites:
+  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
+  - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
+successors:
+  - "[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]"
+  - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
+  - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/08_ai_systems_engineering/LIB-801%20Model%20Calibration%20%26%20Uncertainty%20Estimation%20%28Agent%20EN%29.md)
@@ -128,7 +128,10 @@ import torch.nn as nn
 import torch.optim as optim
 
 class TemperatureScaler(nn.Module):
-    """實作 Guo et al. (ICML 2017) 溫度縮放後處理校準器"""
+    """實作 Guo et al. (ICML 2017) 溫度縮放後處理校準器。
+    透過在驗證集上最小化負對數似然 (NLL) 擬合單一純量參數 T > 0。
+    註：NLL 最佳化在經驗上能顯著改善校準度，但在數學上並不保證離散分箱 ECE 的嚴格單調遞減。
+    """
     def __init__(self):
         super().__init__()
         self.temperature = nn.Parameter(torch.ones(1) * 1.5)
@@ -183,7 +186,9 @@ if __name__ == "__main__":
     calibrated_probs = torch.softmax(scaler(val_logits), dim=-1)
     ece_after = compute_ece(calibrated_probs, val_labels)
     print(f"校準後 ECE: {ece_after * 100:.2f}%")
-    assert ece_after <= ece_before, "校準後誤差應當下降！"
+    # [EMPIRICAL_RESULT] 在正常神經網路上驗證集 ECE 經驗上下降，但非數學嚴格單調保證
+    if ece_after > ece_before:
+        print(f"[!] 警告: 分箱 ECE 未單調下降 (前: {ece_before:.4f}, 後: {ece_after:.4f})，此乃分箱邊界效應所致。")
 ```
 
 ---

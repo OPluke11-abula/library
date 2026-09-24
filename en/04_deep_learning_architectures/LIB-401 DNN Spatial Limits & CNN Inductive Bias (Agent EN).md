@@ -1,5 +1,7 @@
 ---
 call_number: LIB-401
+status: source-verified
+invariants_count: 3
 title: DNN Spatial Limits & CNN Inductive Bias (Agent Edition)
 module: DL-Architectures
 category: Architecture-Core
@@ -7,27 +9,27 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Senior-ML-Engineer
-status: Verified-Authoritative-Production
 math_foundations:
   - Permutation Invariance vs Translation Equivariance
   - Receptive Field Arithmetic & Dilation Geometry
   - Parameter Efficiency & Weight Sharing Bounds
 hardware_target:
   - NVIDIA Tensor Core Implicit GEMM Convolution
-invariants_count: 4
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-successors:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
 tags:
   - cnn
   - inductive-bias
   - translation-equivariance
   - receptive-field
+prerequisites:
+  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
+  - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
+successors:
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+  - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
+  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-401%20%E5%85%A8%E9%80%A3%E7%B5%90%E7%B6%B2%E8%B7%AF%E7%A9%BA%E9%96%93%E6%A5%B5%E9%99%90%E8%88%87%E5%8D%B7%E7%A9%8D%E7%A5%9E%E7%B6%93%E7%B6%B2%E8%B7%AF%E7%90%86%E8%AB%96%E5%BF%85%E7%84%B6%E6%80%A7%20%28DNN%20Spatial%20Limits%20%26%20CNN%20Inductive%20Bias%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -101,6 +103,18 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-401-01 (Strict 2D Spatial Inductive Bias)`: Image classification, object localization, and visual feature backbones MUST NOT utilize flattened MLP layers prior to spatial feature extraction.
-- `INV-401-02 (Receptive Field Sufficiency)`: The effective receptive field $r_L$ at the final feature map MUST cover at least $100\%$ of the target object spatial extent ($r_L \ge 28\text{ px}$ for MNIST, $r_L \ge 224\text{ px}$ for ImageNet).
-- `INV-401-03 (Odd Kernel Symmetry)`: Convolutional kernels MUST use odd dimensions ($3 \times 3, 5 \times 5, 7 \times 7$) with symmetric padding $p = \lfloor k / 2 \rfloor$ to preserve spatial coordinate centering.
+### [RULE-401-01] Spatial Inductive Bias & Translation Equivariance Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: 2D grid perception tasks MUST prioritize convolutional layers with local weight sharing over fully-connected architectures to preserve translation equivariance: $f(T_v(x)) = T_v(f(x))$.
+- **Violation Consequence**: Fully connected networks discard grid spatial topology, requiring exponential parameter counts ($O(H W \cdot C)$) that overfit training coordinates.
+
+### [RULE-401-02] Effective Receptive Field (ERF) Scale Coverage Invariant
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Neural feature extractors MUST be engineered such that the theoretical receptive field at the final representation layer covers $\ge 100\%$ of target input object spatial bounds.
+- **Violation Consequence**: Insufficient receptive field spans prevent the network from integrating global contextual relationships, causing semantic misclassifications on large-scale objects.
+
+### [RULE-401-03] Feature Map Padding & Boundary Consistency Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Convolutional layer padding MUST be symmetric and configured ($p = \lfloor k/2 floor$ for stride 1) to prevent feature map drift and boundary truncation across deep hierarchies.
+- **Violation Consequence**: Asymmetric or unpadded convolutions induce spatial feature shifts toward frame edges, causing structural distortion in downstream feature representations.
+

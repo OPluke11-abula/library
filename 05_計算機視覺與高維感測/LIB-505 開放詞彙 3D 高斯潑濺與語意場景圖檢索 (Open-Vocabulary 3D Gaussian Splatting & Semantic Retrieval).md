@@ -1,5 +1,7 @@
 ---
 call_number: LIB-505
+status: source-verified
+invariants_count: 3
 title: 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Open-Vocabulary
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Open-Vocabulary Contrastive Embedding Spaces (CLIP / DINOv2)
   - Spherical Harmonics & 3D Gaussian Semantic Feature Fields
@@ -17,16 +18,8 @@ hardware_target:
   - CUDA Differentiable Splatting Tensor Core
   - GPU Shared Memory Tiling for High-Dimensional Semantic Feats
   - Fast Nearest Neighbor Search (FAISS / HNSW)
-invariants_count: 4
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
-successors:
-  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
-  - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 tags:
   - 電腦視覺
   - 3DGS
@@ -35,6 +28,11 @@ tags:
   - CLIP
   - LERF
   - LangSplat
+prerequisites:
+  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+successors:
+  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 ---
 
 > 語言切換 / Language: 🇹🇼 **繁體中文** | [🇺🇸 English (Agent Edition)](../en/05_computer_vision/LIB-505%20Open-Vocabulary%203D%20Gaussian%20Splatting%20%26%20Semantic%20Retrieval%20%28Agent%20EN%29.md)

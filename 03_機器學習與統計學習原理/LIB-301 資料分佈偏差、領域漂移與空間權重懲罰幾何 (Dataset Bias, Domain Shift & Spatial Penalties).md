@@ -1,5 +1,7 @@
 ---
 call_number: LIB-301
+status: source-verified
+invariants_count: 3
 title: 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)
 module: Machine-Learning-Theory
 category: Statistical-Learning
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Covariate Shift & Radon-Nikodym Importance Weighting
   - Empirical Risk Minimization (ERM) Failure Under Shift
@@ -15,16 +16,8 @@ math_foundations:
 hardware_target:
   - GPU Data Loader Asynchronous Augmentation Pipeline
   - Fast Tensor Rotation & Affine Transformations
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
-successors:
-  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
-  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
 tags:
   - 圖書館
   - 機器學習
@@ -32,6 +25,12 @@ tags:
   - 領域漂移
   - MNIST
   - 空間懲罰
+prerequisites:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+  - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
+successors:
+  - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
+  - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/03_machine_learning/LIB-301%20Dataset%20Bias%2C%20Domain%20Shift%20%26%20Spatial%20Penalties%20%28Agent%20EN%29.md)
@@ -45,22 +44,22 @@ tags:
 
 ---
 
-## 一、💡 學士直觀心智模型：手寫文化的地域斷層與模型的排他死角
+## 一、💡 學士直觀心智模型：手寫筆劃形態分佈漂移與特徵空間排他死角
 
 在本次手寫數字辨識的真實畫板測試中，發生了一起令人震撼的「災難性誤判」：
-當台灣/亞洲使用者隨手書寫一個**「短橫樑、筆劃接近 90 度筆直垂下」**的直挺數字 7 時，模型沒有猜測 1，也沒有猜測 4，而是以**「100% 的絕對信心度」一口咬定這是數字 8**！
+當使用者隨手書寫一個**「短橫樑、主筆劃垂直直挺（Upright uncrossed 7，無橫槓、傾角接近 90 度）」**的數字 7 時，模型沒有猜測 1，也沒有猜測 4，而是以**「100% 的絕對信心度」一口咬定這是數字 8**！
 
-### 1. MNIST 資料集的歷史文化烙印
-- **資料集不是客觀的上帝視角，它具有強烈的文化偏見 (Cultural Bias)**。
-- MNIST 的訓練資料來自 1990 年代美國人口普查局員工（SD-3）與美國高中生（SD-1）。
-- 在美式手寫文化中，數字 7 的標準形態是：**頂部橫樑非常長，下半身強烈向左下方傾斜約 60~65 度**，墨水終點往往落在畫面左下角。
-- 美國人幾乎從不書寫「筆直垂直」的 7。在模型的認知宇宙裡，它活了幾十萬個 Epoch，從未見過一條直挺挺豎在正中央偏右的 7。
+### 1. MNIST 資料集的歷史形態採樣偏置 (NIST SD-1 vs SD-3)
+- **資料集不是客觀的上帝視角，它具有強烈的取樣偏置 (Sampling Bias)**。
+- MNIST 的原始資料源自 NIST Special Database 3（高中生樣本，筆畫風格自由多變）與 Special Database 1（人口普查局員工樣本，格式標準規範）。
+- 在該訓練分佈中，數字 7 的主流形態呈現頂部橫樑長、下半身顯著向左下方傾斜（Slanted crossed/uncrossed 7，傾角約 60°~65°），墨水終點落在畫面左下角。
+- 該分佈中極度缺乏「筆直垂直、無橫槓（Upright uncrossed 7）」的字形樣本。在經驗訓練分佈裡，模型經歷數十萬次迭代，從未見過主筆劃垂直立於中央偏右的 7。
 
 ### 2. 空間排他性負權重：神經元的扣分禁區
 神經網路並非像人類一樣「理解字形的整體美感」，它在 784 個像素座標上各自擺放了權重：
 - **正權重 (+)**：如果這個位置有亮光，加分！
 - **負權重 (-)**：**如果這個位置有亮光，瘋狂扣分！**
-為了把 7 與 8、9、0 等字形區分開，模型在數字 7 的權重分佈中，對**「畫面中右側垂直區域」**施加了極其嚴苛的巨大負權重。亞洲的直立 7 恰好把長長的主筆劃狠狠踩進了這個「扣分禁區」，導致 7 的分數被徹底打入地獄；而這條豎筆又剛好與 8 的右半邊圓弧完美契合，引發了 100% 誤判為 8 的荒謬悲劇。
+為了把 7 與 8、9、0 等字形區分開，模型在數字 7 的權重分佈中，對**「畫面中右側垂直區域」**施加了極其嚴苛的巨大負權重。直立無橫槓的 7 恰好把長長的主筆劃踩進了這個「扣分禁區」，導致 7 的 Logit 被嚴重壓低；而這條豎筆又剛好與 8 的右半邊圓弧重疊，引發了 100% 誤判為 8 的偽特徵陷阱。
 
 ---
 
@@ -139,7 +138,7 @@ def inspect_spatial_weight_penalty(linear_layer_weight: torch.Tensor):
 import torchvision.transforms.v2 as T
 
 gpu_augmentation_pipeline = T.Compose([
-    T.RandomRotation(degrees=15),                               # 克服亞洲 vs 美式筆劃傾角
+    T.RandomRotation(degrees=15),                               # 克服筆劃形態傾角變異 (Slanted vs Upright)
     T.RandomAffine(degrees=0, translate=(0.08, 0.08), shear=10),# 克服橫樑長度與剪切變換
     T.ToDtype(torch.float32, scale=True),
     T.Normalize(mean=[0.1307], std=[0.3081])
@@ -163,7 +162,7 @@ gpu_augmentation_pipeline = T.Compose([
 - **可執行斷言**:
   ```python
 if recon_error > 0.08 and max_prob > 0.95:
-    raise OODDriftAlert("偵測到文化領域漂移樣本！禁止採信捷徑過度自信預測。")
+    raise OODDriftAlert("偵測到形態分佈漂移樣本！禁止採信捷徑過度自信預測。")
   ```
 
 ### [RULE-301-02] 空間墨水質心前處理牽引合約 (Center of Mass Alignment Safeguard)

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-504
+status: source-verified
+invariants_count: 3
 title: 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)
 module: Computer-Vision
 category: 3D-Neural-Rendering
@@ -7,7 +9,6 @@ audience:
   - Undergraduate
   - Graduate-PhD
   - Autonomous-Agent
-status: Verified-Authoritative-Production
 math_foundations:
   - Continuous Volume Rendering Integral
   - EWA Covariance Projection & Jacobian Transformation
@@ -15,14 +16,8 @@ math_foundations:
 hardware_target:
   - CUDA Tile Rasterizer Shared Memory
   - Fast Radix Sort on GPU DRAM
-invariants_count: 3
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
-  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-successors:
-  - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 tags:
   - 圖書館
   - 電腦視覺
@@ -30,6 +25,14 @@ tags:
   - NeRF
   - 神經渲染
   - 光柵化
+prerequisites:
+  - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+  - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
+  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
+successors:
+  - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
+  - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-504%203D%20Gaussian%20Splatting%20Theory%20%26%20Rasterization%20%28Agent%20EN%29.md)

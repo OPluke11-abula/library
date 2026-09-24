@@ -1,5 +1,7 @@
 ---
 call_number: LIB-905
+status: reviewed
+invariants_count: 5
 title: Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications (Agent EN)
 module: Research-Methodology
 category: Capstone-Engineering-Blueprints
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - AI-Researcher
   - Senior-Systems-Architect
-status: Verified-Authoritative-Production
 math_foundations:
   - Multimodal Contrastive & Diffusion Objective Formulations
   - End-to-End System Evaluation Metrics (mAP, LPIPS, CLIP-Score, Navigation SLA)
@@ -15,18 +16,8 @@ math_foundations:
 hardware_target:
   - Workstation with Single/Dual NVIDIA RTX 4090 (24GB)
   - Unity 3D Engine & WebXR / Mobile Edge Deployment
-invariants_count: 5
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
-  - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-  - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
-  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
-  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
-successors:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
 tags:
   - capstone-blueprints
   - 3dgs
@@ -34,6 +25,14 @@ tags:
   - object-generation
   - intelligent-tour
   - research-grant-nstc
+prerequisites:
+  - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
+  - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
+  - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
+successors: []
 ---
 
 > Language Switch / 語言切換: [🇹🇼 繁體中文](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-905%20%E5%89%8D%E6%B2%BF%E8%A6%96%E8%A6%BA%E8%88%87%E5%85%B7%E8%BA%AB%E5%A4%9A%E6%A8%A1%E6%85%8B%E5%B0%88%E9%A1%8C%E7%A0%94%E7%99%BC%E8%97%8D%E5%9C%96%EF%BC%9A%E4%BA%94%E5%A4%A7%E9%A1%8C%E7%9B%AE%E6%8A%80%E8%A1%93%E5%85%A8%E6%99%AF%E8%88%87%E6%B6%88%E8%9E%8D%E5%AF%A6%E8%AD%89%E6%8C%87%E5%8D%97%20%28Frontier%20Vision%20%26%20Multimodal%20Capstone%20Blueprints%20-%20Five%20Grand%20Research%20Specifications%29.md) | 🇺🇸 **English (Agent Edition)**
@@ -73,7 +72,7 @@ tags:
                                                                      [Unity / WebGL Custom Highlight Shader Display]
 ```
 - **Scoring Formulation**: $\text{Score} = \alpha S_{\text{text}} + \beta S_{\text{view}} + \gamma S_{\text{conf}}$.
-- **Metrics**: Top-1 / Top-3 Accuracy ($\ge 85\%$), Retrieval mAP ($\ge 0.76$), Query Latency $< 300\text{ms}$.
+- **Metrics**: [TARGET] Top-1 / Top-3 Accuracy ($\ge 85\%$), Retrieval mAP ($\ge 0.76$), Query Latency $< 300\text{ms}$.
 
 ### Topic 2: LLM + 3DGS Intelligent Scene QA & Tour Guide (LIB-506)
 - **Architecture**:

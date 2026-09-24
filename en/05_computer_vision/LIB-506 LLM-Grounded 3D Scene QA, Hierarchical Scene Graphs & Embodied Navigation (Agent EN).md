@@ -1,12 +1,13 @@
 ---
 call_number: LIB-506
+status: source-verified
+invariants_count: 3
 title: LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Embodied-AI
 audience:
   - Autonomous-Agent
   - Graduate-PhD
-status: Verified-Authoritative-Production
 math_foundations:
   - Hierarchical 3D Scene Graph (H-3DSG) Formal Topology
   - Topological A* Path Planning & Heuristic Distance Fields
@@ -14,15 +15,8 @@ math_foundations:
 hardware_target:
   - Unity / WebXR Compute Shader Splatting Runtime
   - Asynchronous LLM Spatial Planning Worker
-invariants_count: 3
 created: 2026-09-24
 author: Luke
-prerequisites:
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-  - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
-  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
-successors:
-  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 tags:
   - computer-vision
   - 3dgs
@@ -30,6 +24,13 @@ tags:
   - scene-graphs
   - navigation
   - unity
+prerequisites:
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
+  - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
+successors:
+  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
 
 > Language / 語言: [🇹🇼 繁體中文](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-506%20%E5%A4%A7%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B%E9%A9%85%E5%8B%95%E4%B9%8B%203DGS%20%E7%A9%BA%E9%96%93%E5%95%8F%E7%AD%94%E3%80%81%E9%9A%8E%E5%B1%A4%E5%A0%B4%E6%99%AF%E5%9C%96%E8%88%87%E5%85%B7%E8%BA%AB%E5%B0%8E%E8%88%AA%20%28LLM-Grounded%203D%20Scene%20QA,%20Hierarchical%20Scene%20Graphs%20&%20Embodied%20Navigation%29.md) | 🇺🇸 **English**
@@ -57,11 +58,20 @@ where $\mathbf{c}_k$ is the 3D bounding centroid, $\mathbf{B}_k$ represents Orie
 
 ## 2. Invariants & Implementation Specifications
 
-- `INV-506-01 (Strict Hierarchy Invariant)`: Object nodes MUST strictly belong to exactly one parent room node. Cyclic multi-parent relationships are prohibited.
-- `INV-506-02 (Camera Clearance Invariant)`: Generated camera flight paths MUST maintain vertical ground clearance between $[1.5\text{m}, 1.7\text{m}]$ and barrier clearance $\ge 0.4\text{m}$.
-- `INV-506-03 (Frame Rate SLA)`: Real-time 3DGS rendering in Unity / WebXR MUST sustain $\ge 45\text{ FPS}$ on desktop targets.
+### [RULE-506-01] Hierarchical Spatial Containment Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In hierarchical 3D scene graphs (Building $	o$ Floor $	o$ Room $	o$ Object), every object node MUST maintain a strict single-parent containment relationship with exactly one room node. Cyclic or multi-parent containment graphs are prohibited.
+- **Violation Consequence**: Cyclic or multi-parent topological relationships create infinite loops in LLM spatial navigation and hierarchical question answering.
 
----
+### [RULE-506-02] Camera Elevation & Obstacle Clearance Invariant
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: Navigational trajectories planned for embodied agents MUST maintain camera/sensor ground clearance between $[1.5	ext{m}, 1.7	ext{m}]$ and maintain obstacle distance $\ge 0.4	ext{m}$ against all 3D mesh boundaries [SAFETY_BOUND].
+- **Violation Consequence**: Violating ground or obstacle clearance bounds produces camera clipping through physical geometries and unrealistic navigation trajectories.
+
+### [RULE-506-03] Real-Time Scene QA & Navigation Interactive Frame Rate SLA
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: Interactive embodied navigation engines MUST sustain rendering frame rates of $\ge 30	ext{ FPS}$ ($< 33.3	ext{ms}$ per frame) on target hardware, with LLM spatial question-answering query latency bounded under $800	ext{ms}$ [TARGET].
+- **Violation Consequence**: Rendering and inference latency exceeding interactive thresholds causes disorientation and trajectory oscillation in real-time embodied agents.
 
 ## 3. Canonical References
 

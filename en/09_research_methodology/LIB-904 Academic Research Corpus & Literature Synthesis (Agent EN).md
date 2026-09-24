@@ -1,5 +1,7 @@
 ---
 call_number: LIB-904
+status: source-verified
+invariants_count: 4
 title: Academic Research Corpus & Literature Synthesis (Agent Edition)
 module: Literature-Synthesis-Methodology
 category: Methodology-Practice
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Research-Scientist
   - Capstone-Student
-status: Verified-Authoritative-Production
 math_foundations:
   - Multimodal Vision-Language Alignment
   - Edge Embedded Optimization (TensorRT & Jetson Architecture)
@@ -15,23 +16,18 @@ math_foundations:
 hardware_target:
   - High-Performance GPU Infrastructure (NVIDIA RTX 4090 / A100 / H100)
   - Edge Embedded Systems (NVIDIA Jetson AGX Orin)
-invariants_count: 4
 created: 2026-09-21
 updated: 2026-09-22
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-  - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
-successors: []
 tags:
   - academic-literature
   - paper-reproduction
   - research-methodology
   - peer-review
   - self-study
+prerequisites:
+  - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
+successors: []
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-904%20%E5%AD%B8%E8%A1%93%E7%A7%91%E7%A0%94%E6%96%87%E7%8D%BB%E9%AB%94%E7%B3%BB%E8%88%87%E5%89%8D%E6%B2%BF%E7%A0%94%E7%A9%B6%E5%B0%8D%E9%BD%8A%20%28Academic%20Research%20Corpus%20&%20Literature%20Synthesis%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -181,12 +177,25 @@ def compute_ca_jaccard_distance(
 
 ## 5. Agent Invariant Contracts
 
-- `INV-904-01 (Formal Literature Invariant)`: Every algorithm implemented in the library MUST map to a formal peer-reviewed publication or authoritative textbook baseline.
-- `INV-904-02 (Hardware Budget Constraint)`: Multi-view 3D and diffusion pipelines MUST operate within a 24GB VRAM envelope via low-rank decomposition or tiled rasterization.
-- `INV-904-03 (Sole Author Attribution)`: All knowledge library assets and engineering matrices represent Luke's independent self-study and research corpus.
-- `INV-904-04 (Zero Unverified Assertions)`: Quantitative performance metrics (mAP, FPS, HTER) quoted in this library MUST reference documented empirical test splits.
+### [RULE-904-01] View-Decomposed 3DGS LoRA Dispatch Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In multi-view 3D Gaussian Splatting and diffusion editing architectures, low-rank adaptation modules (LoRA) MUST be conditioned on viewpoint camera pose parameters, routing view-dependent updates through decomposed low-rank projections.
+- **Violation Consequence**: Monolithic global LoRA adapters fail to capture view-dependent radiance variations, producing blurry multi-view reconstructions.
 
----
+### [RULE-904-02] 3D Point Cloud Spatial Ray Serialization Invariant
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: When serializing 3D point cloud or Gaussian primitive coordinates for autoregressive LLM consumption, spatial positions MUST follow a deterministic Hilbert space-filling curve or Morton Z-order serialization.
+- **Violation Consequence**: Unordered spatial serialization destroys spatial locality, preventing sequence models from learning 3D geometric structures.
+
+### [RULE-904-03] Grid-Cropping Test-Time Augmentation Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: In high-resolution vision tasks with tiny target objects, inference pipelines MUST support grid-cropping Test-Time Augmentation (TTA), decomposing inputs into overlapping sub-tiles and fusing multiscale bounding boxes via Non-Maximum Suppression (NMS).
+- **Violation Consequence**: Direct downsampling of high-resolution scenes obliterates sub-pixel features of small objects, degrading detection recall.
+
+### [RULE-904-04] Dynamic Biometric Frame-Difference Liveness Invariant
+- **Contract Level**: `SECURITY_CRITICAL`
+- **Specification**: Real-time biometric verification pipelines MUST combine static spatial facial feature representations with temporal frame-difference liveness detection ($\Delta I_t = \|I_t - I_{t-1}\|_1$), requiring biological micro-motion confirmation before identity release.
+- **Violation Consequence**: Purely static 2D image facial recognition is vulnerable to physical presentation attacks (printed photographs or replayed video screens).
 
 ## 6. Canonical Literature References
 

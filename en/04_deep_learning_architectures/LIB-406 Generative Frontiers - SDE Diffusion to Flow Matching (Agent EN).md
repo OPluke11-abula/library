@@ -1,5 +1,7 @@
 ---
 call_number: LIB-406
+status: source-verified
+invariants_count: 4
 title: Generative Frontiers - SDE Diffusion to Flow Matching & DiT Revolution (Agent Edition)
 module: Generative-AI
 category: Frontiers-Core
@@ -7,7 +9,6 @@ audience:
   - Autonomous-Agent
   - Graduate-PhD
   - Research-Scientist
-status: Verified-Authoritative-Production
 math_foundations:
   - Stochastic Differential Equations (Itô Calculus & SDEs)
   - Score Matching & Tweedie's Denoising Formula
@@ -15,21 +16,20 @@ math_foundations:
   - Diffusion Transformers (DiT & adaLN-Zero)
 hardware_target:
   - High-Throughput Cluster (H100/B200 NVLink)
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
-successors:
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
 tags:
   - diffusion
   - flow-matching
   - dit
   - score-based-models
   - optimal-transport
+prerequisites:
+  - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
+  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+successors:
+  - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
+  - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-406%20%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B%E5%89%8D%E6%B2%BF%EF%BC%9A%E5%BE%9E%E9%9A%A8%E6%A9%9F%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%20%28SDE%29%20%E6%93%B4%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%88%B0%E6%9C%80%E4%BD%B3%E5%82%B3%E8%BC%B8%E6%B5%81%E5%8C%B9%E9%85%8D%20%28Flow%20Matching%29%20%E8%88%87%20DiT%20%E9%9D%A9%E5%91%BD%20%28Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20%26%20DiT%20Revolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -100,6 +100,23 @@ def sample_flow_matching_euler(model, noise: torch.Tensor, steps: int = 10) -> t
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-406-01 (Straight Path Invariant)`: When training Flow Matching architectures, optimal transport conditioning $x_t = (1 - t) x_0 + t x_1$ MUST be used instead of non-linear diffusion schedules to ensure minimum curvature velocity paths.
-- `INV-406-02 (adaLN-Zero Initialization)`: In DiT residual blocks, modulation dimension projections for scale parameters MUST be zero-initialized to guarantee gradient preservation across $L \ge 24$ layers.
-- `INV-406-03 (ODE Step-Size Economy)`: Autonomous inference pipelines MUST benchmark generation quality against step count $N \in \{4, 8, 16, 32\}$. If FID difference between $N=8$ and $N=32$ is $< 0.5$, agents MUST deploy $N=8$ to cut compute cost by $75\%$.
+### [RULE-406-01] Optimal Transport Straight-Flow Path Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: In Flow Matching and Rectified Flow generative architectures, probability trajectories MUST follow optimal transport conditioning $x_t = (1 - t) x_0 + t x_1$ with constant target velocity $u_t(x_t) = x_1 - x_0$.
+- **Violation Consequence**: Non-linear diffusion noise schedules introduce high trajectory curvature, requiring excessive ODE solver integration steps during inference.
+
+### [RULE-406-02] AdaLN-Zero Identity Initialization Invariant
+- **Contract Level**: `STABILITY_CRITICAL`
+- **Specification**: In Diffusion Transformer (DiT) blocks, projection layers modulating scale and shift parameters ($\gamma, eta, lpha$) MUST be initialized strictly to zero (`nn.init.zeros_`).
+- **Violation Consequence**: Non-zero initialization breaks identity mapping at initialization, causing initial forward activations to explode in deep residual stacks.
+
+### [RULE-406-03] ODE Solver Truncation Error Bound Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: In Flow Matching numerical ODE sampling, solver step counts $N_{	ext{steps}}$ MUST balance truncation error $\mathcal{O}(\Delta t^p)$ and compute latency. Single-step Euler integration is restricted to distilled flow networks.
+- **Violation Consequence**: Under-stepping ODE integration without distillation introduces severe perceptual truncation artifacts and mode collapse.
+
+### [RULE-406-04] MM-DiT Dual-Stream Modality Isolation Invariant
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Multi-modal Diffusion Transformers (MM-DiT) MUST maintain distinct linear projections and LayerNorm parameters for visual and textual token sequences, joining representations exclusively within the cross-attention kernel.
+- **Violation Consequence**: Forcing heterogeneous modalities through shared projection layers causes severe cross-modal interference and degraded text-image alignment.
+

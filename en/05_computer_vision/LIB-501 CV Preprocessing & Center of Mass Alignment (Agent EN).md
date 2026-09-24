@@ -1,5 +1,7 @@
 ---
 call_number: LIB-501
+status: source-verified
+invariants_count: 4
 title: CV Preprocessing & Center of Mass Alignment (Agent Edition)
 module: Computer-Vision
 category: Engineering-Perception
@@ -7,28 +9,26 @@ audience:
   - Autonomous-Agent
   - Senior-ML-Engineer
   - CV-Practitioner
-status: Verified-Authoritative-Production
 math_foundations:
   - 2D Spatial Image Moments & Centroids
   - Bilinear Subpixel Coordinate Interpolation
   - Aspect Ratio Preserving Bounding Box Clamping
 hardware_target:
   - Embedded Edge (Jetson Nano/Orin) & Web Canvas
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
-successors:
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
-  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 tags:
   - computer-vision
   - preprocessing
   - center-of-mass
   - moments
   - mnist-deployment
+prerequisites:
+  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
+successors:
+  - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
+  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-501%20%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E5%89%8D%E8%99%95%E7%90%86%E8%A6%8F%E7%AF%84%E8%88%87%E5%BD%B1%E5%83%8F%E8%B3%AA%E5%BF%83%E5%AE%9A%E4%BD%8D%E6%BC%94%E7%AE%97%E6%B3%95%20%28CV%20Preprocessing%20%26%20Center%20of%20Mass%20Alignment%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -55,7 +55,7 @@ For a normalized grayscale intensity image $I(x, y) \in [0, 1]$ where $(x, y) \i
 The geometric center of a $28 \times 28$ discrete grid is $(c_x, c_y) = (13.5, 13.5)$.
 The ideal shift vector:
 $$\vec{v}_{\text{shift}} = (dx, dy) = (13.5 - \bar{x}, \quad 13.5 - \bar{y})$$
-To prevent thin or eccentric strokes (such as an upright Asian "7" or period ".") from being shoved off the edge of the canvas, the shift vector MUST be clamped:
+To prevent thin or eccentric strokes (such as an upright uncrossed "7" or period ".") from being shoved off the edge of the canvas, the shift vector MUST be clamped:
 $$dx_{\text{clamped}} = \text{clip}(dx, -\tau_{\text{shift}}, +\tau_{\text{shift}}), \quad dy_{\text{clamped}} = \text{clip}(dy, -\tau_{\text{shift}}, +\tau_{\text{shift}})$$
 where canonical threshold $\tau_{\text{shift}} = 3.0\text{ px}$.
 
@@ -135,6 +135,23 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-501-01 (Strict Aspect Ratio Preservation)`: Direct resizing of an arbitrary aspect-ratio crop into $28 \times 28$ is STRICTLY PROHIBITED. Bounding boxes MUST be scaled along the dominant dimension to $\le 20\text{ px}$.
-- `INV-501-02 (Centering Shift Limiter)`: The translation shift applied to align center of mass MUST be clamped to $[-3.0, +3.0]\text{ px}$ to prevent clipping of vertical strokes against frame borders.
-- `INV-501-03 (Subpixel Anti-Aliasing)`: When executing affine translation, agents MUST employ bilinear (`INTER_LINEAR`) or bicubic interpolation to avoid discrete grid stepping noise.
+### [RULE-501-01] Anti-Aliasing Resampling Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: When resizing raw high-resolution canvas inputs down to target dimensions ($28 	imes 28$), downsampling ratios $s < 0.5$ MUST use anti-aliased resampling (Lanczos-3 or Area downsampling). Nearest-neighbor interpolation is STRICTLY PROHIBITED.
+- **Violation Consequence**: Naive nearest-neighbor downsampling creates severe high-frequency aliasing and pixel dropouts that fracture continuous handwritten strokes.
+
+### [RULE-501-02] Foreground Mask & Zero-Moment Filter
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`.
+- **Violation Consequence**: Processing empty or sub-threshold noise frames produces numerical instability in center of mass division ($M_{10}/M_{00}$) and spurious high-confidence predictions.
+
+### [RULE-501-03] Centroid Clamping & Canvas Boundary Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Translating the ink center of mass $(ar{x}, ar{y})$ to the canonical target coordinate $(13.5, 13.5)$ MUST apply defensive displacement clamping: $\Delta x_{	ext{clamped}} = 	ext{clip}(13.5 - ar{x}, -3.0, 3.0)$ and $\Delta y_{	ext{clamped}} = 	ext{clip}(13.5 - ar{y}, -3.0, 3.0)$ [HEURISTIC / SAFETY_BOUND]. Note: While LeCun et al. (1998) introduced unconstrained center of mass translation on centered digits, this $\pm 3.0	ext{ px}$ clamp is a defensive engineering safety bound to prevent eccentric strokes from being shifted out of frame boundaries.
+- **Violation Consequence**: Unclamped shifts on highly eccentric inputs push peripheral strokes entirely outside canvas boundaries, destroying digit topology.
+
+### [RULE-501-04] Bunch TTA Geometric Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: In production inference pipelines, critical predictions MAY deploy Test-Time Augmentation (TTA) across at least 3 geometric transformations (e.g., slight scaling $\pm 5\%$, small shifts), averaging output probability distributions $ar{p} = rac{1}{K} \sum_{k=1}^K p_k$.
+- **Violation Consequence**: Single-pass inference on boundary-drawn digits suffers elevated false-negative rates under slight drawing jitter.
+

@@ -1,5 +1,7 @@
 ---
 call_number: LIB-903
+status: reviewed
+invariants_count: 4
 title: Capstone Blueprint, Graduate Admissions & Multimodal Research Evolution (Agent Edition)
 module: Academic-Strategy
 category: Methodology-Practice
@@ -7,27 +9,27 @@ audience:
   - Autonomous-Agent
   - Research-Scientist
   - Capstone-Student
-status: Verified-Authoritative-Production
 math_foundations:
   - NSTC C801 Research Proposal Methodology
   - Rigorous Ablation Study Design
   - Academic Paper 8-Stage Lifecycle
 hardware_target:
   - Academic HPC Cluster & Research Workstations
-invariants_count: 5
 created: 2026-09-17
 author: Luke
-prerequisites:
-  - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
-  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
-successors:
-  - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
 tags:
   - academic-research
   - capstone-blueprint
   - nstc-c801
   - ablation-study
   - thesis-methodology
+prerequisites:
+  - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
+  - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
+  - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
+successors:
+  - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
+  - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-903%20%E5%B0%88%E9%A1%8C%E5%9F%BA%E7%9F%B3%E8%97%8D%E5%9C%96%E3%80%81%E5%AD%B8%E8%A1%93%E6%8E%A8%E7%94%84%E8%88%87%E5%A4%9A%E6%A8%A1%E6%85%8B%E7%A0%94%E7%A9%B6%E6%BC%94%E9%80%B2%20%28Capstone%20Blueprint%20%26%20Academic%20Research%20Evolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -74,7 +76,7 @@ This project is authored and executed independently by **Luke**, spanning all en
 
 | Core Engineering Dimension | Lead Researcher | Key Technical Deliverables & Milestones |
 | :--- | :--- | :--- |
-| **System Architecture & Mathematical Derivations** | **Luke** | • Formalization of 66 mathematical invariants and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with top-tier academic literature corpus and GPU compute architecture |
+| **System Architecture & Mathematical Derivations** | **Luke** | • Formalization of 84 mathematical invariants and system rules and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with top-tier academic literature corpus and GPU compute architecture |
 | **Data Pipelines & Experimental Evaluation** | **Luke** | • Large-scale handwriting collection, cleaning, and subpixel moment centering<br>• Design and execution of ablation studies across all model baselines<br>• Monitoring of Expected Calibration Error (ECE) and loss convergence |
 | **Systems Engineering & Edge Acceleration** | **Luke** | • ONNX export, FP16/INT4 quantization, and TensorRT microsecond acceleration<br>• Interactive Gradio web application with real-time feedback canvas<br>• CI/CD pipeline automation and reproducible Docker environments |
 
@@ -82,6 +84,23 @@ This project is authored and executed independently by **Luke**, spanning all en
 
 ## 4. Agent Invariants & Decision Protocols
 
-- `INV-903-01 (Mandatory Ablation Studies)`: Any architectural contribution MUST include an ablation table proving that each proposed module (e.g., preprocessing, loss term, attention block) provides statistically significant gains over baselines.
-- `INV-903-02 (Hardware Reproducibility)`: Empirical benchmarks MUST report exact hardware specifications (GPU model, driver version, CUDA toolkit, PyTorch version, batch size, and seed count).
-- `INV-903-03 (Citation Rigor)`: Every theoretical assertion MUST link to canonical, peer-reviewed primary sources (CVPR, ICCV, NeurIPS, ICML, ICLR, IEEE/MDPI).
+### [RULE-903-01] Controlled Ablation Single-Factor Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Empirical research and capstone contributions MUST conduct ablation studies adhering to strict single-variable control: exactly one component (e.g., loss term, normalization layer, preprocessing step) is altered per ablation run while holding random seeds (`seed=42`), batch sizes, and optimizer schedules constant.
+- **Violation Consequence**: Concurrently modifying multiple hyperparameters obscures causal attribution and invalidates scientific claims.
+
+### [RULE-903-02] Full Experimental Reproducibility & Artifact Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Every empirical benchmark in the library MUST provide complete reproducibility artifacts: fixed random seeds, pinned library versions (`torch`, `cuda`, `cuDNN`), training scripts, and cryptographically verified checkpoint hashes (SHA-256).
+- **Violation Consequence**: Unverifiable benchmark assertions degrade scientific integrity and violate peer-reviewed research standards.
+
+### [RULE-903-03] Quantitative Empirical Merit Metric Invariant
+- **Contract Level**: `STRATEGIC_DIRECTIVE`
+- **Specification**: Technical assertions MUST be supported by quantitative empirical metrics rather than qualitative statements. Evaluations MUST report triple-axis metrics: **Accuracy / Quality** (%, PSNR, mAP), **Parameter Footprint** (Params, MB), and **Inference Efficiency** (Latency in ms, FPS, TFLOPS).
+- **Violation Consequence**: Qualitative claims without quantitative measurements lack engineering rigor and cannot support defensible system trade-offs.
+
+### [RULE-903-04] Mathematical Formalization Integrity Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Mathematical notation across the library MUST maintain formal integrity: tensor dimensions MUST be explicitly declared for every symbol, operator domains and ranges MUST be bounded, and engineering heuristics MUST NOT masquerade as mathematical theorems.
+- **Violation Consequence**: Unsound pseudo-mathematical formalization misleads autonomous agents and damages the scientific authority of the knowledge base.
+

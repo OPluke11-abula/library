@@ -113,14 +113,14 @@ $$(R_{\Theta, m} q)^T (R_{\Theta, n} k) = q^T (R_{\Theta, m}^T R_{\Theta, n}) k 
 - 在 SRAM 內部一次性完成點積、在線 Softmax 更新與值乘法，**全程絕不將 $N \times N$ 的中間注意力矩陣寫回 HBM**，顯存複雜度直接由 $O(N^2)$ 銳減為 $O(N)$。
 
 ### 2. 2024 最新突破：FlashAttention-3 (Shah & Dao et al., 2024)
-針對 NVIDIA Hopper (H100) 與次世代架構，FlashAttention-3 引入三大硬體非同步黑科技：
+針對 NVIDIA Hopper (H100) 與次世代微架構，FlashAttention-3 引入三大硬體非同步協同機制：
 1. **Warp-Specialization (執行緒束特化)**：
    - 傳統 GPU 每個 Warp 同時做資料搬運和矩陣計算。
    - FA3 將 Warps 分工：一組 Producer Warps 專門負責驅動 **TMA (Tensor Memory Accelerator)** 進行非同步記憶體搬運；另一組 Consumer Warps 專門全速驅動 Tensor Cores 計算，達成**資料搬運與 GEMM 運算的 100% 重疊掩蓋 (Overlap)**。
 2. **交錯矩陣乘法與 Softmax (Interleaved Matmul & Softmax)**：
    - 解決 Tensor Core 與非矩陣運算單元之間的流水線氣泡（Pipeline Bubbles）。
 3. **FP8 低精度塊量化與非相干補償 (FP8 Block Quantization)**：
-   - 在 H100 上達到驚人的 **1.2 PFLOPs/s** 吞吐量，且數值誤差比一般 FP8 低 2.6 倍！
+   - 在 H100 上實現 **1.2 PFLOPs/s** 吞吐量，且數值誤差較常規 FP8 降低 2.6 倍。
 
 ---
 

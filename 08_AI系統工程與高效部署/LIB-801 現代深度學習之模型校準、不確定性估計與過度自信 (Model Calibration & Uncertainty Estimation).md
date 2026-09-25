@@ -42,10 +42,10 @@ successors:
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
 - **後續節點**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
-- **權威期刊/會議文獻出處**：
+- **主要文獻與官方來源**：
   - Guo, Pleiss, Sun, Weinberger (Cornell University, ICML 2017) *On Calibration of Modern Neural Networks*.
   - Angelopoulos & Bates (UC Berkeley, Foundations and Trends in Machine Learning 2023) *Conformal Prediction: A Gentle Introduction*.
-  - Almeida et al. (TypeSafe AI, 2026) *Jev: Reinforcement Learning for Calibrated Decisions (RLCD)*.
+  - Diogo Almeida / TypeSafe AI (2026) *Introducing System One Models & Jev*. TypeSafe AI 官方發布.
   - Platt (1999) *Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized Likelihood Methods*.
 
 ---
@@ -91,7 +91,7 @@ $$\text{MCE} = \max_{m \in \{1, \dots, M\}} \left| \text{acc}(B_m) - \text{conf}
 $$\hat{q}_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}}$$
 - 透過在獨立驗證集上最小化負對數似然損失 (Negative Log-Likelihood, NLL) 求解全域最優 $T^*$：
   $$\min_{T > 0} -\sum_{i=1}^N \log\left(\frac{e^{z_{i, y_i} / T}}{\sum_{j=1}^K e^{z_{i, j} / T}}\right)$$
-- 保持 Top-1 預測不變，同時大幅壓平飽和 Logits，將 ECE 下降 50% 以上。
+- 保持 Top-1 預測排序不變；在 Guo et al. (2017) 的實驗中，Temperature Scaling 通常能有效改善模型校準，但改善幅度依模型、資料集與 ECE 分箱設定而異。
 
 ### 5. 統計保證前沿：共形預測 (Conformal Prediction, Angelopoulos & Bates 2023)
 單純調整溫度依然屬於啟發式方法。在醫療診斷、自駕感測等高風險領域，**共形預測 (Conformal Prediction)** 提供了數學上嚴格的**有限樣本無分佈統計覆蓋保證 (Distribution-Free Guarantee)**。其核心建立在校準資料與測試資料滿足**可交換性（Exchangeability，i.i.d. 為其常見充分條件）**基礎上：
@@ -102,9 +102,8 @@ $$\mathbb{P}\left(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})\right) \ge 1 
 ### 6. 前沿校準對齊探索：決策校準強化學習 (RLCD, Reinforcement Learning for Calibrated Decisions)
 傳統對齊技術（如 RLHF）針對人類偏好獎勵標量進行最優化，常使模型策略為追求最大獎勵而導致預測分佈尖銳化（Entropy Collapse），加劇預測機率的過度自信（ECE 惡化）。
 在 2026 年新一代代理人架構探索中（如 TypeSafe AI 提出的 Jev，詳見 [[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]）：
-- **公開設計目標**：在策略訓練目標中引入嚴格評分規則（Strictly Proper Scoring Rules，例如 Brier Score）或校準懲罰項，促使模型輸出機率能如實反映決策不確定性，以作為代理人系統可靠決策的機率依據。
-  $$\mathcal{B}(\mathbf{p}, y^*) = \sum_{k=1}^K (p_k - \mathbf{1}_{y^* = k})^2$$
-- **未公開實作細節與研究挑戰 `[OPEN_PROBLEM / HYPOTHESIS]`**：其具體策略梯度形式與端到端聯合最佳化演算法目前未公開發表；如何在強化學習策略梯度中直接聯合最佳化具有離散、非平滑分箱特性的 ECE，在學界與產業界仍屬開放性研究挑戰。
+- **公開文獻陳述 [FACT]**：TypeSafe AI 公開將 RLCD (Reinforcement Learning for Calibrated Decisions) 描述為一種旨在為 Jev 生成校準決策與機率的訓練方法。
+- **未公開實作細節 [OPEN_QUESTION]**：在引述的官方資料中，其確切的獎勵函數、評分規則（Scoring Rule）、校準目標、損失函數形式以及策略梯度實作均未公開發表；如何在強化學習策略梯度中直接聯合最佳化具有離散、非平滑分箱特性的 ECE，在學界與產業界仍屬開放性研究挑戰。
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：Log-Sum-Exp 數值防下溢
@@ -191,7 +190,7 @@ if __name__ == "__main__":
     calibrated_probs = torch.softmax(scaler(val_logits), dim=-1)
     ece_after = compute_ece(calibrated_probs, val_labels)
     print(f"校準後 ECE: {ece_after * 100:.2f}%")
-    # [HEURISTIC_OBSERVATION] 依據文獻 (Guo et al., 2017)，驗證集 ECE 經驗上多數下降，但因分箱邊界非平滑特性，數學上無單調保證
+    # [EMPIRICAL_RESULT] 依據文獻 (Guo et al., 2017)，驗證集 ECE 經驗上多數下降，但因分箱邊界非平滑特性，數學上無單調保證
     if ece_after > ece_before:
         print(f"[!] 警告: 分箱 ECE 未單調下降 (前: {ece_before:.4f}, 後: {ece_after:.4f})，此乃分箱邊界效應所致。")
 ```
@@ -233,7 +232,7 @@ assert ece_val <= 0.05, f"模型校準度不足: ECE={ece_val:.4f} 超出 0.05 �
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
 
 1. **現代神經網路校準開創巨作 (ICML 頂會)**
-   - *Paper*: Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). "On Calibration of Modern Neural Networks." *International Conference on Learning Representations / ICML 2017*, PMLR 70, pp. 1321-1330.
+   - *Paper*: Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). "On Calibration of Modern Neural Networks." *Proceedings of the 34th International Conference on Machine Learning (ICML 2017)*, PMLR 70, 1321–1330.
    - *Core Contribution*: 首次揭露現代深層神經網路（如 ResNet）因過度參數化與跨熵最小化，雖然分類準確率極高但預測機率存在嚴重「過度自信」；實證證明溫度縮放 (Temperature Scaling) 為最簡潔有效的單參數校準法。
 2. **共形預測 (Conformal Prediction) 權威綜述導論**
    - *Monograph*: Angelopoulos, A. N., & Bates, S. (2023). "Conformal Prediction: A Gentle Introduction." *Foundations and Trends in Machine Learning*, 16(4), 494-591. DOI: [10.1561/2200000101](https://doi.org/10.1561/2200000101).

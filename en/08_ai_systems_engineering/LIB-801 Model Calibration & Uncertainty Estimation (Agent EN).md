@@ -62,7 +62,8 @@ $$\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}
 Temperature Scaling introduces a single scalar parameter $T > 0$ applied to raw logits $z$:
 $$\hat{p}_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}}$$
 - If $T > 1$: Softens logit distribution, deflating overconfident probabilities toward uniform.
-- Top-1 prediction remains unchanged ($\arg\max z_i = \arg\max z_i / T$), preserving top-1 accuracy.
+- Top-1 prediction rank ordering remains unchanged ($\arg\max z_i = \arg\max z_i / T$), preserving top-1 accuracy.
+- In empirical evaluations (Guo et al., 2017), Temperature Scaling can substantially improve calibration, but the magnitude of improvement depends on the model, dataset, validation distribution, and ECE binning configuration.
 Parameter $T^*$ is optimized on a validation set by minimizing Negative Log-Likelihood (NLL):
 $$T^* = \arg\min_T -\sum_{i=1}^N \log \left( \frac{e^{z_{i, y_i} / T}}{\sum_j e^{z_{i, j} / T}} \right)$$
 
@@ -75,9 +76,8 @@ $$\mathbb{P}\left(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})\right) \ge 1 
 ### 5. Frontiers in Calibrated Alignment: RLCD (Reinforcement Learning for Calibrated Decisions)
 Conventional preference alignment (e.g., RLHF) optimizes scalar rewards, which can sharpen policy distributions (entropy collapse) and induce severe overconfidence.
 Recent research initiatives (e.g., Jev, see [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]) investigate **RLCD**:
-- **Public Design Goal**: Incorporate strictly proper scoring rules (e.g., Brier score) or calibration regularization into policy training so model probabilities faithfully reflect decision uncertainty:
-  $$\mathcal{B}(\mathbf{p}, y^*) = \sum_{k=1}^K (p_k - \mathbf{1}_{y^* = k})^2$$
-- **Undisclosed Implementation Details `[OPEN_PROBLEM / HYPOTHESIS]`**: Specific policy-gradient formulations and optimization algorithms remain proprietary or unpublished; jointly optimizing discrete, non-smooth binned ECE within end-to-end policy gradients remains an open research challenge.
+- **Publicly Documented Statement [FACT]**: TypeSafe AI publicly describes RLCD (Reinforcement Learning for Calibrated Decisions) as a training approach intended to produce calibrated decisions / probabilities for Jev.
+- **Undisclosed Implementation Details [OPEN_QUESTION]**: The exact reward function, scoring rule, calibration objective, loss formulation, and policy-gradient implementation have not been publicly disclosed in the cited official material; jointly optimizing discrete, non-smooth binned ECE within end-to-end policy gradients remains an open research challenge.
 ---
 
 ## 3. Production PyTorch Temperature Scaler

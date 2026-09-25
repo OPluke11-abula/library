@@ -142,7 +142,7 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ### [RULE-501-02] Foreground Mask & Zero-Moment Filter
 - **Contract Level**: `BOUNDARY_GUARD`
-- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`.
+- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`. The threshold $M_{00} \ge 15.0$ is a project-specific defensive engineering safety bound [HEURISTIC / SAFETY_BOUND] designed to prevent division-by-zero during centroid computation ($M_{10}/M_{00}$) and suppress sensor noise, rather than a canonical constant defined in LeCun et al. (1998).
 - **Violation Consequence**: Processing empty or sub-threshold noise frames produces numerical instability in center of mass division ($M_{10}/M_{00}$) and spurious high-confidence predictions.
 
 ### [RULE-501-03] Centroid Clamping & Canvas Boundary Invariant

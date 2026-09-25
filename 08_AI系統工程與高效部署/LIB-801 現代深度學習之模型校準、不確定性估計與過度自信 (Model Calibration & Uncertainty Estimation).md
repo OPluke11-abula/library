@@ -190,7 +190,7 @@ if __name__ == "__main__":
     calibrated_probs = torch.softmax(scaler(val_logits), dim=-1)
     ece_after = compute_ece(calibrated_probs, val_labels)
     print(f"校準後 ECE: {ece_after * 100:.2f}%")
-    # [EMPIRICAL_RESULT] 依據文獻 (Guo et al., 2017)，驗證集 ECE 經驗上多數下降，但因分箱邊界非平滑特性，數學上無單調保證
+    # [LITERATURE_RESULT] Guo et al. (2017) 的實驗顯示 Temperature Scaling 在多數受測資料集上能有效改善校準；但 NLL 最佳化不保證離散分箱 ECE 嚴格單調下降
     if ece_after > ece_before:
         print(f"[!] 警告: 分箱 ECE 未單調下降 (前: {ece_before:.4f}, 後: {ece_after:.4f})，此乃分箱邊界效應所致。")
 ```

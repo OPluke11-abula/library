@@ -37,7 +37,7 @@ successors:
 
 ## 1. Conceptual Mental Model
 
-In standard benchmark tutorials, handwritten digit recognition on MNIST boasts $> 99\%$ accuracy. Yet when real users draw digits on a web canvas (such as Gradio or React sketchpads), naive deployments often drop below $40\%$ accuracy. Why? Because the canonical MNIST dataset was preprocessed using a rigorous, non-trivial protocol established by LeCun et al. (1998): **tight bounding-box extraction, aspect-ratio preserved scaling into a $20 \times 20$ core zone, and translation of the ink center-of-mass directly to $(13.5, 13.5)$ on a $28 \times 28$ canvas**. Omitting this protocol introduces severe spatial distribution shift.
+In standard benchmark tutorials, handwritten digit recognition on MNIST achieves high validation accuracy. Yet when real users draw digits on a web canvas (such as Gradio or React sketchpads), naive deployments without centering and bounding-box normalization often suffer severe accuracy degradation due to spatial distribution shift. Why? Because the canonical MNIST dataset was preprocessed using a rigorous protocol established by LeCun et al. (1998): **tight bounding-box extraction, aspect-ratio preserved scaling into a $20 \times 20$ core zone, and translation of the ink center-of-mass directly to $(13.5, 13.5)$ on a $28 \times 28$ canvas**. Omitting this protocol introduces severe spatial distribution shift.
 
 ---
 
@@ -57,7 +57,7 @@ The ideal shift vector:
 $$\vec{v}_{\text{shift}} = (dx, dy) = (13.5 - \bar{x}, \quad 13.5 - \bar{y})$$
 To prevent thin or eccentric strokes (such as an upright uncrossed "7" or period ".") from being shoved off the edge of the canvas, the shift vector MUST be clamped:
 $$dx_{\text{clamped}} = \text{clip}(dx, -\tau_{\text{shift}}, +\tau_{\text{shift}}), \quad dy_{\text{clamped}} = \text{clip}(dy, -\tau_{\text{shift}}, +\tau_{\text{shift}})$$
-where canonical threshold $\tau_{\text{shift}} = 3.0\text{ px}$.
+where defensive safety bound $\tau_{\text{shift}} = 3.0\text{ px}$ [HEURISTIC / SAFETY_BOUND]. Note that while LeCun et al. (1998) defined translation of the center-of-mass to the canvas center, the $\pm 3.0\text{ px}$ clamping bound is a project-specific defensive engineering heuristic to prevent eccentric or isolated strokes from shifting off the canvas frame.
 
 ### 3. Bilinear Interpolation Operator
 Translating discrete pixel grid by continuous shift $(dx, dy)$ maps source coordinates $(u, v) = (x - dx, y - dy)$. The intensity at $(x, y)$ is evaluated via bilinear weighting:
@@ -137,7 +137,7 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ### [RULE-501-01] Anti-Aliasing Resampling Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: When resizing raw high-resolution canvas inputs down to target dimensions ($28 	imes 28$), downsampling ratios $s < 0.5$ MUST use anti-aliased resampling (Lanczos-3 or Area downsampling). Nearest-neighbor interpolation is STRICTLY PROHIBITED.
+- **Specification**: When resizing raw high-resolution canvas inputs down to target dimensions ($28 \times 28$), downsampling ratios $s < 0.5$ MUST use anti-aliased resampling (Lanczos-3 or Area downsampling). Nearest-neighbor interpolation is STRICTLY PROHIBITED.
 - **Violation Consequence**: Naive nearest-neighbor downsampling creates severe high-frequency aliasing and pixel dropouts that fracture continuous handwritten strokes.
 
 ### [RULE-501-02] Foreground Mask & Zero-Moment Filter
@@ -147,11 +147,11 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ### [RULE-501-03] Centroid Clamping & Canvas Boundary Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Translating the ink center of mass $(ar{x}, ar{y})$ to the canonical target coordinate $(13.5, 13.5)$ MUST apply defensive displacement clamping: $\Delta x_{	ext{clamped}} = 	ext{clip}(13.5 - ar{x}, -3.0, 3.0)$ and $\Delta y_{	ext{clamped}} = 	ext{clip}(13.5 - ar{y}, -3.0, 3.0)$ [HEURISTIC / SAFETY_BOUND]. Note: While LeCun et al. (1998) introduced unconstrained center of mass translation on centered digits, this $\pm 3.0	ext{ px}$ clamp is a defensive engineering safety bound to prevent eccentric strokes from being shifted out of frame boundaries.
+- **Specification**: Translating the ink center of mass $(\bar{x}, \bar{y})$ to the canonical target coordinate $(13.5, 13.5)$ MUST apply defensive displacement clamping: $\Delta x_{\text{clamped}} = \text{clip}(13.5 - \bar{x}, -3.0, 3.0)$ and $\Delta y_{\text{clamped}} = \text{clip}(13.5 - \bar{y}, -3.0, 3.0)$ [HEURISTIC / SAFETY_BOUND]. Note: While LeCun et al. (1998) introduced unconstrained center of mass translation on centered digits, this $\pm 3.0\text{ px}$ clamp is a defensive engineering safety bound to prevent eccentric strokes from being shifted out of frame boundaries.
 - **Violation Consequence**: Unclamped shifts on highly eccentric inputs push peripheral strokes entirely outside canvas boundaries, destroying digit topology.
 
 ### [RULE-501-04] Bunch TTA Geometric Invariant
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: In production inference pipelines, critical predictions MAY deploy Test-Time Augmentation (TTA) across at least 3 geometric transformations (e.g., slight scaling $\pm 5\%$, small shifts), averaging output probability distributions $ar{p} = rac{1}{K} \sum_{k=1}^K p_k$.
+- **Specification**: In production inference pipelines, critical predictions MAY deploy Test-Time Augmentation (TTA) across at least 3 geometric transformations (e.g., slight scaling $\pm 5\%$, small shifts), averaging output probability distributions $\bar{p} = \frac{1}{K} \sum_{k=1}^K p_k$.
 - **Violation Consequence**: Single-pass inference on boundary-drawn digits suffers elevated false-negative rates under slight drawing jitter.
 

@@ -114,7 +114,7 @@ import torch.nn.functional as F
 class SemanticGaussianRetriever(nn.Module):
     """
     3D Gaussian Splatting 開放詞彙文字檢索引擎
-    對齊 [RULE-505-01] ~ [RULE-505-03]
+    對齊 RULE-505-01 ~ RULE-505-03
     """
     def __init__(self, feat_dim: int = 16, clip_dim: int = 512):
         super().__init__()

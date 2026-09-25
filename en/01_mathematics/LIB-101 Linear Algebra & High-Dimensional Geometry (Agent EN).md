@@ -106,7 +106,7 @@ def truncated_svd_projection(x: torch.Tensor, target_rank: int) -> torch.Tensor:
 
 ### [RULE-101-01] Dimension Compatibility & Tensor Core Alignment
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Inner reduction dimensions $K$ and outer dimensions $M, N$ in matrix multiplications ($M 	imes K 	imes N$) MUST be integer multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with NVIDIA Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile boundaries without thread masking or padding penalties.
+- **Specification**: Inner reduction dimensions $K$ and outer dimensions $M, N$ in matrix multiplications ($M \times K \times N$) MUST be integer multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with NVIDIA Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile boundaries without thread masking or padding penalties.
 - **Violation Consequence**: Non-aligned matrix dimensions disable Tensor Core hardware fast paths, degrading GEMM compute throughput by up to $60\%$.
 
 ### [RULE-101-02] Condition Number & Rank Collapse Guardrail
@@ -116,6 +116,6 @@ def truncated_svd_projection(x: torch.Tensor, target_rank: int) -> torch.Tensor:
 
 ### [RULE-101-03] LoRA Rank Selection & Initialization Heuristic
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: In low-rank adaptation ($W = W_0 + rac{lpha}{r} B A$), adapter matrix $A \in \mathbb{R}^{r 	imes d_{	ext{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (e.g., Kaiming uniform/normal) and matrix $B \in \mathbb{R}^{d_{	ext{out}} 	imes r}$ MUST be initialized strictly to zero ($B = 0$). This ensures $\Delta W = 0$ at step $t = 0$. Adapter rank $r$ MUST satisfy $r \ll \min(d_{	ext{in}}, d_{	ext{out}})$.
+- **Specification**: In low-rank adaptation ($W = W_0 + \frac{\alpha}{r} B A$), adapter matrix $A \in \mathbb{R}^{r \times d_{\text{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (e.g., Kaiming uniform/normal) and matrix $B \in \mathbb{R}^{d_{\text{out}} \times r}$ MUST be initialized strictly to zero ($B = 0$). This ensures $\Delta W = 0$ at step $t = 0$. Adapter rank $r$ MUST satisfy $r \ll \min(d_{\text{in}}, d_{\text{out}})$.
 - **Violation Consequence**: Non-zero initialization of $B$ perturbs pretrained parameter manifolds before any adaptation signal is observed.
 

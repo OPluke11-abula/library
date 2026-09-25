@@ -125,7 +125,7 @@ import numpy as np
 class ContextAwarePlacementEngine:
     """
     情境感知物件放置尺度推算與陰影投射引擎
-    對齊 [RULE-408-01] ~ [RULE-408-03]
+    對齊 RULE-408-01 ~ RULE-408-03
     """
     def __init__(self, focal_length_px: float = 800.0, principal_point: tuple = (256.0, 256.0)):
         self.fy = focal_length_px

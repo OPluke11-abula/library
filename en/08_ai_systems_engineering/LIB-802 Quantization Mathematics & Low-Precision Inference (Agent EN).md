@@ -109,7 +109,7 @@ def dequantize_symmetric_int8(q: torch.Tensor, scale: torch.Tensor) -> torch.Ten
 ### [RULE-802-02] Scale Factor & Zero-Point Numerical Validity Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
 - **Specification**: Quantization scale factors $S$ and zero-points $Z$ MUST remain strictly valid: $S > 0$, $S 
-eq 	ext{NaN}$, and $Z \in [	ext{qmin}, 	ext{qmax}]$. Symmetric quantization MUST enforce $Z \equiv 0$.
+eq \text{NaN}$, and $Z \in [\text{qmin}, \text{qmax}]$. Symmetric quantization MUST enforce $Z \equiv 0$.
 - **Violation Consequence**: Zero or invalid scale factors cause division by zero during dequantization ($x = S(q - Z)$), corrupting all downstream activations.
 
 ### [RULE-802-03] Sub-Byte Packing & Memory Alignment Heuristic

@@ -107,12 +107,12 @@ def sample_flow_matching_euler(model, noise: torch.Tensor, steps: int = 10) -> t
 
 ### [RULE-406-02] AdaLN-Zero Identity Initialization Invariant
 - **Contract Level**: `STABILITY_CRITICAL`
-- **Specification**: In Diffusion Transformer (DiT) blocks, projection layers modulating scale and shift parameters ($\gamma, eta, lpha$) MUST be initialized strictly to zero (`nn.init.zeros_`).
+- **Specification**: In Diffusion Transformer (DiT) blocks, projection layers modulating scale and shift parameters ($\gamma, \beta, \alpha$) MUST be initialized strictly to zero (`nn.init.zeros_`).
 - **Violation Consequence**: Non-zero initialization breaks identity mapping at initialization, causing initial forward activations to explode in deep residual stacks.
 
 ### [RULE-406-03] ODE Solver Truncation Error Bound Invariant
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: In Flow Matching numerical ODE sampling, solver step counts $N_{	ext{steps}}$ MUST balance truncation error $\mathcal{O}(\Delta t^p)$ and compute latency. Single-step Euler integration is restricted to distilled flow networks.
+- **Specification**: In Flow Matching numerical ODE sampling, solver step counts $N_{\text{steps}}$ MUST balance truncation error $\mathcal{O}(\Delta t^p)$ and compute latency. Single-step Euler integration is restricted to distilled flow networks.
 - **Violation Consequence**: Under-stepping ODE integration without distillation introduces severe perceptual truncation artifacts and mode collapse.
 
 ### [RULE-406-04] MM-DiT Dual-Stream Modality Isolation Invariant

@@ -90,7 +90,7 @@ successors: []
 ### 題目 4：細粒度指令影像編輯與非目標保持 (LIB-407)
 - **核心管線**：
   1. **指令解析**：解析「把汽車輪框改成黑色，其他地方不要變」 $\to$ 目標 Token: `wheels`, 屬性: `black`, 保持: `car body, background`。
-  2. **注意力增強與抑制**：$A_{\text{target}} \times 1.5$，$A_{\text{bg}} \times 0.2$。
+  2. **注意力增強與抑制**：$A_{\text{target}} \times 1.5$，$A_{\text{bg}} \times 0.2$ [HEURISTIC / DESIGN_DECISION]。
   3. **非目標特徵鎖定 (MasaCtrl 範式)**：在 U-Net 自注意力層中，背景像素直接抄取 DDIM Inversion 原始影像的 Key/Value，徹底杜絕背景重繪。
 - **量化指標**：背景 $\text{LPIPS} \le 0.04$ [TARGET]、編輯成功率 $\ge 90\%$ [TARGET]、CLIP Score $\ge 28.5$ [TARGET]。
 
@@ -127,24 +127,24 @@ successors: []
 ## 四、全域系統規範與不變量 (System Invariants)
 
 ### [RULE-905-01] 3DGS 語意標註多視角一致性防呆
-- **等級**: `CRITICAL_INVARIANT`
-- **邊界**: 在構建 3D 語意高斯場時，任何實體物件在各訓練視角下的反投影 Intersection-over-Union (IoU) 必須 $\ge 0.65$。若低於此閾值，該視角特徵不得參與三維語意碼本更新。
+- **等級**: `QUALITY_BOUND`
+- **邊界**: 在構建 3D 語意高斯場時，實體物件在各訓練視角下的反投影 Intersection-over-Union (IoU) 建議達到 $\ge 0.65$ [HEURISTIC / TARGET]。若在消融評估中低於此閾值，該視角特徵不得參與三維語意碼本更新，以防語意標籤擴散失真。
 
 ### [RULE-905-02] 影像編輯非目標區域嚴格無損防護
-- **等級**: `CRITICAL_INVARIANT`
-- **邊界**: 在細粒度指令影像編輯中，任何標註為「保持不變」的背景像素，在編輯前後的平均絕對誤差（MAE）必須小於 3/255，且結構相似性指標 $\text{SSIM} \ge 0.96$。
+- **等級**: `QUALITY_BOUND`
+- **邊界**: 在細粒度指令影像編輯中，任何標註為「保持不變」的背景像素，建議在編輯前後的平均絕對誤差達到 $\text{MAE} \le 3/255$，且結構相似性指標 $\text{SSIM} \ge 0.96$ [DESIGN_DECISION / TARGET]。
 
 ### [RULE-905-03] 影像融合接觸陰影衰減物理律
 - **等級**: `HIGH_INVARIANT`
 - **邊界**: 凡插入重力接觸實體（如落地燈、椅子），必須在地表生成連續接觸陰影。無陰影生成之合成影像判定為無效樣本（Invalid Compositing）。
 
 ### [RULE-905-04] 大規模校園 3DGS 分塊記憶體預算
-- **等級**: `HIGH_INVARIANT`
-- **邊界**: 大規模場景（校園/大樓）必須實施空間八叉樹（Octree）或網格分塊（Spatial Chunking），單一渲染視錐體內的高斯數量上限為 $4.5 \times 10^6$ 點，動態 VRAM 佔用不得超過 14GB。
+- **等級**: `BOUNDARY_GUARD`
+- **邊界**: 大規模場景（校園/大樓）必須實施空間八叉樹（Octree）或網格分塊（Spatial Chunking），單一渲染視錐體內的高斯數量目標上限為 $4.5 \times 10^6$ 點，動態 VRAM 佔用控制在 $\le 14\text{GB}$ 預算之內 [DESIGN_DECISION / TARGET]。
 
 ### [RULE-905-05] 具身路徑規劃零碰撞原則
-- **等級**: `CRITICAL_INVARIANT`
-- **邊界**: 導航演算法生成的相機或虛擬人移動軌跡，其與場景中任何實體障礙物的幾何距離必須恆大於半徑閾值 $R_{\text{safe}} = 0.35\text{m}$。
+- **等級**: `SAFETY_CRITICAL`
+- **邊界**: 導航演算法生成的相機或虛擬人移動軌跡，其與場景中任何實體障礙物的幾何距離必須恆大於安全半徑限幅 $R_{\text{safe}} \ge 0.35\text{m}$ [SAFETY_BOUND]。
 
 ---
 

@@ -84,8 +84,8 @@ def parse_frontmatter(text: str):
     return data, body
 
 def find_library_files():
-    zh_files = {}
-    en_files = {}
+    zh_files_multi = defaultdict(list)
+    en_files_multi = defaultdict(list)
     
     for p in ROOT.rglob('*.md'):
         rel = p.relative_to(ROOT)
@@ -96,17 +96,31 @@ def find_library_files():
         if m:
             call_no = m.group(1)
             if rel_str.startswith('en/'):
-                en_files[call_no] = rel
+                en_files_multi[call_no].append(rel)
             else:
-                zh_files[call_no] = rel
+                zh_files_multi[call_no].append(rel)
                 
-    return zh_files, en_files
+    return zh_files_multi, en_files_multi
 
 def validate_all():
     errors = []
     warnings = []
     
-    zh_files, en_files = find_library_files()
+    zh_files_multi, en_files_multi = find_library_files()
+    
+    # Check duplicate LIB call numbers per language
+    zh_files = {}
+    for cid, files in zh_files_multi.items():
+        if len(files) > 1:
+            errors.append(f"Duplicate call number '{cid}' found in Chinese edition: {[str(f) for f in files]}")
+        zh_files[cid] = files[0]
+        
+    en_files = {}
+    for cid, files in en_files_multi.items():
+        if len(files) > 1:
+            errors.append(f"Duplicate call number '{cid}' found in English edition: {[str(f) for f in files]}")
+        en_files[cid] = files[0]
+        
     all_call_numbers = sorted(set(zh_files.keys()) | set(en_files.keys()))
     
     print(f"=== Knowledge Base Integrity Validation ===")
@@ -143,6 +157,8 @@ def validate_all():
             status = fm.get('status')
             if not status:
                 errors.append(f"[{lang} {cid}] Missing 'status' in frontmatter")
+            elif status == 'Verified-Authoritative-Production':
+                errors.append(f"[{lang} {cid}] Forbidden legacy status 'Verified-Authoritative-Production' found in frontmatter")
             elif status not in CANONICAL_STATUS_TAXONOMY:
                 errors.append(f"[{lang} {cid}] Invalid status '{status}'. Must be one of: {sorted(CANONICAL_STATUS_TAXONOMY)}")
                 
@@ -238,6 +254,9 @@ def validate_all():
 
     for cid, d in zh_docs.items():
         found = re.findall(r'\[(RULE-\d{3}-\d{2})\]', d['body'])
+        if len(found) != len(set(found)):
+            dups = [r for r in found if found.count(r) > 1]
+            errors.append(f"[ZH {cid}] Duplicate RULE IDs within same file: {sorted(set(dups))}")
         u_found = sorted(set(found))
         zh_invs_by_doc[cid] = u_found
         for inv in u_found:
@@ -255,6 +274,9 @@ def validate_all():
     for cid, d in en_docs.items():
         # Match [RULE-xxx-yy] or `[RULE-xxx-yy]`
         found = re.findall(r'\[(RULE-\d{3}-\d{2})\]', d['body'])
+        if len(found) != len(set(found)):
+            dups = [r for r in found if found.count(r) > 1]
+            errors.append(f"[EN {cid}] Duplicate RULE IDs within same file: {sorted(set(dups))}")
         u_found = sorted(set(found))
         en_invs_by_doc[cid] = u_found
         for inv in u_found:
@@ -325,6 +347,15 @@ def validate_all():
         errors.append(f"README.md badge claims {m_zh.group(1)} invariants, but actual count is {total_invariants}")
     if m_en and int(m_en.group(1)) != total_invariants:
         errors.append(f"en/README.md badge claims {m_en.group(1)} invariants, but actual count is {total_invariants}")
+
+    # 7. Check for illegal C0 control characters and forbidden legacy tokens in active Markdown files
+    for p in all_md_files:
+        raw_bytes = p.read_bytes()
+        bad_chars = [(i, b) for i, b in enumerate(raw_bytes) if b < 32 and b not in (10, 13)]
+        if bad_chars:
+            errors.append(f"Illegal C0 control characters in {p.relative_to(ROOT)}: {len(bad_chars)} occurrences (byte codes: {sorted(set(b for _, b in bad_chars))})")
+        if b'Verified-Authoritative-Production' in raw_bytes:
+            errors.append(f"Forbidden legacy status 'Verified-Authoritative-Production' found in {p.relative_to(ROOT)}")
 
     # Output report
     rep_dir = ROOT / 'reports'

@@ -140,7 +140,7 @@ class CanonicalPillarClassifier(nn.Module):
 
 ### [RULE-001-02] Learning Rate Stability & Floating-Point Range Guardrail
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: If training loss produces `NaN` or `Inf` within the first 5 optimization epochs, autonomous agents MUST decay the base learning rate by at least one order of magnitude ($	imes 0.1$) and verify that input features satisfy bounded $Z$-score or $[0, 1]$ normalization.
+- **Specification**: If training loss produces `NaN` or `Inf` within the first 5 optimization epochs, autonomous agents MUST decay the base learning rate by at least one order of magnitude ($\times 0.1$) and verify that input features satisfy bounded $Z$-score or $[0, 1]$ normalization.
 - **Violation Consequence**: Unbounded input activations paired with aggressive step sizes cause intermediate matrix products to exceed FP16/FP32 representable dynamic ranges.
 
 ### [RULE-001-03] Metric Integrity & Class Imbalance Guardrail
@@ -150,7 +150,7 @@ class CanonicalPillarClassifier(nn.Module):
 
 ### [RULE-001-04] Tensor Shape Trace & Downsampling Guardrail
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: When constructing neural architectures, spatial tensor dimensions `(Batch, Channel, Height, Width)` MUST be formally traced across every strided convolution and pooling layer. Spatial feature map dimensions MUST NOT collapse to $< 1 	imes 1$ before the terminal classification head.
+- **Specification**: When constructing neural architectures, spatial tensor dimensions `(Batch, Channel, Height, Width)` MUST be formally traced across every strided convolution and pooling layer. Spatial feature map dimensions MUST NOT collapse to $< 1 \times 1$ before the terminal classification head.
 - **Violation Consequence**: Premature spatial dimension collapse obliterates convolutional inductive biases and causes irrecoverable spatial feature truncation.
 
 ## 5. Canonical Open Courseware Mapping & Textual Synthesis

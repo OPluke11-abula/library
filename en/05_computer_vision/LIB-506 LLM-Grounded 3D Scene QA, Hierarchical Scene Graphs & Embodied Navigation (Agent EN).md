@@ -60,17 +60,17 @@ where $\mathbf{c}_k$ is the 3D bounding centroid, $\mathbf{B}_k$ represents Orie
 
 ### [RULE-506-01] Hierarchical Spatial Containment Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In hierarchical 3D scene graphs (Building $	o$ Floor $	o$ Room $	o$ Object), every object node MUST maintain a strict single-parent containment relationship with exactly one room node. Cyclic or multi-parent containment graphs are prohibited.
+- **Specification**: In hierarchical 3D scene graphs (Building $\to$ Floor $\to$ Room $\to$ Object), every object node MUST maintain a strict single-parent containment relationship with exactly one room node. Cyclic or multi-parent containment graphs are prohibited.
 - **Violation Consequence**: Cyclic or multi-parent topological relationships create infinite loops in LLM spatial navigation and hierarchical question answering.
 
 ### [RULE-506-02] Camera Elevation & Obstacle Clearance Invariant
 - **Contract Level**: `SAFETY_CRITICAL`
-- **Specification**: Navigational trajectories planned for embodied agents MUST maintain camera/sensor ground clearance between $[1.5	ext{m}, 1.7	ext{m}]$ and maintain obstacle distance $\ge 0.4	ext{m}$ against all 3D mesh boundaries [SAFETY_BOUND].
+- **Specification**: Navigational trajectories planned for embodied agents MUST maintain camera/sensor ground clearance between $[1.5\text{m}, 1.7\text{m}]$ and maintain obstacle distance $\ge 0.4\text{m}$ against all 3D mesh boundaries [SAFETY_BOUND].
 - **Violation Consequence**: Violating ground or obstacle clearance bounds produces camera clipping through physical geometries and unrealistic navigation trajectories.
 
 ### [RULE-506-03] Real-Time Scene QA & Navigation Interactive Frame Rate SLA
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: Interactive embodied navigation engines MUST sustain rendering frame rates of $\ge 30	ext{ FPS}$ ($< 33.3	ext{ms}$ per frame) on target hardware, with LLM spatial question-answering query latency bounded under $800	ext{ms}$ [TARGET].
+- **Specification**: Interactive embodied navigation engines MUST sustain rendering frame rates of $\ge 30\text{ FPS}$ ($< 33.3\text{ms}$ per frame) on target hardware, with LLM spatial question-answering query latency bounded under $800\text{ms}$ [TARGET].
 - **Violation Consequence**: Rendering and inference latency exceeding interactive thresholds causes disorientation and trajectory oscillation in real-time embodied agents.
 
 ## 3. Canonical References

@@ -112,9 +112,9 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
   - 若代碼中存在 `if (x > 0)` 分支，且 Warp 內部分執行緒為 True、部分為 False，GPU 必須**序列化執行**兩條分支路徑，算力直接減半！
 
 ### 2. 記憶體邊界對齊與合併存取 (Coalesced Access)
-- GPU L2 快取與 DRAM 控制器的最小交易單位為 **32 位元組或 128 位元組** 對齊區塊。
-- 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）時，記憶體控制器以單次事務完成讀取。
-- 若起始位址未對齊在 128-byte 邊界，或存在跨步存取，該次請求將被拆解為多次交易，有效頻寬大幅縮水。
+- 現代 NVIDIA 架構（Kepler 至 Hopper/Blackwell）將 128 位元組快取行劃分為四個獨立的 **32 位元組扇區 (Sectors)**。
+- 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）且對齊於 128 位元組邊界時，記憶體子系統發出四個 32 位元組扇區事務（Sector Transactions）完成服務，達到 100% 匯流排利用率。
+- 若存取存在跨步或未對齊，請求將分散至更多扇區事務，有效頻寬利用率可能大幅驟降至 12.5%。
 
 ### 3. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
 在高效能深度學習系統與工程實踐中，本庫深度整合了 NVIDIA 官方 GPU 加速生態與高效能編譯優化：
@@ -211,41 +211,36 @@ if __name__ == "__main__":
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
 ### [RULE-203-01] 神經網路層維度對齊合約 (Layer Sizing & Tensor Core Alignment Invariant)
-- **合約等級**: `CRITICAL_INVARIANT`
+- **合約等級**: `OPTIMIZATION_HEURISTIC`
 - **前置條件**: 設計全連結層（`nn.Linear`）、卷積層通道數或 Transformer 隱藏維度 $d_{\text{model}}$。
 - **量化決策邊界**:
-  - 任何層之輸入與輸出維度必須嚴格滿足：
+  - 建議層之輸入與輸出維度對齊為 8、16 或 32 的整數倍 [OPTIMIZATION_HEURISTIC]：
     $$\text{Dim} \pmod{8} = 0 \quad (\text{FP16/BF16 基準}), \quad \text{Dim} \pmod{16} = 0 \quad (\text{INT8 基準}), \quad \text{Dim} \pmod{32} = 0 \quad (\text{Hopper FP8 TMA})$$
-  - 嚴禁設定如 35, 77, 100, 513 等無法被 Warp 與 Tensor Core 整除之奇異數值。
-- **執行保證**: 保證 GPU 核心佔用率達到 95% 以上，防止尾端線程空轉（Tail Effect）。
-- **可執行斷言**:
-  ```python
-  assert in_features % 8 == 0 and out_features % 8 == 0, f"層維度 ({in_features}, {out_features}) 未對齊 8 之倍數，將喪失 Tensor Core 瓦片硬體加速！"
-  ```
+  - 層維度對齊與全域記憶體合併存取（取決於張量記憶體連續性）不同；維度對齊有助於 Shared Memory 分塊與避免邊界 Warp Lane 遮罩，實際效益取決於具體 GPU 架構、核心實作與資料精度。
+- **執行保證**: 避免 GEMM 算子回退至非 Tensor Core 核心或引入邊界遮罩，維持計算吞吐量。
 
-### [RULE-203-02] 批次大小 (Batch Size) 與 Warp 滿載合約 (Warp Saturation & Batch Sizing)
-- **合約等級**: `BOUNDARY_GUARD`
+### [RULE-203-02] 批次大小與吞吐量最佳化合約 (Batch Sizing & Throughput Optimization)
+- **合約等級**: `HIGH_INVARIANT`
 - **前置條件**: DataLoader 批次大小配置。
 - **量化決策邊界**:
-  - 批次大小 $B$ 必須始終設為 32 的整數倍（如 32, 64, 128, 256）。
-  - 若訓練時顯存不足，**嚴禁**將 Batch Size 降為非對齊數值（如 27）；必須將 Batch Size 鎖定為 32 或 16，並配合梯度累加（Gradient Accumulation Steps）。
-- **例外回退 (Fallback Protocol)**: 若極限情況下只能設為 $B=1$（如單樣本推論），必須依賴 GEMM 矩陣算子將權重維度放大，使算術強度最大化。
+  - 批次大小 $B$ 的選擇應綜合權衡 GPU 顯存容量、梯度統計變異數與核心計算飽和度 [OPTIMIZATION_HEURISTIC]。建議選擇 8, 16, 32 等 2 的冪次方，以利 GEMM/卷積算子分塊對齊。
+  - 批次大小並不直接決定 Warp 執行緒數，奇數批次大小亦不必然引發 Warp 分支發散（Batch 維度通常映射到 Thread Block 或 Grid）；但整數對齊能最大化 SM 佔用率與計算飽和度。
+- **例外回退 (Fallback Protocol)**: 若極限情況下只能設為 $B=1$（如單樣本即時推論），可依賴 GEMM 矩陣算子將權重維度放大，使算術強度最大化。
 
 ### [RULE-203-03] 記憶體排布與連續存取合約 (Memory Layout Channels-Last Invariant)
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
-- **前置條件**: 2D 卷積神經網路（CNN）部署至 NVIDIA GPU (TensorRT / cuDNN)。
+- **前置條件**: 2D 卷積神經網路（CNN）部署至支援 Tensor Core 之 NVIDIA GPU (TensorRT / cuDNN)。
 - **量化決策邊界**:
-  - 強制將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)**。
+  - 視工作負載需求，建議將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)** [OPTIMIZATION_HEURISTIC]。
   - 在 PyTorch 中執行：`model.to(memory_format=torch.channels_last)` 與 `input.to(memory_format=torch.channels_last)`。
 - **執行保證**: 釋放 Tensor Core 2D 卷積原生計算通道，實測延遲降低 20% 至 35%。
 
 ### [RULE-203-04] TensorRT 運算元融合與低精度編譯合約 (TensorRT Layer Fusion & Compilation Invariant)
-- **合約等級**: `PERFORMANCE_CRITICAL`
-- **前置條件**: 產線模型部署至 NVIDIA GPU 伺服器或 Jetson 邊緣端。
+- **合約等級**: `OPTIMIZATION_HEURISTIC`
+- **前置條件**: 具備嚴格延遲或吞吐量要求的生產推論管線部署至 NVIDIA GPU 環境。
 - **量化決策邊界**:
-  - 嚴禁直接在即時推論環境中使用未優化的原生 PyTorch Python 直譯循環。
-  - 必須導出為 ONNX 格式並透過 TensorRT Builder 進行垂直融合（Vertical Fusion，如 `Conv+BN+ReLU`）與 INT8 KL 散度校準量化。
-- **執行保證**: 徹底消除顯存讀寫瓶頸，推論延遲壓制在 5ms 以內。
+  - 在目標環境支援的情況下，建議導出為 ONNX 格式並透過 TensorRT Builder 進行垂直融合（Vertical Fusion，如 `Conv+BN+ReLU`）與低精度量化編譯 [OPTIMIZATION_HEURISTIC]。
+- **執行保證**: 減少中間特徵寫入 DRAM 的往返開銷，降低延遲並提升吞吐量。
 
 ---
 

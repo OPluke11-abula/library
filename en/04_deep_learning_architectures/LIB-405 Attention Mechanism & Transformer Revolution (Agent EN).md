@@ -122,13 +122,13 @@ class ProductionMHA(nn.Module):
 
 ### [RULE-405-01] Scaled Dot-Product & Numerical Temperature Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Self-attention query-key dot products MUST be divided by $\sqrt{d_k}$ ($	ext{Softmax}(Q K^T / \sqrt{d_k}) V$). Omitting the $\sqrt{d_k}$ scaling factor is strictly prohibited.
+- **Specification**: Self-attention query-key dot products MUST be divided by $\sqrt{d_k}$ ($\text{Softmax}(Q K^T / \sqrt{d_k}) V$). Omitting the $\sqrt{d_k}$ scaling factor is strictly prohibited.
 - **Violation Consequence**: For large projection dimensions $d_k$, dot product magnitudes scale with $O(d_k)$, pushing Softmax into near-zero gradient saturation regimes.
 
 ### [RULE-405-02] FlashAttention Operator Dispatch & Tile Invariant
 - **Contract Level**: `PERFORMANCE_CRITICAL`
 - **Specification**: In Transformer inference and training where sequence lengths exceed $N > 1024$, attention implementations MUST dispatch IO-aware tiled FlashAttention kernels (FlashAttention-2/3) to bypass $O(N^2)$ DRAM materialization.
-- **Violation Consequence**: Standard attention materializes the full $N 	imes N$ attention matrix in HBM, causing quadratic memory allocation and memory bandwidth bottlenecks.
+- **Violation Consequence**: Standard attention materializes the full $N \times N$ attention matrix in HBM, causing quadratic memory allocation and memory bandwidth bottlenecks.
 
 ### [RULE-405-03] Rotary Position Embedding (RoPE) Extrapolation Guardrail
 - **Contract Level**: `HIGH_INVARIANT`

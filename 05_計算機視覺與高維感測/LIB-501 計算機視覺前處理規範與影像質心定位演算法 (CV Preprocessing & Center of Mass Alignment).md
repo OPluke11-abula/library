@@ -260,13 +260,13 @@ M00 = float(np.sum(img_array))
 assert M00 >= 15.0, f"無效輸入影像: 筆劃總量 M00={M00} 低於法定閾值 15.0！"
   ```
 
-### [RULE-501-03] 質心幾何牽引與邊界硬鉗制合約 (Centroid Clamping & Canvas Boundary Invariant)
+### [RULE-501-03] 質心幾何牽引與邊界安全限幅合約 (Centroid Clamping & Canvas Boundary Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
 - **前置條件**: 根據一階矩計算重心 $(\bar{x}, \bar{y}) = (M_{10}/M_{00}, M_{01}/M_{00})$ 並進行平移補償。
 - **量化決策邊界**:
   - 目標畫布中心為 $(13.5, 13.5)$。
   - 計算平移向量：$\Delta x = 13.5 - \bar{x}, \Delta y = 13.5 - \bar{y}$。
-  - 硬鉗制範圍：強制限制 $\Delta x, \Delta y \in [-4.0, +4.0]$ 像素。
+  - 防禦性安全限幅：強制限制 $\Delta x, \Delta y \in [-3.0, +3.0]$ 像素 [HEURISTIC / SAFETY_BOUND]。注意：LeCun et al. (1998) 原始規範定義將質心對齊至畫布幾何中心，而 $\pm 3.0\text{ px}$ 限幅為工程防禦性安全邊界，防止極端偏心或噪聲筆劃被移出畫布邊界。
 - **執行保證**: 確保筆劃主體被拉回神經網路高權重感受野核心區，同時徹底杜絕筆劃飛出 $28 \times 28$ 畫布邊界的致命錯誤。
 
 ### [RULE-501-04] 推論端動態幾何變換守恆合約 (Bunch TTA Geometric Invariant)

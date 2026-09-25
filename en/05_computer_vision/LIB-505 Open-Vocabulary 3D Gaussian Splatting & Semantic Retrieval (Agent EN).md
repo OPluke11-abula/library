@@ -67,7 +67,7 @@ where $S_{\text{view}}$ enforces cross-view consensus across training camera fru
 
 ### [RULE-505-03] Spatial Outlier Point Connectivity Rejection
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Semantic Gaussians lacking at least $K \ge 5$ spatial neighbors of matching semantic label within a radius $R = 0.1	ext{m}$ MUST be pruned as isolated noise [HEURISTIC].
+- **Specification**: Semantic Gaussians lacking at least $K \ge 5$ spatial neighbors of matching semantic label within a radius $R = 0.1\text{m}$ MUST be pruned as isolated noise [HEURISTIC].
 - **Violation Consequence**: Unfiltered floating outlier Gaussians introduce severe spatial noise during open-vocabulary 3D scene querying.
 
 ## 3. Canonical References

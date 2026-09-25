@@ -67,9 +67,9 @@ Taking handwritten digit recognition as a concrete case study, production deploy
 2. **Module 02: Dataset Ingestion & Validation**: Safe dimension checking and visualization controls `[RULE-901-01]`.
 3. **Module 03: Normalization & One-Hot Encoding**: Exact `float32 / 255.0` scaling without double division `[RULE-901-02]`.
 4. **Module 04: Hardware-Aligned Neural Network**:
-   - Nodes: $256 \to 128 \to 64 \to 32$, structured as multiples of 16/32 to align with NVIDIA Tensor Core MMA hardware micro-tiles and GEMM block partitions, alongside 32-thread Warp memory coalescing.
+   - Nodes: $256 \to 128 \to 64 \to 32$, structured as multiples of 16/32 to benefit NVIDIA Tensor Core MMA micro-tiling and GEMM block partitioning, supporting efficient memory throughput.
    - Normalization: `BatchNormalization()` for covariate shift stabilization, coupled with `Dropout(0.2)`.
-   - Parameter budget: 245K parameters, saving 72% compute compared to unconstrained deep MLPs.
+   - Parameter budget: 245K parameters, significantly streamlining model capacity compared to deeper unconstrained MLPs.
 5. **Module 05: Convergence Monitoring & Validation**: Loss/Accuracy trajectories evaluated on hold-out splits.
 6. **Module 06: Real-Time Inference Service**: Integration of preprocessing logic with Gradio for sub-millisecond local API serving.
 

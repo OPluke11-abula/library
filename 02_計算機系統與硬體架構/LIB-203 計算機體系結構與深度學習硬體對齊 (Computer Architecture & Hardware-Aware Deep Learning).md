@@ -58,7 +58,7 @@ successors:
 
 ## 一、💡 學士直觀心智模型：裝蛋盒子與高速公路收費站
 
-在深度學習初學者的眼裡，隱藏層神經元數量（Hidden Dimension）似乎可以隨意填寫：你可以設為 250、300 甚至是 777。然而，在任何有資工背景的工程師眼裡，這是一種對底層晶片算力的嚴重浪費。為什麼全世界的經典模型（ResNet、BERT、LLaMA）都清一色採用 $2^n$（如 256, 128, 64, 32）？在體系結構層面，這涉及兩個正交的硬體機制：一是全域顯存存取的 **Warp 記憶體合併 (Memory Coalescing)**，二是計算單元的 **Tensor Core MMA 硬體微瓦片 (Hardware Micro-Tiles) 幾何對齊**。
+在深度學習初學者的眼裡，隱藏層神經元數量（Hidden Dimension）似乎可以隨意填寫：例如 250、300 或是 777。然而，在深入硬體底層的架構視角中，隨意維度容易造成計算單元或記憶體存取的非最優狀態。許多經典模型架構傾向採用 8、16、32 的整數倍或 $2^n$ 維度（如 256, 128, 64, 32），這在體系結構層面主要涉及：計算單元的 **Tensor Core MMA 硬體微瓦片 (Hardware Micro-Tiles) 幾何對齊** 與 Shared Memory 存取分塊；而全域顯存的 **Warp 記憶體合併 (Memory Coalescing)** 則取決於張量在實體記憶體中的連續性排布。
 
 ### 1. 裝蛋盒子的比喻 (The Egg Carton Analogy)
 想像工廠有一種自動化封裝盒，每個盒子剛好能卡住 **32 顆雞蛋**。
@@ -112,21 +112,21 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
   - 若代碼中存在 `if (x > 0)` 分支，且 Warp 內部分執行緒為 True、部分為 False，GPU 必須**序列化執行**兩條分支路徑，算力直接減半！
 
 ### 2. 記憶體邊界對齊與合併存取 (Coalesced Access)
-- 現代 NVIDIA 架構（Kepler 至 Hopper/Blackwell）將 128 位元組快取行劃分為四個獨立的 **32 位元組扇區 (Sectors)**。
-- 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）且對齊於 128 位元組邊界時，記憶體子系統發出四個 32 位元組扇區事務（Sector Transactions）完成服務，達到 100% 匯流排利用率。
-- 若存取存在跨步或未對齊，請求將分散至更多扇區事務，有效頻寬利用率可能大幅驟降至 12.5%。
+- 採用 32 位元組扇區架構之現代 NVIDIA GPU（如 Volta 至 Hopper/Blackwell 等架構）將 128 位元組快取行劃分為四個獨立的 **32 位元組扇區 (Sectors)**。
+- 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）且對齊於 128 位元組邊界時，記憶體子系統發出四個 32 位元組扇區事務（Sector Transactions）完成服務，達到接近 100% 的匯流排傳輸效率。
+- 若存取存在跨步或隨機錯位，請求將分散至更多扇區事務；在極端跨步存取下（例如 Warp 中每個執行緒各自存取不同扇區中的單個 4 位元組數值），有效匯流排事務利用率可能驟降至最低約 $12.5\%$ ($4\text{ Bytes} / 32\text{ Bytes}$)。
 
 ### 3. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
 在高效能深度學習系統與工程實踐中，本庫深度整合了 NVIDIA 官方 GPU 加速生態與高效能編譯優化：
 - **垂直運算元融合 (Vertical Layer Fusion)**：
   在傳統框架中，$\text{Conv} \to \text{Bias} \to \text{ReLU}$ 需要將中介張量寫回全域顯存 (Global Memory / DRAM)，再從顯存讀出給下一層，造成嚴重的顯存頻寬浪費。
-  NVIDIA TensorRT 推論引擎將這三者直接融合為單一 CUDA Kernel，中介特徵純粹保留在 SM 內部的暫存器 (Registers) 與 Shared Memory (SRAM) 中，消除高達 60% 的記憶體讀寫延遲。
+  NVIDIA TensorRT 推論引擎將這三者直接融合為單一 CUDA Kernel，中介特徵純粹保留在 SM 內部的暫存器 (Registers) 與 Shared Memory (SRAM) 中，顯著減少中介特徵寫回 DRAM 的記憶體往返開銷，具體延遲改善幅度取決於網路計算圖深度與記憶體受限（Memory-Bound）比例。
 - **水平運算元融合 (Horizontal Layer Fusion)**：
   將共享相同輸入且結構相同之獨立卷積層（例如 Inception 或注意力機制中 Q, K, V 投影）打包合併為單一大的 GEMM Kernel，大幅減少 Kernel 啟動開銷（Kernel Launch Overhead）。
 - **低精度量化校準 (INT8 PTQ via KL Divergence)**：
   透過最小化對稱量化前後之相對熵（Kullback-Leibler Divergence）：
   $$\mathcal{D}_{\text{KL}}(P \parallel Q) = \sum_{i=1}^N P(i) \log \left(\frac{P(i)}{Q(i)}\right)$$
-  在維持 FP32 原始準確率的前提下，使推論吞吐量提升 2~4 倍，並完全適配邊緣嵌入式晶片（NVIDIA Jetson AGX Orin / Nano）。
+  在儘可能逼近 FP32 原始準確率的前提下，有效降低記憶體頻寬壓力並提升推論吞吐量（具體加速效益取決於算術強度、張量核心代數與工作負載特性），並適配邊緣嵌入式晶片（如 NVIDIA Jetson AGX Orin / Nano）。
 - **非阻塞式 CUDA Stream 非同步管線與 Pinned Memory 權衡**：
   建立雙緩衝 (Double-Buffering) 機制，使主機到設備搬移 (H2D)、Tensor Core 運算與設備到主機搬移 (D2H) 三者完全重疊並發執行。
   - **鎖頁記憶體 (Pinned Memory) 機制**：DataLoader 啟用 `pin_memory=True` 將主機虛擬記憶體鎖定在實體 RAM，允許 GPU 複製引擎（Copy Engine）透過 PCIe 執行非阻塞 DMA 傳輸，無須 CPU 介入。
@@ -223,8 +223,8 @@ if __name__ == "__main__":
 - **合約等級**: `HIGH_INVARIANT`
 - **前置條件**: DataLoader 批次大小配置。
 - **量化決策邊界**:
-  - 批次大小 $B$ 的選擇應綜合權衡 GPU 顯存容量、梯度統計變異數與核心計算飽和度 [OPTIMIZATION_HEURISTIC]。建議選擇 8, 16, 32 等 2 的冪次方，以利 GEMM/卷積算子分塊對齊。
-  - 批次大小並不直接決定 Warp 執行緒數，奇數批次大小亦不必然引發 Warp 分支發散（Batch 維度通常映射到 Thread Block 或 Grid）；但整數對齊能最大化 SM 佔用率與計算飽和度。
+  - 批次大小 $B$ 的選擇應綜合權衡 GPU 顯存容量、梯度統計變異數與核心計算飽和度 [OPTIMIZATION_HEURISTIC]。建議選擇 8, 16, 32 等整數倍或 2 的冪次方，以利 GEMM/卷積算子分塊對齊。
+  - 批次大小並不直接決定 Warp 執行緒數，奇數批次大小亦不必然引發 Warp 分支發散（Batch 維度通常映射到 Thread Block 或 Grid）；將批次大小對齊至 8、16 或 32 的倍數有助於 GEMM 瓦片分割與 Thread Block 硬體排程以提升計算飽和度。
 - **例外回退 (Fallback Protocol)**: 若極限情況下只能設為 $B=1$（如單樣本即時推論），可依賴 GEMM 矩陣算子將權重維度放大，使算術強度最大化。
 
 ### [RULE-203-03] 記憶體排布與連續存取合約 (Memory Layout Channels-Last Invariant)
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 - **量化決策邊界**:
   - 視工作負載需求，建議將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)** [OPTIMIZATION_HEURISTIC]。
   - 在 PyTorch 中執行：`model.to(memory_format=torch.channels_last)` 與 `input.to(memory_format=torch.channels_last)`。
-- **執行保證**: 釋放 Tensor Core 2D 卷積原生計算通道，實測延遲降低 20% 至 35%。
+- **執行保證**: 釋放 Tensor Core 2D 卷積原生計算通道，減少內部轉置開銷並提升計算效率（實際延遲改善取決於網路卷積結構、通道數與底層 cuDNN 核心實作）。
 
 ### [RULE-203-04] TensorRT 運算元融合與低精度編譯合約 (TensorRT Layer Fusion & Compilation Invariant)
 - **合約等級**: `OPTIMIZATION_HEURISTIC`

@@ -93,21 +93,18 @@ $$\hat{q}_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}}$$
   $$\min_{T > 0} -\sum_{i=1}^N \log\left(\frac{e^{z_{i, y_i} / T}}{\sum_{j=1}^K e^{z_{i, j} / T}}\right)$$
 - 保持 Top-1 預測不變，同時大幅壓平飽和 Logits，將 ECE 下降 50% 以上。
 
-### 5. 統計安全前沿：共形預測 (Conformal Prediction, Angelopoulos & Bates 2023)
-單純調整溫度依然屬於啟發式方法。在醫療診斷、自駕感測等高風險領域，**共形預測 (Conformal Prediction)** 提供了數學上嚴格的**免分佈統計覆蓋保證 (Distribution-Free Guarantee)**。此保證嚴格建立在校準資料與測試資料滿足**可交換性（Exchangeability / i.i.d.）**的核心數學假定之上：
-給定任意使用者自訂錯誤率 $\alpha \in (0, 1)$（如 $\alpha = 0.05$，對應 95% 置信度），演算法在有限校準樣本上計算非契合度分數（Non-conformity Score）之經驗分位數 $\hat{q}$，輸出一個**預測集合** $\mathcal{C}(X_{\text{test}}) \subseteq \{1, \dots, K\}$，滿足：
+### 5. 統計保證前沿：共形預測 (Conformal Prediction, Angelopoulos & Bates 2023)
+單純調整溫度依然屬於啟發式方法。在醫療診斷、自駕感測等高風險領域，**共形預測 (Conformal Prediction)** 提供了數學上嚴格的**有限樣本無分佈統計覆蓋保證 (Distribution-Free Guarantee)**。其核心建立在校準資料與測試資料滿足**可交換性（Exchangeability，i.i.d. 為其常見充分條件）**基礎上：
+給定任意使用者自訂錯誤率 $\alpha \in (0, 1)$（如 $\alpha = 0.05$，對應 $1 - \alpha = 0.95$ 之邊際覆蓋率），演算法在有限校準樣本上計算非契合度分數（Non-conformity Score）之經驗分位數 $\hat{q}$，輸出一個**預測集合** $\mathcal{C}(X_{\text{test}}) \subseteq \{1, \dots, K\}$，滿足：
 $$\mathbb{P}\left(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})\right) \ge 1 - \alpha$$
-**實例啟發**：當使用者畫出曖昧不清的傾斜 8 時，共形預測系統不會武斷給出單一類別，而是回傳集合 $\{7, 8\}$，以 $95\%$ 的嚴格數學信心保證真實標籤必在其中！注意：若在實際部署中遭遇任意分佈漂移（Distribution Shift），標準邊際覆蓋率將不再自然成立，必須透過加權共形預測（Weighted Conformal Prediction）進行分佈自適應校正。
+**統計保證語意說明**：此處 $1 - \alpha$ 為覆蓋率之**邊際保證（Marginal Coverage）**，係針對校準資料與測試樣本聯合隨機抽樣之平均期望，而非針對特定單一測試樣本或特定預測集合（例如 $\{7, 8\}$）的條件機率保證。若實際部署環境出現任意未受控的資料分佈漂移（Distribution Shift），標準邊際覆蓋保證將不再自動成立；加權共形預測（Weighted Conformal Prediction）等擴展方法需依賴明確的結構假設（如已知或可精準估計的協變量漂移似然比），並非能無條件修復任意未知的領域漂移。
 
-### 6. 2026 前沿校準對齊：決策校準強化學習 (RLCD, Reinforcement Learning for Calibrated Decisions)
-傳統對齊技術（如 RLHF）針對人類偏好獎勵標量進行最優化，會迫使模型策略為了追求最大獎勵而使預測分佈尖銳化（Entropy Collapse），產生嚴重的過度自信（ECE 惡化）。
-在 2026 年最新突破（如 TypeSafe AI 推出的 Jev，詳見 [[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]）中，提出了 **RLCD** 架構：
-- **嚴格評分規則 (Strictly Proper Scoring Rules)**：以 Brier Score 作為正則化項，迫使模型輸出真實後驗機率：
+### 6. 前沿校準對齊探索：決策校準強化學習 (RLCD, Reinforcement Learning for Calibrated Decisions)
+傳統對齊技術（如 RLHF）針對人類偏好獎勵標量進行最優化，常使模型策略為追求最大獎勵而導致預測分佈尖銳化（Entropy Collapse），加劇預測機率的過度自信（ECE 惡化）。
+在 2026 年新一代代理人架構探索中（如 TypeSafe AI 提出的 Jev，詳見 [[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]）：
+- **公開設計目標**：在策略訓練目標中引入嚴格評分規則（Strictly Proper Scoring Rules，例如 Brier Score）或校準懲罰項，促使模型輸出機率能如實反映決策不確定性，以作為代理人系統可靠決策的機率依據。
   $$\mathcal{B}(\mathbf{p}, y^*) = \sum_{k=1}^K (p_k - \mathbf{1}_{y^* = k})^2$$
-- **策略梯度校準約束**：
-  $$\nabla_\theta \mathcal{J}_{\text{RLCD}}(\theta) = \mathbb{E}_{(s, a)} \left[ \nabla_\theta \log \pi_\theta(a \mid s) \cdot 2(\mathbf{1}_{a=y^*} - \pi_\theta(a \mid s)) - \lambda \nabla_\theta \text{ECE}(\pi_\theta) \right]$$
-- **對齊成果**：徹底杜絕模型「瞎猜卻給出 99% 置信度」的幻覺病態，使 Softmax 輸出具備頻率學派的嚴格置信度，為 S1/S2 雙進程代理人提供了堅實的機率閘控基礎！
-
+- **未公開實作細節與研究挑戰 `[OPEN_PROBLEM / HYPOTHESIS]`**：其具體策略梯度形式與端到端聯合最佳化演算法目前未公開發表；如何在強化學習策略梯度中直接聯合最佳化具有離散、非平滑分箱特性的 ECE，在學界與產業界仍屬開放性研究挑戰。
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：Log-Sum-Exp 數值防下溢
@@ -194,7 +191,7 @@ if __name__ == "__main__":
     calibrated_probs = torch.softmax(scaler(val_logits), dim=-1)
     ece_after = compute_ece(calibrated_probs, val_labels)
     print(f"校準後 ECE: {ece_after * 100:.2f}%")
-    # [EMPIRICAL_RESULT] 在正常神經網路上驗證集 ECE 經驗上下降，但非數學嚴格單調保證
+    # [HEURISTIC_OBSERVATION] 依據文獻 (Guo et al., 2017)，驗證集 ECE 經驗上多數下降，但因分箱邊界非平滑特性，數學上無單調保證
     if ece_after > ece_before:
         print(f"[!] 警告: 分箱 ECE 未單調下降 (前: {ece_before:.4f}, 後: {ece_after:.4f})，此乃分箱邊界效應所致。")
 ```
@@ -225,11 +222,11 @@ assert ece_val <= 0.05, f"模型校準度不足: ECE={ece_val:.4f} 超出 0.05 �
   - 工程啟發邊界：$T \in [0.1, 5.0]$ 屬於工程防護邊界 [HEURISTIC / BOUNDARY_GUARD]，由 Sigmoid 參數化 $T = 0.1 + 4.9 \cdot \sigma(\theta)$ 於數學上予以保證，防範極端分佈平滑或數值不穩定。
 - **執行保證**: 杜絕過度平滑導致所有預測退化為均勻分佈。
 
-### [RULE-801-03] 共形預測高可靠性覆蓋保證合約 (Conformal Prediction Coverage Guarantee)
+### [RULE-801-03] 共形預測統計邊際覆蓋保證合約 (Conformal Prediction Coverage Guarantee)
 - **合約等級**: `SAFETY_CRITICAL`
-- **前置條件 (Pre-conditions)**: 應用於高風險醫療、自駕或工業視覺檢測，且校準資料與測試資料滿足**可交換性（Exchangeability / i.i.d.）**假定。
+- **前置條件 (Pre-conditions)**: 應用於高風險醫療、自駕或工業視覺檢測，且校準資料與測試資料滿足**可交換性（Exchangeability，i.i.d. 為其常見充分條件）**假定。
 - **量化決策邊界 (Decision Thresholds)**:
-  - 設定信賴水平 $1 - \alpha = 0.95$（95% 統計覆蓋率保證）。注意：在未校正的任意領域漂移（Distribution Shift）下，標準邊際覆蓋率將失去保證。
+  - 設定顯著水準 $\alpha = 0.05$（獲得 $1 - \alpha = 0.95$ 之邊際覆蓋率保證）。注意：此保證為跨校準與測試抽樣之邊際統計覆蓋，非針對單一樣本的條件保證；且在任意未受控分佈漂移（Distribution Shift）下，標準邊際保證不再成立。
   - 當模型輸出的預測集合（Prediction Set）大小 $|\mathcal{C}(X)| \ge 3$ 時，判定該樣本存在極高語意多義性，必須強制轉交人工覆核。
 ---
 

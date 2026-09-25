@@ -66,6 +66,18 @@ $$\hat{p}_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}}$$
 Parameter $T^*$ is optimized on a validation set by minimizing Negative Log-Likelihood (NLL):
 $$T^* = \arg\min_T -\sum_{i=1}^N \log \left( \frac{e^{z_{i, y_i} / T}}{\sum_j e^{z_{i, j} / T}} \right)$$
 
+
+### 4. Conformal Prediction & Marginal Coverage (Angelopoulos & Bates, 2023)
+While temperature scaling is heuristic, **Conformal Prediction** provides finite-sample distribution-free guarantees. Under the foundational assumption that calibration and test data are **exchangeable** (where i.i.d. is a common sufficient condition), given user-specified error rate $\alpha \in (0, 1)$, it constructs prediction sets $\mathcal{C}(X_{\text{test}}) \subseteq \{1, \dots, K\}$ satisfying:
+$$\mathbb{P}\left(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})\right) \ge 1 - \alpha$$
+**Statistical semantics**: This is a **marginal coverage guarantee** over the joint randomness of calibration and test data draws, not a conditional guarantee for any specific test sample or realization. Standard marginal coverage does not hold under arbitrary distribution shift; extensions such as Weighted Conformal Prediction require specific structural assumptions (such as covariate shift with known or estimable likelihood ratios) rather than repairing arbitrary domain drift.
+
+### 5. Frontiers in Calibrated Alignment: RLCD (Reinforcement Learning for Calibrated Decisions)
+Conventional preference alignment (e.g., RLHF) optimizes scalar rewards, which can sharpen policy distributions (entropy collapse) and induce severe overconfidence.
+Recent research initiatives (e.g., Jev, see [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]) investigate **RLCD**:
+- **Public Design Goal**: Incorporate strictly proper scoring rules (e.g., Brier score) or calibration regularization into policy training so model probabilities faithfully reflect decision uncertainty:
+  $$\mathcal{B}(\mathbf{p}, y^*) = \sum_{k=1}^K (p_k - \mathbf{1}_{y^* = k})^2$$
+- **Undisclosed Implementation Details `[OPEN_PROBLEM / HYPOTHESIS]`**: Specific policy-gradient formulations and optimization algorithms remain proprietary or unpublished; jointly optimizing discrete, non-smooth binned ECE within end-to-end policy gradients remains an open research challenge.
 ---
 
 ## 3. Production PyTorch Temperature Scaler
@@ -127,6 +139,6 @@ class TemperatureScaler(nn.Module):
 
 ### [RULE-801-03] Conformal Prediction Distribution-Free Coverage Guarantee
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $P(Y \in \mathcal{C}(X)) \ge 1 - \alpha$ under the foundational assumption of **data exchangeability (i.i.d.)** between calibration and test distributions. Note: Standard marginal coverage guarantees do NOT hold under arbitrary out-of-distribution shift without explicit domain-shift or covariate-shift weighting adjustments.
+- **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $\mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \ge 1 - \alpha$ under the foundational assumption of **data exchangeability** (where i.i.d. is a common sufficient condition) between calibration and test distributions. Note: The guarantee is marginal over joint draws, not conditional on an individual test instance. Standard marginal coverage does NOT hold under arbitrary out-of-distribution shift without explicit domain-shift or covariate-shift weighting adjustments based on verifiable likelihood ratios.
 - **Violation Consequence**: Relying on uncalibrated point predictions or assuming coverage under uncorrected distribution shifts provides false statistical confidence guarantees.
 

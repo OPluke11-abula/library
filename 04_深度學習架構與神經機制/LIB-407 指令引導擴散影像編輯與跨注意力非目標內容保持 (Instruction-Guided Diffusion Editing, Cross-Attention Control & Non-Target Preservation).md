@@ -115,7 +115,7 @@ import torch.nn.functional as F
 class CrossAttentionModulator:
     """
     區域感知跨注意力調製與背景特徵保護引擎
-    對齊 [RULE-407-01] ~ [RULE-407-03]
+    對齊 RULE-407-01 ~ RULE-407-03
     """
     def __init__(self, boost_factor: float = 1.5, suppress_factor: float = 0.8):
         self.boost = boost_factor

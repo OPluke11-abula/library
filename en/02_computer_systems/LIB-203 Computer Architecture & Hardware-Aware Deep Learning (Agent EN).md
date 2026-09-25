@@ -78,8 +78,8 @@ $$\text{Machine Balance } I^* = \frac{P_{\text{peak}}}{B_{\text{mem}}} \approx \
 ### 2. The Warp Execution Primitive & Microarchitectural Alignment
 On NVIDIA GPUs:
 - **Thread Warp**: 32 threads executing concurrently under Single Instruction, Multiple Threads (SIMT).
-- **Coalesced Memory Access (32-Byte Sectors)**: Modern NVIDIA architectures (Kepler through Hopper/Blackwell) structure 128-byte L1/L2 cache lines into four discrete 32-byte sectors. When 32 threads in a warp access consecutive 4-byte words aligned to a 128-byte boundary, the hardware services the warp in a single consolidated transaction covering four 32-byte sectors. Strided or unaligned access splits the transaction across multiple sectors, degrading bus efficiency down to $12.5\%$.
-- **Decoupling Layer Sizing from Coalescing**: Layer dimension alignment to multiples of 16/32/64 ($256 	o 128 	o 64 	o 32$) is dictated by **Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile dimensions (e.g., m16n8k16)** and shared memory bank conflict avoidance, NOT global memory coalescing. Global coalescing depends on tensor memory contiguity (`.is_contiguous()`).
+- **Coalesced Memory Access (32-Byte Sectors)**: Modern NVIDIA architectures (Kepler through Hopper/Blackwell) structure 128-byte L1/L2 cache lines into four discrete 32-byte sectors. When 32 threads in a warp access consecutive 4-byte words aligned to a 128-byte boundary, the memory subsystem issues four 32-byte sector transactions to service the warp with 100% bus utilization. Strided or unaligned access forces additional sector transactions, degrading effective memory bus efficiency down to $12.5\%$.
+- **Decoupling Layer Sizing from Coalescing**: Layer dimension alignment to multiples of 16/32/64 ($256 \to 128 \to 64 \to 32$) is dictated by **Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile dimensions (e.g., m16n8k16)** and shared memory bank conflict avoidance, NOT global memory coalescing. Global coalescing depends on tensor memory contiguity (`.is_contiguous()`).
 - **Host-to-Device Memory Pinning Trade-Offs**: Utilizing `pin_memory=True` locks host memory pages into physical RAM, enabling asynchronous DMA copies via GPU copy engines. However, pinned memory cannot be paged out by the OS virtual memory subsystem; over-allocating pinned RAM across multiple DataLoader workers exhausts host physical RAM and risks host system OOM errors.
 - **Warp Divergence Penalty**: If threads within a warp take divergent branches (`if (threadIdx.x % 2 == 0)`), both paths execute serially, reducing compute throughput by up to $50\%$.
 
@@ -131,22 +131,22 @@ def benchmark_memory_coalescing(batch_size: int = 4096, dim: int = 1024):
 ## 5. Agent Invariants & Decision Protocols
 
 ### [RULE-203-01] Layer Sizing & Tensor Core Alignment Invariant
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: All dense layer widths (`nn.Linear`), convolutional channel counts, and Transformer hidden dimensions $d_{	ext{model}}$ MUST be configured as multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with hardware MMA (Matrix Multiply-Accumulate) micro-tiles.
-- **Violation Consequence**: Misaligned layer widths force hardware warp thread masking, reducing Tensor Core compute utilization below $40\%$.
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: Dense layer widths (`nn.Linear`), convolutional channel counts, and Transformer hidden dimensions $d_{\text{model}}$ SHOULD be configured as multiples of 8, 16 (for FP16/BF16), or 32 (for INT8/FP8) [OPTIMIZATION_HEURISTIC] to align with Tensor Core MMA micro-tiles and cuBLAS GEMM partitioning. Layer dimension alignment is distinct from global memory coalescing (which depends on physical tensor contiguity); dimension alignment benefits shared memory tiling and avoids boundary warp lane masking depending on the specific GPU architecture, kernel implementation, and data precision.
+- **Violation Consequence**: Misaligned layer dimensions may cause GEMM kernels to fall back to non-Tensor-Core execution or apply boundary masking, incurring throughput penalties.
 
-### [RULE-203-02] Warp Saturation & Batch Sizing Guardrail
+### [RULE-203-02] Batch Sizing & Throughput Optimization Guardrail
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Batch sizes $B$ in DataLoader configurations SHOULD be multiples of 32 (matching the 32-thread hardware Warp). If memory constraints prevent $B \ge 32$, agents MUST select powers of two (e.g., 16, 8) coupled with gradient accumulation, avoiding odd batch sizes.
-- **Violation Consequence**: Odd batch sizes leave final warp threads idle (warp divergence), causing severe execution inefficiencies on Streaming Multiprocessors.
+- **Specification**: Batch sizes $B$ in DataLoader configurations SHOULD be chosen to balance GPU VRAM capacity, gradient variance, and kernel launch saturation [OPTIMIZATION_HEURISTIC]. Multiples of 8, 16, or 32 are recommended to facilitate tile partitioning in GEMM/convolution kernels. Batch size does not directly dictate warp thread counts, and odd batch sizes do not inherently induce warp divergence; however, power-of-two batch sizes maximize SM occupancy and tensor core tiling efficiency.
+- **Violation Consequence**: Arbitrary or sub-optimal batch sizes underutilize memory bandwidth and fail to saturate Streaming Multiprocessors.
 
 ### [RULE-203-03] Memory Layout Channels-Last Invariant
 - **Contract Level**: `OPTIMIZATION_HEURISTIC`
-- **Specification**: 2D vision models deployed on modern NVIDIA architectures (Ampere, Ada, Hopper) SHOULD utilize the Channels-Last memory format (`torch.channels_last` / NHWC).
+- **Specification**: 2D vision models deployed on modern NVIDIA architectures (Ampere, Ada, Hopper) SHOULD utilize the Channels-Last memory format (`torch.channels_last` / NHWC) where supported as a workload-dependent optimization.
 - **Violation Consequence**: Operating in default NCHW format requires runtime memory transposition inside cuDNN Tensor Core convolution kernels, introducing unnecessary bandwidth overhead.
 
 ### [RULE-203-04] TensorRT Layer Fusion & Compilation Invariant
-- **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: Production inference pipelines deployed on NVIDIA GPUs MUST undergo graph optimization via TensorRT, enforcing vertical kernel fusion ($	ext{Conv} + 	ext{Bias} + 	ext{ReLU}$) and horizontal GEMM fusion.
-- **Violation Consequence**: Unfused eager execution writes intermediate activation tensors to DRAM between successive layers, consuming up to $60\%$ of total inference latency on memory round-trips.
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: Production inference pipelines deployed on NVIDIA GPUs with strict latency and throughput SLAs SHOULD undergo graph optimization via TensorRT [OPTIMIZATION_HEURISTIC], enforcing vertical kernel fusion ($\text{Conv} + \text{Bias} + \text{ReLU}$) and horizontal GEMM fusion where supported by the target environment.
+- **Violation Consequence**: Operating without kernel fusion writes intermediate activation tensors to DRAM between successive layers, increasing memory bandwidth pressure and latency.
 

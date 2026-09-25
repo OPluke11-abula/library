@@ -81,12 +81,12 @@ $$\text{Memory} = 2 \times 4 \times 32768 \times 32 \times 8 \times 128 \times 2
 
 ### [RULE-602-01] Chinchilla Optimal Compute Budget Allocation Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In autoregressive language model pretraining under compute budget $C pprox 6 N D$, model parameter count $N$ and training token count $D$ MUST be scaled in equal proportion ($N \propto \sqrt{C}, D \propto \sqrt{C}$), maintaining $D \ge 20 N$.
+- **Specification**: In autoregressive language model pretraining under compute budget $C \approx 6 N D$, model parameter count $N$ and training token count $D$ MUST be scaled in equal proportion ($N \propto \sqrt{C}, D \propto \sqrt{C}$), maintaining $D \ge 20 N$.
 - **Violation Consequence**: Training parameter-heavy models on insufficient token counts wastes compute and yields undertrained, suboptimal downstream models.
 
 ### [RULE-602-02] KV Cache Memory Allocation Invariant
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Production LLM serving engines MUST deploy Grouped-Query Attention (GQA, $H_{KV} \le H_Q / 4$) or Multi-Query Attention (MQA) when serving contexts exceeding $16	ext{K}$ tokens. KV cache allocations MUST be pre-calculated using PagedAttention: $	ext{Mem}_{	ext{KV}} = 2 	imes 2 	imes n_{	ext{layers}} 	imes n_{	ext{heads, kv}} 	imes d_{	ext{head}} 	imes B 	imes L_{	ext{seq}}$ bytes.
+- **Specification**: Production LLM serving engines MUST deploy Grouped-Query Attention (GQA, $H_{KV} \le H_Q / 4$) or Multi-Query Attention (MQA) when serving contexts exceeding $16\text{K}$ tokens. KV cache allocations MUST be pre-calculated using PagedAttention: $\text{Mem}_{\text{KV}} = 2 \times 2 \times n_{\text{layers}} \times n_{\text{heads, kv}} \times d_{\text{head}} \times B \times L_{\text{seq}}$ bytes.
 - **Violation Consequence**: Uncompressed multi-head attention KV caching consumes over $80\%$ of GPU memory, bottlenecking serving concurrency.
 
 ### [RULE-602-03] RMSNorm Numerical Stability & Epsilon Guardrail

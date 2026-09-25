@@ -146,7 +146,7 @@ class DualProcessController:
 
 ### [RULE-704-02] RLCD Confidence Escalation Invariant
 - **Contract Level**: `SAFETY_CRITICAL`
-- **Specification**: In dual-process neural architectures, System 1 actions MUST NOT be dispatched autonomously if predicted top-1 confidence falls below threshold $	au_{	ext{conf}} = 0.85$ [SAFETY_BOUND]. Low-confidence states MUST be escalated to System 2 deliberative planning.
+- **Specification**: In dual-process neural architectures, System 1 actions MUST NOT be dispatched autonomously if predicted top-1 confidence falls below threshold $\tau_{\text{conf}} = 0.85$ [SAFETY_BOUND]. Low-confidence states MUST be escalated to System 2 deliberative planning.
 - **Violation Consequence**: Uncalibrated low-confidence execution by fast-path models causes unrecoverable environmental errors.
 
 ### [RULE-704-03] Strongly Typed Structured Output Invariant

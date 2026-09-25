@@ -55,7 +55,7 @@ where $S_t$ denotes deep self-attention affinity tensors, enforcing structural p
 
 ### [RULE-407-01] Non-Target Background LPIPS Drift Upper Bound
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In fine-grained instruction-based image editing, perceptual feature drift in non-target background regions MUST satisfy $	ext{LPIPS}(I_{	ext{edit}} \odot M_{	ext{bg}}, I_{	ext{orig}} \odot M_{	ext{bg}}) \le 0.05$ [SAFETY_BOUND].
+- **Specification**: In fine-grained instruction-based image editing, perceptual feature drift in non-target background regions MUST satisfy $\text{LPIPS}(I_{\text{edit}} \odot M_{\text{bg}}, I_{\text{orig}} \odot M_{\text{bg}}) \le 0.05$ [SAFETY_BOUND].
 - **Violation Consequence**: Unconstrained generative editing alters unrelated scene elements, corrupting visual identity and contextual consistency.
 
 ### [RULE-407-02] Cross-Attention Mask Gradient Isolation Guardrail
@@ -65,7 +65,7 @@ where $S_t$ denotes deep self-attention affinity tensors, enforcing structural p
 
 ### [RULE-407-03] DDIM Inversion Step Count & Latency SLA
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: Deterministic DDIM inversion for image reconstruction MUST complete within $N_{	ext{inv}} \le 50$ steps, maintaining per-frame latency under $1.5	ext{s}$ on target GPU hardware [TARGET].
+- **Specification**: Deterministic DDIM inversion for image reconstruction MUST complete within $N_{\text{inv}} \le 50$ steps, maintaining per-frame latency under $1.5\text{s}$ on target GPU hardware [TARGET].
 - **Violation Consequence**: Excessive inversion trajectories exceed interactive serving SLAs without yielding statistically significant reconstruction quality gains.
 
 ## 3. Canonical References

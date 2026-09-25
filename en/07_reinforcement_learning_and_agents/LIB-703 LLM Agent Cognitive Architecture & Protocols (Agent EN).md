@@ -94,7 +94,7 @@ To operate over infinite time horizons within finite token contexts:
 
 ### [RULE-703-01] ReAct Closed-Loop Tool Execution Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Autonomous agent cognitive architectures MUST enforce strict closed-loop execution: Thought $	o$ Action $	o$ Observation $	o$ Reflection. Tool execution outputs MUST be formally parsed and validated before advancing to subsequent reasoning steps.
+- **Specification**: Autonomous agent cognitive architectures MUST enforce strict closed-loop execution: Thought $\to$ Action $\to$ Observation $\to$ Reflection. Tool execution outputs MUST be formally parsed and validated before advancing to subsequent reasoning steps.
 - **Violation Consequence**: Open-loop action sequences hallucinate intermediate tool results, compounding reasoning errors uncontrollably.
 
 ### [RULE-703-02] External Cortex Persistence (Obsidian Vault) Invariant

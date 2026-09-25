@@ -111,12 +111,12 @@ def compute_loss_surface_curvature(model: torch.nn.Module, loss_fn, x_batch, y_b
 - **Contract Level**: `CRITICAL_INVARIANT`
 - **Specification**: For loss functions with $L$-Lipschitz continuous gradients ($\|
 abla f(x) - 
-abla f(y)\| \le L \|x - y\|$), the learning rate MUST satisfy $\eta < 2/L$. In deep neural networks where global $L$ cannot be determined analytically, adaptive gradient norm clipping $\|\mathbf{g}\| \le 	au_{	ext{clip}}$ (default $	au_{	ext{clip}} = 1.0$) MUST be enforced.
+abla f(y)\| \le L \|x - y\|$), the learning rate MUST satisfy $\eta < 2/L$. In deep neural networks where global $L$ cannot be determined analytically, adaptive gradient norm clipping $\|\mathbf{g}\| \le \tau_{\text{clip}}$ (default $\tau_{\text{clip}} = 1.0$) MUST be enforced.
 - **Violation Consequence**: Step sizes violating Lipschitz bounds induce oscillatory divergence along steep loss valley boundaries.
 
 ### [RULE-104-02] Optimizer Memory Footprint Constraint
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When planning model training memory budgets, agents MUST account for optimizer state overhead. For standard AdamW, each parameter requires 8 bytes for 1st ($m_t$) and 2nd ($v_t$) FP32 moment tracking, plus 4 bytes for FP32 master weights. If model parameters occupy $M$ bytes, optimizer states MUST be budgeted as at least $2 	imes$ to $3 	imes M$.
+- **Specification**: When planning model training memory budgets, agents MUST account for optimizer state overhead. For standard AdamW, each parameter requires 8 bytes for 1st ($m_t$) and 2nd ($v_t$) FP32 moment tracking, plus 4 bytes for FP32 master weights. If model parameters occupy $M$ bytes, optimizer states MUST be budgeted as at least $2 \times$ to $3 \times M$.
 - **Violation Consequence**: Underestimating optimizer state memory requirements leads to unexpected CUDA Out-of-Memory (OOM) aborts at the initial backward pass.
 
 ### [RULE-104-03] Numerical Stability & Subnormal Prevention

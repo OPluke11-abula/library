@@ -65,18 +65,18 @@ Most university machine learning courses end with `model.fit(X_train, y_train)` 
 - **Root Cause Analysis**: MNIST dataset training distribution consists of US Census data with slanted/crossed strokes. Straight vertical lines project directly into digit "1" feature clusters.
 
 ### Stage 3: Computer Vision Pipeline & Temperature Calibration
-- **Intervention 1**: Implement LeCun-compliant OpenCV preprocessing (LIB-501): tight bounding box, aspect-ratio preserved scaling to $20 \times 20$, subpixel Center of Mass shift to $(13.5, 13.5)$.
-- **Intervention 2** [EMPIRICAL_RESULT]: Temperature scaling ($T = 1.42$, optimized on validation NLL) to deflate spurious overconfidence (LIB-801). Real-world accuracy jumps from $38\%$ to $94\%$ after combined centering and calibration.
+- **Intervention 1**: Implement LeCun-compliant OpenCV preprocessing (LIB-501): tight bounding box, aspect-ratio preserved scaling to $20 \times 20$, subpixel Center of Mass shift to $(13.5, 13.5)$. This directly addresses the spatial distribution shift on live drawn digits, restoring Top-1 classification accuracy.
+- **Intervention 2**: Apply post-hoc temperature scaling (LIB-801) optimized via negative log-likelihood (NLL) minimization on a validation set to mitigate overconfidence. Note that while temperature scaling preserves logit rank ordering and therefore does not alter Top-1 accuracy, input bounding-box centering and normalization resolves the bulk of misclassifications on upright strokes, while temperature calibration aligns predicted probabilities with empirical accuracy.
 
-### Stage 4: Production PyTorch Modular Architecture
-- **Refactoring**: Migrate from messy notebook scripts to a modular software repository:
-  - `src/models/`: Canonical CNN backbones with batch normalization.
-  - `src/data/`: Memory-mapped data loaders with data augmentation.
-  - `src/engine/`: Mixed-precision training loops with gradient clipping.
+### Stage 4: Production PyTorch Modular Architecture Blueprint
+- **Architectural Blueprint**: In a full production implementation, monolithic scripts are decoupled into a modular software architecture:
+  - Dedicated model modules defining CNN backbones with batch normalization.
+  - Dedicated data ingestion modules featuring memory-mapped loaders and spatial augmentations.
+  - Dedicated engine modules encapsulating mixed-precision training loops and gradient clipping.
 
 ### Stage 5: ONNX Export & TensorRT Acceleration
 - Export model graph to ONNX (`opset_version=17`).
-- [EMPIRICAL_RESULT] Compile TensorRT engine with FP16 precision: latency drops from $14.2\text{ms}$ (PyTorch GPU eager) to $0.82\text{ms}$ (TensorRT FP16) on NVIDIA RTX 4090, enabling $1200+$ requests/second throughput.
+- **TensorRT Optimization**: Compiling inference graphs into TensorRT engines with FP16 precision fuses vertical layers and horizontal GEMMs, substantially reducing memory bandwidth overhead and latency relative to eager-mode execution for high-throughput serving.
 
 ### Stage 6: Full-Stack Interactive Web Serving
 - Implement real-time Gradio sketchpad frontend with bidirectional REST API.
@@ -94,7 +94,7 @@ class ProductionMNISTEngine:
     """
     End-to-end production inference pipeline with CV preprocessing and calibration.
     """
-    def __init__(self, model: torch.nn.Module, temperature: float = 1.42): # [EMPIRICAL_RESULT]
+    def __init__(self, model: torch.nn.Module, temperature: float = 1.5): # [HEURISTIC_BASELINE]
         self.model = model
         self.model.eval()
         self.temperature = temperature
@@ -138,7 +138,7 @@ class ProductionMNISTEngine:
 
 ### [RULE-901-03] Bounding Box & Center of Mass Defensive Clip Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In interactive sketchpad environments, stroke bounding box cropping and center of mass translation shifts MUST enforce defensive clipping ($\Delta x, \Delta y \in [-3.0, 3.0]	ext{ px}$) [HEURISTIC / SAFETY_BOUND].
+- **Specification**: In interactive sketchpad environments, stroke bounding box cropping and center of mass translation shifts MUST enforce defensive clipping ($\Delta x, \Delta y \in [-3.0, 3.0]\text{ px}$) [HEURISTIC / SAFETY_BOUND].
 - **Violation Consequence**: Unclamped shifts on edge-drawn strokes push valid handwriting entirely outside canvas boundaries, creating empty frames.
 
 ### [RULE-901-04] Model Capacity & Confidence Calibration Guardrail

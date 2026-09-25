@@ -94,10 +94,10 @@ $$\hat{q}_i = \frac{e^{z_i / T}}{\sum_{j=1}^K e^{z_j / T}}$$
 - 保持 Top-1 預測不變，同時大幅壓平飽和 Logits，將 ECE 下降 50% 以上。
 
 ### 5. 統計安全前沿：共形預測 (Conformal Prediction, Angelopoulos & Bates 2023)
-單純調整溫度依然屬於啟發式方法。在醫療診斷、自駕感測等高風險領域，**共形預測 (Conformal Prediction)** 提供了數學上嚴格的**免分佈統計覆蓋保證 (Distribution-Free Guarantee)**：
+單純調整溫度依然屬於啟發式方法。在醫療診斷、自駕感測等高風險領域，**共形預測 (Conformal Prediction)** 提供了數學上嚴格的**免分佈統計覆蓋保證 (Distribution-Free Guarantee)**。此保證嚴格建立在校準資料與測試資料滿足**可交換性（Exchangeability / i.i.d.）**的核心數學假定之上：
 給定任意使用者自訂錯誤率 $\alpha \in (0, 1)$（如 $\alpha = 0.05$，對應 95% 置信度），演算法在有限校準樣本上計算非契合度分數（Non-conformity Score）之經驗分位數 $\hat{q}$，輸出一個**預測集合** $\mathcal{C}(X_{\text{test}}) \subseteq \{1, \dots, K\}$，滿足：
 $$\mathbb{P}\left(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})\right) \ge 1 - \alpha$$
-**實例啟發**：當使用者畫出曖昧不清的傾斜 8 時，共形預測系統不會武斷給出單一類別，而是回傳集合 $\{7, 8\}$，以 $95\%$ 的嚴格數學信心保證真實標籤必在其中！
+**實例啟發**：當使用者畫出曖昧不清的傾斜 8 時，共形預測系統不會武斷給出單一類別，而是回傳集合 $\{7, 8\}$，以 $95\%$ 的嚴格數學信心保證真實標籤必在其中！注意：若在實際部署中遭遇任意分佈漂移（Distribution Shift），標準邊際覆蓋率將不再自然成立，必須透過加權共形預測（Weighted Conformal Prediction）進行分佈自適應校正。
 
 ### 6. 2026 前沿校準對齊：決策校準強化學習 (RLCD, Reinforcement Learning for Calibrated Decisions)
 傳統對齊技術（如 RLHF）針對人類偏好獎勵標量進行最優化，會迫使模型策略為了追求最大獎勵而使預測分佈尖銳化（Entropy Collapse），產生嚴重的過度自信（ECE 惡化）。
@@ -129,19 +129,27 @@ import torch.optim as optim
 
 class TemperatureScaler(nn.Module):
     """實作 Guo et al. (ICML 2017) 溫度縮放後處理校準器。
-    透過在驗證集上最小化負對數似然 (NLL) 擬合單一純量參數 T > 0。
+    數學要求：T > 0 嚴格保證 Logits 的排序不變性與單調映射。
+    工程啟發式約束：T 限制在 [0.1, 5.0] [HEURISTIC / BOUNDARY_GUARD]，防止極端數值崩潰。
+    透過 Sigmoid 參數化嚴格在數學上滿足該區間：T = 0.1 + 4.9 * torch.sigmoid(raw_temperature)。
+    初始 raw_temperature = -0.9163 對應 T ≈ 1.5。
     註：NLL 最佳化在經驗上能顯著改善校準度，但在數學上並不保證離散分箱 ECE 的嚴格單調遞減。
     """
     def __init__(self):
         super().__init__()
-        self.temperature = nn.Parameter(torch.ones(1) * 1.5)
+        # raw_temperature = log((1.5 - 0.1) / (5.0 - 1.5)) = log(0.4) ≈ -0.9163
+        self.raw_temperature = nn.Parameter(torch.tensor([-0.9163]))
+
+    @property
+    def temperature(self) -> torch.Tensor:
+        return 0.1 + 4.9 * torch.sigmoid(self.raw_temperature)
 
     def forward(self, logits: torch.Tensor) -> torch.Tensor:
         return logits / self.temperature
 
-    def fit(self, val_logits: torch.Tensor, val_labels: torch.Tensor):
+    def fit(self, val_logits: torch.Tensor, val_labels: torch.Tensor, max_iter: int = 50):
         nll_criterion = nn.CrossEntropyLoss()
-        optimizer = optim.LBFGS([self.temperature], lr=0.01, max_iter=50)
+        optimizer = optim.LBFGS([self.raw_temperature], lr=0.01, max_iter=max_iter)
 
         def eval_loss():
             optimizer.zero_grad()
@@ -213,15 +221,15 @@ assert ece_val <= 0.05, f"模型校準度不足: ECE={ece_val:.4f} 超出 0.05 �
 - **合約等級**: `BOUNDARY_GUARD`
 - **前置條件 (Pre-conditions)**: 透過驗證集負對數似然（NLL）擬合溫度標量 $T$。
 - **量化決策邊界 (Decision Thresholds)**:
-  - 最佳化溫度參數必須嚴格落入有限實數區間：$T \in [0.1, 5.0]$。
-  - 若擬合結果出現 $T > 5.0$ 或 $T < 0.1$，判定模型特徵存在嚴重退化或驗證集分佈嚴重失真，觸發異常警報。
+  - 數學不變量：溫度標量必須滿足 $T > 0$，以保證 Logit 排秩與 Softmax 映射之嚴格單調性（Top-1 準確率完全守恆）。
+  - 工程啟發邊界：$T \in [0.1, 5.0]$ 屬於工程防護邊界 [HEURISTIC / BOUNDARY_GUARD]，由 Sigmoid 參數化 $T = 0.1 + 4.9 \cdot \sigma(\theta)$ 於數學上予以保證，防範極端分佈平滑或數值不穩定。
 - **執行保證**: 杜絕過度平滑導致所有預測退化為均勻分佈。
 
 ### [RULE-801-03] 共形預測高可靠性覆蓋保證合約 (Conformal Prediction Coverage Guarantee)
 - **合約等級**: `SAFETY_CRITICAL`
-- **前置條件 (Pre-conditions)**: 應用於高風險醫療、自駕或工業視覺檢測。
+- **前置條件 (Pre-conditions)**: 應用於高風險醫療、自駕或工業視覺檢測，且校準資料與測試資料滿足**可交換性（Exchangeability / i.i.d.）**假定。
 - **量化決策邊界 (Decision Thresholds)**:
-  - 設定信賴水平 $1 - \alpha = 0.95$（95% 統計覆蓋率保證）。
+  - 設定信賴水平 $1 - \alpha = 0.95$（95% 統計覆蓋率保證）。注意：在未校正的任意領域漂移（Distribution Shift）下，標準邊際覆蓋率將失去保證。
   - 當模型輸出的預測集合（Prediction Set）大小 $|\mathcal{C}(X)| \ge 3$ 時，判定該樣本存在極高語意多義性，必須強制轉交人工覆核。
 ---
 

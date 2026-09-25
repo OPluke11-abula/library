@@ -105,16 +105,16 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 
 ### [RULE-504-01] Positive Semi-Definite Covariance Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In 3D Gaussian Splatting, 3D covariance matrices $\Sigma = R S S^T R^T$ MUST remain mathematically positive semi-definite. Scaling parameters $s \in \mathbb{R}^3$ MUST be constrained via positive exponential activation ($s = \exp(s_{	ext{raw}})$) and rotation quaternions $q$ MUST be normalized to unit norm ($\|q\| = 1$).
+- **Specification**: In 3D Gaussian Splatting, 3D covariance matrices $\Sigma = R S S^T R^T$ MUST remain mathematically positive semi-definite. Scaling parameters $s \in \mathbb{R}^3$ MUST be constrained via positive exponential activation ($s = \exp(s_{\text{raw}})$) and rotation quaternions $q$ MUST be normalized to unit norm ($\|q\| = 1$).
 - **Violation Consequence**: Unnormalized quaternions or negative scaling parameters produce indefinite covariance matrices, causing 2D projection Jacobian breakdown and catastrophic rendering artifacts.
 
 ### [RULE-504-02] 2D Screen-Space Low-Pass Anti-Aliasing Guardrail
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When projecting 3D Gaussians to 2D screen space, a low-pass filter variance $\sigma_{	ext{filter}}^2 = 0.3	ext{ px}^2$ MUST be added to the 2D projected covariance $\Sigma_{2D}' = J \Sigma J^T + \sigma_{	ext{filter}}^2 I_{2 	imes 2}$.
+- **Specification**: When projecting 3D Gaussians to 2D screen space, a low-pass filter variance $\sigma_{\text{filter}}^2 = 0.3\text{ px}^2$ MUST be added to the 2D projected covariance $\Sigma_{2D}' = J \Sigma J^T + \sigma_{\text{filter}}^2 I_{2 \times 2}$.
 - **Violation Consequence**: Omitting the screen-space low-pass footprint causes severe high-frequency pixel popping and aliasing during camera translation.
 
 ### [RULE-504-03] Ray Transmittance Early-Exit Heuristic
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: During tiled front-to-back alpha blending rasterization ($T_i = \prod_{j=1}^{i-1} (1 - lpha_j)$), thread evaluation for a given pixel MUST terminate immediately when accumulated opacity reaches $1 - T_i \ge 0.9999$.
+- **Specification**: During tiled front-to-back alpha blending rasterization ($T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$), thread evaluation for a given pixel MUST terminate immediately when accumulated opacity reaches $1 - T_i \ge 0.9999$.
 - **Violation Consequence**: Continuing ray integration past near-opaque surfaces consumes unnecessary memory bandwidth without altering output color values.
 

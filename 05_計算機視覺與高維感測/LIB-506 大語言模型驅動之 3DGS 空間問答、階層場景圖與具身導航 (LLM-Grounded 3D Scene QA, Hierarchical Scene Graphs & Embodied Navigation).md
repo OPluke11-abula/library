@@ -124,7 +124,7 @@ from typing import Dict, List, Tuple, Optional
 class SceneGraphNavigator:
     """
     階層式 3D 場景圖與空間導航規劃引擎
-    對齊 [RULE-506-01] ~ [RULE-506-03]
+    對齊 RULE-506-01 ~ RULE-506-03
     """
     def __init__(self, scene_nodes: Dict[str, dict], adjacency_list: Dict[str, List[Tuple[str, float]]]):
         # scene_nodes: {node_id: {"name": str, "pos": (x,y,z), "level": int}}

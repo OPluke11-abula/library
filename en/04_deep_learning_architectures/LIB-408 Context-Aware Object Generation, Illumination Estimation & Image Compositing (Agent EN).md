@@ -71,7 +71,7 @@ $$\mathcal{L} = \lambda_{\text{light}} \mathcal{L}_{\text{light}} + \lambda_{\te
 
 ### [RULE-408-03] Color Harmonization Earth Mover's Distance SLA
 - **Contract Level**: `QUALITY_BOUND`
-- **Specification**: Composited object color distributions MUST be harmonized such that color histogram Earth Mover's Distance (EMD) against adjacent ambient background satisfies $	ext{EMD} \le 0.12$ [TARGET].
+- **Specification**: Composited object color distributions MUST be harmonized such that color histogram Earth Mover's Distance (EMD) against adjacent ambient background satisfies $\text{EMD} \le 0.12$ [TARGET].
 - **Violation Consequence**: Unharmonized composite foregrounds display conspicuous color cast and illumination boundary discontinuities.
 
 ## 3. Canonical References

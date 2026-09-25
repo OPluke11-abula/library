@@ -208,7 +208,7 @@ model.compile(
 
 #### 💡 硬體對齊與層次設計精華：
 * **為什麼節點是 $256 \to 128 \to 64 \to 32$？**
-  1. **硬體記憶體對齊**：GPU（NVIDIA CUDA Warp 32 執行緒）在做二進制矩陣乘法時，2 的冪次方節點數能享有最高的**記憶體合併讀取（Coalesced Access）**與快取命中率（對齊 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。
+  1. **硬體最佳化啟發**：隱藏層節點數設計為 16 或 32 的倍數有利於 GPU GEMM 分塊分發、Tensor Core 微區塊運算以及快取局部性（對齊 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。
   2. **金字塔表徵提煉**：底層（256）寬一點，捕捉豐富的細部筆畫邊緣；往後層層收斂（$128 \to 64 \to 32$），強迫模型丟掉次要雜訊，只提煉最核心的數字語意，參數量控制在 24.5 萬，防止過擬合。
 * **`activation='relu'`**：公式是 $\text{ReLU}(x) = \max(0, x)$。大於 0 原樣通過，小於 0 歸零。它計算極快，且能完美解決傳統 Sigmoid 的「梯度消失」問題。
 * **`BatchNormalization()`**：批次正規化。每一層算完後，資料分佈會漂移。BN 強制把數據拉回「平均 0、變異數 1」的標準常態分佈，能大幅加速學習、穩定訓練。
@@ -371,7 +371,7 @@ def preprocess_image(inp):
 
 ## 總結複習手冊：你現在掌握的五大底層硬實力
 
-1. **硬體原理**：$2^n$ 節點與 GPU CUDA Warp 32 執行緒記憶體合併讀取對齊（[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。
+1. **硬體原理**：維度分塊與 GPU GEMM 分割/Tensor Core 對齊啟發（[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。
 2. **架構選型**：全連接網路 DNN 座標死記缺陷 vs 卷積神經網路 CNN 空間平移不變性（[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)|LIB-401]]）。
 3. **視覺前處理**：邊界框裁切、20x20 等比縮放、重心質心對齊公式與 $\pm 3$ 安全限幅（[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)|LIB-501]]）。
 4. **形態分佈偏差**：傾斜筆劃 7 的空間負權重禁區 vs 直挺無橫槓 7 空間重疊（[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)|LIB-301]]）。

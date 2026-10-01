@@ -96,7 +96,7 @@ The library indexes volumes into 10 specialized functional wings based on the AC
 | **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | Chinchilla compute-optimal frontier, GQA |
 | **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | S1 non-autoregressive Jev, S2 ReAct gating |
 | **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | ECE temperature scaling, AWQ/INT4 GEMM |
-| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis & Five Frontier Blueprints | C801 proposal structure, solo engineering, ablation matrix |
+| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis, Five Frontier Blueprints & Conversational Epistemic Revision | C801 proposal structure, solo engineering, ablation matrix, epistemic calibration |
 
 ---
 

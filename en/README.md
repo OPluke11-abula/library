@@ -145,6 +145,7 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-903** | **09 Methodology** | [Capstone Blueprint & Academic Research Evolution](09_research_methodology/LIB-903%20Capstone%20Blueprint%20&%20Academic%20Research%20Evolution%20%28Agent%20EN%29.md) | Research proposal formulation, ablation design, paper structure |
 | **LIB-904** | **09 Methodology** | [Academic Research Corpus & Literature Synthesis](09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20&%20Literature%20Synthesis%20%28Agent%20EN%29.md) | Literature review methodology, metric verification, and reproduction |
 | **LIB-905** | **09 Methodology** | [Frontier Vision & Multimodal Capstone Blueprints](09_research_methodology/LIB-905%20Frontier%20Vision%20&%20Multimodal%20Capstone%20Blueprints%20%28Agent%20EN%29.md) | Five capstone specifications, full pipelines, NSTC grant templates |
+| **LIB-906** | **09 Methodology** | [LLM Conversational Epistemic Revision](09_research_methodology/LIB-906%20LLM%20Conversational%20Epistemic%20Revision%20%28Agent%20EN%29.md) | Epistemic calibration under conversational challenge, sycophancy vs stubbornness |
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "volume_count": 24,
+  "volume_count": 25,
   "topological_order": [
     "LIB-000",
     "LIB-001",
@@ -25,7 +25,8 @@
     "LIB-506",
     "LIB-903",
     "LIB-904",
-    "LIB-905"
+    "LIB-905",
+    "LIB-906"
   ],
   "invariants_total": 84,
   "error_count": 0,

@@ -53,3 +53,5 @@ Primary Navigator:
   - [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]
   - [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]
   - [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]
+  - [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]]
+

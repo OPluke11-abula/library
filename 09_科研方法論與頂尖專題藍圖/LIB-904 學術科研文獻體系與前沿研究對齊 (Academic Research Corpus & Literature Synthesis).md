@@ -36,7 +36,8 @@ tags:
   - 自學體系
 prerequisites:
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
-successors: []
+successors:
+  - "[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20%26%20Literature%20Synthesis%20%28Agent%20EN%29.md)

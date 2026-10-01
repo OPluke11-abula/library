@@ -133,9 +133,12 @@ successors:
    - 根據夏農資訊理論，事件的自資訊（驚奇度）定義為 $I(x) = -\log P(x)$。預測大概率事件（$P \to 1$）幾乎不包含額外資訊量；而以極低機率預測真實事件（$P \to 0$）意味著巨大的不確定性破壞，懲罰呈對數級無界發散（$-\log P \to \infty$）。
    - 最小化交叉熵等價於極大似然估計（Maximum Likelihood Estimation, MLE），在分佈層面等價於最小化真實分佈與模型分佈之間的相對熵（Kullback-Leibler 散度 $D_{\text{KL}}(y \parallel P)$）。
 
-3. **最佳化景觀的嚴格凸性 (Strict Convexity)** `[DERIVATION]`：
-   - 線性損失 $\mathcal{L}_{\text{linear}}(z) = 1 - \sigma(z)$ 對 Logit $z$ 而言是非凸函數（Non-convex），存在大片平坦的梯度死區與局部鞍點。
-   - 交叉熵損失對 Logit $z$ 展開為：$-\log \sigma(z) = \log(1 + e^{-z})$（即 Softplus 函數），其二階導數 $\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$，在全定義域上滿足**嚴格凸性（Strictly Convex）**，保證了優化演算法能夠平穩、無歧義地收斂至全域最優解。
+3. **最佳化景觀的嚴格凸性與深度網路非凸邊界 (Strict Convexity & Non-Convex Boundaries)** `[DERIVATION]`：
+   - 若採用線性損失 $\mathcal{L}_{\text{linear}}(z) = 1 - \sigma(z)$ 或在分類中搭配 MSE，對 Logit $z$ 而言是非凸函數，且在嚴重錯誤處導函數 $\sigma'(z) \to 0$ 會誘發大片平坦的梯度死區與不良鞍點。
+   - 交叉熵損失對純量 Logit $z$ 展開為：$-\log \sigma(z) = \log(1 + e^{-z})$（即 Softplus 函數），其二階導數 $\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$ 在有限定義域上滿足**嚴格凸性（Strictly Convex）**。
+   - **`[SAFETY_BOUND]` 理論邊界界定**：
+     - 在**單層廣義線性模型（經典邏輯迴歸 $z = w^T x + b$）**中，Affine 變換保持凸性，損失對參數 $(w, b)$ 呈現凸性（若特徵矩陣滿秩則為嚴格凸），消除了 MSE 的非凸鞍點困境；但若資料嚴格線性可分，未正則化的最大似然估計會使權重向量發散（$\|w\| \to \infty$），實務上必須加入 $L_2$ 正則化以保證有限極值點。
+     - 在**多層深度神經網路**中，非線性隱藏層的複合映射使整體參數景觀呈現高度非凸性（Non-convex）。此時交叉熵的核心優勢在於輸出層梯度的代數對消 $\frac{\partial \mathcal{L}}{\partial z} = P - y$，使模型在嚴重犯錯時仍具備恆定的線性推動力，杜絕輸出層梯度飽和與腦死，而非賦予深層網路全域凸性。
 
 ---
 
@@ -404,7 +407,7 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 2. **邏輯迴歸與分類決策 (Logistic Regression & Classification)**：
    * 透過 Sigmoid 激活函數 $g(z) = \frac{1}{1 + e^{-z}}$ 將線性實數映射至 $(0, 1)$ 機率區間：$f_{\vec{w},b}(\vec{x}) = g(\vec{w} \cdot \vec{x} + b) = P(y=1 \mid \vec{x})$。
    * 決策邊界（Decision Boundary）由 $\vec{w} \cdot \vec{x} + b = 0$ 決定。
-   * **對數損失函數 (Binary Cross-Entropy Loss)**：若在邏輯迴歸中硬用 MSE，損失曲面會產生無數非凸（Non-convex）局部極小點。改用凸性對數損失 $\mathcal{L}(f, y) = -y \log(f) - (1-y) \log(1-f)$，能確保全域凸優化收斂。
+   * **對數損失函數 (Binary Cross-Entropy Loss)**：若在二元分類中搭配 Sigmoid 採用 MSE，其導函數中包含的 $\sigma'(z) = P(1-P)$ 會在嚴重犯錯時趨近於 0，誘發平坦高原與非凸鞍點死區。改用對數損失 $\mathcal{L}(f, y) = -y \log(f) - (1-y) \log(1-f)$，能透過代數對消消除輸出層梯度飽和，並在線性特徵假設下享有參數空間的凸最佳化性質。
 3. **過擬合防禦與正則化 (Overfitting & Regularization)**：
    * 高偏差（High Bias / 欠擬合）：模型過於簡單，無法捕捉資料規律。
    * 高方差（High Variance / 過擬合）：模型參數過多，強行死記訓練樣本雜訊，失去泛化力。

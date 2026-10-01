@@ -74,7 +74,7 @@ Consider binary classification with sigmoid probability $P = \sigma(z) = \frac{1
   - When completely correct ($P \to 1$), the gradient smoothly approaches 0.
 - **Information Theory & Convexity** `[FACT]`:
   - Self-information (Surprisal) $I(x) = -\log P(x)$ imposes unbounded asymptotic penalty as $P \to 0$. Minimizing Cross-Entropy directly maximizes likelihood (MLE).
-  - With respect to logit $z$, $-\ln \sigma(z) = \ln(1 + e^{-z})$ (Softplus) is strictly convex ($\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$), eliminating spurious non-convex saddle plateaus present in linear loss formulations.
+  - With respect to scalar logit $z$, $-\ln \sigma(z) = \ln(1 + e^{-z})$ (Softplus) is strictly convex ($\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$). In single-layer Generalized Linear Models (e.g., Logistic Regression), this preserves convexity in parameters $(w, b)$, avoiding the non-convex plateaus and saturation traps of MSE; in multi-layer deep networks, non-linear composition renders the overall landscape non-convex, where Cross-Entropy's primary advantage is eliminating output-layer gradient saturation ($\frac{\partial \mathcal{L}}{\partial z} = P - y$) rather than conferring global convexity.
 
 ### Pillar 04: Backpropagation & The Jacobian Chain Rule
 In a computational DAG of layers $l = 1, \dots, L$, the gradient of scalar loss $\mathcal{L}$ with respect to weight matrix $W^{[l]}$ is evaluated via reverse-mode automatic differentiation:

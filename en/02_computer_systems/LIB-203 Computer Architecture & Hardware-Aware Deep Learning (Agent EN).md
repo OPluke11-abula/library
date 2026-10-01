@@ -62,7 +62,7 @@ $$\text{Machine Balance } I^* = \frac{P_{\text{peak}}}{B_{\text{mem}}} \approx \
 - If $I < I^*$: The operation is **Memory-Bound**. Arithmetic units remain stalled waiting for DRAM cache lines (e.g., LayerNorm, GeLU, Softmax).
 - If $I \ge I^*$: The operation is **Compute-Bound**. GPU execution pipelines are fully saturated (e.g., large-matrix GEMM, Convolution).
 
-### Roofline Case Study: Pointwise Image Preprocessing & Operator Fusion `[FACT]` `[ROOFLINE_ANALYSIS]`
+### Roofline Case Study: Pointwise Image Preprocessing & Operator Fusion `[FACT]` `[DERIVATION]`
 Consider image brightness clamping: `torch.clamp(image * 1.2, 0, 255)`.
 - **Eager Execution**:
   - `aten::mul`: Read $x$ ($4N\text{ Bytes}$) $\to$ Write intermediate $tmp$ ($4N\text{ Bytes}$).
@@ -73,7 +73,7 @@ Consider image brightness clamping: `torch.clamp(image * 1.2, 0, 255)`.
 - **`torch.compile` / Triton Vertical Loop Fusion**:
   - Pointwise loop fusion compiles both operations into a single kernel. Intermediates reside in SM registers/L1 SRAM.
   - Total DRAM Traffic = Read $x$ ($4N\text{ Bytes}$) + Write $out$ ($4N\text{ Bytes}$) = **$8N\text{ Bytes}$** (50% reduction).
-  - Yields an immediate $\approx 2\times$ speedup and eliminates one host-side kernel launch overhead.
+  - Theoretically halves DRAM traffic under memory-bound conditions (yielding an idealized theoretical bandwidth speedup of up to $\approx 2\times$) and eliminates one kernel launch overhead; realized end-to-end latency speedup depends on tensor dimensions, on-chip L2 cache residency, and kernel launch latency amortization.
 
 ---
 
@@ -88,7 +88,7 @@ Consider image brightness clamping: `torch.clamp(image * 1.2, 0, 255)`.
 | **High Bandwidth Memory (HBM3)**| 80 GB - 144 GB | ~400 - 800 cycles | 2.0 - 3.35 TB/s |
 | **PCIe Gen 5 Host Transfer** | System DRAM | > 10,000 cycles | 64 GB/s (x16 duplex) |
 
-### 2. Hardware Special Function Units (SFU) & Reciprocal Square Root `[FACT]` `[HARDWARE_ARCHITECTURE]`
+### 2. Hardware Special Function Units (SFU) & Reciprocal Square Root `[FACT]`
 In normalization (RMSNorm, LayerNorm) and AdamW optimizer steps, calculating variance reciprocals is a primary hotspot:
 - **Eager Division Trap (`1 / torch.sqrt(x)`)**:
   - Issues 2 kernels (`sqrt` and `div`), requiring 2 reads and 2 writes ($16N\text{ Bytes}$ for FP32).
@@ -155,21 +155,21 @@ def benchmark_memory_coalescing(batch_size: int = 4096, dim: int = 1024):
 
 ### [RULE-203-01] Layer Sizing & Tensor Core Alignment Invariant
 - **Contract Level**: `OPTIMIZATION_HEURISTIC`
-- **Specification**: Dense layer widths (`nn.Linear`), convolutional channel counts, and Transformer hidden dimensions $d_{\text{model}}$ SHOULD be configured as multiples of 8, 16 (for FP16/BF16), or 32 (for INT8/FP8) [OPTIMIZATION_HEURISTIC] to align with Tensor Core MMA micro-tiles and cuBLAS GEMM partitioning. Layer dimension alignment is distinct from global memory coalescing (which depends on physical tensor contiguity); dimension alignment benefits shared memory tiling and avoids boundary warp lane masking depending on the specific GPU architecture, kernel implementation, and data precision.
+- **Specification**: Dense layer widths (`nn.Linear`), convolutional channel counts, and Transformer hidden dimensions $d_{\text{model}}$ SHOULD be configured as multiples of 8, 16 (for FP16/BF16), or 32 (for INT8/FP8) `[HEURISTIC]` to align with Tensor Core MMA micro-tiles and cuBLAS GEMM partitioning. Layer dimension alignment is distinct from global memory coalescing (which depends on physical tensor contiguity); dimension alignment benefits shared memory tiling and avoids boundary warp lane masking depending on the specific GPU architecture, kernel implementation, and data precision.
 - **Violation Consequence**: Misaligned layer dimensions may cause GEMM kernels to fall back to non-Tensor-Core execution or apply boundary masking, incurring throughput penalties.
 
 ### [RULE-203-02] Batch Sizing & Throughput Optimization Guardrail
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Batch sizes $B$ in DataLoader configurations SHOULD be chosen to balance GPU VRAM capacity, gradient variance, and kernel launch saturation [OPTIMIZATION_HEURISTIC]. Multiples of 8, 16, or 32 are recommended to facilitate tile partitioning in GEMM/convolution kernels. Batch size does not directly dictate warp thread counts, and odd batch sizes do not inherently induce warp divergence; configuring batch sizes aligned to multiples of 8, 16, or 32 facilitates GEMM tile partitioning and thread block scheduling to improve compute saturation.
+- **Specification**: Batch sizes $B$ in DataLoader configurations SHOULD be chosen to balance GPU VRAM capacity, gradient variance, and kernel launch saturation `[HEURISTIC]`. Multiples of 8, 16, or 32 are recommended to facilitate tile partitioning in GEMM/convolution kernels. Batch size does not directly dictate warp thread counts, and odd batch sizes do not inherently induce warp divergence; configuring batch sizes aligned to multiples of 8, 16, or 32 facilitates GEMM tile partitioning and thread block scheduling to improve compute saturation.
 - **Violation Consequence**: Arbitrary or sub-optimal batch sizes underutilize memory bandwidth and fail to saturate Streaming Multiprocessors.
 
 ### [RULE-203-03] Memory Layout Channels-Last Invariant
 - **Contract Level**: `OPTIMIZATION_HEURISTIC`
-- **Specification**: 2D vision models deployed on modern NVIDIA architectures (Ampere, Ada, Hopper) SHOULD utilize the Channels-Last memory format (`torch.channels_last` / NHWC) where supported as a workload-dependent optimization.
+- **Specification**: 2D vision models deployed on modern NVIDIA architectures (Ampere, Ada, Hopper) SHOULD utilize the Channels-Last memory format (`torch.channels_last` / NHWC) `[HEURISTIC]` where supported as a workload-dependent optimization.
 - **Violation Consequence**: Operating in default NCHW format requires runtime memory transposition inside cuDNN Tensor Core convolution kernels, introducing unnecessary bandwidth overhead.
 
 ### [RULE-203-04] TensorRT Layer Fusion & Compilation Invariant
 - **Contract Level**: `OPTIMIZATION_HEURISTIC`
-- **Specification**: Production inference pipelines deployed on NVIDIA GPUs with strict latency and throughput SLAs SHOULD undergo graph optimization via TensorRT [OPTIMIZATION_HEURISTIC], enforcing vertical kernel fusion ($\text{Conv} + \text{Bias} + \text{ReLU}$) and horizontal GEMM fusion where supported by the target environment.
+- **Specification**: Production inference pipelines deployed on NVIDIA GPUs with strict latency and throughput SLAs SHOULD undergo graph optimization via TensorRT `[HEURISTIC]`, enforcing vertical kernel fusion ($\text{Conv} + \text{Bias} + \text{ReLU}$) and horizontal GEMM fusion where supported by the target environment.
 - **Violation Consequence**: Operating without kernel fusion writes intermediate activation tensors to DRAM between successive layers, increasing memory bandwidth pressure and latency.
 

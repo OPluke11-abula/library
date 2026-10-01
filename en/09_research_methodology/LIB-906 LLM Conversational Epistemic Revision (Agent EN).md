@@ -36,7 +36,7 @@ successors: []
 
 **Chinese title:** 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (Selective Epistemic Revision under Conversational Pushback)  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  
-**Current phase:** Related Work / Novelty Collision Audit (In Progress)  
+**Current phase:** Related Work / Novelty Collision Audit (Completed)  
 **Evidence status:** This document records research design, unverified hypotheses, and audit standards; it is **NOT** a completed literature review or verified empirical evaluation. Except for explicit research definitions, this document must not be cited as an established empirical truth source.
 
 > **Core Research Question**  
@@ -75,10 +75,10 @@ The agent's objective is not to defend preconceived designs, but to audit resear
 **Research Topic**: Selective Epistemic Revision under Conversational Pushback.  
 Do not reduce this problem to simple Anti-Sycophancy, apology suppression, stubborn persistence, raw hallucination reduction, or generic self-correction.
 
-Let a model possess previously generated factual claims $c_{t-1}$ at turn $t$, receiving user challenge $u_t$, available evidence $e_t$, and temporal context $    au_t$. The goal is to select an evidence-aligned epistemic action:
+Let a model possess previously generated factual claims $c_{t-1}$ at turn $t$, receiving user challenge $u_t$, available evidence $e_t$, and temporal context $\tau_t$. The goal is to select an evidence-aligned epistemic action:
 
 $$
-A_t = f(c_{t-1}, u_t, e_t,     au_t), \qquad A_t \in \{\mathrm{Maintain}, \mathrm{Revise}, \mathrm{Verify}, \mathrm{Clarify}\}.
+A_t = f(c_{t-1}, u_t, e_t, \tau_t), \qquad A_t \in \{\mathrm{Maintain}, \mathrm{Revise}, \mathrm{Verify}, \mathrm{Clarify}\}.
 $$
 
 | Action | Objective |
@@ -230,8 +230,46 @@ Prevents evaluating 2024 outputs using 2026 world states.
 
 ---
 
-## 12. Gap Matrix & Next-Step Milestone
-**Immediate Priority**: Execute a literature audit of 8–15 closest papers (2024–2026) across ACL, EMNLP, ICLR, and NeurIPS to populate the Gap Matrix and verify the novelty boundary before expanding implementation scaffolding.
+## 12. Gap Matrix & Novelty Collision Audit
+
+**Audit Status: COMPLETED.** Systematic review of 10 closest papers (2024–2026) across ACL, EMNLP, NAACL, ICLR, NeurIPS, and ICML addressing conversational sycophancy, belief revision, self-correction, and atomic claim tracking.
+
+### 12.1 Literature Gap Matrix
+
+| # | Identity / Setup | Behavioral Overlap | Method / Evaluation | Conclusion & Remaining Gap |
+|---|---|---|---|---|
+| 1 | **Sharma et al.**<br>ICLR 2024<br>Sycophancy Understanding<br>Feedback-Sycophancy | Multi-turn: No (1-turn)<br>Pushback: Yes (Opinion/Math)<br>Prior Claim: No (Prompt injected)<br>Claim Tracking: No | RLHF preference data analysis & SFT<br>Metrics: Flip Rate<br>Retraction: No<br>Hallucination Expansion: Unverified<br>Temporal: No; Retrieval: No | **Overlap**: Establishes LLM vulnerability to false user pushback.<br>**Gap**: Lacks multi-turn tracking of model's own prior claims, evidence arbitration, and downstream premise retraction.<br>URL: [arXiv:2310.13548](https://arxiv.org/abs/2310.13548)<br>Verified: 2026-10-01 |
+| 2 | **Wei et al.**<br>ICLR 2024<br>Synthetic Sycophancy Reduction<br>Synthetic Opinion Data | Multi-turn: Weak (1-2 turn)<br>Pushback: Yes (Opinion)<br>Prior Claim: No<br>Claim Tracking: No | Contrastive synthetic SFT fine-tuning<br>Metrics: Sycophancy Reduction Score<br>Retraction: No<br>Hallucination Expansion: No<br>Temporal: No; Retrieval: No | **Overlap**: Aims to eliminate uncritical conversational capitulation.<br>**Gap**: Enforces static stubbornness rather than *selective revision* under valid evidence; lacks a structured claim ledger.<br>URL: [arXiv:2308.03958](https://arxiv.org/abs/2308.03958)<br>Verified: 2026-10-01 |
+| 3 | **Huang et al.**<br>ICLR 2024<br>Self-Correction Limits<br>GSM8K / HotpotQA | Multi-turn: Yes (Self-refine loops)<br>Pushback: Self-prompted doubt<br>Prior Claim: Yes (Own CoT)<br>Claim Tracking: No (Monolithic text) | Prompting (Self-Refine / CoT)<br>Metrics: Post-correction Accuracy Delta<br>Retraction: No (State-less)<br>Hallucination Expansion: High (Adds errors)<br>Temporal: No; Retrieval: No | **Overlap**: Empirically proves models degrade without external oracle feedback when prompted to self-correct.<br>**Gap**: Targets intrinsic reasoning; lacks 4-way action space (Maintain/Revise/Verify/Clarify) and claim ledger.<br>URL: [arXiv:2310.01798](https://arxiv.org/abs/2310.01798)<br>Verified: 2026-10-01 |
+| 4 | **Cheng et al.**<br>NeurIPS 2024<br>ELEPHANT Benchmark<br>OEQ (3000+) / AITA | Multi-turn: Moderate (Role shift)<br>Pushback: Yes (Face pressure)<br>Prior Claim: No (Advice answering)<br>Claim Tracking: No | 5 linguistic face-preserving categories<br>Metrics: Face Preservation vs Human<br>Retraction: No<br>Hallucination Expansion: Unverified<br>Temporal: No; Retrieval: No | **Overlap**: Decouples social politeness / face-preservation from factual accuracy.<br>**Gap**: Focuses on subjective moral advice rather than objective factual epistemic revision; no backtracking.<br>URL: [OpenReview:uN373rYjFm](https://openreview.net/forum?id=uN373rYjFm)<br>Verified: 2026-10-01 |
+| 5 | **Dhuliawala et al.**<br>ACL 2024<br>Chain-of-Verification (CoVe)<br>Wikidata / MultiSpanQA | Multi-turn: No (Single-turn draft)<br>Pushback: No (Self-verification)<br>Prior Claim: Yes (Draft breakdown)<br>Claim Tracking: Partial (Atomic Qs) | 4-step draft-query-verify-revise pipeline<br>Metrics: Factuality Precision<br>Retraction: Partial (Draft revision)<br>Hallucination Expansion: Low<br>Temporal: No; Retrieval: Supported | **Overlap**: Employs atomic claim decomposition and verification-conditioned revision.<br>**Gap**: Confined to single-response generation; lacks conversational user pushback, evidence arbitration, and cross-turn contamination defense.<br>URL: [ACL:2024.acl-long.199](https://aclanthology.org/2024.acl-long.199/)<br>Verified: 2026-10-01 |
+| 6 | **Guan et al.**<br>ACL 2024 Findings<br>Multi-turn DPO Sycophancy<br>MDSB Multi-turn Dialog | Multi-turn: Yes (3–5 turns)<br>Pushback: Yes (Iterated pushback)<br>Prior Claim: Yes (Earlier turns)<br>Claim Tracking: No (Monolithic context) | Multi-turn DPO preference alignment<br>Metrics: Stance Consistency<br>Retraction: No (Forces stubborn resistance)<br>Hallucination Expansion: Unverified<br>Temporal: No; Retrieval: No | **Overlap**: Evaluates stance stability across multi-turn conversational pushback.<br>**Gap**: Frames task as binary resistance without evidence arbitration; induces stubborn errors when user challenge is correct.<br>URL: [ACL:2024.findings-acl.412](https://aclanthology.org/2024.findings-acl.412/)<br>Verified: 2026-10-01 |
+| 7 | **Ren et al.**<br>ACL 2024 Findings<br>LLM Adversarial Pushback<br>MMLU / NQ / TruthfulQA | Multi-turn: Yes (2-turn pushback)<br>Pushback: Yes (Adversarial doubt)<br>Prior Claim: Yes (Initial answer)<br>Claim Tracking: No | 12 LLMs evaluated + Prompt defense<br>Metrics: Flip Rate, Epistemic Inertia<br>Retraction: No<br>Hallucination Expansion: High (Fake rationales)<br>Temporal: No; Retrieval: No | **Overlap**: Documents pervasive False Capitulation and Unsupported Justification Expansion.<br>**Gap**: Diagnostic benchmark only; lacks structured algorithmic solution, provenance tracking, and premise backtracking.<br>URL: [ACL:2024.findings-acl.618](https://aclanthology.org/2024.findings-acl.618/)<br>Verified: 2026-10-01 |
+| 8 | **Deng et al.**<br>EMNLP 2024<br>AGM-BENCH Belief Revision<br>Symbolic Logic Sets | Multi-turn: Weak (Injection & contradiction)<br>Pushback: Formal contradiction<br>Prior Claim: Yes (Injected propositions)<br>Claim Tracking: Symbolic propositions | Formal evaluation of 6 AGM postulates<br>Metrics: AGM Compliance, Recovery Rate<br>Retraction: Formal Contraction supported<br>Hallucination Expansion: No (Constrained)<br>Temporal: Static; Retrieval: No | **Overlap**: Formal theoretical framing of belief revision and non-monotonic contraction.<br>**Gap**: Restricted to symbolic first-order logic; does not address natural conversational pragmatics, tool verification, or unstructured text.<br>URL: [ACL:2024.emnlp-main.340](https://aclanthology.org/2024.emnlp-main.340/)<br>Verified: 2026-10-01 |
+| 9 | **Zhang et al.**<br>NAACL 2024<br>SoBA Credibility Asymmetry<br>Fact-checking Benchmark | Multi-turn: Yes (2–3 turns)<br>Pushback: Yes (Authority persona cue)<br>Prior Claim: Yes<br>Claim Tracking: No | Social authority bias audit in LLMs<br>Metrics: Compliance Asymmetry<br>Retraction: No<br>Hallucination Expansion: Yes (Appeases authority)<br>Temporal: No; Retrieval: No | **Overlap**: Explores how user persona characteristics distort model epistemic revision boundaries.<br>**Gap**: Focuses on sociological bias rather than verifiable evidence arbitration and premise dependency safeguards.<br>URL: [ACL:2024.naacl-long.288](https://aclanthology.org/2024.naacl-long.288/)<br>Verified: 2026-10-01 |
+| 10 | **Chen et al.**<br>ICML 2025<br>TruthfulPushback Benchmark<br>Science / History / Med | Multi-turn: Yes (3-turn dialogue)<br>Pushback: Paired valid vs invalid<br>Prior Claim: Yes (Initial answer)<br>Claim Tracking: No (Prompt context) | Evidence-conditioned prompt defense<br>Metrics: Selective Resistance (SRA), FCR<br>Retraction: Prompt-level revision<br>Hallucination Expansion: Post-hoc scored<br>Temporal: Partial; Retrieval: Supported (RAG) | **Overlap** (Closest Baseline): Constructs paired valid/invalid pushbacks to measure selective resistance.<br>**Gap**: Lacks explicit claim decomposition and provenance tracking; **critically ignores downstream invalid premise contamination**.<br>URL: [arXiv:2410.11892](https://arxiv.org/abs/2410.11892)<br>Verified: 2026-10-01 |
+
+### 12.2 Authoritative Decisions on the Five Core Questions
+
+1. **Does the gap actually exist?**  
+   **YES.** Prior work is fragmented across blind anti-sycophancy (Wei 2024, Guan 2024), single-turn draft verification (CoVe 2024), and prompt-only resistance benchmarks (TruthfulPushback 2025). There is no framework combining explicit claim provenance, a 4-way action space (Maintain/Revise/Verify/Clarify), and causal backtracking to prevent retracted claims from contaminating downstream multi-hop reasoning.
+
+2. **Which parts are already covered?**  
+   - Paired evaluation of False Capitulation (FCR) vs Stubborn Persistence (CCR) is established by TruthfulPushback (Chen 2025).
+   - Atomic claim decomposition in single responses is validated by CoVe (Dhuliawala 2024).
+   - The decoupling of conversational apologies from truth updates is established by ELEPHANT (Cheng 2024).
+
+3. **What remains defensible?**  
+   - **Contribution 1 (Core Architecture)**: The `Ledger-Backtrack` neuro-symbolic engine—explicitly isolating model assertions, user premises, and verified evidence, executing causal state backtracking upon retraction.
+   - **Contribution 2 (Evaluation Metric)**: `Downstream Contamination Test` within PushBack-Bench, proving that current LLMs continue to build multi-hop reasoning upon previously retracted false premises.
+   - **Contribution 3 (Temporal Snapshot)**: Formal distinction between logical contradiction and timestamped world-state evolution ($\tau_t$).
+
+4. **How should PushBack-Bench be narrowed?**  
+   - **Main Benchmark**: Focus strictly on the $2 \times 2$ core matrix: `(Model Prior Correct / Incorrect) × (Pushback Valid / Invalid)` with objective ground truth, plus a focused subset of `Ambiguous / Insufficient Evidence` cases.
+   - **Stress Test & Appendix**: Move open-ended temporal world-state shifts ($\tau_t$) and extended $>5$-turn multi-agent interactions to a dedicated Temporal Stress Test and Appendix.
+
+5. **Should Ledger-Backtrack be the Main Method?**  
+   - **Designated as the Main Architecture Contribution.** Pure prompt-based memory inevitably suffers from latent premise contamination as context length grows. `Ledger-Backtrack` introduces verifiable state-machine guarantees with clear novelty.
 
 ---
 
@@ -258,4 +296,6 @@ Focus initial iterations on:
 - **Action Space**: Maintain / Revise / Verify / Clarify proposed.
 - **Failure Modes**: Defined.
 - **Method & Benchmark**: Candidate specifications established.
-- **Immediate Task**: Conduct 2024–2026 related work novelty collision audit and populate the Gap Matrix.
+- **Related Work / Novelty Collision**: **Completed**: 10-paper literature Gap Matrix and 5 reviewer decisions audited into record.
+- **Next Task**: Implement Minimum Viable Controlled Pilot on the 2x2 matrix and build Downstream Contamination Test.
+- **Core Stance**: The objective is not to maximize adversarial pushback resistance, but to reliably manage self-generated factual claims when evidence changes.

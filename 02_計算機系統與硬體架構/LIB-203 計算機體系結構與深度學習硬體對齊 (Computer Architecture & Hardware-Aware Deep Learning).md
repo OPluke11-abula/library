@@ -81,7 +81,7 @@ $$C = \alpha (A \cdot B) + \beta C, \quad A \in \mathbb{R}^{M \times K}, B \in \
 在現代硬體張量核心（NVIDIA Tensor Cores）中，底層微架構以固定尺寸的**硬體微瓦片 (Hardware Micro-Tiles)** 進行矩陣乘法（例如 Ampere/Ada 架構的 MMA 指令：$16 \times 8 \times 16$ 或 $16 \times 16 \times 16$ 矩陣塊）：
 $$C_{i, j} = \sum_{k=0}^{\lceil K / B_k \rceil - 1} A_{i, k}^{\text{tile}} \cdot B_{k, j}^{\text{tile}}$$
 - 當矩陣維度 $M, N, K$ 均為 16 或 32 的整數倍時，整體張量可以被精確劃分為整數個瓦片，邊界完全不需要填充（Zero-Padding）。
-- 若維度未對齊，底層邊界瓦片必須透過分支條件（Predication Masking）關閉部分計算單元，導致 Tensor Core 算力利用率暴跌至 40% 以下。
+- 若維度未對齊硬體微瓦片整數倍，底層邊界瓦片必須透過分支遮罩條件（Predication Masking）關閉部分計算線程或在 Shared Memory 進行額外 Padding 補零，導致有效計算單元空轉與指令發射開銷增加，顯著降低 Tensor Core 算力飽和度（具體利用率衰減程度取決於矩陣規模、瓦片分塊形狀與底層 cuBLAS 核心策略）。
 
 ### 2. Roofline 算力與記憶體頻寬平衡模型
 Williams et al. (CACM 2009) 提出的 Roofline 模型定義了系統的理論性能極限：
@@ -99,7 +99,7 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
 -- 若神經網路層的算術強度 $I < 82$，系統處於 **Memory-Bound** 區域，增加更多計算單元毫無意義，吞吐量完全受限於顯存傳輸速率。
 - 若 $I \ge 82$，系統進入 **Compute-Bound** 區域，Tensor Cores 的乘加加速能力才能真正發揮到 100%。
 
-### 3. Roofline 實例拆解：影像前處理與 Pointwise 算子融合的記憶體牆 `[FACT]` `[ROOFLINE_ANALYSIS]`
+### 3. Roofline 實例拆解：影像前處理與 Pointwise 算子融合的記憶體牆 `[FACT]` `[DERIVATION]`
 以常見之電腦視覺影像亮度調整為例：`torch.clamp(image * 1.2, 0, 255)`。
 - **計算量與訪存量統計**（設張量元素量為 $N$，FP32 單精度）：
   - 運算量：1 次浮點乘法 + 2 次比較截斷（$\min/\max$）= 每元素 **3 FLOPs**。
@@ -112,7 +112,7 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
   - **`torch.compile` / Triton 垂直循環融合 (Vertical Loop Fusion)**：
     - 編譯器將兩步操作合成為單一 Fused Kernel，中間結果直接於 SM 暫存器（Registers）與晶上 SRAM 中完成乘法與夾值。
     - 訪存量：僅需讀取 $x$ ($4N\text{ B}$) $\to$ 直接寫入 $out$ ($4N\text{ B}$)，總搬運量降為 **$8N\text{ Bytes}$**（顯存流量砍半 50%）。
-    - 效益：在 Memory-Bound 區域，執行延遲直接縮減約 50%（$2\times$ 吞吐加速），並抹平 1 次 Kernel Launch Overhead。
+    - 效益：在極端受限於顯存頻寬（Memory-Bound）的理想假設下，理論顯存搬運頻寬極限之延遲最高可縮減約 50%（理論 DRAM 流量砍半，對應 $2\times$ 頻寬加速比），並省去 1 次 GPU Kernel Launch 開銷；實際端到端加速幅度受中介特徵是否已命中晶上 L2 Cache、張量尺寸與啟動排程佔比共同決定。
 
 ---
 
@@ -131,7 +131,7 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
 - 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）且對齊於 128 位元組邊界時，記憶體子系統發出四個 32 位元組扇區事務（Sector Transactions）完成服務，達到接近 100% 的匯流排傳輸效率。
 - 若存取存在跨步或隨機錯位，請求將分散至更多扇區事務；在極端跨步存取下（例如 Warp 中每個執行緒各自存取不同扇區中的單個 4 位元組數值），有效匯流排事務利用率可能驟降至最低約 $12.5\%$ ($4\text{ Bytes} / 32\text{ Bytes}$)。
 
-### 3. GPU 特殊功能單元 (SFU) 與平方根倒數 (Reciprocal Square Root) 硬體對齊 `[FACT]` `[HARDWARE_ARCHITECTURE]`
+### 3. GPU 特殊功能單元 (SFU) 與平方根倒數 (Reciprocal Square Root) 硬體對齊 `[FACT]`
 在數值歸一化與優化器更新中，計算分母開根號是核心熱點。
 - **傳統直覺寫法 `1 / torch.sqrt(x)` 的效能黑洞**：
   - 觸發 2 個獨立 Kernel（開根號與除法），產生 2 次讀取與 2 次寫入（$16N\text{ Bytes}$ DRAM 流量）。
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
 - **前置條件**: 設計全連結層（`nn.Linear`）、卷積層通道數或 Transformer 隱藏維度 $d_{\text{model}}$。
 - **量化決策邊界**:
-  - 建議層之輸入與輸出維度對齊為 8、16 或 32 的整數倍 [OPTIMIZATION_HEURISTIC]：
+  - 建議層之輸入與輸出維度對齊為 8、16 或 32 的整數倍 `[HEURISTIC]`：
     $$\text{Dim} \pmod{8} = 0 \quad (\text{FP16/BF16 基準}), \quad \text{Dim} \pmod{16} = 0 \quad (\text{INT8 基準}), \quad \text{Dim} \pmod{32} = 0 \quad (\text{Hopper FP8 TMA})$$
   - 層維度對齊與全域記憶體合併存取（取決於張量記憶體連續性）不同；維度對齊有助於 Shared Memory 分塊與避免邊界 Warp Lane 遮罩，實際效益取決於具體 GPU 架構、核心實作與資料精度。
 - **執行保證**: 避免 GEMM 算子回退至非 Tensor Core 核心或引入邊界遮罩，維持計算吞吐量。
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 - **合約等級**: `HIGH_INVARIANT`
 - **前置條件**: DataLoader 批次大小配置。
 - **量化決策邊界**:
-  - 批次大小 $B$ 的選擇應綜合權衡 GPU 顯存容量、梯度統計變異數與核心計算飽和度 [OPTIMIZATION_HEURISTIC]。建議選擇 8, 16, 32 等整數倍或 2 的冪次方，以利 GEMM/卷積算子分塊對齊。
+  - 批次大小 $B$ 的選擇應綜合權衡 GPU 顯存容量、梯度統計變異數與核心計算飽和度 `[HEURISTIC]`。建議選擇 8, 16, 32 等整數倍或 2 的冪次方，以利 GEMM/卷積算子分塊對齊。
   - 批次大小並不直接決定 Warp 執行緒數，奇數批次大小亦不必然引發 Warp 分支發散（Batch 維度通常映射到 Thread Block 或 Grid）；將批次大小對齊至 8、16 或 32 的倍數有助於 GEMM 瓦片分割與 Thread Block 硬體排程以提升計算飽和度。
 - **例外回退 (Fallback Protocol)**: 若極限情況下只能設為 $B=1$（如單樣本即時推論），可依賴 GEMM 矩陣算子將權重維度放大，使算術強度最大化。
 
@@ -258,7 +258,7 @@ if __name__ == "__main__":
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
 - **前置條件**: 2D 卷積神經網路（CNN）部署至支援 Tensor Core 之 NVIDIA GPU (TensorRT / cuDNN)。
 - **量化決策邊界**:
-  - 視工作負載需求，建議將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)** [OPTIMIZATION_HEURISTIC]。
+  - 視工作負載需求，建議將張量記憶體排布從預設之 **NCHW** 轉換為 **Channels-Last (NHWC)** `[HEURISTIC]`。
   - 在 PyTorch 中執行：`model.to(memory_format=torch.channels_last)` 與 `input.to(memory_format=torch.channels_last)`。
 - **執行保證**: 釋放 Tensor Core 2D 卷積原生計算通道，減少內部轉置開銷並提升計算效率（實際延遲改善取決於網路卷積結構、通道數與底層 cuDNN 核心實作）。
 
@@ -266,7 +266,7 @@ if __name__ == "__main__":
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
 - **前置條件**: 具備嚴格延遲或吞吐量要求的生產推論管線部署至 NVIDIA GPU 環境。
 - **量化決策邊界**:
-  - 在目標環境支援的情況下，建議導出為 ONNX 格式並透過 TensorRT Builder 進行垂直融合（Vertical Fusion，如 `Conv+BN+ReLU`）與低精度量化編譯 [OPTIMIZATION_HEURISTIC]。
+  - 在目標環境支援的情況下，建議導出為 ONNX 格式並透過 TensorRT Builder 進行垂直融合（Vertical Fusion，如 `Conv+BN+ReLU`）與低精度量化編譯 `[HEURISTIC]`。
 - **執行保證**: 減少中間特徵寫入 DRAM 的往返開銷，降低延遲並提升吞吐量。
 
 ---

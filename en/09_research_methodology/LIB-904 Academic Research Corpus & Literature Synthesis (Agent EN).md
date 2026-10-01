@@ -27,7 +27,8 @@ tags:
   - self-study
 prerequisites:
   - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
-successors: []
+successors:
+  - "[[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-904%20%E5%AD%B8%E8%A1%93%E7%A7%91%E7%A0%94%E6%96%87%E7%8D%BB%E9%AB%94%E7%B3%BB%E8%88%87%E5%89%8D%E6%B2%BF%E7%A0%94%E7%A9%B6%E5%B0%8D%E9%BD%8A%20%28Academic%20Research%20Corpus%20&%20Literature%20Synthesis%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**

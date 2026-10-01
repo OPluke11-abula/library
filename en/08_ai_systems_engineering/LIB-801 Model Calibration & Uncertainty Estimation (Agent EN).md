@@ -30,6 +30,7 @@ successors:
   - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
   - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
   - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
+  - "[[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../08_AI%E7%B3%BB%E7%B5%B1%E5%B7%A5%E7%A8%8B%E8%88%87%E9%AB%98%E6%95%88%E9%83%A8%E7%BD%B2/LIB-801%20%E7%8F%BE%E4%BB%A3%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E4%B9%8B%E6%A8%A1%E5%9E%8B%E6%A0%A1%E6%BA%96%E3%80%81%E4%B8%8D%E7%A2%BA%E5%AE%9A%E6%80%A7%E4%BC%B0%E8%A8%88%E8%88%87%E9%81%8E%E5%BA%A6%E8%87%AA%E4%BF%A1%20%28Model%20Calibration%20%26%20Uncertainty%20Estimation%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**

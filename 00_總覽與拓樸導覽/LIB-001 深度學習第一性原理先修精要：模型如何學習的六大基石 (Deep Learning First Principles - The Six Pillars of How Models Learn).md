@@ -109,6 +109,34 @@ successors:
      $$\mathcal{L}_{\text{CE}} = -\sum_{c=1}^C y_c \log(\hat{y}_c)$$
      *直覺*：**賭盤賠率懲罰**。若真實標籤是「貓」，模型預測「是貓的機率為 99%」，$-\log(0.99) \approx 0.01$（懲罰微乎其微）；但若模型預測「是貓的機率僅 1%」，$-\log(0.01) \approx 4.6$（監考官重重扣分！）。模型越自信地猜錯，懲罰將呈現對數級劇烈爆炸。
 
+#### (3) 深入第一性原理：為什麼分類 Loss 不用直覺的 1 - P，偏要用 -log(P)？
+在機器學習初學者看來，若預測機率為 $P \in [0, 1]$，真實標籤為 $y = 1$，直覺上的線性誤差就是 $1 - P$。為什麼全人類的深度學習框架不採用 $\mathcal{L}_{\text{linear}} = 1 - P$，而必須採用負對數 $\mathcal{L}_{\text{CE}} = -\log(P)$？
+
+這背後蘊含著微積分鏈鎖律、資訊理論與凸最佳化的三大數學本質：
+
+1. **微積分鏈鎖律的神級對消 vs. 致命梯度飽和 (The Gradient Cancellation)** `[DERIVATION]`：
+   在神經網路中，機率 $P$ 是未歸一化 Logit 分數 $z$ 經由 Sigmoid 激活得出的：
+   $$P = \sigma(z) = \frac{1}{1 + e^{-z}}, \quad \frac{\partial P}{\partial z} = P(1 - P)$$
+   * **若採用直覺線性損失 $\mathcal{L}_{\text{linear}} = 1 - P$**：
+     對 Logit $z$ 求導：
+     $$\frac{\partial \mathcal{L}_{\text{linear}}}{\partial z} = \frac{\partial \mathcal{L}}{\partial P} \cdot \frac{\partial P}{\partial z} = (-1) \cdot P(1 - P) = \mathbf{-P(1 - P)}$$
+     🚨 **`[SAFETY_BOUND]` 梯度飽和陷阱**：若模型犯下離譜錯誤（例如真實值為 1，但模型預測 $z = -10$，機率 $P \approx 0.000045$），此時梯度大小為 $-0.000045 \times (1 - 0.000045) \approx \mathbf{0}$！模型錯得越徹底，Sigmoid 越深陷平坦飽和區，**反向傳播的推動力反而歸零（梯度消失／網絡腦死）**，參數徹底卡死無法修正。
+   * **若採用負對數交叉熵 $\mathcal{L}_{\text{CE}} = -\log(P)$**：
+     對 Logit $z$ 求導：
+     $$\frac{\partial \mathcal{L}_{\text{CE}}}{\partial z} = \frac{\partial \mathcal{L}}{\partial P} \cdot \frac{\partial P}{\partial z} = \left(-\frac{1}{P}\right) \cdot P(1 - P) = \mathbf{P - 1} = \mathbf{P - y}$$
+     ✨ **`[FACT]` 完美對消**：對數求導產生的倒數項 $\frac{1}{P}$，在代數上**精準消滅了** Sigmoid 導函數中的 $P$！
+     - 當模型錯得極其離譜（$P \to 0$）時，梯度大小為 $|0 - 1| = \mathbf{1}$（保持最大極限修正力道，全力推進！）。
+     - 當模型預測完全正確（$P \to 1$）時，梯度平滑歸零（$1 - 1 = 0$）。
+     - 梯度與未歸一化誤差呈現乾淨的線性關係，徹底消除了輸出層的梯度飽和。
+
+2. **夏農資訊理論與驚奇度 (Surprisal & Relative Entropy)** `[FACT]`：
+   - 根據夏農資訊理論，事件的自資訊（驚奇度）定義為 $I(x) = -\log P(x)$。預測大概率事件（$P \to 1$）幾乎不包含額外資訊量；而以極低機率預測真實事件（$P \to 0$）意味著巨大的不確定性破壞，懲罰呈對數級無界發散（$-\log P \to \infty$）。
+   - 最小化交叉熵等價於極大似然估計（Maximum Likelihood Estimation, MLE），在分佈層面等價於最小化真實分佈與模型分佈之間的相對熵（Kullback-Leibler 散度 $D_{\text{KL}}(y \parallel P)$）。
+
+3. **最佳化景觀的嚴格凸性 (Strict Convexity)** `[DERIVATION]`：
+   - 線性損失 $\mathcal{L}_{\text{linear}}(z) = 1 - \sigma(z)$ 對 Logit $z$ 而言是非凸函數（Non-convex），存在大片平坦的梯度死區與局部鞍點。
+   - 交叉熵損失對 Logit $z$ 展開為：$-\log \sigma(z) = \log(1 + e^{-z})$（即 Softplus 函數），其二階導數 $\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$，在全定義域上滿足**嚴格凸性（Strictly Convex）**，保證了優化演算法能夠平穩、無歧義地收斂至全域最優解。
+
 ---
 
 ### 3. 反向傳播與梯度 (Backpropagation / Gradient)
@@ -168,6 +196,17 @@ $$\text{新旋鈕設定} = \text{舊旋鈕設定} - \eta \cdot \text{梯度}$$
 4. **特徵條件數惡化 (Ill-conditioned Surface)**：
    * *現象*：學習率稍微設大一點 Loss 就暴衝，設小一點又走不動。
    * *數學透視*：特徵未做標準化，導致損失曲面像一個極端狹長的狹谷（長短軸比例失衡，條件數過大）。梯度方向與山谷底部的真實方向幾乎垂直，造成兩壁瘋狂震盪。解法是強制加入 Batch Normalization 或 LayerNorm。
+5. **In-place 原地操作（結尾帶底線 `_`）的記憶體機制與 Autograd 致命雷區**：
+   * *現象*：為了節省顯存，將操作全改成 `add_`、`mul_`，結果模型在 `loss.backward()` 時突然拋出：
+     `RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation...`
+   * *底層機制與安全界限* `[FACT]` `[SAFETY_BOUND]`：
+     - **記憶體分配原理**：常規操作 `y = x + 1` 會向 CUDA Caching Allocator 申請全新顯存區塊（`StorageImpl`）；而帶底線的原地操作 `x.add_(1)` 直接在原顯存緩衝區上改寫數值，不產生中繼張量，確實可顯著降低顯存峰值。
+     - **反向鏈鎖律的現場依賴**：微積分求導通常需要前向傳播的原始輸入值（例如 $y = x^2$ 的導數為 $2x$）。若在計算圖中執行 In-place 塗改，原始數值被摧毀，反向傳播將無法正確求導。
+     - **PyTorch 版本計數器哨兵 (`version_counter_`)**：每個張量均維護版本號，任何 In-place 修改使版本號遞增。若 Autograd 節點發現被依賴張量的版本已被修改，便會觸發硬性防禦拋出 RuntimeError。
+     - **工程決策邊界** `[DESIGN_DECISION]`：
+       1. **強制使用 In-place**：優化器權重與動量更新（`with torch.no_grad(): p.add_(-lr * grad)`），防止百億參數模型每步更新複製權重導致 OOM；推論階段（`@torch.inference_mode()`）；LLM KV-Cache 靜態槽位填入。
+       2. **嚴格禁用 In-place**：模型前向傳播（Forward Pass）中參與梯度的路徑，尤其是殘差連線（Residual Stream）與分支跳躍結構。
+       3. **編譯器時代優化**：在 PyTorch 2.0+ `torch.compile` 下，優先保持純函數式（Out-of-place）代碼，使 TorchInductor 能自由進行垂直循環融合與自動緩衝區復用（Buffer Reuse），兼具代碼純粹性與零多餘記憶體開銷。
 
 ---
 

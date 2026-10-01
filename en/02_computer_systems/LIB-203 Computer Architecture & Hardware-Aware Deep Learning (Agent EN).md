@@ -62,6 +62,19 @@ $$\text{Machine Balance } I^* = \frac{P_{\text{peak}}}{B_{\text{mem}}} \approx \
 - If $I < I^*$: The operation is **Memory-Bound**. Arithmetic units remain stalled waiting for DRAM cache lines (e.g., LayerNorm, GeLU, Softmax).
 - If $I \ge I^*$: The operation is **Compute-Bound**. GPU execution pipelines are fully saturated (e.g., large-matrix GEMM, Convolution).
 
+### Roofline Case Study: Pointwise Image Preprocessing & Operator Fusion `[FACT]` `[ROOFLINE_ANALYSIS]`
+Consider image brightness clamping: `torch.clamp(image * 1.2, 0, 255)`.
+- **Eager Execution**:
+  - `aten::mul`: Read $x$ ($4N\text{ Bytes}$) $\to$ Write intermediate $tmp$ ($4N\text{ Bytes}$).
+  - `aten::clamp`: Read $tmp$ ($4N\text{ Bytes}$) $\to$ Write output $out$ ($4N\text{ Bytes}$).
+  - Total DRAM Traffic = $16N\text{ Bytes}$ across 2 independent kernel launches.
+  - Arithmetic Intensity: $I_{\text{eager}} = \frac{3\text{ FLOPs}}{16\text{ Bytes}} \approx \mathbf{0.1875\text{ FLOP/Byte}} \ll I^*$.
+  - Execution is severely memory-bandwidth bound; compute cores are stalled $> 99\%$ of the time.
+- **`torch.compile` / Triton Vertical Loop Fusion**:
+  - Pointwise loop fusion compiles both operations into a single kernel. Intermediates reside in SM registers/L1 SRAM.
+  - Total DRAM Traffic = Read $x$ ($4N\text{ Bytes}$) + Write $out$ ($4N\text{ Bytes}$) = **$8N\text{ Bytes}$** (50% reduction).
+  - Yields an immediate $\approx 2\times$ speedup and eliminates one host-side kernel launch overhead.
+
 ---
 
 ## 3. GPU Microarchitecture & CUDA Execution Model
@@ -75,7 +88,17 @@ $$\text{Machine Balance } I^* = \frac{P_{\text{peak}}}{B_{\text{mem}}} \approx \
 | **High Bandwidth Memory (HBM3)**| 80 GB - 144 GB | ~400 - 800 cycles | 2.0 - 3.35 TB/s |
 | **PCIe Gen 5 Host Transfer** | System DRAM | > 10,000 cycles | 64 GB/s (x16 duplex) |
 
-### 2. The Warp Execution Primitive & Microarchitectural Alignment
+### 2. Hardware Special Function Units (SFU) & Reciprocal Square Root `[FACT]` `[HARDWARE_ARCHITECTURE]`
+In normalization (RMSNorm, LayerNorm) and AdamW optimizer steps, calculating variance reciprocals is a primary hotspot:
+- **Eager Division Trap (`1 / torch.sqrt(x)`)**:
+  - Issues 2 kernels (`sqrt` and `div`), requiring 2 reads and 2 writes ($16N\text{ Bytes}$ for FP32).
+  - Floating-point division in GPU hardware lacks single-cycle ALU paths and requires high-latency multi-cycle iterative SFU emulation (10-20 cycles).
+- **Canonical Fast Path (`torch.rsqrt(x)`)**:
+  - Single kernel launch, cutting DRAM memory traffic from $16N$ to $8N\text{ Bytes}$ (50% savings).
+  - **Hardware SFU ISA Pipeline**: NVIDIA Streaming Multiprocessors route `torch.rsqrt` directly to the **SFU (Special Function Unit)** via PTX `rsqrt.approx.f32`, emitting the native SASS instruction **`MUFU.RSQ`**.
+  - **Algebraic Compute Demotion**: Rewriting normalization as $x \odot \text{rsqrt}(\sigma^2 + \epsilon)$ replaces multi-cycle vector division with a single-cycle Fused Multiply-Add (FMA), foundational to modern LLM RMSNorm and AdamW implementations.
+
+### 3. The Warp Execution Primitive & Microarchitectural Alignment
 On NVIDIA GPUs:
 - **Thread Warp**: 32 threads executing concurrently under Single Instruction, Multiple Threads (SIMT).
 - **Coalesced Memory Access (32-Byte Sectors)**: Modern NVIDIA architectures utilizing 32-byte memory sectors (e.g., Volta through Hopper/Blackwell) structure 128-byte cache lines into four discrete 32-byte sectors. When 32 threads in a warp access consecutive 4-byte words aligned to a 128-byte boundary, the memory subsystem issues four 32-byte sector transactions to service the warp with near 100% bus utilization. In extreme strided access patterns where each thread requests a 4-byte word landing in a distinct sector, effective bus transaction efficiency can drop to as low as $12.5\%$ ($4\text{ bytes} / 32\text{ bytes}$).

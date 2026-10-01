@@ -115,6 +115,11 @@ $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\
   $$M_{10} = \sum (X \odot I), \quad M_{01} = \sum (Y \odot I)$$
   計算耗時縮減至 **0.02ms**（提速 75 倍）！
 
+### 2. GPU 端批次前處理管線的算子融合 (Pointwise Fusion via torch.compile) `[FACT]` `[PERFORMANCE_CRITICAL]`
+在深度學習視覺前處理與資料增強管線中（例如在 GPU 端執行亮度增益與範圍截斷 `torch.clamp(img * 1.2, 0, 255)`）：
+- **傳統 Eager 模式的頻寬顛簸 (Memory Thrashing)**：連續呼叫多個未融合的 Pointwise 運算元，會引發多次獨立的 GPU Kernel 啟動，每次皆需將中介張量完整寫回顯存再讀出。由於算術強度極低（$\text{AI} \approx 0.1875\text{ FLOP/Byte}$），GPU 嚴重受困於記憶體牆，導致硬體利用率（GPU-Util）出現鋸齒狀震盪。
+- **編譯器融合方案**：將前處理函式加上 `@torch.compile`，由 TorchInductor 生成融合後的 Triton Kernel。資料僅需自顯存讀入一次，在 SM 暫存器中連貫完成乘法與夾值後寫回，顯存頻寬消耗減半，避免資料加載端成為整體訓練或即時推論的吞吐瓶頸。
+
 ---
 
 ## 四、💻 工業級工程實作：Yann LeCun 規範前處理與 Bunch TTA 動態融合管線

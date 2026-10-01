@@ -57,17 +57,17 @@ The ideal shift vector:
 $$\vec{v}_{\text{shift}} = (dx, dy) = (13.5 - \bar{x}, \quad 13.5 - \bar{y})$$
 To prevent thin or eccentric strokes (such as an upright uncrossed "7" or period ".") from being shoved off the edge of the canvas, the shift vector MUST be clamped:
 $$dx_{\text{clamped}} = \text{clip}(dx, -\tau_{\text{shift}}, +\tau_{\text{shift}}), \quad dy_{\text{clamped}} = \text{clip}(dy, -\tau_{\text{shift}}, +\tau_{\text{shift}})$$
-where defensive safety bound $\tau_{\text{shift}} = 3.0\text{ px}$ [HEURISTIC / SAFETY_BOUND]. Note that while LeCun et al. (1998) defined translation of the center-of-mass to the canvas center, the $\pm 3.0\text{ px}$ clamping bound is a project-specific defensive engineering heuristic to prevent eccentric or isolated strokes from shifting off the canvas frame.
+where defensive safety bound $\tau_{\text{shift}} = 3.0\text{ px}$ `[SAFETY_BOUND]`. Note that while LeCun et al. (1998) defined translation of the center-of-mass to the canvas center, the $\pm 3.0\text{ px}$ clamping bound is a project-specific defensive engineering safety heuristic to prevent eccentric or isolated strokes from shifting off the canvas frame.
 
 ### 3. Bilinear Interpolation Operator
 Translating discrete pixel grid by continuous shift $(dx, dy)$ maps source coordinates $(u, v) = (x - dx, y - dy)$. The intensity at $(x, y)$ is evaluated via bilinear weighting:
 $$I_{\text{shifted}}(x, y) = (1 - s)(1 - t) I(u_0, v_0) + s(1 - t) I(u_1, v_0) + (1 - s) t I(u_0, v_1) + s t I(u_1, v_1)$$
 where $u_0 = \lfloor u \rfloor, v_0 = \lfloor v \rfloor, u_1 = u_0 + 1, v_1 = v_0 + 1$, and fractional residuals $s = u - u_0, t = v - v_0$.
 
-### 4. GPU-Accelerated Preprocessing & Pointwise Kernel Fusion `[FACT]` `[PERFORMANCE_CRITICAL]`
+### 4. GPU-Accelerated Preprocessing & Pointwise Kernel Fusion `[FACT]` `[DESIGN_DECISION]`
 When executing real-time image augmentation on GPU (e.g., gain adjustments and clamping `torch.clamp(image * 1.2, 0, 255)`):
-- **Eager Memory Thrashing**: Executing consecutive pointwise transformations without fusion forces multiple memory-bound kernel launches with extremely low arithmetic intensity ($I \approx 0.1875\text{ FLOP/Byte}$), inducing sawtooth GPU utilization patterns.
-- **Triton / Compiler Fusion**: Decorating preprocessing functions with `@torch.compile` allows TorchInductor to fuse transformations into a single Triton kernel, caching intermediate values in SM registers/L1 SRAM, halving DRAM memory bandwidth demand, and preventing preprocessing from bottlenecking neural inference.
+- **Eager Memory Thrashing**: Executing consecutive pointwise transformations without fusion forces multiple memory-bound kernel launches with extremely low arithmetic intensity (under FP32, $I \approx 0.1875\text{ FLOP/Byte}$), inducing sawtooth GPU utilization patterns.
+- **Triton / Compiler Fusion**: Decorating preprocessing functions with `@torch.compile` allows TorchInductor to fuse transformations into a single Triton kernel, caching intermediate values in SM registers/L1 SRAM, halving theoretical DRAM memory traffic from $16N$ to $8N\text{ Bytes}$, and preventing preprocessing from bottlenecking neural inference.
 
 ---
 
@@ -147,12 +147,12 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ### [RULE-501-02] Foreground Mask & Zero-Moment Filter
 - **Contract Level**: `BOUNDARY_GUARD`
-- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`. The threshold $M_{00} \ge 15.0$ is a project-specific defensive engineering safety bound [HEURISTIC / SAFETY_BOUND] designed to prevent division-by-zero during centroid computation ($M_{10}/M_{00}$) and suppress sensor noise, rather than a canonical constant defined in LeCun et al. (1998).
+- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`. The threshold $M_{00} \ge 15.0$ is a project-specific defensive engineering safety bound `[SAFETY_BOUND]` designed to prevent division-by-zero during centroid computation ($M_{10}/M_{00}$) and suppress sensor noise, rather than a canonical constant defined in LeCun et al. (1998).
 - **Violation Consequence**: Processing empty or sub-threshold noise frames produces numerical instability in center of mass division ($M_{10}/M_{00}$) and spurious high-confidence predictions.
 
 ### [RULE-501-03] Centroid Clamping & Canvas Boundary Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Translating the ink center of mass $(\bar{x}, \bar{y})$ to the canonical target coordinate $(13.5, 13.5)$ MUST apply defensive displacement clamping: $\Delta x_{\text{clamped}} = \text{clip}(13.5 - \bar{x}, -3.0, 3.0)$ and $\Delta y_{\text{clamped}} = \text{clip}(13.5 - \bar{y}, -3.0, 3.0)$ [HEURISTIC / SAFETY_BOUND]. Note: While LeCun et al. (1998) introduced unconstrained center of mass translation on centered digits, this $\pm 3.0\text{ px}$ clamp is a defensive engineering safety bound to prevent eccentric strokes from being shifted out of frame boundaries.
+- **Specification**: Translating the ink center of mass $(\bar{x}, \bar{y})$ to the canonical target coordinate $(13.5, 13.5)$ MUST apply defensive displacement clamping: $\Delta x_{\text{clamped}} = \text{clip}(13.5 - \bar{x}, -3.0, 3.0)$ and $\Delta y_{\text{clamped}} = \text{clip}(13.5 - \bar{y}, -3.0, 3.0)$ `[SAFETY_BOUND]`. Note: While LeCun et al. (1998) introduced unconstrained center of mass translation on centered digits, this $\pm 3.0\text{ px}$ clamp is a defensive engineering safety bound to prevent eccentric strokes from being shifted out of frame boundaries.
 - **Violation Consequence**: Unclamped shifts on highly eccentric inputs push peripheral strokes entirely outside canvas boundaries, destroying digit topology.
 
 ### [RULE-501-04] Bunch TTA Geometric Invariant

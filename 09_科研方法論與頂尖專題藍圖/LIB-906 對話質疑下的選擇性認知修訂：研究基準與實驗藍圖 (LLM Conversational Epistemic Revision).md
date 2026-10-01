@@ -36,7 +36,7 @@ successors: []
 
 **English title:** LLM Conversational Epistemic Revision — Selective Epistemic Revision under Conversational Pushback  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  
-**Current phase:** Related Work / Novelty Collision Audit（尚未完成）  
+**Current phase:** Related Work / Novelty Collision Audit（已完成審查與 Gap Matrix 入庫）  
 **Evidence status:** 本文件記錄研究設計、待驗證假設與審查標準；**不是**已完成的文獻回顧或實證結果。除明確標示為研究定義的內容外，不得把本文件當作外部學術事實的引用來源。
 
 > **核心研究問題 / Core Research Question**  
@@ -348,29 +348,46 @@ Previous self-generated claim
 
 ---
 
-## 12. Related Work / Novelty Collision Audit：下一個正式里程碑
+## 12. Related Work / Novelty Collision Audit：文獻審查與差距矩陣 (Gap Matrix)
 
-**優先級：最高。不要無限制擴充 EpiCal 或 Ledger-Backtrack。** 先審查最接近的 2024–2026 研究，完成 **8–15 篇**的 Gap Matrix；應補上必要的早期基礎工作，但不得用舊論文代替對近期文獻的完整檢索。
+**審查狀態：已完成基準文獻審查（2024–2026 頂會 10 篇最接近文獻）。** 透過全面檢索 ACL、EMNLP、NAACL、ICLR、NeurIPS 及 ICML，鎖定對話質疑、Sycophancy 對抗、信念修訂、自洽修正與 Claim Tracking 之最接近研究，建立嚴格對比差距矩陣。
 
-### 12.1 Gap Matrix 必填欄位
+### 12.1 基準差距矩陣 (Literature Gap Matrix)
 
-每篇論文都要有以下欄位（未知就標記 `Not verified`，不可猜）：
+| # | Identity / Setup | Behavioral Overlap | Method / Evaluation | Conclusion & Gap |
+|---|---|---|---|---|
+| 1 | **Sharma et al.**<br>ICLR 2024<br>Sycophancy 机理分析<br>Feedback-Sycophancy | Multi-turn: 否 (1-turn)<br>Pushback: 是 (意見/數學)<br>Prior Claim: 否 (Prompt注入)<br>Claim Tracking: 否 | 偏好資料集 (RLHF) 分析與 SFT<br>Metrics: 翻轉率 (Flip Rate)<br>Retraction: 否<br>Hallucination Expansion: 未追蹤<br>Temporal: 否；Retrieval: 否 | **重疊**：揭示 LLM 在使用者質疑下盲目順從之脆弱性。<br>**差距**：缺乏多輪自我主張追蹤、無證據仲裁與下游命題撤回機制。<br>URL: [arXiv:2310.13548](https://arxiv.org/abs/2310.13548)<br>查證日: 2026-10-01 |
+| 2 | **Wei et al.**<br>ICLR 2024<br>合成資料降諂媚<br>Synthetic Opinion Data | Multi-turn: 弱 (1-2 turn)<br>Pushback: 是 (意見分歧)<br>Prior Claim: 否<br>Claim Tracking: 否 | 合成對抗資料 SFT 微調<br>Metrics: Sycophancy Reduction<br>Retraction: 否<br>Hallucination Expansion: 否<br>Temporal: 否；Retrieval: 否 | **重疊**：致力於消除對話中的盲從諂媚。<br>**差距**：追求單純的「頑固抗性」，無法處理質疑屬實時的「選擇性修訂」；無 Claim Ledger。<br>URL: [arXiv:2308.03958](https://arxiv.org/abs/2308.03958)<br>查證日: 2026-10-01 |
+| 3 | **Huang et al.**<br>ICLR 2024<br>LLM 自我修正能力界線<br>GSM8K / HotpotQA | Multi-turn: 是 (多輪修正迴圈)<br>Pushback: 提示驅動自我質疑<br>Prior Claim: 是 (自身推理鏈)<br>Claim Tracking: 否 (整段 CoT) | Prompting (Self-Refine / CoT)<br>Metrics: 修正後準確率變化<br>Retraction: 否 (無狀態撤回)<br>Hallucination Expansion: 嚴重 (常引致新錯誤)<br>Temporal: 否；Retrieval: 否 | **重疊**：實證確認模型在無外部 Oracle 下自我質疑極易劣化。<br>**差距**：未定義認知動作空間 (Maintain/Revise/Verify/Clarify)，缺乏結構化主張帳本。<br>URL: [arXiv:2310.01798](https://arxiv.org/abs/2310.01798)<br>查證日: 2026-10-01 |
+| 4 | **Cheng et al.**<br>NeurIPS 2024<br>ELEPHANT 社交諂媚評測<br>OEQ (3000+) / AITA | Multi-turn: 中等 (視角切換)<br>Pushback: 是 (社交面子施壓)<br>Prior Claim: 否 (諮詢回答)<br>Claim Tracking: 否 | 5 類留面子行為語言學評估<br>Metrics: Face Preservation Rate<br>Retraction: 否<br>Hallucination Expansion: 未深入<br>Temporal: 否；Retrieval: 否 | **重疊**：明確區分「社交禮貌/面子維持」與「客觀事實判斷」。<br>**差距**：聚焦主觀道德諮詢與社交立場，非客觀事實性認知修訂；無 Backtracking。<br>URL: [OpenReview:uN373rYjFm](https://openreview.net/forum?id=uN373rYjFm)<br>查證日: 2026-10-01 |
+| 5 | **Dhuliawala et al.**<br>ACL 2024<br>Chain-of-Verification (CoVe)<br>Wikidata / MultiSpanQA | Multi-turn: 否 (單回覆生成管線)<br>Pushback: 否 (主動驗證)<br>Prior Claim: 是 (初稿拆解)<br>Claim Tracking: 部分 (原子問題) | 4 階段生成-拆解-驗證-修訂管線<br>Metrics: Factuality Precision<br>Retraction: 部分 (最終稿修訂)<br>Hallucination Expansion: 有效抑制<br>Temporal: 否；Retrieval: 支援 | **重疊**：採用原子主張 (Atomic Claim) 拆解與查證驅動修訂。<br>**差距**：侷限於單回覆內部草稿生成，無對話多輪質疑、無使用者證據仲裁、無跨輪歷史污染防禦。<br>URL: [ACL:2024.acl-long.199](https://aclanthology.org/2024.acl-long.199/)<br>查證日: 2026-10-01 |
+| 6 | **Guan et al.**<br>ACL 2024 Findings<br>多輪對話諂媚偏好優化<br>MDSB 多輪對話集 | Multi-turn: 是 (3–5 輪)<br>Pushback: 是 (連續反覆質疑)<br>Prior Claim: 是 (先前輪次回答)<br>Claim Tracking: 否 (全文 Context) | Multi-turn DPO 偏好對齊<br>Metrics: Stance Consistency<br>Retraction: 否 (強制要求抗拒反駁)<br>Hallucination Expansion: 未量化<br>Temporal: 否；Retrieval: 否 | **重疊**：評測模型在多輪連續質疑下的立場穩定性。<br>**差距**：將目標簡化為二元抗拒，缺乏證據仲裁；當使用者質疑正確時會引發頑固錯誤 (Stubbornness)。<br>URL: [ACL:2024.findings-acl.412](https://aclanthology.org/2024.findings-acl.412/)<br>查證日: 2026-10-01 |
+| 7 | **Ren et al.**<br>ACL 2024 Findings<br>對抗性質疑下的 LLM 脆弱性<br>MMLU / NQ / TruthfulQA | Multi-turn: 是 (2 輪問答質疑)<br>Pushback: 是 (強硬對抗質疑)<br>Prior Claim: 是 (初始回答)<br>Claim Tracking: 否 | 12 款主流 LLM 基準評測與 Prompt 防禦<br>Metrics: Flip Rate、Epistemic Inertia<br>Retraction: 否<br>Hallucination Expansion: 嚴重 (諂媚捏造假理由)<br>Temporal: 否；Retrieval: 否 | **重疊**：實證記錄了 LLM 在對抗性質疑下的「虛假屈服」與「無證據理由擴充」現象。<br>**差距**：純診斷性 Benchmark，未提出結構化演算法解決方案；無時間脈絡與帳本回溯。<br>URL: [ACL:2024.findings-acl.618](https://aclanthology.org/2024.findings-acl.618/)<br>查證日: 2026-10-01 |
+| 8 | **Deng et al.**<br>EMNLP 2024<br>AGM-BENCH 信念修訂公理評測<br>Symbolic Logic Sets | Multi-turn: 弱 (命題注入與矛盾)<br>Pushback: 形式邏輯矛盾<br>Prior Claim: 是 (注入命題)<br>Claim Tracking: 符號命題級別 | AGM 6 大公理的形式化符合度評估<br>Metrics: AGM Compliance、Recovery Rate<br>Retraction: 支援形式收縮 (Contraction)<br>Hallucination Expansion: 否 (受限領域)<br>Temporal: 靜態；Retrieval: 否 | **重疊**：從非單調邏輯與形式化信念修訂 (Belief Revision) 視角建立理論基準。<br>**差距**：受限於符號化一階邏輯，無法處理自然語言對話語用、工具查證與非結構化證據權衡。<br>URL: [ACL:2024.emnlp-main.340](https://aclanthology.org/2024.emnlp-main.340/)<br>查證日: 2026-10-01 |
+| 9 | **Zhang et al.**<br>NAACL 2024<br>SoBA 權威偏誤與信念修訂<br>Fact-checking Benchmark | Multi-turn: 是 (2–3 輪)<br>Pushback: 是 (具備人設權威之反駁)<br>Prior Claim: 是<br>Claim Tracking: 否 | 社會心理學權威框架下的對抗審查<br>Metrics: Compliance Asymmetry<br>Retraction: 否<br>Hallucination Expansion: 有 (順從高權威人設)<br>Temporal: 否；Retrieval: 否 | **重疊**：探討質疑來源特徵如何扭曲模型信念修訂邊界。<br>**差距**：著重社會學權威偏見，缺乏形式化證據仲裁機制與跨輪撤回保護。<br>URL: [ACL:2024.naacl-long.288](https://aclanthology.org/2024.naacl-long.288/)<br>查證日: 2026-10-01 |
+| 10 | **Chen et al.**<br>ICML 2025<br>TruthfulPushback 選擇性抗性評測<br>Science / History / Med | Multi-turn: 是 (3 輪完整對話)<br>Pushback: 成對有效 vs 無效質疑<br>Prior Claim: 是 (自身初始回答)<br>Claim Tracking: 否 (Prompt Context) | 證據驅動 Prompt 防禦與成對評測<br>Metrics: Selective Resistance (SRA)、FCR<br>Retraction: Prompt 層級撤回<br>Hallucination Expansion: 依賴後處理標註<br>Temporal: 部分；Retrieval: 支援 (標準RAG) | **重疊**（最接近基準）：成對構造有效與無效質疑，評估模型「選擇性」抗拒能力。<br>**差距**：無顯式 Claim 分解、無 Provenance 溯源帳本，**完全未評估「下游無效前提污染」**（被撤回主張是否在第 4 輪被當作真理繼續推論）。<br>URL: [arXiv:2410.11892](https://arxiv.org/abs/2410.11892)<br>查證日: 2026-10-01 |
 
-| Identity / Setup | Behavioral Overlap | Method / Evaluation | Conclusion |
-|---|---|---|---|
-| Paper；Venue / Year；Problem；Dataset | Multi-turn?；User Pushback?；Self-generated Prior Claims?；Explicit Claim Tracking? | Method；Metrics；Retraction / Backtracking?；Hallucination Expansion?；Temporal Truth?；External Retrieval? | Overlap with Our Work；Remaining Gap；Source URL；Verification Date |
+### 12.2 五大核心審查問題之權威裁決 (Authoritative Decisions on the 5 Questions)
 
-資料來源應優先原論文、ACL Anthology、會議正式頁面、作者公開版本與官方 Dataset / Code；保留來源 URL 與審查日期。**本版不填入未逐篇核實的論文。**
+1. **Does the gap actually exist? (真正缺口是否存在？)**  
+   **存在且顯著。** 現有研究分散於「單純抗諂媚/盲目堅持」（Wei 2024, Guan 2024）、「單輪草稿自我查證」（CoVe 2024）與「純文字 Prompt 選擇性抗性 Benchmark」（TruthfulPushback 2025）。目前學界完全缺乏一套**「具備顯式主張溯源（Provenance）、證據仲裁動作空間（Maintain/Revise/Verify/Clarify）、並具備因果回溯機制以防止失效主張污染下游多跳推理」**的完整架構與評測體系。
 
-### 12.2 必須回答的五個問題
+2. **Which parts are already covered? (哪些問題已被 Prior Work 覆蓋？)**  
+   - 「無效質疑下之虛假屈服 (FCR)」與「有效質疑下之頑固抗拒 (CCR)」的基本對稱評測已由 TruthfulPushback (Chen 2025) 提出。
+   - 單次回覆內的原子主張拆解已由 CoVe (Dhuliawala 2024) 驗證可行。
+   - 社交禮貌（道歉態度）與事實信念更新之解耦概念已由 ELEPHANT (Cheng 2024) 充分立論。
 
-1. **Does the gap actually exist?** 真正缺口是否存在？
-2. **Which parts are already covered?** 哪些問題、方法或指標已被 Prior Work 覆蓋？
-3. **What remains defensible?** 哪些 Contribution 在對照最接近方法後仍能成立？
-4. **How should PushBack-Bench be narrowed?** 哪些維度保留 Main Benchmark；哪些移到 Stress Test / Appendix？
-5. **Should Ledger-Backtrack be the Main Method?** 是核心方法、Supporting Component，或僅為 Experimental Scaffold？
+3. **What remains defensible? (哪些 Contribution 仍能堅守成立？)**  
+   - **Contribution 1 (核心方法)**：`Ledger-Backtrack` 神經符號架構——以顯式 Claim Ledger 隔離「自身主張」、「使用者前提」與「外部事實」，並在主張被 Revise/Retract 時觸發計算圖回溯，強制阻斷無效前提進入下游推理（Invalid Premise Safeguard）。
+   - **Contribution 2 (評測維度)**：`PushBack-Bench` 首次引入「下游前提依賴測試（Downstream Contamination Test）」，證明即便 SOTA 模型（如 GPT-4o）在文字上表面撤回錯誤，後續多跳推論仍會暗中沿用該錯誤前提。
+   - **Contribution 3 (時間脈絡)**：正式區分「邏輯矛盾」與「時間版本躍遷 ($\tau_t$)」，避免時序更新被誤判為事實錯誤。
 
-**階段性交付：** 已驗證的 Gap Matrix → Claim-level Overlap Map → 可 defend 的 Research Question → 縮小的 Benchmark / Method Scope → Baseline / Pilot Plan。若最接近的工作已完整覆蓋原假設，應誠實修訂題目或貢獻定位。
+4. **How should PushBack-Bench be narrowed? (基準範圍如何聚焦收斂？)**  
+   - **主評測集 (Main Benchmark)**：嚴格鎖定於具備高可信客觀真值之 $2 \times 2$ 核心矩陣：`(模型初始正確/錯誤) × (質疑有效/無效)`，加上聚焦的 `Ambiguous / Insufficient` 查證邊界案例。
+   - **壓力測試與附錄 (Stress Test / Appendix)**：將開放式時間世界狀態遷移 ($\tau_t$) 與大於 5 輪之長對話移至獨立的 Temporal Stress Test 與附錄，避免主文評測變因失控。
+
+5. **Should Ledger-Backtrack be the Main Method? (方法定位裁決)**  
+   - **裁定為核心方法 (Main Architecture Contribution)**。文獻審查表明，純 Prompt-based 記憶體管理（如 TruthfulPushback Baseline）在上下文長度增長時必然發生潛在前提污染；`Ledger-Backtrack` 提供具有可證實性（Verifiability）的狀態轉換機制，具備高度獨立的學術創新價值。
 
 ---
 
@@ -425,11 +442,11 @@ Previous self-generated claim
 | PushBack-Bench | **Candidate**：四維控制，Controlled / Organic 約 60/40 可調 |
 | Temporal GT | **研究原則已定義**：Timestamped Evidence Snapshot |
 | Main Metrics | **候選**：ESA Macro-F1、FCR、CCR、USGR、VRA；分母與 Rubric 待鎖定 |
-| Related Work / Novelty Collision | **未完成，下一步優先事項** |
+| Related Work / Novelty Collision | **已完成**：10 篇頂會文獻 Gap Matrix 與五大核心審查問題裁決入庫 |
 | 實驗結果 / 統計 | **尚未提供；不得聲稱任何 Improvement、Significance 或 Model Ranking** |
 
 ### 接續工作指令 / Next-step Handoff
 
-**下一個任務：** 查證最接近的 2024–2026 研究，建立至少 8–15 篇可追溯的 Gap Matrix；完成後依結果決定 Benchmark 的最小有效範圍與 Ledger-Backtrack 的 Contribution 層級。除非文獻審查顯示必要，暫停新的 EpiCal 模組擴張。
+**下一個任務：** 依據 Gap Matrix 審查裁定結果，實作最小可行前導實驗（Controlled Single / 3-turn Pilot），針對 2x2 核心矩陣驗證標籤可靠性，並實作 Ledger-Backtrack 之無效前提阻斷測試（Downstream Contamination Test）。
 
 **主研究立場：** 目標不是讓模型更善於反駁使用者，而是讓模型在證據改變時，可靠管理自身先前生成的 Factual Claims。

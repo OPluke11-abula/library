@@ -109,16 +109,17 @@ $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\
 在即時視覺推論管線中，影像前處理必須在 5ms 內完成，避免阻塞神經網路推論線程：
 
 ### 1. NumPy 向量化力矩計算 vs 純 Python 雙重迴圈
-- 若以純 Python `for y in range(28): for x in range(28)` 累加像素力矩，由於直譯器開銷與指針間接尋址，耗時約需 1.5ms。
-- **NumPy SIMD 向量化實作**：
-  利用廣播機制預先生成坐標網格 $X, Y \in \mathbb{R}^{28 \times 28}$，直接調用底層 CPU AVX2 指令集執行單指令多資料乘加：
+以標準 x86-64 測試環境（Python 3.11，單線程）處理單張 $28 \times 28$ 灰階影像為微基準測試範例：
+- 若以純 Python `for y in range(28): for x in range(28)` 累加像素力矩，受 CPython 直譯器循環開銷與動態物件裝箱影響，典型耗時約 1.5ms。
+- **NumPy SIMD 向量化實作** `[FACT]`：
+  利用廣播機制預先生成坐標網格 $X, Y \in \mathbb{R}^{28 \times 28}$，直接調用底層 CPU AVX2/AVX-512 向量化指令集執行連續記憶體乘加：
   $$M_{10} = \sum (X \odot I), \quad M_{01} = \sum (Y \odot I)$$
-  計算耗時縮減至 **0.02ms**（提速 75 倍）！
+  消除直譯器開銷後，計算耗時可大幅縮減至約 **0.02ms**（展現近 75 倍之向量化加速潛力）。
 
-### 2. GPU 端批次前處理管線的算子融合 (Pointwise Fusion via torch.compile) `[FACT]` `[PERFORMANCE_CRITICAL]`
+### 2. GPU 端批次前處理管線的算子融合 (Pointwise Fusion via torch.compile) `[FACT]` `[DESIGN_DECISION]`
 在深度學習視覺前處理與資料增強管線中（例如在 GPU 端執行亮度增益與範圍截斷 `torch.clamp(img * 1.2, 0, 255)`）：
-- **傳統 Eager 模式的頻寬顛簸 (Memory Thrashing)**：連續呼叫多個未融合的 Pointwise 運算元，會引發多次獨立的 GPU Kernel 啟動，每次皆需將中介張量完整寫回顯存再讀出。由於算術強度極低（$\text{AI} \approx 0.1875\text{ FLOP/Byte}$），GPU 嚴重受困於記憶體牆，導致硬體利用率（GPU-Util）出現鋸齒狀震盪。
-- **編譯器融合方案**：將前處理函式加上 `@torch.compile`，由 TorchInductor 生成融合後的 Triton Kernel。資料僅需自顯存讀入一次，在 SM 暫存器中連貫完成乘法與夾值後寫回，顯存頻寬消耗減半，避免資料加載端成為整體訓練或即時推論的吞吐瓶頸。
+- **傳統 Eager 模式的頻寬顛簸 (Memory Thrashing)**：連續呼叫多個未融合的 Pointwise 運算元，會引發多次獨立的 GPU Kernel 啟動，每次皆需將中介張量完整寫回顯存再讀出。以 FP32 單精度為例，算術強度極低（$\text{AI} \approx 0.1875\text{ FLOP/Byte}$），GPU 嚴重受困於記憶體牆，導致硬體利用率（GPU-Util）出現鋸齒狀震盪。
+- **編譯器融合方案**：將前處理函式加上 `@torch.compile`，由 TorchInductor 生成融合後的 Triton Kernel。資料僅需自顯存讀入一次，在 SM 暫存器中連貫完成乘法與夾值後寫回，理論 DRAM 搬運流量自 $16N$ 降至 $8N\text{ Bytes}$（流量減半），顯著降低顯存頻寬壓力，避免前處理端成為整體訓練或即時推論的吞吐瓶頸。
 
 ---
 
@@ -257,7 +258,7 @@ if __name__ == "__main__":
 - **前置條件**: 影像前處理二值化遮罩生成。
 - **量化決策邊界**:
   - 零階矩（前景像素灰階總和）：$M_{00} = \sum_{x,y} I(x,y)$。
-  - 最小筆劃有效閾值：$M_{00} \ge 15.0$ [HEURISTIC / SAFETY_BOUND]。此門檻為工程防禦性安全邊界（防範極端空畫布、離散雜訊或一階矩質心計算時的分母除以零例外），非 LeCun et al. (1998) 原始文獻之規範常數。
+  - 最小筆劃有效閾值：$M_{00} \ge 15.0$ `[SAFETY_BOUND]`。此門檻為工程防禦性安全邊界（防範極端空畫布、離散雜訊或一階矩質心計算時的分母除以零例外），非 LeCun et al. (1998) 原始文獻之規範常數。
   - 若 $M_{00} < 15.0$，判定影像為空白畫布或極端噪聲，直接中斷管線並拋出 `EmptyImageException`。
 - **可執行斷言**:
   ```python
@@ -271,7 +272,7 @@ assert M00 >= 15.0, f"無效輸入影像: 筆劃總量 M00={M00} 低於安全門
 - **量化決策邊界**:
   - 目標畫布中心為 $(13.5, 13.5)$。
   - 計算平移向量：$\Delta x = 13.5 - \bar{x}, \Delta y = 13.5 - \bar{y}$。
-  - 防禦性安全限幅：強制限制 $\Delta x, \Delta y \in [-3.0, +3.0]$ 像素 [HEURISTIC / SAFETY_BOUND]。注意：LeCun et al. (1998) 原始規範定義將質心對齊至畫布幾何中心，而 $\pm 3.0\text{ px}$ 限幅為工程防禦性安全邊界，防止極端偏心或噪聲筆劃被移出畫布邊界。
+  - 防禦性安全限幅：強制限制 $\Delta x, \Delta y \in [-3.0, +3.0]$ 像素 `[SAFETY_BOUND]`。注意：LeCun et al. (1998) 原始規範定義將質心對齊至畫布幾何中心，而 $\pm 3.0\text{ px}$ 限幅為工程防禦性安全邊界，防止極端偏心或噪聲筆劃被移出畫布邊界。
 - **執行保證**: 確保筆劃主體被拉回神經網路高權重感受野核心區，同時徹底杜絕筆劃飛出 $28 \times 28$ 畫布邊界的致命錯誤。
 
 ### [RULE-501-04] 推論端動態幾何變換守恆合約 (Bunch TTA Geometric Invariant)

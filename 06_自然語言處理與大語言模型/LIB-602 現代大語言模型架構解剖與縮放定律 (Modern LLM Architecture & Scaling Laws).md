@@ -35,6 +35,7 @@ successors:
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
   - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
+  - "[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20%26%20Scaling%20Laws%20%28Agent%20EN%29.md)

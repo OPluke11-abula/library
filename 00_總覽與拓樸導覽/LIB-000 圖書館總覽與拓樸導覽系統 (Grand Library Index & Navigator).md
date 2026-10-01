@@ -84,7 +84,7 @@ successors:
 | **LIB-600 ~ 699** | **06 自然語言處理與大語言模型館** | 縮放定律、Decoder-Only、RMSNorm、SwiGLU、GQA | [[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]] |
 | **LIB-700 ~ 799** | **07 強化學習與智慧代理人館** | MDP、策略梯度、ReAct 迴圈、S1/S2 雙進程 (Jev/CUA-S1) | [[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]<br>[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]] |
 | **LIB-800 ~ 899** | **08 AI 系統工程與高效部署館** | 模型校準、共形預測、AWQ 量化、INT4/FP8 推論 | [[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]<br>[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]] |
-| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 專題戰略、研究計畫書、研究演進樹、前沿學術文獻體系、五大專題全景、經典專案復盤 | [[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]<br>[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]<br>[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]<br>[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]] |
+| **LIB-900 ~ 999** | **09 科研方法論與頂尖專題藍圖館** | 專題戰略、研究計畫書、研究演進樹、前沿學術文獻體系、五大專題全景、經典專案復盤、對話認知修訂基準 | [[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]<br>[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]<br>[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]<br>[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]<br>[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]] |
 
 ---
 
@@ -153,10 +153,12 @@ flowchart TD
         LIB903["LIB-903 專題基石藍圖與推甄演進<br/>(國科會 C801 與多模態演進)"]
         LIB904["LIB-904 學術科研文獻體系<br/>(前沿文獻閱讀與科研對齊)"]
         LIB905["LIB-905 前沿視覺多模態專題藍圖<br/>(五大題目技術全景與消融指南)"]
+        LIB906["LIB-906 對話認知修訂基準<br/>(信念校準與抗諂媚藍圖)"]
 
         LIB901 --> LIB903
         LIB903 --> LIB904
         LIB904 --> LIB905
+        LIB904 --> LIB906
     end
 
     %% 主幹跨層依賴鏈接 (Primary Cross-Tier Dependencies)
@@ -172,9 +174,11 @@ flowchart TD
     VisualAxis ==> LIB905
     SequenceAxis ==> LIB703
     SequenceAxis ==> LIB905
+    SequenceAxis ==> LIB906
     AgentAxis ==> LIB802
     SystemAxis ==> LIB901
     SystemAxis ==> LIB903
+    SystemAxis ==> LIB906
 ```
 
 ---
@@ -210,6 +214,7 @@ flowchart TD
   13. [[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]
   14. [[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]
   15. [[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]
+  16. [[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]
 
 ### 路線 C：AI Agent 自主工程與推論路線（智能體執行協議）
 - **核心目標**：讓 AI Agent 在接手專題任務、撰寫系統程式碼與除錯時，遵循嚴格的系統不變量約束。
@@ -220,6 +225,7 @@ flowchart TD
   4. [[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]
   5. [[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]
   6. [[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]
+  7. [[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]
 
 ---
 

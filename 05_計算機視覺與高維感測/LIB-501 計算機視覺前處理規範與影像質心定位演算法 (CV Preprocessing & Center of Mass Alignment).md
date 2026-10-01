@@ -108,13 +108,14 @@ $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\
 
 在即時視覺推論管線中，影像前處理必須在 5ms 內完成，避免阻塞神經網路推論線程：
 
-### 1. NumPy 向量化力矩計算 vs 純 Python 雙重迴圈
-以標準 x86-64 測試環境（Python 3.11，單線程）處理單張 $28 \times 28$ 灰階影像為微基準測試範例：
-- 若以純 Python `for y in range(28): for x in range(28)` 累加像素力矩，受 CPython 直譯器循環開銷與動態物件裝箱影響，典型耗時約 1.5ms。
-- **NumPy SIMD 向量化實作** `[FACT]`：
-  利用廣播機制預先生成坐標網格 $X, Y \in \mathbb{R}^{28 \times 28}$，直接調用底層 CPU AVX2/AVX-512 向量化指令集執行連續記憶體乘加：
+### 1. NumPy 向量化力矩計算 vs 純 Python 雙重迴圈 `[EMPIRICAL_RESULT]`
+以標準 x86-64 測試環境（CPython 直譯器，單線程）處理單張 $28 \times 28$ 灰階影像，可藉由倉庫內基準測試腳本 `scripts/benchmark_lib501_moments.py` 進行實測：
+- **純 Python 雙重迴圈**：`for y in range(28): for x in range(28)` 逐元素存取 NumPy 陣列時，受 CPython 直譯器循環跳轉開銷、動態分派與純量物件裝箱（Boxing）影響，單張耗時約為 **0.13ms 至 0.46ms**（若在帶除錯/剖析或早期直譯器環境下可達毫秒級）。
+- **NumPy SIMD 向量化實作**：
+  利用預先生成之坐標網格 $X, Y \in \mathbb{R}^{28 \times 28}$，底層調用 CPU AVX2/AVX-512 向量化指令集執行連續記憶體點乘累加：
   $$M_{10} = \sum (X \odot I), \quad M_{01} = \sum (Y \odot I)$$
-  消除直譯器開銷後，計算耗時可大幅縮減至約 **0.02ms**（展現近 75 倍之向量化加速潛力）。
+  消除了直譯器逐元素分派與裝箱開銷，計算耗時可大幅縮減至約 **0.007ms 至 0.02ms**。
+- **實證加速效益**：在實測環境下呈現約 **10 倍至 25 倍**之向量化加速比（相較於純 Python 列表則約 8 倍至 10 倍）。若需現場驗證，可直接執行 `uv run --with numpy python scripts/benchmark_lib501_moments.py` 取得當前硬體之確切時延分佈。
 
 ### 2. GPU 端批次前處理管線的算子融合 (Pointwise Fusion via torch.compile) `[FACT]` `[DESIGN_DECISION]`
 在深度學習視覺前處理與資料增強管線中（例如在 GPU 端執行亮度增益與範圍截斷 `torch.clamp(img * 1.2, 0, 255)`）：

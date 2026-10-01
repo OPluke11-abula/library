@@ -72,6 +72,24 @@ Standard attention materializes the $N \times N$ attention matrix in GPU HBM:
 - **FlashAttention**: Tiles $Q, K, V$ into fast SRAM blocks ($B_r \times d, B_c \times d$), computes online softmax normalization running statistics ($m, l$), and NEVER writes the $N \times N$ intermediate matrix to DRAM:
   $$\text{FlashAttention IO Complexity}: O\left( \frac{N^2 d^2}{M_{\text{SRAM}}} \right) \text{ memory transactions}$$
 
+### 4. Normalization Placement: Post-LN vs. Pre-LN Dynamics `[DERIVATION]` `[FACT]`
+The training stability of deep Transformer stacks depends critically on the placement of normalization relative to residual addition:
+- **Post-LN (Vaswani et al., 2017)**:
+  $$x_{l+1} = \text{LayerNorm}\big(x_l + F_l(x_l)\big)$$
+  Residual identity additions are trapped inside LayerNorm. Unrolling across $L$ layers reveals no pristine identity highway to $x_0$.
+  - **Gradient Decay Trap (Xiong et al., ICML 2020)**: At random initialization, bottom-layer parameter gradient norms scale as $\mathcal{O}(1 / \sqrt{L})$ while top-layer gradients scale as $\mathcal{O}(1)$. Without rigorous Learning Rate Warmup, initial optimizer steps at the top layers shatter initialization structures, causing catastrophic training divergence.
+- **Pre-LN (GPT-2, LLaMA, Modern Foundations)**:
+  $$x_{l+1} = x_l + F_l\big(\text{LayerNorm}(x_l)\big)$$
+  - **Identity Highway**: $x_L = x_0 + \sum_{l=0}^{L-1} F_l(\text{LayerNorm}(x_l))$.
+  - Taking the gradient with respect to $x_0$: $\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \sum_{l=0}^{L-1} \frac{\partial F_l}{\partial x_0}$.
+  - The direct identity matrix $\mathbf{I}$ guarantees that gradient scales remain uniform $\mathcal{O}(1)$ across all layers, enabling warmup-free stable training up to hundreds of layers.
+- **The Pre-Norm Dilemma & Architectural Evolutions** `[LITERATURE_RESULT]`:
+  - In Pre-LN, residual stream norms grow with depth ($\|x_l\| \sim \mathcal{O}(\sqrt{l})$), causing the relative contribution $\frac{\|F_l\|}{\|x_l\|} \to 0$ in deeper layers (representation capacity dilution).
+  - Modern LLMs counter this via:
+    1. **Pre-RMSNorm (LLaMA/Mistral/Qwen)**: Replaces LayerNorm with fast reciprocal square root scaling (`torch.rsqrt`).
+    2. **DeepNorm (Wang et al., 2022)**: Bounded residual scaling parameters $\alpha, \beta$ that enable 1,000-layer Post-LN training.
+    3. **QK-Norm (Dehghani et al., 2023 / Gemma 2)**: Normalizes $Q$ and $K$ heads directly prior to dot products to suppress logit growth in extreme scale regimes.
+
 ---
 
 ## 3. Production PyTorch Implementation: Multi-Head Attention

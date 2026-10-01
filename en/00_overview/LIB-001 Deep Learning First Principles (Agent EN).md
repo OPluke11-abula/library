@@ -60,9 +60,21 @@ Given ground truth categorical distribution $y \in \{0, 1\}^K$ and raw model log
 $$\hat{y}_k = \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}$$
 The objective minimized is the empirical Categorical Cross-Entropy (equivalent to the Kullback-Leibler divergence $D_{\text{KL}}(y \parallel \hat{y})$):
 $$\mathcal{L}_{\text{CE}}(y, \hat{y}) = -\sum_{k=1}^K y_k \ln \hat{y}_k$$
-Logit gradient derivative:
-$$\frac{\partial \mathcal{L}_{\text{CE}}}{\partial z_k} = \hat{y}_k - y_k$$
-This yields an elegant linear error signal: the gradient magnitude is exactly the difference between predicted probability and target label.
+
+#### First-Principles Contrast: Why $-\ln(P)$ Over Linear Error $1 - P$? `[DERIVATION]`
+Consider binary classification with sigmoid probability $P = \sigma(z) = \frac{1}{1 + e^{-z}}$, where $\sigma'(z) = P(1 - P)$:
+- **Failure Mode of Linear Loss $\mathcal{L}_{\text{linear}} = 1 - P$**:
+  Evaluating the derivative with respect to pre-activation logit $z$:
+  $$\frac{\partial \mathcal{L}_{\text{linear}}}{\partial z} = \frac{\partial \mathcal{L}}{\partial P} \cdot \frac{\partial P}{\partial z} = (-1) \cdot P(1 - P) = \mathbf{-P(1 - P)}$$
+  🚨 **`[SAFETY_BOUND]` Gradient Saturation Trap**: If the model is confidently wrong (e.g., ground truth $y = 1$, but $z \ll 0 \implies P \to 0$), the gradient vanishes: $\lim_{P \to 0} \frac{\partial \mathcal{L}_{\text{linear}}}{\partial z} = 0$. The model becomes paralyzed in the flat saturation regime of the sigmoid, unable to learn or recover.
+- **The Canonical Logarithmic Cancellation of $\mathcal{L}_{\text{CE}} = -\ln(P)$** `[FACT]`:
+  $$\frac{\partial \mathcal{L}_{\text{CE}}}{\partial z} = \left(-\frac{1}{P}\right) \cdot P(1 - P) = \mathbf{P - 1} = \mathbf{\hat{y} - y}$$
+  The reciprocal term $\frac{1}{P}$ from the logarithm perfectly cancels the $P$ term in the activation derivative.
+  - When catastrophic misprediction occurs ($P \to 0$), the gradient magnitude reaches maximum unit strength ($|0 - 1| = 1$), exerting maximum corrective force.
+  - When completely correct ($P \to 1$), the gradient smoothly approaches 0.
+- **Information Theory & Convexity** `[FACT]`:
+  - Self-information (Surprisal) $I(x) = -\log P(x)$ imposes unbounded asymptotic penalty as $P \to 0$. Minimizing Cross-Entropy directly maximizes likelihood (MLE).
+  - With respect to logit $z$, $-\ln \sigma(z) = \ln(1 + e^{-z})$ (Softplus) is strictly convex ($\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$), eliminating spurious non-convex saddle plateaus present in linear loss formulations.
 
 ### Pillar 04: Backpropagation & The Jacobian Chain Rule
 In a computational DAG of layers $l = 1, \dots, L$, the gradient of scalar loss $\mathcal{L}$ with respect to weight matrix $W^{[l]}$ is evaluated via reverse-mode automatic differentiation:
@@ -78,6 +90,14 @@ Bias correction:
 $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$
 Parameter update:
 $$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t$$
+
+#### In-Place Tensor Operations (`_` Suffix) & Autograd Version Guardrails `[FACT]` `[SAFETY_BOUND]`
+- **Memory Mechanics**: Out-of-place operations ($y = x + 1$) allocate fresh physical memory via the CUDA Caching Allocator (`StorageImpl`). In-place operations ($x.\text{add\_}(1)$) mutate the existing storage buffer directly, avoiding intermediate allocation overhead.
+- **Autograd Version Counter**: Backward gradient evaluation requires pristine forward activation values. Every PyTorch tensor tracks a `TensorImpl::version_counter_`. Modifying an activation in-place increments this counter; if an active backward node references an altered tensor, autograd halts with:
+  `RuntimeError: one of the variables needed for gradient computation has been modified by an inplace operation`.
+- **System Constraints**:
+  - **Mandatory In-place**: Parameter updates under `torch.no_grad()` (`p.add_(-lr * grad)`), preventing multi-billion parameter tensor re-allocations from triggering OOM; inference generation buffers; LLM KV-cache slot insertions.
+  - **Strictly Prohibited**: Training forward passes involving branch dependencies or residual streams. In PyTorch 2.0+ `torch.compile`, out-of-place functional code is preferred as TorchInductor automatically performs pointwise loop fusion and optimal buffer reuse without side-effect hazards.
 
 ### Pillar 06: CNN Inductive Bias & Translation Equivariance
 Dense layers possess no spatial inductive bias; permuting pixels destroys nothing in an MLP but destroys everything in natural imagery. A 2D convolution:

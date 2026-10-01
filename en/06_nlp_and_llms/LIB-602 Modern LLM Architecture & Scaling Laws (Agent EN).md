@@ -55,9 +55,11 @@ $$N_{\text{opt}} \propto C^a, \quad D_{\text{opt}} \propto C^b, \quad a = \frac{
 **Crucial Finding**: For compute-optimal performance, model parameters and token counts MUST scale equally in a **1:20 ratio** (~20 tokens per model parameter). Models like Chinchilla 70B trained on 1.4T tokens systematically outperform oversized under-trained models like Gopher 280B.
 
 ### 2. Modern Architectural Primitives
-1. **RMSNorm (Root Mean Square Normalization)**:
-   Dispenses with mean re-centering in LayerNorm, reducing arithmetic complexity:
-   $$\text{RMSNorm}(x) = \frac{x}{\text{RMS}(x)} \odot \gamma, \quad \text{RMS}(x) = \sqrt{\frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon}$$
+1. **RMSNorm (Root Mean Square Normalization) & SFU Hardware Mapping** `[FACT]` `[HARDWARE_ARCHITECTURE]`:
+   Dispenses with mean re-centering in LayerNorm, scaling purely by the root mean square of activation activations:
+   $$\text{RMSNorm}(x) = x \odot \text{rsqrt}\left( \frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon \right) \odot \gamma$$
+   - **SFU Hardware Instruction Pipeline**: Instead of dividing by the square root, production backends issue `torch.rsqrt`, emitting native NVIDIA SASS instruction `MUFU.RSQ` (PTX `rsqrt.approx.f32`) on Special Function Units (SFUs) and converting costly vector division into single-cycle Fused Multiply-Add (FMA) arithmetic.
+   - **Pre-RMSNorm Identity Highway**: Positioned prior to attention and feed-forward sublayers (Pre-Norm), preserving an uninterrupted gradient residual highway $\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \dots$ that stabilizes ultra-deep training dynamics in LLaMA, Mistral, and Qwen.
 2. **SwiGLU Activation Function**:
    Gated linear unit with Swish activation $\text{Swish}(x) = x \cdot \sigma(\beta x)$:
    $$\text{SwiGLU}(x) = \left( \text{Swish}(x W_{\text{gate}}) \odot (x W_{\text{up}}) \right) W_{\text{down}}$$

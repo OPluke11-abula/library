@@ -96,8 +96,23 @@ $$P = \min\left(P_{\text{peak}}, \; I \times \text{BW}_{\text{mem}}\right)$$
 $$I^* = \frac{P_{\text{peak}}}{\text{BW}_{\text{mem}}}$$
 以 NVIDIA RTX 4090 為例，$P_{\text{peak}} \approx 82.6\text{ TFLOPS (FP32)}$，顯存頻寬 $\text{BW} \approx 1008\text{ GB/s}$：
 $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}$$
-- 若神經網路層的算術強度 $I < 82$，系統處於 **Memory-Bound** 區域，增加更多計算單元毫無意義，吞吐量完全受限於顯存傳輸速率。
+-- 若神經網路層的算術強度 $I < 82$，系統處於 **Memory-Bound** 區域，增加更多計算單元毫無意義，吞吐量完全受限於顯存傳輸速率。
 - 若 $I \ge 82$，系統進入 **Compute-Bound** 區域，Tensor Cores 的乘加加速能力才能真正發揮到 100%。
+
+### 3. Roofline 實例拆解：影像前處理與 Pointwise 算子融合的記憶體牆 `[FACT]` `[ROOFLINE_ANALYSIS]`
+以常見之電腦視覺影像亮度調整為例：`torch.clamp(image * 1.2, 0, 255)`。
+- **計算量與訪存量統計**（設張量元素量為 $N$，FP32 單精度）：
+  - 運算量：1 次浮點乘法 + 2 次比較截斷（$\min/\max$）= 每元素 **3 FLOPs**。
+  - **傳統 Eager Mode 執行**：
+    - Kernel 1 (`aten::mul`): 讀取 $x$ ($4N\text{ B}$) $\to$ 寫入中繼張量 $tmp$ ($4N\text{ B}$)。
+    - Kernel 2 (`aten::clamp`): 讀取 $tmp$ ($4N\text{ B}$) $\to$ 寫入最終張量 $out$ ($4N\text{ B}$)。
+    - 總記憶體搬運量：$16N\text{ Bytes}$，且觸發 2 次 GPU Kernel 啟動排程。
+    - 算術強度：$I_{\text{eager}} = \frac{3 \text{ FLOPs}}{16 \text{ Bytes}} \approx \mathbf{0.1875 \text{ FLOP/Byte}} \ll 82 \text{ FLOP/Byte}$。
+    - 結論：系統極端受限於顯存頻寬（Memory-Bound），GPU 算力單元超過 99% 時間處於等待資料搬運的閒置狀態。
+  - **`torch.compile` / Triton 垂直循環融合 (Vertical Loop Fusion)**：
+    - 編譯器將兩步操作合成為單一 Fused Kernel，中間結果直接於 SM 暫存器（Registers）與晶上 SRAM 中完成乘法與夾值。
+    - 訪存量：僅需讀取 $x$ ($4N\text{ B}$) $\to$ 直接寫入 $out$ ($4N\text{ B}$)，總搬運量降為 **$8N\text{ Bytes}$**（顯存流量砍半 50%）。
+    - 效益：在 Memory-Bound 區域，執行延遲直接縮減約 50%（$2\times$ 吞吐加速），並抹平 1 次 Kernel Launch Overhead。
 
 ---
 
@@ -116,7 +131,19 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
 - 當 Warp 中的 32 個執行緒同時請求 32 個連續的 4 位元組浮點數（$32 \times 4 = 128\text{ Bytes}$）且對齊於 128 位元組邊界時，記憶體子系統發出四個 32 位元組扇區事務（Sector Transactions）完成服務，達到接近 100% 的匯流排傳輸效率。
 - 若存取存在跨步或隨機錯位，請求將分散至更多扇區事務；在極端跨步存取下（例如 Warp 中每個執行緒各自存取不同扇區中的單個 4 位元組數值），有效匯流排事務利用率可能驟降至最低約 $12.5\%$ ($4\text{ Bytes} / 32\text{ Bytes}$)。
 
-### 3. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
+### 3. GPU 特殊功能單元 (SFU) 與平方根倒數 (Reciprocal Square Root) 硬體對齊 `[FACT]` `[HARDWARE_ARCHITECTURE]`
+在數值歸一化與優化器更新中，計算分母開根號是核心熱點。
+- **傳統直覺寫法 `1 / torch.sqrt(x)` 的效能黑洞**：
+  - 觸發 2 個獨立 Kernel（開根號與除法），產生 2 次讀取與 2 次寫入（$16N\text{ Bytes}$ DRAM 流量）。
+  - 在 GPU 硬體層級，浮點除法（Division）無專用單週期乘加電路，需要透過多功能單元（SFU）執行倒數近似後進行多次迭代，延遲高達 10~20 個週期以上。
+- **內行寫法 `torch.rsqrt(x)` 的微架構優勢**：
+  - 僅啟動 1 個 Kernel，全域顯存搬運量直接降至 $8N\text{ Bytes}$（節省 50% DRAM Traffic）。
+  - **專用硬體 SFU 指令直通**：NVIDIA SM 內建特殊功能單元（Special Function Unit, SFU），在 PTX 層直接對應 `rsqrt.approx.f32` 指令，在 SASS 機器碼層直發 **`MUFU.RSQ`**（Multi-Function Unit Reciprocal Square Root）。
+  - **算力代數降階**：在神經網路歸一化算子中，將除法轉化為乘法：
+    $$\frac{x}{\sqrt{\sigma^2 + \epsilon}} \equiv x \odot \text{rsqrt}(\sigma^2 + \epsilon)$$
+    將高昂的向量除法轉換為單週期的 Fused Multiply-Add (FMA) 乘加操作，在 RMSNorm（LLaMA/Mistral/Qwen）及 AdamW 參數更新中成為標準底層實作。
+
+### 4. NVIDIA 官方生態與推論引擎：TensorRT 運算元融合與低精度量化編譯
 在高效能深度學習系統與工程實踐中，本庫深度整合了 NVIDIA 官方 GPU 加速生態與高效能編譯優化：
 - **垂直運算元融合 (Vertical Layer Fusion)**：
   在傳統框架中，$\text{Conv} \to \text{Bias} \to \text{ReLU}$ 需要將中介張量寫回全域顯存 (Global Memory / DRAM)，再從顯存讀出給下一層，造成嚴重的顯存頻寬浪費。

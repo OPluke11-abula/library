@@ -104,6 +104,24 @@ $$R_{\Theta, m}^d = \begin{bmatrix}
 $$(R_{\Theta, m} q)^T (R_{\Theta, n} k) = q^T (R_{\Theta, m}^T R_{\Theta, n}) k = q^T R_{\Theta, n - m} k$$
 完美實現了位置絕對值無關、純粹由相對拓樸距離調控注意力的優雅幾何。
 
+### 4. 正規化拓樸演進：Post-LN 與 Pre-LN 的殘差流梯度動態學 `[DERIVATION]` `[FACT]`
+Transformer 的堆疊穩定性核心取決於層正規化（Normalization）與殘差連線（Residual Stream）的拓樸相對位置：
+- **Post-LN (Vaswani et al., 2017 初代架構)**：
+  $$x_{l+1} = \text{LayerNorm}\big(x_l + F_l(x_l)\big)$$
+  - 殘差相加後被封裝在 LayerNorm 內部。將 $L$ 層展開，主幹不存在直通第 0 層的純淨恆等映射。
+  - **初始化梯度方差陷阱 (Xiong et al., ICML 2020)** `[THEORETICAL_FOUNDATION]`：在隨機初始化時，底層（輸入端）參數梯度範數隨層數衰減為 $\|\nabla_{W_{\text{bottom}}} \mathcal{L}\| = \mathcal{O}(1 / \sqrt{L})$，而頂層為 $\mathcal{O}(1)$。若無學習率預熱（Warmup），頂層過激步幅將直接摧毀網路結構引發發散，因此 Post-LN **強制要求嚴格的 Learning Rate Warmup**。
+- **Pre-LN (GPT-2, LLaMA 等當代大模型主流)**：
+  $$x_{l+1} = x_l + F_l\big(\text{LayerNorm}(x_l)\big)$$
+  - **恆等高速公路 (Identity Highway)**：$x_L = x_0 + \sum_{l=0}^{L-1} F_l(\text{LN}(x_l))$。
+  - 對底層求導具備直通單位矩陣：$\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \sum_{l=0}^{L-1} \frac{\partial F_l}{\partial x_0}$。
+  - Xiong 等人嚴格證明 Pre-LN 各層梯度尺度均勻維持在 $\mathcal{O}(1)$，訓練極度穩健，允許免預熱直接以較大學習率收斂。
+- **Pre-LN 的表徵退化困境 (The Pre-Norm Dilemma) 與現代防禦** `[LITERATURE_RESULT]`：
+  - 隨著層數加深，主幹模長 $\|x_l\|$ 隨層數增長，導致深層子層的相對貢獻 $\frac{\|F_l(\text{LN}(x_l))\|}{\|x_l\|} \to 0$，深層易退化為打醬油的無效恆等傳遞。
+  - **現代工業級演進方案**：
+    1. **Pre-RMSNorm (LLaMA/Mistral/Qwen)**：切除均值平移，結合硬體 SFU `torch.rsqrt` 加速，兼顧殘差暢通與計算效率。
+    2. **DeepNorm (DeepNet, 2022)**：透過理論推導之殘差縮放係數 $\alpha, \beta$ 成功穩定訓練 1000 層 Post-LN，打破深層容量限制。
+    3. **QK-Norm (ViT-22B, Gemma 2)**：在點積前對 $Q, K$ 獨立施加 LayerNorm，杜絕注意力矩陣在超深層訓練時之 Logit 數值溢位。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：從 FlashAttention 到 FlashAttention-3

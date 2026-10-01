@@ -87,12 +87,14 @@ $$\min_{N, D} \mathcal{L}(N, D) \quad \text{s.t.} \quad 6 N D = C$$
 $$N^* \propto C^a, \quad D^* \propto C^b, \quad \text{其中 } a = \frac{\beta}{\alpha + \beta} \approx 0.45, \; b = \frac{\alpha}{\alpha + \beta} \approx 0.55$$
 **定理結論**：在給定算力限制下，若模型參數量翻倍，訓練數據量亦必須等比例增加約 $1.8 \sim 2.0$ 倍，方可維持 Pareto 最優解。現代 LLaMA 3 (8B) 更是採用了超過 $15\text{T}$ Tokens 的超極限訓練（Over-training），換取邊緣部署時的極致性價比。
 
-### 2. RMSNorm (Root Mean Square Layer Normalization)
+### 2. RMSNorm (Root Mean Square Layer Normalization) 與 SFU 硬體管線對齊 `[FACT]` `[HARDWARE_ARCHITECTURE]`
 傳統 LayerNorm 對激活向量 $x \in \mathbb{R}^d$ 的公式為：
 $$\text{LN}(x) = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \odot \gamma + \beta, \quad \text{其中 } \mu = \frac{1}{d}\sum_{i=1}^d x_i, \; \sigma^2 = \frac{1}{d}\sum_{i=1}^d (x_i - \mu)^2$$
 Zhang & Sennrich (NeurIPS 2019) 證明：LayerNorm 的泛化收益主要來自於輸入特徵的**尺度不變性 (Scale Invariance)**，而與中心平移無關。RMSNorm 徹底捨棄均值計算：
-$$\text{RMSNorm}(x) = \frac{x}{\text{RMS}(x)} \odot \gamma, \quad \text{其中 } \text{RMS}(x) = \sqrt{\frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon}$$
-計算少了一次全域求和與減法，硬體執行緒同步次數直接減半。
+$$\text{RMSNorm}(x) = x \odot \text{rsqrt}\left(\frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon\right) \odot \gamma$$
+- **GPU SFU 硬體管線直通**：底層實作絕非先求平方根再執行向量除法（`x / torch.sqrt(...)`），而是直接調用 `torch.rsqrt(...)`。這在 NVIDIA GPU 上映射至專用特殊功能單元（SFU）指令 `MUFU.RSQ`（PTX `rsqrt.approx.f32`），並將高開銷的向量除法降階為單週期 FMA 乘法，顯存搬運量直接減半。
+- **Pre-RMSNorm 殘差骨幹**：在 LLaMA、Mistral、Qwen 中，RMSNorm 被置於注意力模組與 FFN 之前（Pre-Norm），使主幹殘差流保有 $\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \dots$ 的直通梯度高速公路，兼具 Pre-Norm 的極限訓練穩定性與 RMSNorm 的高吞吐。
+- 計算少了一次全域求和與減法，硬體執行緒同步次數直接減半。
 
 ### 3. SwiGLU 門控前饋網路 (Gated Linear Units)
 Shazeer (2020) 提出的 SwiGLU 替換了傳統的 $\text{ReLU}(x W_1) W_2$：

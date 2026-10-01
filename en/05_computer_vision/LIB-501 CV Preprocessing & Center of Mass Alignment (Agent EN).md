@@ -64,6 +64,11 @@ Translating discrete pixel grid by continuous shift $(dx, dy)$ maps source coord
 $$I_{\text{shifted}}(x, y) = (1 - s)(1 - t) I(u_0, v_0) + s(1 - t) I(u_1, v_0) + (1 - s) t I(u_0, v_1) + s t I(u_1, v_1)$$
 where $u_0 = \lfloor u \rfloor, v_0 = \lfloor v \rfloor, u_1 = u_0 + 1, v_1 = v_0 + 1$, and fractional residuals $s = u - u_0, t = v - v_0$.
 
+### 4. GPU-Accelerated Preprocessing & Pointwise Kernel Fusion `[FACT]` `[PERFORMANCE_CRITICAL]`
+When executing real-time image augmentation on GPU (e.g., gain adjustments and clamping `torch.clamp(image * 1.2, 0, 255)`):
+- **Eager Memory Thrashing**: Executing consecutive pointwise transformations without fusion forces multiple memory-bound kernel launches with extremely low arithmetic intensity ($I \approx 0.1875\text{ FLOP/Byte}$), inducing sawtooth GPU utilization patterns.
+- **Triton / Compiler Fusion**: Decorating preprocessing functions with `@torch.compile` allows TorchInductor to fuse transformations into a single Triton kernel, caching intermediate values in SM registers/L1 SRAM, halving DRAM memory bandwidth demand, and preventing preprocessing from bottlenecking neural inference.
+
 ---
 
 ## 3. Production PyTorch / OpenCV Preprocessing Implementation

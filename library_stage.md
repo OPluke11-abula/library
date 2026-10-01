@@ -106,9 +106,14 @@
   - 全面收斂非標準標籤，確保 Evidence Taxonomy 嚴格符合 10 種標準標籤定義。
 - **P2 基礎設施維護 (Infrastructure Maintenance)**：
   - 升級 `.github/workflows/validate.yml` 至 `actions/checkout@v7` 與 `actions/setup-python@v7`，徹底消除 GitHub Actions Runner Node 20 棄用告警（CI 通過且 0 告警）。
-- **Research Milestone (LIB-906 文獻差距矩陣與防碰撞審計)**：
-  - 完成 2024–2026 年 10 篇關鍵文獻差距矩陣（Sharma 2024, Wei 2024, Huang 2024, Cheng 2024 ELEPHANT, Dhuliawala 2024 CoVe, Guan 2024, Ren 2024, Deng 2024 AGM-BENCH, Zhang 2024 SoBA, Chen 2025 TruthfulPushback）。
-  - 嚴謹回答 5 項核心審查提問，科研階段更新為「已完成」。嚴格維持未實驗前不宣稱新穎性之科研誠信原則。
+
+### 6. 原始文獻核實、可重現微基準測試與防碰撞審計狀態校準 (PR #6)
+- **P0: LIB-906 原始文獻深度核實與狀態校準 (Primary Literature Verification)**：
+  - 逐一校驗核對 Section 12.1 全部 10 篇關鍵文獻之真實出版會議、arXiv ID 與 OpenReview 索引（包括 Cheng et al. ELEPHANT arXiv:2505.02878 / ICLR 2026, Dhuliawala et al. CoVe Findings of ACL 2024 `2024.findings-acl.212`, Hong et al. SYCON-Bench Findings of EMNLP 2025 arXiv:2410.05353, Laban et al. FlipFlop Salesforce 2023 arXiv:2311.08596, AGM-Bench ICLR 2026 OpenReview `h1m1YmpHVx`, SoBA Benchmark 2026, 以及 Selective Epistemic Resistance 假說），全面替換原先引證不符之出版條目。
+  - 恪守科研誠信守則：「未完成受控消融實驗前，不得宣告 Novelty Audit 已結束」，將審計狀態校準為「原始文獻核實進行中 `[SAFETY_BOUND]`」，堅決禁止於消融實驗前過早宣告新穎性或完結審計。
+- **P0: LIB-501 微基準測試與實證數據標註 (Reproducible Benchmark & Empirical Evidence)**：
+  - 新增可重現基準腳本 `scripts/benchmark_lib501_moments.py`，測量 x86-64 單線程環境下 $28 \times 28$ 影像之墨跡動差質心計算耗時。
+  - 以實測數據（Python 走訪 NumPy: ~0.13ms–0.46ms；原生 List: ~0.06ms–0.09ms；NumPy SIMD: ~0.007ms–0.02ms，加速比 ~10x–25x，標記為 `[EMPIRICAL_RESULT]`）全面取代未受控之理想化宣稱（1.5ms, 0.02ms, 75x）。
 
 ---
 

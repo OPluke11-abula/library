@@ -2,7 +2,7 @@
 
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-01  
-> **當前交接基準 HEAD**: `68571aa27ab794fbfe7326ffb972d5897641d2c8`（PR #3: `68571aa` 正式交接點）  
+> **當前交接基準 HEAD**: `d838ed70b28244d3cd77a09c3a2ddd6758097cde`（PR #4: `d838ed7` 正式交接點）  
 > **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量，拓樸 DAG 100% 閉環驗證通過。
 
 ---
@@ -30,7 +30,7 @@
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py`) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`68571aa27ab794fbfe7326ffb972d5897641d2c8`
+- **交接基準 Commit SHA**：`d838ed70b28244d3cd77a09c3a2ddd6758097cde`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter 100% 對齊。
 - **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、等級與計數在中英雙語完全對稱（0 重複、0 缺失）。
@@ -96,11 +96,25 @@
 - 完整盤點 25 卷冊架構、84 條決策合約不變量與雙庫零漂移協定。
 - 確立交接基準 HEAD 為 `68571aa27ab794fbfe7326ffb972d5897641d2c8`。
 
+### 5. 科研精確度校準、Taxonomy 規範化、CI 升級與文獻差距矩陣 (PR #4: `d838ed7`)
+- **P0 科研精確度校準 (Scientific Accuracy Calibration)**：
+  - `LIB-001`：界定 Softplus Logit 嚴格凸性範疇；釐清單層 GLM 參數凸性與多層神經網路非凸 Loss Landscape 之界線；說明線性可分資料之發散條件；澄清輸出層代數梯度相消性（$\frac{\partial \mathcal{L}}{\partial z} = P - y$）與 MSE 飽和高原之本質差異。
+  - `LIB-203`：移除未經引證之「效能下降 40%」經驗宣稱，改以微架構 Predication Masking 及 Shared Memory Padding 幾何機制深度論證；將記憶體頻寬減半嚴格標註為 Memory-Bound 邊界條件下的理論上限；標準化標籤（`[DERIVATION]`, `[FACT]`, `[HEURISTIC]`）。
+  - `LIB-501`：補足 NumPy 與 Python Loop 微基準測試之具體環境條件（x86-64, 單線程, Python 3.11, $28 \times 28$ 陣列）；標準化標籤（`[DESIGN_DECISION]`, `[SAFETY_BOUND]`）。
+- **P1 文檔一致性維護 (Documentation Consistency)**：
+  - `en/09_research_methodology/LIB-906`：修復損毀之 LaTeX 時間上下文變數（`$\tau_t$`）。
+  - 全面收斂非標準標籤，確保 Evidence Taxonomy 嚴格符合 10 種標準標籤定義。
+- **P2 基礎設施維護 (Infrastructure Maintenance)**：
+  - 升級 `.github/workflows/validate.yml` 至 `actions/checkout@v7` 與 `actions/setup-python@v7`，徹底消除 GitHub Actions Runner Node 20 棄用告警（CI 通過且 0 告警）。
+- **Research Milestone (LIB-906 文獻差距矩陣與防碰撞審計)**：
+  - 完成 2024–2026 年 10 篇關鍵文獻差距矩陣（Sharma 2024, Wei 2024, Huang 2024, Cheng 2024 ELEPHANT, Dhuliawala 2024 CoVe, Guan 2024, Ren 2024, Deng 2024 AGM-BENCH, Zhang 2024 SoBA, Chen 2025 TruthfulPushback）。
+  - 嚴謹回答 5 項核心審查提問，科研階段更新為「已完成」。嚴格維持未實驗前不宣稱新穎性之科研誠信原則。
+
 ---
 
 ## 🛡️ 四、核心規範與系統不變量約束 (System Invariants)
 
-新接手的 Agent 必須無條件嚴格遵守以下五大規範：
+新接手的 Agent 必須無條件嚴格遵守以下六大規範：
 
 1. **雙庫零漂移協定 (Zero-Drift Synchronization Rule)**：
    每次變更與 PR 合併後，必須第一時間同步本機開發倉與 OneDrive Obsidian 主庫，保證兩者 HEAD SHA 完全一致。
@@ -122,6 +136,12 @@
    繁體中文卷與英文卷必須維持元數據（Call Number、Status、Prerequisites、Successors、Invariants Count）與實質內容完全對齊。
 5. **Git 與 PR 合併生命週期**：
    變更需建立功能分支 -> 執行單元與拓樸驗證 -> Commit (Conventional Commits) -> Push -> `gh pr create` -> `gh pr merge` -> Pull main -> OneDrive Vault Reset。
+6. **四大工作維度與解耦治理原則 (Four-Tier Governance & Decoupling Principles)**：
+   依據知識庫長期維護規範，後續工作嚴格劃分為四大優先級與治理維度，並遵循解耦原則：
+   - **P0: 科研精確度 (Scientific Accuracy)**：第一性原理驗證、凸性與幾何極限、硬體微架構邊界條件。優先於任何文檔排版或格式修飾。
+   - **P1: 文檔一致性 (Documentation Consistency)**：標準證據分類學（嚴格 10 種標籤，杜絕自創複合標籤）、中英雙語對稱性、符號與 LaTeX 語法一致性。
+   - **P2: 基礎設施維護 (Infrastructure Maintenance)**：CI/CD Workflow、驗證腳本、依賴升級。**嚴格解耦原則**：基礎設施修改必須獨立成專門 PR 提交與審查，嚴禁與核心科學內容修改混雜提交。
+   - **Research Milestone: 8–15 篇前沿文獻矩陣與防碰撞審計 (Novelty Collision Audit)**：新方法提出必須涵蓋同領域最新文獻比對。**科研誠信守則**：實驗驗證前所有方法與效果一律標註為 `Proposed / Hypothesized / Expected`，嚴禁在缺乏實證數據前宣稱新穎性或效能優勢。
 
 ---
 
@@ -145,4 +165,4 @@
 2. **消融實驗重現環境建置**：
    - 針對 LIB-901、LIB-905、LIB-906 中的基準實驗，評估建立自動化測試與消融驗證腳本。
 3. **日常維護**：
-   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `68571aa`（或最新 main 分支 HEAD），工作區乾淨無漂移。
+   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `d838ed70b28244d3cd77a09c3a2ddd6758097cde`（或最新 main 分支 HEAD），工作區乾淨無漂移。

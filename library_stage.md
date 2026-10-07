@@ -1,8 +1,8 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-10-01  
-> **當前交接基準 HEAD**: `d838ed70b28244d3cd77a09c3a2ddd6758097cde`（PR #4: `d838ed7` 正式交接點）  
+> **更新時間**: 2026-10-07  
+> **當前交接基準 HEAD**: `297e23ce64a8b58d7877d6edbd7ea7f55adba170`（PR #7: `297e23c` 正式交接點）  
 > **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量，拓樸 DAG 100% 閉環驗證通過。
 
 ---
@@ -30,7 +30,7 @@
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py`) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`d838ed70b28244d3cd77a09c3a2ddd6758097cde`
+- **交接基準 Commit SHA**：`297e23ce64a8b58d7877d6edbd7ea7f55adba170`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter 100% 對齊。
 - **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、等級與計數在中英雙語完全對稱（0 重複、0 缺失）。
@@ -115,6 +115,18 @@
   - 新增可重現基準腳本 `scripts/benchmark_lib501_moments.py`，測量 x86-64 單線程環境下 $28 \times 28$ 影像之墨跡動差質心計算耗時。
   - 以實測數據（Python 走訪 NumPy: ~0.13ms–0.46ms；原生 List: ~0.06ms–0.09ms；NumPy SIMD: ~0.007ms–0.02ms，加速比 ~10x–25x，標記為 `[EMPIRICAL_RESULT]`）全面取代未受控之理想化宣稱（1.5ms, 0.02ms, 75x）。
 
+### 7. 正弦位置編碼幾何推導與無正規化 Transformer DyT 入庫 (PR #7: `297e23c`)
+- **P0: LIB-405 正弦位置編碼 (Sinusoidal PE) 與損失曲面平滑化閉環**：
+  - 補足 Vaswani et al. (NeurIPS 2017) 經典加性正弦位置編碼的第一性原理推導，以多進位制頻率衰減詮釋角速度設計（$\omega_i = 10000^{-2i/d}$）。
+  - 嚴密以和差化積三角恆等式證明子空間內積之相對平移不變性（$\langle PE_t^{(i)}, PE_{t+k}^{(i)} \rangle = \cos(\omega_i k)$），並剖析加性注入交叉項污染如何催生乘性正交 RoPE 之演進。
+  - 納入 Li et al. (NeurIPS 2018) 殘差連線對高維損失曲面之凸化定理（Loss Landscape Convexification），防禦梯度破碎。
+- **P0: LIB-602 Meta FAIR DyT (Dynamic Tanh, CVPR 2025) 微架構與 Roofline 分析**：
+  - 納入 Zhu, He, LeCun, Liu et al. (*Transformers without Normalization*, CVPR 2025) 突破性成果。
+  - 剖析 LayerNorm (2 次 reduction)、RMSNorm (1 次 reduction 仰賴 Warp Shuffle `__shfl_down_sync`) 到 DyT (0 次 reduction，純逐點 SFU 運算）的微架構躍進。
+  - 論證 DyT 實現與 GEMM epilogue 之 100% 融合及顯存頻寬（HBM）瓶頸解放，提供 PyTorch 參考實作與標準文獻引用。
+- **P1: 文檔一致性與標準標籤收斂**：
+  - 清理殘留之非規範標籤，嚴格恪守全庫 10 大標準證據分類學。
+
 ---
 
 ## 🛡️ 四、核心規範與系統不變量約束 (System Invariants)
@@ -170,4 +182,4 @@
 2. **消融實驗重現環境建置**：
    - 針對 LIB-901、LIB-905、LIB-906 中的基準實驗，評估建立自動化測試與消融驗證腳本。
 3. **日常維護**：
-   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `d838ed70b28244d3cd77a09c3a2ddd6758097cde`（或最新 main 分支 HEAD），工作區乾淨無漂移。
+   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `297e23ce64a8b58d7877d6edbd7ea7f55adba170`（或最新 main 分支 HEAD），工作區乾淨無漂移。

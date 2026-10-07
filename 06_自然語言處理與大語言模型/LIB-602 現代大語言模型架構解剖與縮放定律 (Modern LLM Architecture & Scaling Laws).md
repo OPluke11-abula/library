@@ -88,7 +88,8 @@ $$\min_{N, D} \mathcal{L}(N, D) \quad \text{s.t.} \quad 6 N D = C$$
 $$N^* \propto C^a, \quad D^* \propto C^b, \quad \text{其中 } a = \frac{\beta}{\alpha + \beta} \approx 0.45, \; b = \frac{\alpha}{\alpha + \beta} \approx 0.55$$
 **定理結論**：在給定算力限制下，若模型參數量翻倍，訓練數據量亦必須等比例增加約 $1.8 \sim 2.0$ 倍，方可維持 Pareto 最優解。現代 LLaMA 3 (8B) 更是採用了超過 $15\text{T}$ Tokens 的超極限訓練（Over-training），換取邊緣部署時的極致性價比。
 
-### 2. RMSNorm (Root Mean Square Layer Normalization) 與 SFU 硬體管線對齊 `[FACT]` `[HARDWARE_ARCHITECTURE]`
+### 2. RMSNorm、DyT (Dynamic Tanh) 與無正規化架構的微架構映射 `[FACT]` `[DERIVATION]` `[LITERATURE_RESULT]`
+#### (1) RMSNorm 尺度不變性與 SFU 硬體管線對齊
 傳統 LayerNorm 對激活向量 $x \in \mathbb{R}^d$ 的公式為：
 $$\text{LN}(x) = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \odot \gamma + \beta, \quad \text{其中 } \mu = \frac{1}{d}\sum_{i=1}^d x_i, \; \sigma^2 = \frac{1}{d}\sum_{i=1}^d (x_i - \mu)^2$$
 Zhang & Sennrich (NeurIPS 2019) 證明：LayerNorm 的泛化收益主要來自於輸入特徵的**尺度不變性 (Scale Invariance)**，而與中心平移無關。RMSNorm 徹底捨棄均值計算：
@@ -96,6 +97,16 @@ $$\text{RMSNorm}(x) = x \odot \text{rsqrt}\left(\frac{1}{d} \sum_{i=1}^d x_i^2 +
 - **GPU SFU 硬體管線直通**：底層實作絕非先求平方根再執行向量除法（`x / torch.sqrt(...)`），而是直接調用 `torch.rsqrt(...)`。這在 NVIDIA GPU 上映射至專用特殊功能單元（SFU）指令 `MUFU.RSQ`（PTX `rsqrt.approx.f32`），並將高開銷的向量除法降階為單週期 FMA 乘法，顯存搬運量直接減半。
 - **Pre-RMSNorm 殘差骨幹**：在 LLaMA、Mistral、Qwen 中，RMSNorm 被置於注意力模組與 FFN 之前（Pre-Norm），使主幹殘差流保有 $\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \dots$ 的直通梯度高速公路，兼具 Pre-Norm 的極限訓練穩定性與 RMSNorm 的高吞吐。
 - 計算少了一次全域求和與減法，硬體執行緒同步次數直接減半。
+
+#### (2) 次世代無正規化極限：Meta DyT (Dynamic Tanh, CVPR 2025) 與純逐點算子融合
+儘管 RMSNorm 省略了均值，但計算二階矩 $\frac{1}{d}\sum x_i^2$ 仍強制需要一次**全維度跨執行緒規約 (Cross-Lane Reduction)**。在 CUDA 微架構中，這必須依賴 Warp Shuffle 指令（`__shfl_down_sync`）或 Shared Memory 樹狀累加，造成流水線氣泡並限制了與前後 GEMM 矩陣乘法的完全算子融合。
+
+Zhu, He, LeCun, Liu et al. (Meta FAIR, CVPR 2025, arXiv:2503.01817) 提出了震撼性的 **DyT (Dynamic Tanh)**，成功構建了完全無需正規化層（Normalization-Free）的 Transformer：
+$$\text{DyT}(x) = \gamma \odot \tanh(\alpha x) + \beta \quad \text{或簡化為} \quad \tanh(\alpha x)$$
+其中 $\alpha$ 為可學習標量參數（初始值設為 $0.5$），$\gamma, \beta \in \mathbb{R}^d$ 為可學習仿射參數。
+- **零跨線程規約 (Zero Reduction Overhead)**：DyT 是純粹的逐元素（Element-wise）操作，徹底消除了任何橫跨特徵維度 $d$ 的求和規約，計算複雜度完全退化為局域單指令。
+- **SFU 算子融合 (Kernel Fusion) 與 Memory Bandwidth 解釋放**：$\tanh$ 函數直接由 GPU 特殊功能單元（SFU `MUFU.TANH` / PTX `tanh.approx.f32`）執行。DyT 能以 Epilogue 形式直接完全融合至前一級線性投影矩陣乘法中，不再需要單獨啟動記憶體密集型 Kernel，徹底打破記憶體頻寬受限（Memory-Bound）。
+- **非線性飽和約束本質**：Zhu 等人發現正規化層的核心機能並非嚴格的統計標準化，而是防止深層網絡激活模長爆炸的「動態範圍壓制」。$\tanh$ 函數天然具備 $[-1, 1]$ 嚴格有界性，透過可自適應調節斜率的 $\alpha$，提供自穩定的梯度傳導，在視覺與語言模型中均展現出匹敵或超越 RMSNorm 的收斂穩定度。
 
 ### 3. SwiGLU 門控前饋網路 (Gated Linear Units)
 Shazeer (2020) 提出的 SwiGLU 替換了傳統的 $\text{ReLU}(x W_1) W_2$：
@@ -158,6 +169,21 @@ class RMSNorm(nn.Module):
         rms = torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
         return x * rms * self.weight
 
+class DynamicTanh(nn.Module):
+    """
+    Meta DyT (Dynamic Tanh, CVPR 2025) - Normalization-free bounded activation.
+    Eliminates intra-warp reduction operations (__shfl_down_sync) across dimension D.
+    """
+    def __init__(self, dim: int, alpha_init: float = 0.5):
+        super().__init__()
+        self.alpha = nn.Parameter(torch.tensor(alpha_init))
+        self.gamma = nn.Parameter(torch.ones(dim))
+        self.beta = nn.Parameter(torch.zeros(dim))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Pure element-wise computation, 100% fusable with GEMM epilogue
+        return self.gamma * torch.tanh(self.alpha * x) + self.beta
+
 class SwiGLUFFN(nn.Module):
     def __init__(self, d_model: int, hidden_dim: int):
         super().__init__()
@@ -201,13 +227,20 @@ if __name__ == "__main__":
     d_model = 256
     x = torch.randn(2, 16, d_model)
     norm = RMSNorm(d_model)
+    dyt = DynamicTanh(d_model)
     ffn = SwiGLUFFN(d_model, int(8/3 * d_model))
     gqa = GroupedQueryAttention(d_model, n_heads=8, n_kv_heads=2)
     
-    out = gqa(norm(x)) + x
-    out = ffn(norm(out)) + out
-    print(f"輸入尺寸: {x.shape} -> 輸出尺寸: {out.shape}")
-    assert out.shape == x.shape, "維度驗證失敗！"
+    # RMSNorm pipeline
+    out_norm = gqa(norm(x)) + x
+    out_norm = ffn(norm(out_norm)) + out_norm
+    
+    # DyT Normalization-Free pipeline
+    out_dyt = gqa(dyt(x)) + x
+    out_dyt = ffn(dyt(out_dyt)) + out_dyt
+    
+    print(f"輸入尺寸: {x.shape} -> RMSNorm 輸出: {out_norm.shape}, DyT 輸出: {out_dyt.shape}")
+    assert out_norm.shape == x.shape and out_dyt.shape == x.shape, "維度驗證失敗！"
 ```
 
 ---
@@ -264,3 +297,6 @@ assert token_param_ratio >= 18.0, f"Token 與參數比例 {token_param_ratio:.1f
 5. **GQA 分組查詢注意力**
    - *Paper*: Ainslie, J., Ontanon, S., Alberti, C., et al. (2023). "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints." *EMNLP 2023*. arXiv: [2305.13245](https://arxiv.org/abs/2305.13245).
    - *Core Contribution*: 在維持 MHA 表現力的同時將 KV 快取顯存頻寬開銷縮減至 $1/8$，支援超長上下文推論。
+6. **無正規化 Transformer 與 Dynamic Tanh 開創作 (CVPR 頂會)**
+   - *Paper*: Zhu, J., He, K., LeCun, Y., Liu, Z., et al. (2025). "Transformers without Normalization." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2025)*. arXiv: [2503.01817](https://arxiv.org/abs/2503.01817).
+   - *Core Contribution*: 提出純逐點算子 DyT (Dynamic Tanh)，徹底摒除 Transformer 架構對 LayerNorm/RMSNorm 跨執行緒規約的依賴，實現與 GEMM 算子之 100% 融合與極致顯存頻寬釋放。

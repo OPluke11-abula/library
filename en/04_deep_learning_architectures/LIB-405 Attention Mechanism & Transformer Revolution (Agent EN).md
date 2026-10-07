@@ -58,7 +58,23 @@ Assume components of $q$ and $k$ are independent random variables with zero mean
 $$z = \sum_{i=1}^{d_k} q_i k_i \implies \mathbb{E}[z] = 0, \quad \text{Var}(z) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = d_k$$
 As $d_k$ grows large, variance scales to $d_k$, pushing logits into the saturation zones of Softmax where gradients vanish ($\sigma'(z) \to 0$). Scaling by $\frac{1}{\sqrt{d_k}}$ preserves unit variance: $\text{Var}\left(\frac{z}{\sqrt{d_k}}\right) = 1$.
 
-### 2. Rotary Position Embedding (RoPE)
+### 2. Sinusoidal Positional Encoding & Relative Translation Invariance `[DERIVATION]` `[FACT]`
+Self-attention is permutation-equivariant ($\text{Attn}(P X) = P \text{Attn}(X)$), requiring explicit positional representations to distinguish sequence order.
+
+#### Multi-Base Frequency Decay Analogy
+Analogous to positional numbering systems where low-order digits cycle with high frequency while high-order digits change slowly, Vaswani et al. (NeurIPS 2017) project discrete positions $t \in [0, L-1]$ onto a continuous harmonic spectrum:
+$$PE_{(t, 2i)} = \sin(\omega_i t), \quad PE_{(t, 2i+1)} = \cos(\omega_i t), \quad \omega_i = \frac{1}{10000^{2i/d}}$$
+where wavelengths form a geometric progression from $2\pi$ to $10000 \cdot 2\pi$.
+
+#### Proof of Relative Distance Invariance
+In each 2D subspace $i$, the vector $(\sin(\omega_i t), \cos(\omega_i t))$ corresponds to a phasor on the unit circle. For positions $t$ and $t+k$, their inner product in subspace $i$ is:
+$$\langle PE_t^{(i)}, PE_{t+k}^{(i)} \rangle = \sin(\omega_i t) \sin(\omega_i (t+k)) + \cos(\omega_i t) \cos(\omega_i (t+k)) = \cos(\omega_i k)$$
+Via the cosine angle-subtraction identity, the inner product depends strictly on relative offset $k$, fully invariant to absolute step $t$.
+
+#### Transition from Additive to Multiplicative RoPE
+Additive injection $\tilde{x}_t = x_t + PE_t$ generates unwanted cross-terms $(x_m + PE_m)^T (x_n + PE_n) = x_m^T x_n + x_m^T PE_n + PE_m^T x_n + PE_m^T PE_n$, where $x_m^T PE_n$ tangles semantic content with absolute coordinates. This limitation directly motivated RoPE's orthogonal multiplicative rotation.
+
+### 3. Rotary Position Embedding (RoPE)
 Instead of adding absolute position vectors ($x + p_m$), RoPE applies an orthogonal rotation to the query and key vectors in 2D coordinate pairs.
 For a 2D vector $x = (x_1, x_2)^T \in \mathbb{C}$ at position $m$:
 $$R_{\Theta, m} = \begin{pmatrix} \cos m\theta & -\sin m\theta \\ \sin m\theta & \cos m\theta \end{pmatrix}$$
@@ -66,18 +82,20 @@ Inner product property:
 $$\langle R_{\Theta, m} q, R_{\Theta, n} k \rangle = \text{Re} \left[ (q e^{i m \theta}) (k e^{i n \theta})^* \right] = \text{Re} \left[ q k^* e^{i (m - n) \theta} \right]$$
 The attention score between token $m$ and token $n$ depends strictly on the **relative distance $(m - n)$**, conferring seamless length extrapolation capabilities.
 
-### 3. FlashAttention IO-Aware Memory Complexity
+### 4. FlashAttention IO-Aware Memory Complexity
 Standard attention materializes the $N \times N$ attention matrix in GPU HBM:
 - Standard IO Complexity: $O(N^2 d)$ reads/writes to slow HBM. Out-Of-Memory when $N \ge 8192$.
 - **FlashAttention**: Tiles $Q, K, V$ into fast SRAM blocks ($B_r \times d, B_c \times d$), computes online softmax normalization running statistics ($m, l$), and NEVER writes the $N \times N$ intermediate matrix to DRAM:
   $$\text{FlashAttention IO Complexity}: O\left( \frac{N^2 d^2}{M_{\text{SRAM}}} \right) \text{ memory transactions}$$
 
-### 4. Normalization Placement: Post-LN vs. Pre-LN Dynamics `[DERIVATION]` `[FACT]`
+### 5. Normalization Placement: Post-LN, Pre-LN & Loss Landscape Convexification `[DERIVATION]` `[FACT]`
 The training stability of deep Transformer stacks depends critically on the placement of normalization relative to residual addition:
+- **Loss Landscape Convexification via Skip Connections** `[LITERATURE_RESULT]`:
+  Li et al. (NeurIPS 2018) proved via filter-normalized visualizations that deep architectures without skip connections develop chaotic, highly non-convex loss surfaces filled with saddle points; residual highways restore smooth, unimodal convex-like convergence paths.
 - **Post-LN (Vaswani et al., 2017)**:
   $$x_{l+1} = \text{LayerNorm}\big(x_l + F_l(x_l)\big)$$
   Residual identity additions are trapped inside LayerNorm. Unrolling across $L$ layers reveals no pristine identity highway to $x_0$.
-  - **Gradient Decay Trap (Xiong et al., ICML 2020)**: At random initialization, bottom-layer parameter gradient norms scale as $\mathcal{O}(1 / \sqrt{L})$ while top-layer gradients scale as $\mathcal{O}(1)$. Without rigorous Learning Rate Warmup, initial optimizer steps at the top layers shatter initialization structures, causing catastrophic training divergence.
+  - **Gradient Decay Trap (Xiong et al., ICML 2020)** `[DERIVATION]`: At random initialization, bottom-layer parameter gradient norms scale as $\mathcal{O}(1 / \sqrt{L})$ while top-layer gradients scale as $\mathcal{O}(1)$. Without rigorous Learning Rate Warmup, initial optimizer steps at the top layers shatter initialization structures, causing catastrophic training divergence.
 - **Pre-LN (GPT-2, LLaMA, Modern Foundations)**:
   $$x_{l+1} = x_l + F_l\big(\text{LayerNorm}(x_l)\big)$$
   - **Identity Highway**: $x_L = x_0 + \sum_{l=0}^{L-1} F_l(\text{LayerNorm}(x_l))$.
@@ -152,4 +170,21 @@ class ProductionMHA(nn.Module):
 - **Contract Level**: `HIGH_INVARIANT`
 - **Specification**: When extending context length beyond pretraining windows using Rotary Position Embeddings (RoPE), agents MUST apply continuous frequency interpolation (e.g., NTK-aware or YaRN scaling) rather than naive linear extrapolation.
 - **Violation Consequence**: Unscaled rotational frequencies on out-of-distribution positions produce catastrophic perplexity degradation.
+
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Transformer Foundations (NeurIPS)**
+   - *Paper*: Vaswani, A., et al. (2017). "Attention Is All You Need." *NeurIPS 2017*, 30, 5998-6008.
+   - *Core Contribution*: Introduced pure self-attention Transformer architecture, scaled dot-product attention, and sinusoidal positional embeddings.
+2. **FlashAttention (NeurIPS & ICLR)**
+   - *Paper*: Dao, T., et al. (2022). "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Complexity." *NeurIPS 2022*.
+   - *Paper*: Dao, T. (2024). "FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning." *ICLR 2024*.
+   - *Paper*: Shah, J., et al. (2024). "FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision." *arXiv:2407.08608*.
+3. **Rotary Position Embedding (RoPE)**
+   - *Paper*: Su, J., et al. (2024). "RoFormer: Enhanced Transformer with Rotary Position Embedding." *Neurocomputing*, 568, 127063.
+4. **Loss Landscape Convexification (NeurIPS)**
+   - *Paper*: Li, H., Xu, Z., Taylor, G., Studer, C., & Goldstein, T. (2018). "Visualizing the Loss Landscape of Neural Nets." *NeurIPS 2018*, 31.
+   - *Core Contribution*: Empirically established that skip connections transform chaotic non-convex optimization terrains into convex-like smooth basins.
 

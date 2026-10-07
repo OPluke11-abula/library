@@ -56,27 +56,63 @@ $$N_{\text{opt}} \propto C^a, \quad D_{\text{opt}} \propto C^b, \quad a = \frac{
 **Crucial Finding**: For compute-optimal performance, model parameters and token counts MUST scale equally in a **1:20 ratio** (~20 tokens per model parameter). Models like Chinchilla 70B trained on 1.4T tokens systematically outperform oversized under-trained models like Gopher 280B.
 
 ### 2. Modern Architectural Primitives
-1. **RMSNorm (Root Mean Square Normalization) & SFU Hardware Mapping** `[FACT]` `[HARDWARE_ARCHITECTURE]`:
-   Dispenses with mean re-centering in LayerNorm, scaling purely by the root mean square of activation activations:
+1. **RMSNorm & SFU Hardware Mapping** `[FACT]` `[DERIVATION]`:
+   Dispenses with mean re-centering in LayerNorm, scaling purely by the root mean square of activations:
    $$\text{RMSNorm}(x) = x \odot \text{rsqrt}\left( \frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon \right) \odot \gamma$$
    - **SFU Hardware Instruction Pipeline**: Instead of dividing by the square root, production backends issue `torch.rsqrt`, emitting native NVIDIA SASS instruction `MUFU.RSQ` (PTX `rsqrt.approx.f32`) on Special Function Units (SFUs) and converting costly vector division into single-cycle Fused Multiply-Add (FMA) arithmetic.
    - **Pre-RMSNorm Identity Highway**: Positioned prior to attention and feed-forward sublayers (Pre-Norm), preserving an uninterrupted gradient residual highway $\frac{\partial x_L}{\partial x_0} = \mathbf{I} + \dots$ that stabilizes ultra-deep training dynamics in LLaMA, Mistral, and Qwen.
-2. **SwiGLU Activation Function**:
+2. **Dynamic Tanh (DyT) & Normalization-Free Frontiers** `[LITERATURE_RESULT]` `[FACT]` `[DERIVATION]`:
+   Zhu, He, LeCun, Liu et al. (Meta FAIR, CVPR 2025, arXiv:2503.01817) proved that explicit statistical normalization layers can be replaced entirely by an element-wise bounded non-linearity:
+   $$\text{DyT}(x) = \gamma \odot \tanh(\alpha x) + \beta$$
+   - **Zero Cross-Lane Reduction Overhead**: RMSNorm still mandates a reduction across the hidden dimension $d$ (requiring Warp Shuffle `__shfl_down_sync` instructions across the 32 threads in each warp). DyT operates purely element-wise with zero intra-warp synchronization.
+   - **100% Kernel Fusion Epilogue**: Executed directly on GPU SFUs (`tanh.approx.f32`), DyT fuses entirely into preceding GEMM projection epilogues, bypassing DRAM/HBM roundtrips.
+   - **Bounded Saturation Mechanism**: DyT restricts dynamic activation ranges to $[-1, 1]$, preventing gradient explosion in deep Transformers while matching or surpassing RMSNorm performance.
+3. **SwiGLU Activation Function**:
    Gated linear unit with Swish activation $\text{Swish}(x) = x \cdot \sigma(\beta x)$:
    $$\text{SwiGLU}(x) = \left( \text{Swish}(x W_{\text{gate}}) \odot (x W_{\text{up}}) \right) W_{\text{down}}$$
    Expands intermediate MLP dimension to $d_{\text{ffn}} = \left\lfloor \frac{8}{3} d_{\text{model}} \right\rfloor$.
-3. **Grouped-Query Attention (GQA)**:
+4. **Grouped-Query Attention (GQA)**:
    Standard MHA maintains $H$ query heads and $H$ key/value heads. In GQA, $H_Q$ query heads share $H_{KV}$ key/value heads (where $H_Q = G \times H_{KV}$):
    $$\text{KV Cache Memory Compression Factor} = \frac{H_Q}{H_{KV}}$$
    For LLaMA-3 70B ($H_Q = 64, H_{KV} = 8$), KV cache memory is reduced by **$8 \times$**, enabling $128\text{K}$ context window deployments.
 
 ---
 
-## 3. Production KV Cache Budgeting Formula
+## 3. Production KV Cache Budgeting & Modern Layer Implementation
 
+### 1. KV Cache Budgeting Formula
 $$\text{KV Cache Memory (Bytes)} = 2 \times B \times S \times L \times H_{KV} \times d_k \times \text{BytesPerElement}$$
 For a sequence length $S = 32,768$, batch size $B = 4$, $L = 32$, $H_{KV} = 8$, $d_k = 128$, with FP16 ($\text{BytesPerElement} = 2$):
 $$\text{Memory} = 2 \times 4 \times 32768 \times 32 \times 8 \times 128 \times 2 = 17,179,869,184 \text{ Bytes} \approx 16.0 \text{ GB}$$
+
+### 2. PyTorch Normalization & DyT Reference Implementations
+```python
+import torch
+import torch.nn as nn
+
+class RMSNorm(nn.Module):
+    def __init__(self, dim: int, eps: float = 1e-6):
+        super().__init__()
+        self.eps = eps
+        self.weight = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        rms = torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
+        return x * rms * self.weight
+
+class DynamicTanh(nn.Module):
+    """
+    DyT (Zhu et al., CVPR 2025) - Element-wise bounded normalization alternative.
+    """
+    def __init__(self, dim: int, alpha_init: float = 0.5):
+        super().__init__()
+        self.alpha = nn.Parameter(torch.tensor(alpha_init))
+        self.gamma = nn.Parameter(torch.ones(dim))
+        self.beta = nn.Parameter(torch.zeros(dim))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.gamma * torch.tanh(self.alpha * x) + self.beta
+```
 
 ---
 
@@ -96,4 +132,22 @@ $$\text{Memory} = 2 \times 4 \times 32768 \times 32 \times 8 \times 128 \times 2
 - **Contract Level**: `CRITICAL_INVARIANT`
 - **Specification**: Root Mean Square Normalization (RMSNorm) MUST configure variance epsilon $\epsilon \ge 10^{-6}$ for FP16/BF16 execution to prevent division by zero during zero-mean activation states.
 - **Violation Consequence**: Inadequate epsilon values in RMSNorm cause division overflow and catastrophic `NaN` gradient propagation in deep Transformer blocks.
+
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Compute-Optimal LLMs (NeurIPS Oral)**
+   - *Paper*: Hoffmann, J., et al. (2022). "Training Compute-Optimal Large Language Models." *NeurIPS 2022*, 35, 30016-30030.
+2. **Empirical Scaling Laws**
+   - *Paper*: Kaplan, J., et al. (2020). "Scaling Laws for Neural Language Models." *arXiv:2001.08361*.
+3. **RMSNorm Foundations**
+   - *Paper*: Zhang, B., & Sennrich, R. (2019). "Root Mean Square Layer Normalization." *NeurIPS 2019*.
+4. **Transformers without Normalization (CVPR)**
+   - *Paper*: Zhu, J., He, K., LeCun, Y., Liu, Z., et al. (2025). "Transformers without Normalization." *CVPR 2025*. arXiv: [2503.01817](https://arxiv.org/abs/2503.01817).
+   - *Core Contribution*: Proved that element-wise Dynamic Tanh (DyT) can eliminate LayerNorm/RMSNorm while eliminating warp reduction bottlenecks.
+5. **PagedAttention & vLLM (SOSP)**
+   - *Paper*: Kwon, W., et al. (2023). "Efficient Memory Management for Large Language Model Serving with PagedAttention." *SOSP 2023*, pp. 611-626.
+6. **Grouped-Query Attention (EMNLP)**
+   - *Paper*: Ainslie, J., et al. (2023). "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints." *EMNLP 2023*.
 

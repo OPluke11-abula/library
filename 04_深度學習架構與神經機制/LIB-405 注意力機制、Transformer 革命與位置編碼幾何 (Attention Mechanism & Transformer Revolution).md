@@ -89,7 +89,28 @@ $$\text{Var}(S) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = \sum_{i=1}^{d_k} \left(
 - 此時 Softmax 的局部導數 $\frac{\partial \text{Softmax}}{\partial z} \approx 0$，反向傳播**梯度徹底消失**！
 - 除以 $\sqrt{d_k}$ 後，將方差拉回恆定值 $\text{Var}\left(\frac{S}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$，完美保護梯度流。
 
-### 3. 旋轉位置編碼 (Rotary Position Embedding, RoPE) 幾何推導
+### 3. 經典正弦位置編碼 (Sinusoidal Positional Encoding) 幾何投影與相對平移不變性 `[DERIVATION]` `[FACT]`
+自注意力矩陣 $\text{Softmax}(Q K^T / \sqrt{d_k})$ 對輸入序列具有完全的**排列等變性 (Permutation Equivariance)**：若輸入序列被置換矩陣 $P$ 打亂，$PX$ 的注意力輸出恰為 $P \text{Attention}(X)$。若不注入序列拓樸資訊，模型無法感知詞彙的先後次序。
+
+#### (1) 進位制頻率衰減直觀 (Multi-Base Positional Carry Analogy)
+觀察十進位或二進位數字系統，最低位數隨序列步進跳動最為劇烈（高頻），而最高位數變化最為平緩（低頻）。Vaswani et al. (NeurIPS 2017) 構造了一組連續調和振盪基底，將離散步長 $t \in [0, L-1]$ 映射至由幾何級數遞減之角頻率構成的高維幾何空間：
+$$PE_{(t, 2i)} = \sin(\omega_i t), \quad PE_{(t, 2i+1)} = \cos(\omega_i t), \quad \text{其中 } \omega_i = \frac{1}{10000^{2i/d}}$$
+其中幾何級數頻率 $\omega_i \in [1, 10000^{-1}]$，波長涵蓋從 $2\pi$ 至 $10000 \cdot 2\pi$，保證了任意序列長度下的非週期重疊性。
+
+#### (2) 單位圓相量與相對平移不變性證明 (Proof of Relative Translation Invariance)
+在每個獨立的二維子空間 $i$ 中，向量組 $(\sin(\omega_i t), \cos(\omega_i t))$ 恰為二維單位圓上的連續相量（Phasor）。
+考慮任意兩位置 $t$ 與 $t+k$（相對位移為 $k$），計算其在第 $i$ 個二維子空間中的內積：
+$$\langle PE_t^{(i)}, PE_{t+k}^{(i)} \rangle = \sin(\omega_i t) \sin(\omega_i (t+k)) + \cos(\omega_i t) \cos(\omega_i (t+k))$$
+根據餘弦和差化積恆等式 $\cos(\alpha - \beta) = \cos \alpha \cos \beta + \sin \alpha \sin \beta$：
+$$\langle PE_t^{(i)}, PE_{t+k}^{(i)} \rangle = \cos\big(\omega_i (t+k) - \omega_i t\big) = \cos(\omega_i k)$$
+**數學證明結論**：子空間內積**嚴格僅取決於相對位移 $k$，而與絕對時間步 $t$ 完全無關**！此外，Vaswani et al. 證明存在線性投影矩陣 $M_k \in \mathbb{R}^{2 \times 2}$，滿足 $PE_{t+k}^{(i)} = M_k PE_t^{(i)}$，使線性注意力機制能以純線性投影捕捉相對位移。
+
+#### (3) 從加性正弦到乘性正交 RoPE 的理論演進
+經典 Transformer 採用加性位置注入：$\tilde{x}_t = x_t + PE_t$。計算點積注意力時展開四個交叉項：
+$$(x_m + PE_m)^T (x_n + PE_n) = \underbrace{x_m^T x_n}_{\text{內容-內容}} + \underbrace{x_m^T PE_n + PE_m^T x_n}_{\text{內容-位置交叉污染}} + \underbrace{PE_m^T PE_n}_{\text{純相對位置}}$$
+交叉項的存在強行將語義特徵空間與坐標幾何空間混合，且加性干擾會稀釋語義向量的範數。這一理論局限直接催生了 Su et al. (2024) 的 RoPE（旋轉位置編碼）——將加性向量偏置升維為正交複數乘法旋轉，徹底消滅交叉項。
+
+### 4. 旋轉位置編碼 (Rotary Position Embedding, RoPE) 幾何推導
 Su et al. (2024) 提出的 RoPE 成為現代大模型（LLaMA、Mistral）的絕對標配。其目標是尋找一個變換矩陣 $R_{\Theta, m}$，使得在位置 $m$ 的向量 $q$ 與在位置 $n$ 的向量 $k$ 進行內積時，**內積結果只與相對距離 $m - n$ 有關**：
 $$\langle R_{\Theta, m} q, R_{\Theta, n} k \rangle = g(q, k, m - n)$$
 在二維複數平面上，這對應複數乘法旋轉：$q e^{i m \theta}$。拓展至高維空間，RoPE 為分塊對角正交矩陣：
@@ -104,12 +125,14 @@ $$R_{\Theta, m}^d = \begin{bmatrix}
 $$(R_{\Theta, m} q)^T (R_{\Theta, n} k) = q^T (R_{\Theta, m}^T R_{\Theta, n}) k = q^T R_{\Theta, n - m} k$$
 完美實現了位置絕對值無關、純粹由相對拓樸距離調控注意力的優雅幾何。
 
-### 4. 正規化拓樸演進：Post-LN 與 Pre-LN 的殘差流梯度動態學 `[DERIVATION]` `[FACT]`
+### 5. 正規化拓樸演進：Post-LN、Pre-LN 與損失曲面平滑化 `[DERIVATION]` `[FACT]`
 Transformer 的堆疊穩定性核心取決於層正規化（Normalization）與殘差連線（Residual Stream）的拓樸相對位置：
+- **殘差連線的損失曲面凸化 (Loss Landscape Convexification)** `[LITERATURE_RESULT]`：
+  Li et al. (NeurIPS 2018) 透過高維濾波器正規化投影嚴格證實，無 Skip-connection 的深層網路損失曲面充滿混沌高階鞍點與斷崖；引入殘差結構後，曲面轉變為平滑的單峰凸向盆地，防止梯度破碎（Gradient Shattering）。
 - **Post-LN (Vaswani et al., 2017 初代架構)**：
   $$x_{l+1} = \text{LayerNorm}\big(x_l + F_l(x_l)\big)$$
   - 殘差相加後被封裝在 LayerNorm 內部。將 $L$ 層展開，主幹不存在直通第 0 層的純淨恆等映射。
-  - **初始化梯度方差陷阱 (Xiong et al., ICML 2020)** `[THEORETICAL_FOUNDATION]`：在隨機初始化時，底層（輸入端）參數梯度範數隨層數衰減為 $\|\nabla_{W_{\text{bottom}}} \mathcal{L}\| = \mathcal{O}(1 / \sqrt{L})$，而頂層為 $\mathcal{O}(1)$。若無學習率預熱（Warmup），頂層過激步幅將直接摧毀網路結構引發發散，因此 Post-LN **強制要求嚴格的 Learning Rate Warmup**。
+  - **初始化梯度方差陷阱 (Xiong et al., ICML 2020)** `[DERIVATION]`：在隨機初始化時，底層（輸入端）參數梯度範數隨層數衰減為 $\|\nabla_{W_{\text{bottom}}} \mathcal{L}\| = \mathcal{O}(1 / \sqrt{L})$，而頂層為 $\mathcal{O}(1)$。若無學習率預熱（Warmup），頂層過激步幅將直接摧毀網路結構引發發散，因此 Post-LN **強制要求嚴格的 Learning Rate Warmup**。
 - **Pre-LN (GPT-2, LLaMA 等當代大模型主流)**：
   $$x_{l+1} = x_l + F_l\big(\text{LayerNorm}(x_l)\big)$$
   - **恆等高速公路 (Identity Highway)**：$x_L = x_0 + \sum_{l=0}^{L-1} F_l(\text{LN}(x_l))$。
@@ -266,3 +289,6 @@ assert abs(actual_scale - expected_scale) < 1e-6, "注意力縮放係數必須�
 5. **旋轉位置編碼 RoPE 頂刊論文**
    - *Paper*: Su, J., Ahmed, M., Lu, Y., Pan, S., Bo, W., & Liu, Y. (2024). "RoFormer: Enhanced Transformer with Rotary Position Embedding." *Neurocomputing*, 568, 127063. DOI: [10.1016/j.neucom.2023.127063](https://doi.org/10.1016/j.neucom.2023.127063).
    - *Core Contribution*: 透過複數平面旋轉矩陣將絕對位置注入特徵向量，完美保留內積之相對距離衰減性質，成為 LLaMA, Mistral, Qwen 等現代開源大模型標配。
+6. **神經網路損失曲面視覺化 (NeurIPS 頂會)**
+   - *Paper*: Li, H., Xu, Z., Taylor, G., Studer, C., & Goldstein, T. (2018). "Visualizing the Loss Landscape of Neural Nets." *Advances in Neural Information Processing Systems (NeurIPS 2018)*, 31.
+   - *Core Contribution*: 利用濾波器正規化投影嚴密證實，Skip-connection（殘差連線）能消除高維非凸損失曲面的混沌碎裂與高階鞍點，使深層 Transformer 具備近凸性的單峰優化路徑。

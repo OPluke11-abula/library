@@ -1,8 +1,8 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-10-07  
-> **當前交接基準 HEAD**: `297e23ce64a8b58d7877d6edbd7ea7f55adba170`（PR #7: `297e23c` 正式交接點）  
+> **更新時間**: 2026-10-10  
+> **當前交接基準 HEAD**: `c65161b7406459d03e1aa2481ccd7e58cc239a98`（PR #8: `c65161b` 正式交接點）  
 > **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量，拓樸 DAG 100% 閉環驗證通過。
 
 ---
@@ -30,7 +30,7 @@
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py`) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`297e23ce64a8b58d7877d6edbd7ea7f55adba170`
+- **交接基準 Commit SHA**：`c65161b7406459d03e1aa2481ccd7e58cc239a98`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter 100% 對齊。
 - **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、等級與計數在中英雙語完全對稱（0 重複、0 缺失）。
@@ -126,6 +126,12 @@
   - 論證 DyT 實現與 GEMM epilogue 之 100% 融合及顯存頻寬（HBM）瓶頸解放，提供 PyTorch 參考實作與標準文獻引用。
 - **P1: 文檔一致性與標準標籤收斂**：
   - 清理殘留之非規範標籤，嚴格恪守全庫 10 大標準證據分類學。
+
+### 8. 輸入輸出權重綁定 (Weight Tying) 架構與參數量化 (PR #8: `c65161b`)
+- **P0: LIB-602 權重綁定幾何直觀與記憶體壓縮**：
+  - 基於 Press & Wolf (2017) 經典文獻，正式補足 Weight Tying（Token Embedding = LM Head，即 $W_{\text{out}} = W_{\text{emb}}^T$）架構設定。
+  - 提出幾何層面之點積相似度空間（Dot-Product Similarity）詮釋，跳脫「分類器權重」思維。
+  - 量化參數壓縮比（如 GPT-2 Small 省下 $\sim 20\%$ 總參數量），並針對大語言模型（如 LLaMA 3 70B）論述 Untie 取捨（Expressivity Trade-off）。
 
 ---
 

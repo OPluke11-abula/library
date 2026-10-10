@@ -14,6 +14,7 @@ math_foundations:
   - RMSNorm Scale-Invariance Mathematics
   - SwiGLU Gated Activation Representation Capacity
   - Grouped-Query Attention (GQA) Memory Complexity
+  - Weight Tying Dot-Product Space (W_out = W_emb^T)
 hardware_target:
   - PagedAttention Virtual Memory Block Table
   - KV Cache High-Bandwidth Memory (HBM) Footprint
@@ -68,10 +69,11 @@ successors:
 - **歷史誤區 (Kaplan 2020)**：早期的研究認為「腦容量越大越好」，導致業界訓練了許多參數量極大但只讀過少量資料的「巨大卻飢餓」的模型（如 175B 的 GPT-3 只讀了 300B Tokens）。
 - **Chinchilla 的頓悟 (Hoffmann 2022)**：DeepMind 嚴格證明，給一個巨大的腦袋配太少題目是嚴重的資源浪費！**腦容量與題庫量應當以 1:1 的比例等速擴張**。對於 7B 參數的模型，至少需要餵食 140B ~ 1.4T Tokens 才能達到最優智力。
 
-### 2. 現代大腦的三大手術：RMSNorm、SwiGLU 與 GQA
+### 2. 現代大腦的四大手術：RMSNorm、SwiGLU、GQA 與 Weight Tying
 - **手術一：RMSNorm（切除昂貴的均值計算）**：傳統 LayerNorm 每次都要算均值 $\mu$ 再減去，浪費兩次記憶體讀寫。RMSNorm 發現只要保留方差（RMS）縮放，效果完全不變，推論加速 15%！
 - **手術二：SwiGLU（靈巧門控通道）**：前饋網路不再是死板的線性變換，而是引入一組「開關通道」（Gating），像閥門一樣動態篩選關鍵資訊。
 - **手術三：GQA（KV Cache 減重術）**：多個注意力頭共用同一組 Key/Value 快取，將推論顯存佔用直接砍掉 75%~87.5%，讓消費級顯卡也能跑百億大模型！
+- **手術四：Weight Tying（輸入與輸出字典共用）**：預測下一個字時，直接拿輸出向量去跟最初的「輸入字典」比對「誰最相似」。讓同一本字典同時負責輸入（Token 轉向量）與輸出（向量轉機率），直接省下數千萬個參數與大量的記憶體空間，是輕量化模型的經典妙招！
 
 ---
 
@@ -124,6 +126,16 @@ $$\text{SwiGLU}(x) = \left(\text{Swish}_\beta(x W_{\text{gate}}) \otimes x W_{\t
 **KV Cache 記憶體壓縮比**：
 $$\text{Ratio} = \frac{H_Q}{H_{KV}} = 4\times \sim 8\times$$
 推論時單一序列的顯存頻寬需求下降至原本的 25% 以下，使單卡能容納的並行 Batch Size 激增 4 倍！
+
+### 5. 輸入輸出權重綁定 (Weight Tying) 的幾何與參數量化 `[FACT]` `[DESIGN_DECISION]` `[LITERATURE_RESULT]`
+在語言模型的兩端，存在兩個極其龐大的矩陣：
+1. **輸入嵌入矩陣 (Token Embedding)** $W_{\text{emb}} \in \mathbb{R}^{V \times d}$：負責將 Vocabulary Index 轉換為連續向量，其中 $V$ 為詞表大小（如 LLaMA 3 的 $128,256$），$d$ 為隱藏維度（如 $4,096$）。
+2. **輸出投影矩陣 (LM Head / Pre-softmax Linear)** $W_{\text{out}} \in \mathbb{R}^{d \times V}$：負責將深層網路輸出的最終向量轉換回 Vocabulary 機率分佈的 Logits，運算為 $z = h \cdot W_{\text{out}}$。
+
+**Weight Tying** (Press & Wolf, 2017; Inan et al., 2016) 的核心洞見在於**強制約束 $W_{\text{out}} = W_{\text{emb}}^T$**：
+- **幾何直觀 (Vector Similarity)**：不再將 LM Head 視為獨立的「分類器權重」，而是視為**測量輸出隱含向量 $h$ 與每一個輸入詞向量相似度的內積空間 (Dot-product Similarity)**。這迫使模型學習將概念相近的詞彙在同一個連續空間中對齊。
+- **極致參數壓縮**：以 GPT-2 (Small) 為例，$V \approx 50,257, d=768$，原本 Embedding 與 LM Head 各佔約 38.5M 參數。採用 Weight Tying 後，直接省下近 $20\%$ 的總參數量。對於小型模型（如 Gemma 2B、Qwen 0.5B），這是顯著的輕量化妙招。
+- **架構取捨**：雖然節省了大量參數，但強制輸入（表達語義）與輸出（表達預測機率）共用同一表徵空間，有時會限制模型的表達上限。因此在百億參數以上的大型模型（如 LLaMA 3 8B/70B）中，為了追求極致的準確率，通常會**放棄 (Untie)** Weight Tying，重新分離這兩個矩陣。
 
 ---
 
@@ -300,3 +312,6 @@ assert token_param_ratio >= 18.0, f"Token 與參數比例 {token_param_ratio:.1f
 6. **無正規化 Transformer 與 Dynamic Tanh 開創作 (CVPR 頂會)**
    - *Paper*: Zhu, J., He, K., LeCun, Y., Liu, Z., et al. (2025). "Transformers without Normalization." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2025)*. arXiv: [2503.01817](https://arxiv.org/abs/2503.01817).
    - *Core Contribution*: 提出純逐點算子 DyT (Dynamic Tanh)，徹底摒除 Transformer 架構對 LayerNorm/RMSNorm 跨執行緒規約的依賴，實現與 GEMM 算子之 100% 融合與極致顯存頻寬釋放。
+7. **Weight Tying 權重綁定經典文獻**
+   - *Paper*: Press, O., & Wolf, L. (2017). "Using the Output Embedding to Improve Language Models." *EACL 2017*. arXiv: [1608.05859](https://arxiv.org/abs/1608.05859).
+   - *Core Contribution*: 證明語言模型的輸入 Token 嵌入矩陣與輸出 LM Head 投影矩陣可強制共用同一份權重，在節省超過 20% 參數量的同時提升語言模型之理論上限。

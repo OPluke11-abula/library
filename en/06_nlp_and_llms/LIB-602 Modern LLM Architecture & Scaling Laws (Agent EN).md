@@ -13,6 +13,7 @@ math_foundations:
   - Chinchilla Compute-Optimal Frontier (Hoffmann et al.)
   - SwiGLU Gated Activation Mathematics
   - Grouped-Query Attention (GQA) Memory Budgeting
+  - Weight Tying Dot-Product Space (W_out = W_emb^T)
 hardware_target:
   - Tensor Parallelism & Pipeline Parallelism Clusters
 created: 2026-09-17
@@ -41,7 +42,7 @@ successors:
 
 ## 1. Conceptual Mental Model
 
-Modern generative Large Language Models (such as LLaMA-3, Mistral, and Gemma) depart substantially from the original 2017 Vaswani Transformer. Standard Post-LN was abandoned due to vanishing gradient instabilities; absolute positional embeddings were supplanted by RoPE; ReLU was replaced by SwiGLU; and standard Multi-Head Attention was replaced by Grouped-Query Attention (GQA) to tame the explosive memory footprint of the Key-Value (KV) cache. Understanding these architectural transitions is vital for optimizing agent inference throughput.
+Modern generative Large Language Models (such as LLaMA-3, Mistral, and Gemma) depart substantially from the original 2017 Vaswani Transformer. Standard Post-LN was abandoned due to vanishing gradient instabilities; absolute positional embeddings were supplanted by RoPE; ReLU was replaced by SwiGLU; standard Multi-Head Attention was replaced by Grouped-Query Attention (GQA) to tame the explosive memory footprint of the Key-Value (KV) cache; and Weight Tying (sharing input embedding and output projection matrices) has become a classic strategy for parameter efficiency. Understanding these architectural transitions is vital for optimizing agent inference throughput.
 
 ---
 
@@ -75,6 +76,12 @@ $$N_{\text{opt}} \propto C^a, \quad D_{\text{opt}} \propto C^b, \quad a = \frac{
    Standard MHA maintains $H$ query heads and $H$ key/value heads. In GQA, $H_Q$ query heads share $H_{KV}$ key/value heads (where $H_Q = G \times H_{KV}$):
    $$\text{KV Cache Memory Compression Factor} = \frac{H_Q}{H_{KV}}$$
    For LLaMA-3 70B ($H_Q = 64, H_{KV} = 8$), KV cache memory is reduced by **$8 \times$**, enabling $128\text{K}$ context window deployments.
+5. **Weight Tying (Token Embedding = LM Head)** `[FACT]` `[DESIGN_DECISION]` `[LITERATURE_RESULT]`:
+   At the two boundaries of the language model exist massive matrices: the input embedding $W_{\text{emb}} \in \mathbb{R}^{V \times d}$ and the output pre-softmax projection $W_{\text{out}} \in \mathbb{R}^{d \times V}$.
+   **Weight Tying** (Press & Wolf, 2017) enforces the structural constraint $W_{\text{out}} = W_{\text{emb}}^T$.
+   - **Dot-Product Similarity Intuition**: Conceptually, it reframes the LM Head not as an independent classifier, but as a similarity space where the output hidden state $h$ is dot-producted against the initial input token representations to find the closest match.
+   - **Parameter Compression**: By tying these weights, models save roughly $20\%$ of their total parameters (e.g., saving $\sim 38.5\text{M}$ parameters on GPT-2 Small where $V \approx 50,257$ and $d = 768$), making it a crucial technique for lightweight architectures (e.g., Gemma 2B).
+   - **Expressivity Trade-off**: Enforcing the same representation space for semantic input meaning and output probability prediction can bound theoretical capacity. Consequently, ultra-large modern models (like LLaMA-3 70B) often **untie** these weights to maximize capacity and predictive accuracy.
 
 ---
 
@@ -150,4 +157,7 @@ class DynamicTanh(nn.Module):
    - *Paper*: Kwon, W., et al. (2023). "Efficient Memory Management for Large Language Model Serving with PagedAttention." *SOSP 2023*, pp. 611-626.
 6. **Grouped-Query Attention (EMNLP)**
    - *Paper*: Ainslie, J., et al. (2023). "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints." *EMNLP 2023*.
+7. **Weight Tying**
+   - *Paper*: Press, O., & Wolf, L. (2017). "Using the Output Embedding to Improve Language Models." *EACL 2017*.
+   - *Core Contribution*: Demonstrated that tying the input embedding and output projection matrices significantly reduces parameter count while enhancing language model performance.
 

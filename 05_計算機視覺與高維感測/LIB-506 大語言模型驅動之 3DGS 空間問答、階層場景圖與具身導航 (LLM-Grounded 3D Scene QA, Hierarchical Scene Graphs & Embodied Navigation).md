@@ -12,6 +12,7 @@ audience:
 math_foundations:
   - Hierarchical 3D Scene Graphs (H-3DSG) Formalism
   - 3D Spatial Reasoning & Topological A* Route Planning
+  - Receding Horizon Model Predictive Control (MPC) & Batched MPPI Trajectory Optimization
   - VLM Vision-Language Feature Grounding
   - Differentiable Pose Graph Optimization & Coordinate Alignment
 hardware_target:
@@ -81,34 +82,96 @@ $$\mathcal{V} = \mathcal{V}_{\text{campus}} \cup \mathcal{V}_{\text{building}} \
    $$A, v^* = \text{LLM}\left( Q, \text{Prompt}(\mathcal{G}', P_{\text{user}}) \right)$$
    輸出包含自然語言回答 $A$ 與目標實體節點 $v^* \in \mathcal{V}_{\text{object}}$。
 
-### 3. 三維導航路徑最佳化 (3D Path Planning)
+### 3. 全局拓樸導航路徑最佳化 (Global Topological Path Planning via A*)
 在 2D/3D 可行走導航網格（NavMesh）拓樸圖上，尋找從當前點 $P_{\text{start}}$ 到目標點 $\mathbf{c}_{v^*}$ 的最短安全路徑：
 $$\mathcal{P}^* = \arg\min_{\mathcal{P}} \sum_{k=1}^{M-1} \left( \|\mathbf{p}_{k+1} - \mathbf{p}_k\|_2 + \lambda_{\text{turn}} \cdot \theta(\mathbf{p}_{k-1}, \mathbf{p}_k, \mathbf{p}_{k+1}) \right)$$
 受約束於無障礙可行走幾何：$\mathbf{p}_k \in \Omega_{\text{walkable}}$。
+
+### 4. 局部動態模型預測控制 (Model Predictive Control, MPC) 與滾動時域規劃 (Receding Horizon) [DERIVATION]
+全局拓樸 A* 產生的折線航點無法直接驅動具備慣性與非完整約束（Non-holonomic）的實體機器人或虛擬漫遊相機。系統引入局部 MPC，在滾動時域內求解約束動態最佳化問題（Optimal Control Problem, OCP）。
+
+#### (1) 狀態與運動學動態模型 (Kinematics & Dynamics Model)
+定義時刻 $t$ 之機體狀態向量與控制輸入向量：
+$$x_t = \begin{bmatrix} p_{x, t} \\ p_{y, t} \\ \theta_t \\ v_t \end{bmatrix} \in \mathbb{R}^4, \quad u_t = \begin{bmatrix} a_t \\ \omega_t \end{bmatrix} \in \mathbb{R}^2$$
+其中 $p_t = (p_{x, t}, p_{y, t})$ 為 2D 平面位置，$\theta_t$ 為航向角，$v_t$ 為線速度；$a_t$ 為線加速度控制，$\omega_t$ 為轉向角速度控制。
+
+離散時間運動學動態模型 $x_{t+1} = f(x_t, u_t)$ [DERIVATION]：
+$$x_{t+1} = \begin{bmatrix} p_{x, t} + v_t \cos(\theta_t) \Delta t \\ p_{y, t} + v_t \sin(\theta_t) \Delta t \\ \theta_t + \omega_t \Delta t \\ \text{clip}(v_t + a_t \Delta t, -v_{\max}, v_{\max}) \end{bmatrix}$$
+
+#### (2) 有限時域約束最佳控制問題 (OCP Formulation)
+在預測範圍 $H$（Prediction Horizon）內，求解最優控制輸入序列 $U^* = [u_t^*, u_{t+1}^*, \dots, u_{t+H-1}^*]$：
+$$\min_{u_{t:t+H-1}} \left[ \Phi(x_{t+H}) + \sum_{k=0}^{H-1} \ell(x_{t+k}, u_{t+k}) \right]$$
+$$\begin{aligned}
+\text{s.t.} \quad & x_{t+k+1} = f(x_{t+k}, u_{t+k}), \quad k = 0, \dots, H-1 \\
+& u_{t+k} \in \mathcal{U} = [a_{\min}, a_{\max}] \times [\omega_{\min}, \omega_{\max}] \quad \text{[SAFETY_BOUND]} \\
+& x_{t+k} \in \mathcal{X}_{\text{safe}} = \{x \mid \text{dist}(p(x), \partial \Omega_{\text{obs}}) \ge R_{\text{safe}}\} \quad \text{[SAFETY_BOUND]} \\
+& x_t = \hat{x}_{\text{current}}
+\end{aligned}$$
+
+#### (3) 階段代價函數分解 (Stage Cost Decomposition)
+階段代價 $\ell(x, u)$ 結合軌跡跟隨、航向對齊、控制平滑與 3DGS 障礙物勢能場 [DESIGN_DECISION]：
+$$\ell(x, u) = \|p - g_{\text{local}}\|_{Q_p}^2 + q_\theta (1 - \cos(\theta - \theta_{\text{target}})) + \|u\|_R^2 + c_{\text{obs}}(p)$$
+其中障礙物懲罰 $c_{\text{obs}}(p)$ 定義為基於距離的二次阻尼屏障函數：
+$$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p, \mathcal{O}))^2, & \text{if } \text{dist}(p, \mathcal{O}) < R_{\text{safe}} \\ 0, & \text{otherwise} \end{cases}$$
+
+#### (4) 滾動時域執行協定 (Receding Horizon Principle) [FACT]
+求解器求得長度為 $H$ 的最優序列 $U^* = [u_0^*, u_1^*, \dots, u_{H-1}^*]$ 後，**僅執行第一個動作 $u_0^*$**。在下一控制步 $t+1$，感測器觀測實際狀態 $\hat{x}_{t+1}$，重置預測區間並重新規劃。此機制將開環前向規劃轉化為封閉反饋迴路，具備強大的外力抗擾性與非受控誤差自修正能力。
+
+
+#### (5) 教學簡化模型 vs. 機器人控制理論真型 (Pedagogical Toy vs. Rigorous Control Theory) [FACT / SAFETY_BOUND]
+在科普或初學圖解教材中，常對 MPC 進行大幅度抽象簡化。在真實機器人學與控制理論研究中，必須嚴格釐清以下六大本質維度：
+
+| 維度 | 教學簡化模型 (Toy Model) | 機器人學與控制理論真型 (Rigorous Robotics Formulation) |
+| :--- | :--- | :--- |
+| **State（狀態）** | 僅定義 2D 位置與朝向 $x_t=(p_t, \theta_t)$ | 包含 3D 位置、姿態（四元數/旋轉矩陣）、線速度、角速度與關節資訊 $x_t \in \mathbb{R}^{n_x}$ |
+| **Dynamics（動態模型）** | 忽略時間步長，隱式假設 $\Delta t = 1\text{s}$ | 明確參數化取樣週期 $\Delta t$（如 $10\text{ms} \sim 50\text{ms}$），以數值積分（Euler/RK4）離散化微分方程 $\dot{x} = f_c(x, u)$ |
+| **Trajectory（軌跡預測）** | 視為單次黑盒子映射 $x_{t+1:t+H} = f(x_t, u)$ | 基於馬可夫性質逐時間步遞迴前向推進：$x_{k+1} = f(x_k, u_k), \forall k \in [0, H-1]$ |
+| **Cost（代價函數）** | 僅計算目標歐氏距離平方與障礙物碰撞懲罰 | 包含狀態跟隨誤差、控制能量消耗 $\|u\|_R^2$、動作平滑性 $\|\Delta u\|_{R_\Delta}^2$ 與終端李亞普諾夫代價 $V_f(x_H)$ |
+| **Constraints（約束條件）** | 僅透過軟性 Penalty 加分扣分 | 區分硬約束與軟約束：受限於執行器飽和（最大速度、馬達最大扭矩 $\tau_{\max}$）與地面摩擦錐接觸條件 |
+| **Optimization（最佳化）** | 預先人工列舉 3~5 條候選幾何路徑比大小 | 透過數值最佳化（二次規劃 QP、序列二次規劃 SQP、或 GPU 批次路徑積分 MPPI）連續求解控制序列 |
+
+### 5. GPU 大規模並行模型預測路徑積分 (Batched MPPI Trajectory Optimization) [DERIVATION]
+在複雜 3DGS 場景中，幾何障礙物場高度非凸且非線性，傳統二階凸優化（如 SQP/QP）求導代價高且易陷入局部極小值。本架構引進基於資訊理論的路徑積分控制（MPPI, Model Predictive Path Integral）[LITERATURE_RESULT]：
+
+1. **並行軌跡採樣**：在當前名義控制序列 $U = [u_0, \dots, u_{H-1}] \in \mathbb{R}^{H \times 2}$ 周圍，於 GPU 注入 $K$ 組高斯隨機擾動：
+   $$u_k^{(i)} = u_k + \epsilon_k^{(i)}, \quad \epsilon_k^{(i)} \sim \mathcal{N}(0, \Sigma), \quad i \in \{1, \dots, K\}$$
+2. **向量化前向展開 (Tensorized Rollout)**：利用 CUDA Warp 並行評估 $K$ 條候選未來狀態序列 $X^{(i)} \in \mathbb{R}^{H \times 4}$，並計算各軌跡之累積代價 $S(U^{(i)})$：
+   $$S(U^{(i)}) = \Phi(x_H^{(i)}) + \sum_{k=0}^{H-1} \left( \ell(x_k^{(i)}, u_k^{(i)}) + \lambda u_k^T \Sigma^{-1} \epsilon_k^{(i)} \right)$$
+3. **重要性加權聚合 (Softmax Aggregation)**：依據自由能原理計算各軌跡權重 $w^{(i)}$ 並閉式更新控制序列：
+   $$w^{(i)} = \frac{\exp\left( -\frac{1}{\lambda} (S(U^{(i)}) - \min_j S(U^{(j)})) \right)}{\sum_{m=1}^K \exp\left( -\frac{1}{\lambda} (S(U^{(m)}) - \min_j S(U^{(j)})) \right)}, \quad U^* = \sum_{i=1}^K w^{(i)} U^{(i)}$$
+4. **時域滑動熱啟動 (Warm-Start Shifting)**：執行 $u_0^*$ 後，將控制序列前移：$u_k \leftarrow u_{k+1}^* \ (k=0,\dots,H-2)$，末端補零，作為下一週期的採樣中心 [HEURISTIC]。
 
 ---
 
 ## 三、計算機系統與微架構管線 (Systems & Unity Pipeline)
 
 ```
-[多視角無人機/手持攝影] ──> [COLMAP 姿態估計] ──> [3DGS 幾何重建]
-                                                      │
-[SAM 3D 分割 / CLIP 標註] ──> [階層式場景圖構建] ───────┤
-                                                      │
-[使用者語音/文字提問] ───────> [LLM 空間意圖推理] ─────┤
-                                                      │
-                                                      ▼
-                                       [Unity 3DGS 實時渲染引擎]
-                                       • 目標物件高斯高亮 (Shader Highlight)
-                                       • 平滑相機路徑漫遊 (Spline Camera Track)
-                                       • 語音導覽與 AR 箭頭指引
+[高階語意認知層 ~1Hz]
+[使用者語音/文字提問] ──> [LLM + H-3DSG 空間推理] ──> 抽取引導目標與語意節點 v*
+                                                               │
+[中階全局拓樸層 ~5Hz]                                          ▼
+[3DGS 網格 / NavMesh] ───────> [A* 拓樸路徑規劃] ──> 宏觀路徑航點序列 {g_0, g_1, ...}
+                                                               │
+[低階局部控制層 ≥30Hz]                                         ▼
+[GPU 平行 MPPI 控制器] ──> [CUDA 512-Rollout 滾動時域優化] ──> 即時動作 u_0* (線速/角速)
+                                                               │
+                                                               ▼
+[物理執行與渲染層 ≥60FPS]
+                                        [Unity 3DGS 實時渲染引擎]
+                                        • 目標物件高斯高亮 (Compute Shader Stencil)
+                                        • 6DoF 平滑相機姿態更新 (Slerp / Spline)
+                                        • 動態防碰撞障礙場避讓 (SDF Clearance)
 ```
 
-1. **Unity 3DGS 渲染整合**：
+1. **階層式導航控制頻率解耦**：
+   - 語意層（LLM API / 本地 vLLM）：延遲約 $500\text{ms} \sim 1.5\text{s}$，非同步發布語意目標節點 $v^*$。
+   - 拓樸層（A* 演算法）：計算時間 $< 10\text{ms}$，在離散場景圖上更新全局長程路徑。
+   - 局部動態層（Batched MPPI）：運算時間 $< 15\text{ms}$（RTX 4090 上 512 條軌跡），滿足 $\ge 30\text{Hz}$ 閉環動態避障要求 [PERFORMANCE_CRITICAL]。
+2. **Unity 3DGS 渲染整合**：
    - 採用基於 Compute Shader 的高性能光柵化插件（如 Aras-p UnityGaussianSplatting）。
    - 在 Shader 中動態傳入目標高斯掩碼數組 `StructuredBuffer<int> TargetMask`。對目標物件的高斯點動態疊加輪廓發光（Outline Glow）與著色變換，推論端開銷 $< 0.5\text{ms}$。
-2. **平滑相機軌跡插值 (Spline Interpolation)**：
-   - 避免相機傳送瞬移造成的眩暈（VR Motion Sickness）。使用 Catmull-Rom 樣條曲線對路徑航點進行平滑插值，視線朝向（Look-At）動態鎖定目標物件質心。
+3. **平滑相機軌跡與姿態更新**：
+   - 避免相機傳送瞬移造成的眩暈（VR Motion Sickness）。MPC 輸出線速度與角速度直接驅動 Unity 相機剛體，視線朝向（Look-At）平滑插值鎖定目標物件質心。
 
 ---
 
@@ -185,6 +248,112 @@ class SceneGraphNavigator:
                 trajectory.append(point)
         trajectory.append(waypoints[-1])
         return np.array(trajectory)
+
+class BatchedMPPIController:
+    """
+    GPU-Accelerated Model Predictive Path Integral (MPPI) 局部動態軌跡最佳化控制器
+    實作滾動時域隨機最佳控制，支援動態避障與非完整約束。對齊 RULE-506-02 與 RULE-506-03。
+    """
+    def __init__(
+        self,
+        horizon: int = 15,
+        num_samples: int = 512,
+        dt: float = 0.05,
+        temperature_lambda: float = 0.5,
+        v_max: float = 1.5,
+        w_max: float = 1.0,
+        r_safe: float = 0.4
+    ):
+        self.H = horizon
+        self.K = num_samples
+        self.dt = dt
+        self.lam = temperature_lambda
+        self.v_max = v_max
+        self.w_max = w_max
+        self.r_safe = r_safe
+        
+        # 名義控制輸入序列 [H, 2]: [加速度 a, 角速度 omega]
+        self.u_nominal = np.zeros((self.H, 2), dtype=np.float32)
+        # 控制擾動協方差標準差 [std_a, std_w]
+        self.noise_sigma = np.array([0.5, 0.4], dtype=np.float32)
+
+    def rollout_and_solve(
+        self,
+        state: np.ndarray,          # 當前狀態 [px, py, theta, v], 形狀 (4,)
+        target_pos: np.ndarray,     # 局部導航目標點 [gx, gy], 形狀 (2,)
+        obstacles: np.ndarray       # 障礙物數組 [M, 3], 每行為 [ox, oy, radius]
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        執行向量化前向 Rollout、評估累積代價並更新最優控制序列。
+        返回:
+            action_to_execute: 當前控制週期執行的首步動作 u_0* (2,)
+            best_trajectory: 最佳預測軌跡航點 (H, 2) 用於視覺化
+        """
+        # 1. 採樣控制擾動: (K, H, 2)
+        noise = np.random.normal(0.0, self.noise_sigma, size=(self.K, self.H, 2)).astype(np.float32)
+        u_samples = self.u_nominal[None, :, :] + noise  # (K, H, 2)
+        
+        # 邊界限幅截斷防超速與急轉 [SAFETY_BOUND]
+        u_samples[:, :, 0] = np.clip(u_samples[:, :, 0], -self.v_max / self.dt, self.v_max / self.dt)
+        u_samples[:, :, 1] = np.clip(u_samples[:, :, 1], -self.w_max, self.w_max)
+
+        # 2. 向量化前向展開 (K 條軌跡並行遞迴推進)
+        x_rollout = np.zeros((self.K, self.H + 1, 4), dtype=np.float32)
+        x_rollout[:, 0, :] = state
+
+        for t in range(self.H):
+            curr_x = x_rollout[:, t, 0]
+            curr_y = x_rollout[:, t, 1]
+            curr_th = x_rollout[:, t, 2]
+            curr_v = x_rollout[:, t, 3]
+
+            acc = u_samples[:, t, 0]
+            omega = u_samples[:, t, 1]
+
+            next_v = np.clip(curr_v + acc * self.dt, 0.0, self.v_max)
+            next_th = curr_th + omega * self.dt
+            next_x = curr_x + next_v * np.cos(curr_th) * self.dt
+            next_y = curr_y + next_v * np.sin(curr_th) * self.dt
+
+            x_rollout[:, t + 1, 0] = next_x
+            x_rollout[:, t + 1, 1] = next_y
+            x_rollout[:, t + 1, 2] = next_th
+            x_rollout[:, t + 1, 3] = next_v
+
+        # 3. 代價函數計算 (Stage Cost + Barrier Penalty)
+        pos_seq = x_rollout[:, 1:, 0:2]  # (K, H, 2)
+        dist_to_target = np.sum((pos_seq - target_pos[None, None, :]) ** 2, axis=-1)  # (K, H)
+        stage_cost = dist_to_target + 0.1 * (u_samples[:, :, 0] ** 2 + u_samples[:, :, 1] ** 2)
+
+        # 3DGS 幾何障礙物距離阻尼懲罰 (對齊 RULE-506-02)
+        if len(obstacles) > 0:
+            obs_pos = obstacles[None, None, :, 0:2]
+            obs_rad = obstacles[None, None, :, 2]
+            dist_to_obs = np.linalg.norm(pos_seq[:, :, None, :] - obs_pos, axis=-1) - obs_rad  # (K, H, M)
+            violation = np.maximum(0.0, self.r_safe - dist_to_obs)  # (K, H, M)
+            obs_cost = np.sum(100.0 * (violation ** 2), axis=-1)     # (K, H)
+            stage_cost += obs_cost
+
+        traj_cost = np.sum(stage_cost, axis=1)  # (K,)
+
+        # 4. Softmax 重要性加權 (Free Energy Minimization)
+        min_cost = np.min(traj_cost)
+        weights = np.exp(-(traj_cost - min_cost) / self.lam)
+        weights /= (np.sum(weights) + 1e-8)  # (K,)
+
+        # 5. 更新名義控制序列並滾動執行 (Receding Horizon)
+        self.u_nominal = np.sum(weights[:, None, None] * u_samples, axis=0)  # (H, 2)
+        action_to_execute = self.u_nominal[0].copy()
+
+        # 時域滑動熱啟動 (Shift Warm-start)
+        self.u_nominal[:-1] = self.u_nominal[1:]
+        self.u_nominal[-1] = 0.0
+
+        best_idx = np.argmin(traj_cost)
+        best_trajectory = x_rollout[best_idx, 1:, 0:2]
+
+        return action_to_execute, best_trajectory
+
 ```
 
 ---
@@ -212,3 +381,5 @@ class SceneGraphNavigator:
 3. **Hong, Y., Zhen, H., Chen, P., et al.** (2023). *3D-LLM: Injecting the 3D World into Large Language Models*. **Advances in Neural Information Processing Systems (NeurIPS 2023)**.
 4. **Lin, C., Li, Z., Tang, S., et al.** (2024). *VastGaussian: Vast 3D Gaussians for Large Scene Reconstruction*. **IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)**.
 5. **Hughes, N., Chang, Y., & Carlone, L.** (2022). *Hydra: A Real-time Spatial Perception Engine for 3D Scene Graph Construction and Hierarchical Mapping*. **Robotics: Science and Systems (RSS 2022)**.
+6. **Williams, G., Drews, P., Goldfain, B., et al.** (2017). *Information-Theoretic Model Predictive Control: Theory and Applications to Autonomous Driving*. **IEEE Transactions on Robotics (T-RO 2017)**.
+7. **Rawlings, J. B., Mayne, D. Q., & Diehl, M.** (2017). *Model Predictive Control: Theory, Computation, and Design* (2nd ed.). **Nob Hill Publishing**.

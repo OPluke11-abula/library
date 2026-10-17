@@ -12,7 +12,7 @@ audience:
 math_foundations:
   - Uniform Affine Quantization & Rounding Error Analysis
   - AWQ Activation-Aware Salient Channel Protection
-  - SmoothQuant `[LITERATURE_RESULT]` Cross-Layer Invariant Scaling
+  - SmoothQuant Cross-Layer Invariant Scaling
 hardware_target:
   - GPU INT4/FP8 Sub-byte Packing
   - Tensor Core CUTLASS High-Throughput Kernels
@@ -91,7 +91,7 @@ $$W X = \left(W \cdot \text{diag}(\mathbf{s})^{-1}\right) \cdot \left(\text{diag
 $$\mathbf{s} = s_X^\alpha, \quad \text{其中 } s_X = \frac{1}{N} \sum_{i=1}^N |X_{i, :}|, \quad \alpha \in [0, 1]$$
 - 透過在 $[0, 1]$ 區間內進行簡單的網格搜尋（Grid Search，通常 $\alpha^* \approx 0.5$），AWQ 在**完全不進行耗時的反向傳播與過度擬合微調**的情況下，直接使 4-bit 模型的 Perplexity 損失逼近 0！
 
-### 3. SmoothQuant (Xiao et al., ICML 2023) 難度平滑遷移
+### 3. SmoothQuant (Xiao et al., ICML 2023) 難度平滑遷移 `[LITERATURE_RESULT]`
 LLM 激活值存在跨通道極端離群值（Outliers，部分通道數值高達 100+，而其餘通道 $< 1$）。SmoothQuant 將激活值的量化難度遷移至權重矩陣：
 $$Y = \left(X \cdot \text{diag}(s)^{-1}\right) \cdot \left(\text{diag}(s) \cdot W\right) = \hat{X} \cdot \hat{W}$$
 尺度平滑因子：

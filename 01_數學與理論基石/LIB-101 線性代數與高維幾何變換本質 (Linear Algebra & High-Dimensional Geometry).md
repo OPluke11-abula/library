@@ -71,19 +71,19 @@ $$\text{旋轉/正交投影 } V^T \longrightarrow \text{各軸縮放 } \Sigma \l
 
 ## 二、🎓 博士級數學形式化推導：譜定理、SVD 與低秩逼近
 
-### 1. 譜定理 (Spectral Theorem) 與對稱矩陣正交對角化
+### 1. 譜定理 (Spectral Theorem) 與對稱矩陣正交對角化 `[FACT]`
 若矩陣 $S \in \mathbb{R}^{n \times n}$ 為實對稱矩陣（$S = S^T$），則存在正交矩陣 $Q$（滿足 $Q^T Q = I$）與實對角矩陣 $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_n)$，使得：
 $$S = Q \Lambda Q^T = \sum_{i=1}^n \lambda_i q_i q_i^T$$
 其中 $q_i$ 為彼此正交的單位特徵向量，$\lambda_i$ 為對應之實特徵值。這保證了在協方差矩陣與二次型損失曲面中，我們永遠能找到一組完全獨立的正交軸來解構幾何特性。
 
-### 2. 奇異值分解 (Singular Value Decomposition, SVD)
+### 2. 奇異值分解 (Singular Value Decomposition, SVD) `[FACT]`
 對於任意實矩陣 $A \in \mathbb{R}^{m \times n}$（不要求方陣或對稱），均存在正交矩陣 $U \in \mathbb{R}^{m \times m}$、$V \in \mathbb{R}^{n \times n}$ 以及半正定對角矩陣 $\Sigma \in \mathbb{R}^{m \times n}$，使得：
 $$A = U \Sigma V^T$$
 - $U$ 的列向量稱為**左奇異向量 (Left Singular Vectors)**，為 $A A^T$ 的特徵向量。
 - $V$ 的列向量稱為**右奇異向量 (Right Singular Vectors)**，為 $A^T A$ 的特徵向量。
 - $\Sigma$ 對角線上的非負元素 $\sigma_i = \sqrt{\lambda_i(A^T A)}$ 即為奇異值。
 
-### 3. Eckart-Young-Mirsky 低秩逼近定理 (The Fundamental Theorem of Low-Rank Approximation)
+### 3. Eckart-Young-Mirsky 低秩逼近定理 (The Fundamental Theorem of Low-Rank Approximation) `[DERIVATION]`
 令 $A_k = \sum_{i=1}^k \sigma_i u_i v_i^T$（其中 $k < \text{rank}(A)$）為保留前 $k$ 個最大奇異值的截斷 SVD 矩陣。則對於任意秩不大於 $k$ 的矩陣 $B \in \mathbb{R}^{m \times n}$（即 $\text{rank}(B) \le k$），在 Frobenius 範數與譜範數（$L_2$ 算子範數）下，$A_k$ 均為 $A$ 的全域最優逼近：
 $$\min_{\text{rank}(B) \le k} \|A - B\|_F = \|A - A_k\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}$$
 $$\min_{\text{rank}(B) \le k} \|A - B\|_2 = \|A - A_k\|_2 = \sigma_{k+1}$$

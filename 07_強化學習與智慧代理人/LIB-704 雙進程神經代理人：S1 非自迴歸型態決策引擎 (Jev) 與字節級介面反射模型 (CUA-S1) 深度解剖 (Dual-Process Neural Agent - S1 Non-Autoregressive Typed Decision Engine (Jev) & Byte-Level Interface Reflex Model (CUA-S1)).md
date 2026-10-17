@@ -88,7 +88,7 @@ successors:
 │                  │ 機率置信度閘控 (Confidence Gating)    │                  │
 │                  └───────────────────┬───────────────────┘                  │
 │                                      │                                      │
-│               P >= 0.85 `[SAFETY_BOUND]` (高置信直覺) │ P < 0.85 (不確定性告警/罕見複雜情境) │
+│               P >= 0.85 (高置信直覺) │ P < 0.85 (不確定性告警/罕見複雜情境) │
 │                                      │                                      │
 │                                      ▼                                      │
 │       ┌──────────────────────────────────────────────┐                      │
@@ -114,24 +114,24 @@ successors:
 
 ### 1. Jev 與 RLCD (Reinforcement Learning for Calibrated Decisions) 數學形式化
 
-由前 OpenAI 研究員 Diogo Almeida 創立的 TypeSafe AI 推出的 **Jev**，徹底拋棄了文字聊天介面，轉型為**強型別非自迴歸決策引擎**。其核心演算法突破在於 **RLCD**。
+由前 OpenAI 研究員 Diogo Almeida 創立的 TypeSafe AI 推出的 **Jev**，徹底拋棄了文字聊天介面，轉型為**強型別非自迴歸決策引擎** `[FACT]`。其核心演算法突破在於 **RLCD**。
 
 #### (1) 傳統 RLHF 的病態過度自信缺陷
-傳統大模型對齊採用 RLHF（基於人類偏好的強化學習），其目標是最大化人類標註者的獎勵模型期望值：
+傳統大模型對齊採用 RLHF（基於人類偏好的強化學習），其目標是最大化人類標註者的獎勵模型期望值 `[FACT]`：
 $$\max_\theta \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta} \left[ R_\phi(x, y) \right] - \beta D_{\text{KL}}(\pi_\theta(y \mid x) \parallel \pi_{\text{ref}}(y \mid x))$$
 - **理論病態**：RLHF 會迫使策略模型 $\pi_\theta$ 將機率質量極度集中在獎勵最高的單一候選 Token 上，導致 Softmax 輸出分佈極化（尖銳化），產生嚴重的「過度自信（Overconfidence）」（參見 [[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]）。此時模型的機率值喪失了統計置信度意義。
 
-#### (2) 嚴格評分規則 (Strictly Proper Scoring Rules) 與 Brier Score 結合
+#### (2) 嚴格評分規則 (Strictly Proper Scoring Rules) 與 Brier Score 結合 `[FACT]`
 在決策理論中，若一個評分函數使智慧體只有在如實回報其真實信念機率 $P$ 時才能獲得最小期望損失，則稱該函數為**嚴格評分規則（Strictly Proper Scoring Rule）**。
 最經典的形式為 **Brier Score**。給定一個 $K$ 分類的真實分佈標籤 $y^* \in \{1, \dots, K\}$，模型的預測機率向量為 $\mathbf{p} = [p_1, \dots, p_K]$，Brier 損失定義為：
 $$\mathcal{B}(\mathbf{p}, y^*) = \sum_{k=1}^K \left( p_k - \mathbf{1}_{y^* = k} \right)^2$$
-Brier Score 可嚴格分解為三項正交分量（Murphy 分解）：
+Brier Score 可嚴格分解為三項正交分量（Murphy 分解）`[DERIVATION]`：
 $$\mathcal{B}(\mathbf{p}, y^*) = \text{Uncertainty} - \text{Resolution} + \text{Reliability}$$
 其中 **Reliability（可靠度）** 直接量化了校準誤差：
 $$\text{Reliability} = \sum_{m=1}^M \frac{|B_m|}{N} \left( \bar{p}_m - \bar{y}_m \right)^2$$
 
-#### (3) RLCD 策略梯度公式 (RLCD Policy Gradient)
-RLCD 不再使用標量獎勵標籤，而是構造**校準優勢函數（Calibrated Advantage Function, $\mathcal{A}_{\text{cal}}$）**：
+#### (3) RLCD 策略梯度建模假設 (Hypothesized RLCD Formulation) `[HYPOTHESIS]` `[OPEN_QUESTION]`
+*(註：TypeSafe AI 公開文件僅聲明 Jev 採用 RLCD 進行校準決策訓練 `[FACT]`，並未公開其精確損失函數與梯度推導；以下為結合 Brier 嚴格評分規則之理論重構假設 `[HYPOTHESIS]`)*：
 $$\mathcal{L}_{\text{RLCD}}(\theta) = \mathbb{E}_{(s, y^*) \sim \mathcal{D}} \left[ \mathcal{B}(\pi_\theta(\cdot \mid s), y^*) + \lambda_{\text{ECE}} \cdot \mathcal{D}_{\text{cal}}(\pi_\theta(\cdot \mid s)) \right]$$
 對應的策略梯度更新式為：
 $$\nabla_\theta \mathcal{J}_{\text{RLCD}}(\theta) = \mathbb{E}_{(s, a)} \left[ \nabla_\theta \log \pi_\theta(a \mid s) \cdot \left( 2(\mathbf{1}_{a=y^*} - \pi_\theta(a \mid s)) \right) - \lambda \nabla_\theta \text{ECE}(\pi_\theta) \right]$$

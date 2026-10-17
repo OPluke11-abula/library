@@ -11,8 +11,8 @@ audience:
   - Senior-ML-Engineer
 math_foundations:
   - Spectral Theorem & Orthogonal Diagonalization
-  - Singular Value Decomposition (SVD) `[FACT]`
-  - Low-Rank Matrix Approximation (Eckart-Young Theorem `[DERIVATION]`)
+  - Singular Value Decomposition (SVD)
+  - Low-Rank Matrix Approximation (Eckart-Young Theorem)
   - Moore-Penrose Pseudoinverse
 hardware_target:
   - GPU Tensor Core GEMM Tiling (WMMA)
@@ -53,11 +53,11 @@ In deep learning, data matrices are not static tabular sheets; they represent me
 
 ## 2. Mathematical Formalization
 
-### 1. The Spectral Theorem for Symmetric Matrices
+### 1. The Spectral Theorem for Symmetric Matrices `[FACT]`
 Let $A \in \mathbb{R}^{n \times n}$ be a symmetric matrix ($A = A^T$). There exists an orthonormal basis of eigenvectors $q_1, \dots, q_n \in \mathbb{R}^n$ with real eigenvalues $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_n$ such that:
 $$A = Q \Lambda Q^T = \sum_{i=1}^n \lambda_i q_i q_i^T, \quad Q Q^T = Q^T Q = I$$
 
-### 2. Singular Value Decomposition (SVD)
+### 2. Singular Value Decomposition (SVD) `[FACT]`
 For any arbitrary matrix $A \in \mathbb{R}^{m \times n}$ of rank $r \le \min(m, n)$:
 $$A = U \Sigma V^T$$
 where:
@@ -65,7 +65,7 @@ where:
 - $\Sigma \in \mathbb{R}^{m \times n}$ is diagonal, containing singular values $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$.
 - $V \in \mathbb{R}^{n \times n}$ is orthogonal ($V^T V = I_n$), spanning the right singular vectors (eigenvectors of $A^T A$).
 
-### 3. Eckart-Young-Mirsky Theorem (Optimal Low-Rank Approximation)
+### 3. Eckart-Young-Mirsky Theorem (Optimal Low-Rank Approximation) `[DERIVATION]`
 For any target rank $k < r$, the truncated SVD matrix $A_k = \sum_{i=1}^k \sigma_i u_i v_i^T$ is the unique minimizer of the reconstruction error under Frobenius and spectral norms:
 $$\min_{\text{rank}(B) \le k} \|A - B\|_F = \|A - A_k\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}$$
 This fundamental theorem forms the theoretical bedrock of **LoRA (Low-Rank Adaptation)** and neural parameter compression.

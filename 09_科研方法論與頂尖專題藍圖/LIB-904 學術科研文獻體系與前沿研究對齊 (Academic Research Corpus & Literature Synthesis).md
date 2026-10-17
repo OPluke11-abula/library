@@ -12,7 +12,7 @@ audience:
 math_foundations:
   - View-Decomposed LoRA & 3DGS Cascaded Optimization
   - Space-Filling Curves (Hilbert & Z-Order) Point Cloud Serialization
-  - Camera-Aware Jaccard Distance Metric (CA-Jaccard `[DERIVATION]`)
+  - Camera-Aware Jaccard Distance Metric (CA-Jaccard)
   - Entropy-Aware Adaptive Fusion (EAAF) in Latent Diffusion
   - Parallel Residual Bi-Fusion (PRB-FPN) & Testing-Time Grid Cropping
   - Bunch Testing Time Augmentation (Bunch TTA) Invariant Transformations
@@ -138,7 +138,7 @@ $$h_i = \mathcal{H}\left(\lfloor x_i / \delta \rfloor, \, \lfloor y_i / \delta \
 
 在論文 *"Person Re-Identification Under Non-Overlapping Cameras Based on Advanced Contextual Embeddings"* 中，提出了一種**無需重訓骨幹網路即能大幅拉升精度的後處理拓樸演算法**。
 
-#### (1) 相機感知 Jaccard 距離 (Camera-Aware Jaccard Distance)
+#### (1) 相機感知 Jaccard 距離 (Camera-Aware Jaccard Distance) `[DERIVATION]`
 給定探測影像 (Query) $q$ 與圖庫樣本 (Gallery) $g_i$，由 Vision Transformer (TransReID) 提取出 $L_2$ 歸一化特徵向量 $f_q, f_{g_i}$，初步歐幾里得距離為 $d(q, g_i) = \|f_q - f_{g_i}\|_2$。
 
 但在非重疊相機網絡中，相機專屬偏差（Camera-specific Bias，如曝光、角度）會導致同相機樣本距離虛假偏近。
@@ -148,7 +148,7 @@ $$\mathcal{R}(p, k) = \{g \in \mathcal{N}(p, k) \mid p \in \mathcal{N}(g, k)\}$$
 $$C(p, g) = \begin{cases} 1.0 + \gamma & \text{if } \text{CamID}(p) == \text{CamID}(g) \text{ (抑制同相機場景捷徑)} \\ 1.0 & \text{if } \text{CamID}(p) \neq \text{CamID}(g) \text{ (鼓勵跨相機匹配)} \end{cases}$$
 最終計算 Jaccard 相似度矩陣：
 $$d_{\text{CA-Jaccard}}(q, g) = 1 - \frac{|\mathcal{R}^*(q, k) \cap \mathcal{R}^*(g, k)|}{|\mathcal{R}^*(q, k) \cup \mathcal{R}^*(g, k)|}$$
-在 Market-1501 基準資料集上，mAP 指標從 88.2% 躍升至 **93.58%**，實證證明幾何拓樸後處理能有效消除特徵空間的流形扭曲。
+在 Market-1501 基準資料集上，mAP 指標從 88.2% 躍升至 **93.58%** `[LITERATURE_RESULT]`，實證證明幾何拓樸後處理能有效消除特徵空間的流形扭曲。
 
 ---
 

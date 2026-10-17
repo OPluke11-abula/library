@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Autonomous-Agent
 math_foundations:
-  - Covariate Shift `[FACT]` & Radon-Nikodym Importance Weighting
+  - Covariate Shift & Radon-Nikodym Importance Weighting
   - Empirical Risk Minimization (ERM) Failure Under Shift
   - 784-Dimensional Linear Separator Hyperplane Analysis
 hardware_target:
@@ -50,7 +50,7 @@ successors:
 在本次手寫數字辨識的真實畫板測試中，發生了一起令人震撼的「災難性誤判」：
 當使用者隨手書寫一個**「短橫樑、主筆劃垂直直挺（Upright uncrossed 7，無橫槓、傾角接近 90 度）」**的數字 7 時，模型沒有猜測 1，也沒有猜測 4，而是以**「100% 的絕對信心度」一口咬定這是數字 8**！
 
-### 1. MNIST 資料集的歷史形態採樣偏置 (NIST SD-1 vs SD-3)
+### 1. MNIST 資料集的歷史形態採樣偏置 (NIST SD-1 vs SD-3) `[LITERATURE_RESULT]`
 - **資料集不是客觀的上帝視角，它具有強烈的取樣偏置 (Sampling Bias)**。
 - MNIST 的原始資料源自 NIST Special Database 3（高中生樣本，筆畫風格自由多變）與 Special Database 1（人口普查局員工樣本，格式標準規範）。
 - 在該訓練分佈中，數字 7 的主流形態呈現頂部橫樑長、下半身顯著向左下方傾斜（Slanted crossed/uncrossed 7，傾角約 60°~65°），墨水終點落在畫面左下角。
@@ -66,13 +66,13 @@ successors:
 
 ## 二、🎓 博士級數學形式化推導：協變量漂移 (Covariate Shift) 與空間懲罰超平面
 
-### 1. 經驗風險最小化 (ERM) 在領域漂移下的泛化界崩潰
+### 1. 經驗風險最小化 (ERM) 在領域漂移下的泛化界崩潰 `[FACT]`
 機器學習的基礎假設是 **I.I.D.（獨立同分佈假設）**：訓練集與測試集採樣自完全相同的聯合機率分佈 $P(X, Y)$。
 設經驗風險最小化目標為：
 $$\hat{R}(f) = \frac{1}{N} \sum_{i=1}^N \mathcal{L}(f(x_i), y_i)$$
-在真實世界落地中，面臨的是**協變量漂移 (Covariate Shift)**：
+在真實世界落地中，面臨的是**協變量漂移 (Covariate Shift)** `[FACT]`：
 $$P_{\text{train}}(Y \mid X) = P_{\text{test}}(Y \mid X), \quad \text{但} \quad P_{\text{train}}(X) \neq P_{\text{test}}(X)$$
-Ben-David et al. (Machine Learning 2010) 證明了領域適應的泛化誤差上界：
+Ben-David et al. (Machine Learning 2010) 證明了領域適應的泛化誤差上界 `[LITERATURE_RESULT]`：
 $$\epsilon_{\text{target}}(f) \le \epsilon_{\text{source}}(f) + \frac{1}{2} d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_{\text{source}}, \mathcal{D}_{\text{target}}) + \lambda^*$$
 其中 $d_{\mathcal{H}\Delta\mathcal{H}}$ 為兩個領域在假設空間 $\mathcal{H}$ 下的 $\mathcal{H}$-散度（H-Divergence），$\lambda^*$ 為理想聯合假設的誤差。
 - 美式 MNIST 分佈 $\mathcal{D}_{\text{source}}$ 與亞洲書寫分佈 $\mathcal{D}_{\text{target}}$ 的散度極大，使原先在測試集高達 98.24% 的模型，在目標領域泛化誤差界限直接失控崩潰。

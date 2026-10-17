@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-84_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-93_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
 
 <p align="center">
   <b>Technical Notes on Mathematical Foundations, GPU Systems, and Production Deep Learning</b>
@@ -124,6 +124,7 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-000** | **00 Overview** | [Master Index & Topological Graph](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md) | DAG dependency topology, classification, and system invariants |
 | **LIB-001** | **00 Overview** | [Deep Learning First Principles](00_overview/LIB-001%20Deep%20Learning%20First%20Principles%20%28Agent%20EN%29.md) | Six core pillars: geometry, activations, loss, backprop, Adam, CNN bias |
 | **LIB-101** | **01 Mathematics** | [Linear Algebra & High-Dimensional Geometry](01_mathematics/LIB-101%20Linear%20Algebra%20&%20High-Dimensional%20Geometry%20%28Agent%20EN%29.md) | Vector spaces, SVD, hyperplanes, geometric projection |
+| **LIB-102** | **01 Mathematics** | [Probability, Information Theory & Variational Inference](01_mathematics/LIB-102%20Probability,%20Information%20Theory%20&%20Variational%20Inference%20%28Agent%20EN%29.md) | Shannon entropy, KL/f-divergence, ELBO, Score matching, Log-Sum-Exp |
 | **LIB-104** | **01 Mathematics** | [Convex Optimization & Gradient Descent](01_mathematics/LIB-104%20Convex%20Optimization%20&%20Gradient%20Descent%20%28Agent%20EN%29.md) | Lipschitz continuity, Hessian conditioning, momentum dynamics |
 | **LIB-203** | **02 Systems** | [Computer Architecture & Hardware-Aware Deep Learning](02_computer_systems/LIB-203%20Computer%20Architecture%20&%20Hardware-Aware%20Deep%20Learning%20%28Agent%20EN%29.md) | Memory hierarchy, Warp divergence, Tensor Cores, Roofline model |
 | **LIB-301** | **03 Machine Learning** | [Dataset Bias, Domain Shift & Spatial Penalties](03_machine_learning/LIB-301%20Dataset%20Bias,%20Domain%20Shift%20&%20Spatial%20Penalties%20%28Agent%20EN%29.md) | Covariate shift, cultural dataset bias, spatial weight penalties |
@@ -133,6 +134,7 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-407** | **04 Architectures** | [Fine-Grained Instruction Image Editing](04_deep_learning_architectures/LIB-407%20Fine-Grained%20Instruction%20Image%20Editing%20&%20Cross-Attention%20Preservation%20%28Agent%20EN%29.md) | Latent inversion, cross-attention modulation, mutual self-attention locking |
 | **LIB-408** | **04 Architectures** | [Context-Aware Object Generation & Compositing](04_deep_learning_architectures/LIB-408%20Context-Aware%20Object%20Generation,%20Illumination%20Estimation%20&%20Image%20Compositing%20%28Agent%20EN%29.md) | Metric depth perspective, Spherical Harmonics lighting, contact shadows |
 | **LIB-501** | **05 Vision** | [CV Preprocessing & Center of Mass Alignment](05_computer_vision/LIB-501%20CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment%20%28Agent%20EN%29.md) | Bounding box clamping, ink moment center-of-mass centering |
+| **LIB-502** | **05 Vision** | [Camera Projective Geometry, Epipolar Geometry & SfM](05_computer_vision/LIB-502%20Camera%20Projective%20Geometry,%20Epipolar%20Geometry%20&%20Structure-from-Motion%20%28Agent%20EN%29.md) | Pinhole model, SE(3)/SO(3), epipolar geometry, Bundle Adjustment |
 | **LIB-504** | **05 Vision** | [3D Gaussian Splatting Theory & Rasterization](05_computer_vision/LIB-504%203D%20Gaussian%20Splatting%20Theory%20&%20Rasterization%20%28Agent%20EN%29.md) | Continuous radiance fields vs 3D Gaussians, GPU tile rasterization |
 | **LIB-505** | **05 Vision** | [Open-Vocabulary 3DGS & Semantic Retrieval](05_computer_vision/LIB-505%20Open-Vocabulary%203D%20Gaussian%20Splatting%20&%20Semantic%20Retrieval%20%28Agent%20EN%29.md) | 2D-to-3D language distillation, multi-view consensus, open-vocabulary queries |
 | **LIB-506** | **05 Vision** | [LLM-Grounded 3D Scene QA & Navigation](05_computer_vision/LIB-506%20LLM-Grounded%203D%20Scene%20QA,%20Hierarchical%20Scene%20Graphs%20&%20Embodied%20Navigation%20%28Agent%20EN%29.md) | ConceptGraphs, spatial reasoning ReAct loops, hierarchical campus tour |

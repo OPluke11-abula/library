@@ -38,6 +38,10 @@ successors:
 
 # Quantization Mathematics & Low-Precision Inference Architectures
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
+- **Successors**: [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 Serving deep neural networks in 32-bit floating point (FP32) is wasteful. 99% of neural network parameters do not require 24 bits of mantissa precision. **Quantization** projects continuous real numbers into discrete, low-bit integer lattices ($\mathbb{Z}$), slashing memory footprint by $4 \times$ (INT8) or $8 \times$ (INT4/FP8) while enabling specialized hardware **Tensor Core integer matrix engines (DP4A, WMMA)** to double or quadruple arithmetic throughput.
@@ -66,9 +70,15 @@ $$\hat{x} = S (q - Z)$$
 Quantizing weight matrix $W \to \hat{W} = W + \Delta W$ introduces output perturbation. Taylor expansion of loss $\mathcal{L}$:
 $$\mathcal{L}(W + \Delta W) \approx \mathcal{L}(W) + g^T \Delta W + \frac{1}{2} \Delta W^T H \Delta W$$
 At convergence, gradient $g = 0$. The error is governed by Hessian $H = 2 X X^T$.
-- **GPTQ (Frantar et al., 2022)**: Recursively solves column-wise updates using the inverse Hessian $H^{-1}$:
+- **GPTQ (Frantar et al., 2022) `[LITERATURE_RESULT]`**: Recursively solves column-wise updates using the inverse Hessian $H^{-1}$:
   $$\Delta w_j = -\frac{w_j - \text{quant}(w_j)}{[H^{-1}]_{jj}} \cdot H_{:, j}^{-1}$$
-- **AWQ (Lin et al., 2023)**: Discovers that protecting the top $1\%$ of salient channels (ranked by activation magnitude $\|X\|_2$) prevents perplexity degradation in 4-bit LLMs.
+- **AWQ (Lin et al., 2023) `[LITERATURE_RESULT]`**: Discovers that protecting the top $1\%$ of salient channels (ranked by activation magnitude $\|X\|_2$) prevents perplexity degradation in 4-bit LLMs.
+
+---
+
+### 4. Systems & Hardware Alignment: Sub-Byte Register Packing & LOP3 Dequantization
+- **32-Bit Register Sub-Byte Packing**: Because GPU global memory transactions address byte-aligned words, 4-bit weights (INT4) are packed 8 elements per `uint32_t` register aligned to 128-byte L1 cache lines, cutting HBM weight transfer volume by $4\times$ compared to FP16 `[DESIGN_DECISION]`.
+- **In-Register LOP3 Bitwise Unpacking**: During W4A16 GEMM execution, CUDA kernels load packed `uint32_t` words from HBM into registers and use hardware 3-input logical lookup instructions (`lop3.b32`) with bitmasking and FP16 scale multiplication directly inside registers before feeding Tensor Core MMA instructions `[LITERATURE_RESULT]`.
 
 ---
 
@@ -116,3 +126,11 @@ def dequantize_symmetric_int8(q: torch.Tensor, scale: torch.Tensor) -> torch.Ten
 - **Specification**: Sub-byte weights (e.g., INT4, INT2) stored in global memory MUST be packed contiguously into 32-bit registers (e.g., 8 INT4 weights per `uint32_t`) aligned to 128-byte transaction boundaries.
 - **Violation Consequence**: Unpacked sub-byte weights waste memory storage and prevent Tensor Core SIMD sub-byte matrix multiplication instructions.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Lin, J., Tang, J., Tang, H., Yang, S., Chen, W. M., Wang, W. C., Xiao, G., Dang, X., Gan, C., & Han, S.** (2024). "AWQ: Activation-aware Weight Quantization for On-Device LLM Compression and Acceleration." *Conference on Machine Learning and Systems (MLSys 2024 Best Paper Award)*. [arXiv:2306.00978](https://arxiv.org/abs/2306.00978).
+2. **Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., & Han, S.** (2023). "SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models." *International Conference on Machine Learning (ICML 2023)*, PMLR 202, pp. 38087–38099.
+3. **Dettmers, T., Lewis, M., Belkada, Y., & Zettlemoyer, L.** (2022). "LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale." *Advances in Neural Information Processing Systems (NeurIPS 2022)*, 35, 30318–30332.
+4. **Frantar, E., Ashkboos, S., Hoefler, T., & Alistarh, D.** (2023). "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers." *International Conference on Learning Representations (ICLR 2023)*. [arXiv:2210.17323](https://arxiv.org/abs/2210.17323).

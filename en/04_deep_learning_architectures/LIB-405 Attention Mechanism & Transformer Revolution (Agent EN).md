@@ -27,7 +27,6 @@ tags:
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-  - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
 successors:
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
   - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
@@ -38,6 +37,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-405%20%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%A9%9F%E5%88%B6%E3%80%81Transformer%20%E9%9D%A9%E5%91%BD%E8%88%87%E4%BD%8D%E7%BD%AE%E7%B7%A8%E7%A2%BC%E5%B9%BE%E4%BD%95%20%28Attention%20Mechanism%20%26%20Transformer%20Revolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # The Attention Mechanism, Transformer Architecture & RoPE Geometry
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]].
+- **Successors**: [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 

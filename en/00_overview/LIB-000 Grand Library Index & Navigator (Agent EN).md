@@ -36,9 +36,9 @@ successors:
 The knowledge base is formalized as a finite, directed, acyclic graph:
 $$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A})$$
 where:
-- $\mathcal{V} = \{v_1, v_2, \dots, v_{25}\}$ is the set of 25 canonical academic volumes.
+- $\mathcal{V} = \{v_1, v_2, \dots, v_{27}\}$ is the set of 27 canonical academic volumes.
 - $\mathcal{E} \subset \mathcal{V} \times \mathcal{V}$ is the set of directed dependency edges representing prerequisite orderings. If $(u, v) \in \mathcal{E}$, volume $u$ MUST be ingested and verified prior to volume $v$.
-- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 84$).
+- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 93$).
 
 ### Topological Sort & Execution Order
 Because $\mathcal{G}$ contains no directed cycles ($\nexists \text{ path } u \rightsquigarrow u$), there exists at least one linear topological ordering $\tau: \mathcal{V} \to \{1, \dots, |\mathcal{V}|\}$ satisfying:
@@ -46,9 +46,9 @@ $$(u, v) \in \mathcal{E} \implies \tau(u) < \tau(v)$$
 
 The canonical 3-tier linear ingestion schedule for autonomous agents is:
 1. **Tier 1: Core Mathematical & Hardware Primitives**:
-   $$\text{LIB-000} \to \text{LIB-001} \to \text{LIB-101} \to \text{LIB-104} \to \text{LIB-203}$$
+   $$\text{LIB-000} \to \text{LIB-001} \to \text{LIB-101} \to \text{LIB-102} \to \text{LIB-104} \to \text{LIB-203}$$
 2. **Tier 2: Perception, Spatial Biases, Architectures & Systems**:
-   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-801} \to \text{LIB-405} \to \text{LIB-501} \to \text{LIB-406} \to \text{LIB-602} \to \text{LIB-504} \to \text{LIB-407} \to \text{LIB-703} \to \text{LIB-802} \to \text{LIB-505} \to \text{LIB-408} \to \text{LIB-704} \to \text{LIB-506}$$
+   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-801} \to \text{LIB-405} \to \text{LIB-501} \to \text{LIB-502} \to \text{LIB-406} \to \text{LIB-602} \to \text{LIB-504} \to \text{LIB-407} \to \text{LIB-703} \to \text{LIB-802} \to \text{LIB-505} \to \text{LIB-408} \to \text{LIB-704} \to \text{LIB-506}$$
 3. **Tier 3: Empirical Systems & Capstone Research**:
    $$\text{LIB-901} \to \text{LIB-903} \to \text{LIB-904} \to \text{LIB-905} \to \text{LIB-906}$$
 
@@ -85,18 +85,18 @@ Every numerical metric, performance threshold, and scientific assertion in this 
 
 The library indexes volumes into 10 specialized functional wings based on the ACM Computing Classification System (CCS 2012) and Dewey Decimal principles:
 
-| Call Number Range | Wing Name | Focus Domain | Key Mathematical & System Invariants |
+| Call Number Range | Wing Name | Focus Domain | Flagship Volumes & Key Invariants |
 | :--- | :--- | :--- | :--- |
-| **LIB-000 ~ 099** | **00 Overview & Protocols** | DAG Navigator & First Principles | 6-Pillar framework, agent decision trees |
-| **LIB-100 ~ 199** | **01 Mathematical Foundations** | Linear Algebra, SVD & Optimization | Spectral decomposition, Lipschitz gradients |
-| **LIB-200 ~ 299** | **02 Computer Systems & Hardware** | Memory Hierarchy & Microarchitecture | Warp coalescing, Tensor Core GEMM tiling |
-| **LIB-300 ~ 399** | **03 Machine Learning Principles** | Covariate Shift & Spatial Penalties | Out-of-Distribution bounds, covariate shift |
-| **LIB-400 ~ 499** | **04 Deep Learning Architectures** | CNNs, Transformers, Flow Matching, Instruction Editing & Harmonization | Equivariance, RoPE, OT velocity fields, attention locking |
-| **LIB-500 ~ 599** | **05 Computer Vision & Sensing** | Centering Moments, 3DGS Splatting, Semantic Retrieval & Spatial QA | Bilinear CoM shift, explicit Gaussians, multi-view consensus |
-| **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | Chinchilla compute-optimal frontier, GQA |
-| **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | S1 non-autoregressive Jev, S2 ReAct gating |
-| **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | ECE temperature scaling, AWQ/INT4 GEMM |
-| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis, Five Frontier Blueprints & Conversational Epistemic Revision | C801 proposal structure, solo engineering, ablation matrix, epistemic calibration |
+| **LIB-000 ~ 099** | **00 Overview & Protocols** | DAG Navigator & First Principles | [[LIB-000 Grand Library Index & Navigator (Agent EN)]], [[LIB-001 Deep Learning First Principles (Agent EN)]] |
+| **LIB-100 ~ 199** | **01 Mathematical Foundations** | Linear Algebra, SVD, Probability, Info Theory, ELBO & Optimization | [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]] |
+| **LIB-200 ~ 299** | **02 Computer Systems & Hardware** | Memory Hierarchy & Microarchitecture | [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]] |
+| **LIB-300 ~ 399** | **03 Machine Learning Principles** | Covariate Shift & Spatial Penalties | [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]] |
+| **LIB-400 ~ 499** | **04 Deep Learning Architectures** | CNNs, Transformers, Flow Matching, Instruction Editing & Harmonization | [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]] |
+| **LIB-500 ~ 599** | **05 Computer Vision & Sensing** | Centering Moments, Projective/Epipolar Geometry, SfM, 3DGS Splatting, Semantic Retrieval & Spatial QA | [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] |
+| **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]] |
+| **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]] |
+| **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]] |
+| **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis, Five Frontier Blueprints & Conversational Epistemic Revision | [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]] |
 
 ---
 
@@ -138,3 +138,10 @@ def verify_library_integrity(dag_graph: dict):
             assert p in dag_graph, f"Broken link alert: dependency {p} of node {node} does not exist!"
 ```
 
+---
+
+## 6. Canonical Standards & References
+
+1. **Association for Computing Machinery (ACM)** (2012 / Updated 2024). *The 2012 ACM Computing Classification System (CCS)*. ACM Official Nomenclature.
+2. **Joint Task Force on Computing Curricula** (2023). *Computer Science Curricula 2023 (CS2023)*. IEEE Computer Society & ACM.
+3. **OCLC** (2019). *Dewey Decimal Classification (DDC), 23rd Edition*. 004–006 Data Processing & Computer Science.

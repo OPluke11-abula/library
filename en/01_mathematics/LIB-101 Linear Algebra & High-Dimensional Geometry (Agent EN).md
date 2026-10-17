@@ -11,8 +11,8 @@ audience:
   - Senior-ML-Engineer
 math_foundations:
   - Spectral Theorem & Orthogonal Diagonalization
-  - Singular Value Decomposition (SVD)
-  - Low-Rank Matrix Approximation (Eckart-Young Theorem)
+  - Singular Value Decomposition (SVD) `[FACT]`
+  - Low-Rank Matrix Approximation (Eckart-Young Theorem `[DERIVATION]`)
   - Moore-Penrose Pseudoinverse
 hardware_target:
   - GPU Tensor Core GEMM Tiling (WMMA)
@@ -26,11 +26,13 @@ tags:
 prerequisites:
   - "[[LIB-001 Deep Learning First Principles (Agent EN)]]"
 successors:
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
   - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
+  - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
   - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
   - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
 ---
@@ -38,6 +40,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../01_%E6%95%B8%E5%AD%B8%E8%88%87%E7%90%86%E8%AB%96%E5%9F%BA%E7%9F%B3/LIB-101%20%E7%B7%9A%E6%80%A7%E4%BB%A3%E6%95%B8%E8%88%87%E9%AB%98%E7%B6%AD%E5%B9%BE%E4%BD%95%E8%AE%8A%E6%8F%9B%E6%9C%AC%E8%B3%AA%20%28Linear%20Algebra%20%26%20High-Dimensional%20Geometry%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Linear Algebra & High-Dimensional Geometry for Deep Learning
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-001 Deep Learning First Principles (Agent EN)]].
+- **Successors**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -119,3 +125,11 @@ def truncated_svd_projection(x: torch.Tensor, target_rank: int) -> torch.Tensor:
 - **Specification**: In low-rank adaptation ($W = W_0 + \frac{\alpha}{r} B A$, e.g., $d_{\text{model}} = 4096$), adapter matrix $A \in \mathbb{R}^{r \times d_{\text{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (Kaiming) and matrix $B \in \mathbb{R}^{d_{\text{out}} \times r}$ MUST be initialized strictly to zero ($B = 0$) so $\Delta W = 0$ at $t = 0$. Default rank selection: $r \in \{8, 16\}$ ($\alpha = 2r$) for standard instruction tuning, $r \ge 64$ for vertical domain injection, enforcing parameter ratio $(2 d_{\text{model}} r) / d_{\text{model}}^2 \le 0.01$ and $r \le 128$.
 - **Violation Consequence**: Non-zero initialization of $B$ perturbs pretrained parameter manifolds at step 0, while excessive rank ($r > 128$) induces overfitting and VRAM overflow.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Eckart, C., & Young, G.** (1936). "The approximation of one matrix by another of lower rank." *Psychometrika*, 1(3), 211–218. DOI: [10.1007/BF02288367](https://doi.org/10.1007/BF02288367).
+2. **Golub, G. H., & Van Loan, C. F.** (2013). *Matrix Computations* (4th ed.). Johns Hopkins University Press.
+3. **Strang, G.** (2016). *Introduction to Linear Algebra* (5th ed.). Wellesley-Cambridge Press.
+4. **Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., & Chen, W.** (2022). "LoRA: Low-Rank Adaptation of Large Language Models." *International Conference on Learning Representations (ICLR 2022)*. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685).

@@ -26,7 +26,7 @@ tags:
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
-  - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
+  - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
 successors:
   - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
   - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
@@ -36,6 +36,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-504%203D%20%E8%A6%96%E8%A6%BA%E5%89%8D%E6%B2%BF%EF%BC%9A%E7%A5%9E%E7%B6%93%E8%BC%BB%E5%B0%84%E5%A0%B4%20%28NeRF%29%20%E5%88%B0%203D%20%E9%AB%98%E6%96%AF%E6%BD%91%E6%BF%BA%20%283DGS%29%20%E7%90%86%E8%AB%96%E8%88%87%E5%85%89%E6%9F%B5%E5%8C%96%20%283D%20Gaussian%20Splatting%20Theory%20%26%20Rasterization%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # 3D Gaussian Splatting: Theory & Differentiable Rasterization
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]].
+- **Successors**: [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -51,7 +55,7 @@ $$G(x) = \exp\left( -\frac{1}{2} (x - \mu)^T \Sigma^{-1} (x - \mu) \right)$$
 To guarantee positive semi-definiteness during gradient descent, $\Sigma$ is factorized into a rotation matrix $R$ (parameterized by unit quaternion $q$) and scale vector $s = (s_x, s_y, s_z)^T$:
 $$\Sigma = R S S^T R^T, \quad S = \text{diag}(s)$$
 
-### 2. Projection to 2D Screen Space (Zwicker EWA Splatting)
+### 2. Projection to 2D Screen Space (Zwicker EWA Splatting `[DERIVATION]`)
 Given viewing transformation $W$ (world-to-camera matrix) and projective Jacobian $J$ at camera coordinate $t = W \mu$:
 $$\Sigma' = J W \Sigma W^T J^T$$
 where $\Sigma' \in \mathbb{R}^{2 \times 2}$ is the projected 2D covariance matrix on the camera image plane.
@@ -118,3 +122,11 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 - **Specification**: During tiled front-to-back alpha blending rasterization ($T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$), thread evaluation for a given pixel MUST terminate immediately when accumulated opacity reaches $1 - T_i \ge 0.9999$.
 - **Violation Consequence**: Continuing ray integration past near-opaque surfaces consumes unnecessary memory bandwidth without altering output color values.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Mildenhall, B., Srinivasan, P. P., Tancik, M., Barron, J. T., Ramamoorthi, R., & Ng, R.** (2020). "NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis." *European Conference on Computer Vision (ECCV 2020)*, pp. 405–421. DOI: [10.1007/978-3-030-58452-8_24](https://doi.org/10.1007/978-3-030-58452-8_24).
+2. **Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G.** (2023). "3D Gaussian Splatting for Real-Time Radiance Field Rendering." *ACM Transactions on Graphics (SIGGRAPH 2023)*, 42(4), Article 139. DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
+3. **Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B.** (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM SIGGRAPH 2024 Conference Papers*. DOI: [10.1145/3641519.3657428](https://doi.org/10.1145/3641519.3657428).
+4. **Wu, G., Yi, T., Fang, J., Xie, L., Zhang, X., Wei, W., Liu, W., Tian, Q., & Wang, X.** (2024). "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)*, pp. 20310–20320.

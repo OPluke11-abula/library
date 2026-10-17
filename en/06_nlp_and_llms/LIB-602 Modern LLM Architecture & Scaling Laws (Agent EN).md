@@ -26,6 +26,7 @@ tags:
   - gqa
   - rmsnorm
 prerequisites:
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
@@ -39,6 +40,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../06_%E8%87%AA%E7%84%B6%E8%AA%9E%E8%A8%80%E8%99%95%E7%90%86%E8%88%87%E5%A4%A7%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B/LIB-602%20%E7%8F%BE%E4%BB%A3%E5%A4%A7%E8%AA%9E%E8%A8%80%E6%A8%A1%E5%9E%8B%E6%9E%B6%E6%A7%8B%E8%A7%A3%E5%89%96%E8%88%87%E7%B8%AE%E6%94%BE%E5%AE%9A%E5%BE%8B%20%28Modern%20LLM%20Architecture%20%26%20Scaling%20Laws%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Modern Large Language Model Architectures & Empirical Scaling Laws
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]].
+- **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 

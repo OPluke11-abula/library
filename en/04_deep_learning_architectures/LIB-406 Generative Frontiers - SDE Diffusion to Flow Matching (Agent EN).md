@@ -25,6 +25,7 @@ tags:
   - score-based-models
   - optimal-transport
 prerequisites:
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
 successors:
@@ -35,6 +36,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-406%20%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B%E5%89%8D%E6%B2%BF%EF%BC%9A%E5%BE%9E%E9%9A%A8%E6%A9%9F%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%20%28SDE%29%20%E6%93%B4%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%88%B0%E6%9C%80%E4%BD%B3%E5%82%B3%E8%BC%B8%E6%B5%81%E5%8C%B9%E9%85%8D%20%28Flow%20Matching%29%20%E8%88%87%20DiT%20%E9%9D%A9%E5%91%BD%20%28Generative%20Frontiers%20-%20From%20Score-Based%20SDE%20Diffusion%20to%20Optimal%20Transport%20Flow%20Matching%20%26%20DiT%20Revolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Generative Frontiers: SDE Score-Based Diffusion to Optimal Transport Flow Matching
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]].
+- **Successors**: [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -68,6 +73,12 @@ Replacing legacy U-Nets with standard Vision Transformer backbones:
 2. **adaLN-Zero Conditioning**: Adaptive LayerNorm parameters $(\gamma, \beta, \alpha)$ dynamically regressed from time embedding $t$:
    $$\text{adaLN}(h, t) = \gamma(t) \odot \text{LayerNorm}(h) + \beta(t)$$
    Crucially, scale factor $\alpha(t)$ is initialized to 0 at $t = 0$, making each residual block an exact identity function at initialization.
+
+---
+
+### 4. Systems & Hardware Alignment
+- **FlashAttention-3 & Tensor Core Utilization in DiT**: Replacing legacy UNet group-convolutions with uniform DiT patch sequences ($N = HW/p^2$) converts spatial bottlenecks into dense Tensor Core GEMMs and SRAM-fused FlashAttention kernels `[DESIGN_DECISION]`.
+- **NFE Latency Budget**: Straight Optimal Transport trajectories ($\kappa = 0$) reduce Number of Function Evaluations (NFE) from $50\text{--}100$ SDE steps to $4\text{--}8$ Euler steps, cutting HBM activation read/write traffic by $>85\%$ `[EMPIRICAL_RESULT]`.
 
 ---
 

@@ -45,7 +45,7 @@ successors:
 ---
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（GPU Warp 對齊）、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]（DNN 空間死記缺陷）、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]（LeCun 前處理規範）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（8 層過度自信與校準理論）。
+- **前置依賴**：[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
 - **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
 - **核心定位**：本卷為整座圖書館的**「創生實戰案例典籍（Genesis Case Study）」**，原汁原味復盤中原大學資工系蔡老師課堂作業從陽春範本進化為生產級手寫辨識系統的完整工程與理論全景。
 

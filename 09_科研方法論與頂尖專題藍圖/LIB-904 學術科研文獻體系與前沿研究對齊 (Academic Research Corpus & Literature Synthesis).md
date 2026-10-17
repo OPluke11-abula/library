@@ -12,7 +12,7 @@ audience:
 math_foundations:
   - View-Decomposed LoRA & 3DGS Cascaded Optimization
   - Space-Filling Curves (Hilbert & Z-Order) Point Cloud Serialization
-  - Camera-Aware Jaccard Distance Metric (CA-Jaccard)
+  - Camera-Aware Jaccard Distance Metric (CA-Jaccard `[DERIVATION]`)
   - Entropy-Aware Adaptive Fusion (EAAF) in Latent Diffusion
   - Parallel Residual Bi-Fusion (PRB-FPN) & Testing-Time Grid Cropping
   - Bunch Testing Time Augmentation (Bunch TTA) Invariant Transformations
@@ -46,7 +46,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
-- **後續節點**：[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]（本卷亦為學術文獻研讀與科研方法論之總成節點，直接支撐大專學生研究計畫與深度學習自主科研體系）。
+- **後續節點**：[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **學術定位**：建立獨立研究員（Luke）研讀頂級會議與同行評審權威期刊論文的系統化方法論。以電腦視覺、神經渲染（3DGS）、高維幾何點雲序列化、度量學習（Metric Learning）與測試時增強（TTA）等前沿研究為實戰範例，架構從理論形式化、消融實驗分析、GPU 硬體映射到代碼復現之完整學術研讀閉環：
 
 ```

@@ -25,9 +25,11 @@ tags:
   - adam-dynamics
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
 successors:
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
+  - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
   - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
 ---
@@ -35,6 +37,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../01_%E6%95%B8%E5%AD%B8%E8%88%87%E7%90%86%E8%AB%96%E5%9F%BA%E7%9F%B3/LIB-104%20%E5%87%B8%E6%9C%80%E4%BD%B3%E5%8C%96%E7%90%86%E8%AB%96%E8%88%87%E4%B8%80%E9%9A%8E%E4%BA%8C%E9%9A%8E%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%B9%BE%E4%BD%95%20%28Optimization%20Theory%20%26%20Gradient%20Descent%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Convex Optimization Theory & Gradient Descent Dynamics
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]].
+- **Successors**: [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -45,7 +51,7 @@ Optimization in deep learning navigates a non-convex, high-dimensional empirical
 ## 2. Mathematical Formalization
 
 ### 1. Lipschitz Gradient Smoothness
-A differentiable loss function $f: \mathbb{R}^d \to \mathbb{R}$ is $L$-smooth ($L$-Lipschitz continuous gradient) if:
+A differentiable loss function $f: \mathbb{R}^d \to \mathbb{R}$ is $L$-smooth ($L$-Lipschitz continuous `[FACT]` gradient) if:
 $$\|\nabla f(x) - \nabla f(y)\| \le L \|x - y\|, \quad \forall x, y \in \mathbb{R}^d$$
 Equivalently, this imposes a quadratic upper bound on function values (Descent Lemma):
 $$f(y) \le f(x) + \langle \nabla f(x), y - x \rangle + \frac{L}{2} \|y - x\|^2$$
@@ -122,3 +128,11 @@ def compute_loss_surface_curvature(model: torch.nn.Module, loss_fn, x_batch, y_b
 - **Specification**: The second-moment denominator constant $\epsilon$ in adaptive optimizers (Adam/AdamW) MUST be configured to match numerical precision: $\epsilon = 10^{-8}$ for FP32/BF16, and $\epsilon \ge 10^{-6}$ for pure FP16 to prevent subnormal floating-point divisions (below FP16 minimum normal $6.1 \times 10^{-5}$).
 - **Violation Consequence**: Excessively small $\epsilon$ under half-precision generates subnormal denormalized numbers, causing severe hardware ALU pipeline stalls.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Nesterov, Y.** (2004). *Introductory Lectures on Convex Optimization: A Basic Course*. Springer. DOI: [10.1007/978-1-4419-8853-9](https://doi.org/10.1007/978-1-4419-8853-9).
+2. **Boyd, S., & Vandenberghe, L.** (2004). *Convex Optimization*. Cambridge University Press. DOI: [10.1017/CBO9780511804441](https://doi.org/10.1017/CBO9780511804441).
+3. **Loshchilov, I., & Hutter, F.** (2019). "Decoupled Weight Decay Regularization." *International Conference on Learning Representations (ICLR 2019)*. [arXiv:1711.05101](https://arxiv.org/abs/1711.05101).
+4. **Kingma, D. P., & Ba, J.** (2015). "Adam: A Method for Stochastic Optimization." *International Conference on Learning Representations (ICLR 2015)*. [arXiv:1412.6980](https://arxiv.org/abs/1412.6980).

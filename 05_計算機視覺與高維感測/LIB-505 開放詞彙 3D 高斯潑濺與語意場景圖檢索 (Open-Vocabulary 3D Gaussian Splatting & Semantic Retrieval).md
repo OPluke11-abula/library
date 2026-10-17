@@ -41,7 +41,7 @@ successors:
 
 ## 導讀與概念座標
 - **前置依賴**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]。
-- **後續模組**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
+- **後續節點**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **核心目標**：解決傳統 3DGS 僅能渲染幾何外觀與 RGB 輻射場、缺乏語意理解的缺陷。透過將開放詞彙（Open-Vocabulary）語言視覺特徵（CLIP / DINOv2 / SAM）嵌入顯式 3D 高斯橢球，實現輸入任意自然語言指令（如「找出可以坐的東西」或「實驗室裡的印表機在哪」）即時定位並高亮 3D 物件實體。
 
 ---

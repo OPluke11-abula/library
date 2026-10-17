@@ -27,11 +27,16 @@ prerequisites:
   - "[[LIB-000 Grand Library Index & Navigator (Agent EN)]]"
 successors:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../00_%E7%B8%BD%E8%A6%BD%E8%88%87%E6%8B%93%E6%A8%B8%E5%B0%8E%E8%A6%BD/LIB-001%20%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E7%AC%AC%E4%B8%80%E6%80%A7%E5%8E%9F%E7%90%86%E5%85%88%E4%BF%AE%E7%B2%BE%E8%A6%81%EF%BC%9A%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E5%AD%B8%E7%BF%92%E7%9A%84%E5%85%AD%E5%A4%A7%E5%9F%BA%E7%9F%B3%20%28Deep%20Learning%20First%20Principles%20-%20The%20Six%20Pillars%20of%20How%20Models%20Learn%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Deep Learning First Principles: The Six Pillars of Neural Learning
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-000 Grand Library Index & Navigator (Agent EN)]].
+- **Successors**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]].
 
 ## 1. Executive Conceptual Mental Model
 
@@ -192,3 +197,11 @@ For rapid reference and cross-verification against foundational literature, this
 4. **ResNet Identity Shortcut**: Highway paths $a^{[l+2]} = g(z^{[l+2]} + a^{[l]})$ prevent gradient extinction by establishing clean $\frac{\partial \mathcal{L}}{\partial a^{[l]}} = \frac{\partial \mathcal{L}}{\partial a^{[l+2]}} + \dots$ backpropagation channels.
 5. **Attention Scaling Factor**: The scalar $\frac{1}{\sqrt{d_k}}$ in $\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)$ prevents large dot-products from pushing softmax into vanishing gradient saturation regions.
 
+---
+
+## 6. Canonical & Peer-Reviewed References
+
+1. **Rumelhart, D. E., Hinton, G. E., & Williams, R. J.** (1986). "Learning representations by back-propagating errors." *Nature*, 323(6088), 533–536. DOI: [10.1038/323533a0](https://doi.org/10.1038/323533a0).
+2. **LeCun, Y., Bengio, Y., & Hinton, G.** (2015). "Deep learning." *Nature*, 521(7553), 436–444. DOI: [10.1038/nature14539](https://doi.org/10.1038/nature14539).
+3. **Goodfellow, I., Bengio, Y., & Courville, A.** (2016). *Deep Learning*. MIT Press.
+4. **Kingma, D. P., & Ba, J.** (2015). "Adam: A Method for Stochastic Optimization." *International Conference on Learning Representations (ICLR 2015)*. [arXiv:1412.6980](https://arxiv.org/abs/1412.6980).

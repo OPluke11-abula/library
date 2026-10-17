@@ -1,7 +1,7 @@
 ---
 call_number: LIB-906
 status: reviewed
-invariants_count: 0
+invariants_count: 3
 title: 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)
 module: Research-Methodology
 category: NLP-LLM-Alignment-Research
@@ -34,9 +34,13 @@ successors: []
 
 # 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖
 
+## 🧭 拓樸導航與概念座標
+- **前置依賴**：[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
+- **後續節點**：無（終端專題節點）。
+
 **English title:** LLM Conversational Epistemic Revision — Selective Epistemic Revision under Conversational Pushback  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  
-**Current phase:** Related Work / Novelty Collision Audit（已完成審查與 Gap Matrix 入庫）  
+**Current phase:** Related Work / Novelty Collision Audit（原始文獻核實進行中，已完成 10 篇基準論文 Gap Matrix 入庫）  
 **Evidence status:** 本文件記錄研究設計、待驗證假設與審查標準；**不是**已完成的文獻回顧或實證結果。除明確標示為研究定義的內容外，不得把本文件當作外部學術事實的引用來源。
 
 > **核心研究問題 / Core Research Question**  
@@ -370,24 +374,24 @@ Previous self-generated claim
 ### 12.2 五大核心審查問題之權威裁決 (Authoritative Decisions on the 5 Questions)
 
 1. **Does the gap actually exist? (真正缺口是否存在？)**  
-   **存在且顯著。** 現有研究分散於「單純抗諂媚/盲目堅持」（Wei 2024, Guan 2024）、「單輪草稿自我查證」（CoVe 2024）與「純文字 Prompt 選擇性抗性 Benchmark」（TruthfulPushback 2025）。目前學界完全缺乏一套**「具備顯式主張溯源（Provenance）、證據仲裁動作空間（Maintain/Revise/Verify/Clarify）、並具備因果回溯機制以防止失效主張污染下游多跳推理」**的完整架構與評測體系。
+   **存在且顯著 `[HYPOTHESIS]`。** 現有研究分散於「單純抗諂媚/盲目堅持」（Wei et al. 2023, Sharma et al. 2024）、「單輪草稿自我查證」（Dhuliawala et al. 2024 CoVe）與「多輪對話翻轉診斷 Benchmark」（Laban et al. 2023 FlipFlop, Hong et al. 2025 SYCON-Bench）。目前學界仍缺乏一套**「具備顯式主張溯源（Provenance）、證據仲裁動作空間（Maintain/Revise/Verify/Clarify）、並具備因果回溯機制以防止失效主張污染下游多跳推理」**的完整架構與評測體系。
 
 2. **Which parts are already covered? (哪些問題已被 Prior Work 覆蓋？)**  
-   - 「無效質疑下之虛假屈服 (FCR)」與「有效質疑下之頑固抗拒 (CCR)」的基本對稱評測已由 TruthfulPushback (Chen 2025) 提出。
-   - 單次回覆內的原子主張拆解已由 CoVe (Dhuliawala 2024) 驗證可行。
-   - 社交禮貌（道歉態度）與事實信念更新之解耦概念已由 ELEPHANT (Cheng 2024) 充分立論。
+   - 「無效質疑下之立場翻轉（FlipFlop / Turn of Flip）」與多輪持續施壓下之順從動態，已由 Laban et al. (2023) 與 SYCON-Bench (Hong et al. 2025) 系統化實證 `[LITERATURE_RESULT]`。
+   - 單次回覆內的原子主張拆解已由 CoVe (Dhuliawala et al. 2024) 驗證可行 `[LITERATURE_RESULT]`。
+   - 社交禮貌（道歉態度/面子維持）與事實信念更新之解耦概念已由 ELEPHANT (Cheng et al. 2025/2026) 充分立論 `[LITERATURE_RESULT]`。
 
 3. **What remains defensible? (哪些 Contribution 仍能堅守成立？)**  
-   - **Contribution 1 (核心方法)**：`Ledger-Backtrack` 神經符號架構——以顯式 Claim Ledger 隔離「自身主張」、「使用者前提」與「外部事實」，並在主張被 Revise/Retract 時觸發計算圖回溯，強制阻斷無效前提進入下游推理（Invalid Premise Safeguard）。
-   - **Contribution 2 (評測維度)**：`PushBack-Bench` 首次引入「下游前提依賴測試（Downstream Contamination Test）」，證明即便 SOTA 模型（如 GPT-4o）在文字上表面撤回錯誤，後續多跳推論仍會暗中沿用該錯誤前提。
-   - **Contribution 3 (時間脈絡)**：正式區分「邏輯矛盾」與「時間版本躍遷 ($\tau_t$)」，避免時序更新被誤判為事實錯誤。
+   - **Contribution 1 (核心方法)**：`Ledger-Backtrack` 神經符號架構——以顯式 Claim Ledger 隔離「自身主張」、「使用者前提」與「外部事實」，並在主張被 Revise/Retract 時觸發計算圖回溯，強制阻斷無效前提進入下游推理（Invalid Premise Safeguard） `[DESIGN_DECISION]`。
+   - **Contribution 2 (評測維度)**：`PushBack-Bench` 首次引入「下游前提依賴測試（Downstream Contamination Test）」，檢驗模型在文字上表面撤回錯誤後，後續多跳推論是否仍暗中沿用該錯誤前提 `[TARGET]`。
+   - **Contribution 3 (時間脈絡)**：正式區分「邏輯矛盾」與「時間版本躍遷 ($\tau_t$)」，避免時序更新被誤判為事實錯誤 `[DESIGN_DECISION]`。
 
 4. **How should PushBack-Bench be narrowed? (基準範圍如何聚焦收斂？)**  
    - **主評測集 (Main Benchmark)**：嚴格鎖定於具備高可信客觀真值之 $2 \times 2$ 核心矩陣：`(模型初始正確/錯誤) × (質疑有效/無效)`，加上聚焦的 `Ambiguous / Insufficient` 查證邊界案例。
    - **壓力測試與附錄 (Stress Test / Appendix)**：將開放式時間世界狀態遷移 ($\tau_t$) 與大於 5 輪之長對話移至獨立的 Temporal Stress Test 與附錄，避免主文評測變因失控。
 
 5. **Should Ledger-Backtrack be the Main Method? (方法定位裁決)**  
-   - **裁定為核心方法 (Main Architecture Contribution)**。文獻審查表明，純 Prompt-based 記憶體管理（如 TruthfulPushback Baseline）在上下文長度增長時必然發生潛在前提污染；`Ledger-Backtrack` 提供具有可證實性（Verifiability）的狀態轉換機制，具備高度獨立的學術創新價值。
+   - **裁定為候選核心方法 (Candidate Main Architecture Contribution)**。文獻審查表明，純 Prompt-based 記憶體管理（如 Self-Refine / SYCON-Bench Prompt Baseline）在上下文長度增長時極易發生潛在前提污染；`Ledger-Backtrack` 提供具有可證實性（Verifiability）的狀態轉換機制，其邊際效益待受控消融實驗最終裁決。
 
 ---
 
@@ -450,3 +454,46 @@ Previous self-generated claim
 **下一個任務：** 依據 Gap Matrix 審查裁定結果，實作最小可行前導實驗（Controlled Single / 3-turn Pilot），針對 2x2 核心矩陣驗證標籤可靠性，並實作 Ledger-Backtrack 之無效前提阻斷測試（Downstream Contamination Test）。
 
 **主研究立場：** 目標不是讓模型更善於反駁使用者，而是讓模型在證據改變時，可靠管理自身先前生成的 Factual Claims。
+
+---
+
+## 17. 🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
+
+### [RULE-906-01] 社交道歉與事實認知修訂嚴格解耦合約 (Social-Epistemic Decoupling Invariant)
+- **合約等級**: `CRITICAL_INVARIANT`
+- **前置條件**: 設計對話質疑評估指標（FCR、CCR、ESA）或訓練/提示模型面對使用者反駁之回應策略時。
+- **決策邊界**:
+  - **嚴格禁止**將社交語氣標記（如「抱歉造成誤解」、「感謝您的指正」）直接判定為事實讓步（False Capitulation）或有效修訂（Correct Correction）。
+  - 認知動作分類 $A_t \in \{\mathrm{Maintain}, \mathrm{Revise}, \mathrm{Verify}, \mathrm{Clarify}\}$ 必須完全依據模型對原子事實主張 $C_i$ 的**實質真值狀態更新**進行判定。
+
+### [RULE-906-02] 已撤回主張之下游前提污染阻斷鐵律 (Retracted Premise Backtracking Invariant)
+- **合約等級**: `CRITICAL_INVARIANT`
+- **前置條件**: 當 Claim Ledger 中任一先前主張 $C_i$ 因有效反證被標記為 `Retracted` 或 `Contradicted` 時。
+- **決策邊界**:
+  - 系統必須立即執行認知回溯（Epistemic Backtracking），將 $C_i$ 及其無獨立支撐的衍生子命題移出有效推論前提集。
+  - 後續輪次的生成與多跳推理**嚴禁將已撤回之 $C_i$ 重新當作有效事實前提**；評估時必須檢驗下游多跳推論鏈，而非僅比對字面句子重複。
+
+### [RULE-906-03] 預實驗階段新穎性審計與結果誠信護欄 (Pre-Experimental Novelty & Result Integrity Invariant)
+- **合約等級**: `CRITICAL_INVARIANT`
+- **前置條件**: 撰寫研究藍圖、相關文獻差距矩陣（Gap Matrix）或尚未完成受控實驗之論文草稿時。
+- **決策邊界**:
+  - 在完成受控基準實驗與消融測試前，Novelty Collision Audit 狀態必須維持為**進行中（In-Progress）** `[SAFETY_BOUND]`，嚴禁宣告新穎性審查已終結。
+  - 所有未經實機測試之架構效益與指標表現一律標註為 `Proposed / Hypothesized` `[HYPOTHESIS]`，**嚴格禁止**捏造未執行實驗之提升百分比、$p$ 值或從參數記憶合成未經核實之論文引證。
+
+---
+
+## 18. 📚 權威論文與同行評審文獻 (Canonical & Peer-Reviewed References)
+
+1. **RLHF 諂媚機理剖析奠基作 (ICLR 2024)**
+   - *Paper*: Sharma, M., Tong, M., Korbak, T., Duvenaud, D., Askell, A., Bowman, S. R., ... & Perez, E. (2024). "Towards Understanding Sycophancy in Language Models." *International Conference on Learning Representations (ICLR 2024)*. [arXiv:2310.13548](https://arxiv.org/abs/2310.13548).
+2. **LLM 內在自我修正界線實證 (ICLR 2024)**
+   - *Paper*: Huang, J., Chen, X., Mishra, S., Zheng, H. S., Yu, A. W., Song, X., & Zhou, D. (2024). "Large Language Models Cannot Self-Correct Reasoning Yet." *International Conference on Learning Representations (ICLR 2024)*. [arXiv:2310.01798](https://arxiv.org/abs/2310.01798).
+3. **驗證鏈原子主張拆解管線 (Findings of ACL 2024)**
+   - *Paper*: Dhuliawala, S., Komeili, M., Xu, J., Raileanu, R., Li, X., Celikyilmaz, A., & Weston, J. (2024). "Chain-of-Verification Reduces Hallucination in Large Language Models." *Findings of the Association for Computational Linguistics: ACL 2024*, pp. 3563–3578. URL: [https://aclanthology.org/2024.findings-acl.212/](https://aclanthology.org/2024.findings-acl.212/).
+4. **多輪持續對話諂媚基準 SYCON-Bench (Findings of EMNLP 2025)**
+   - *Paper*: Hong, J., et al. (2025). "Measuring Sycophancy of Language Models in Multi-turn Dialogues." *Findings of the Association for Computational Linguistics: EMNLP 2025*. [arXiv:2410.05353](https://arxiv.org/abs/2410.05353).
+5. **對話反問立場翻轉實驗 FlipFlop (Salesforce AI 2023)**
+   - *Paper*: Laban, P., Murakhovs'ka, L., Xiong, C., & Wu, C.-S. (2023). "Are You Sure? Challenging LLMs Leads to Performance Drops in The FlipFlop Experiment." [arXiv:2311.08596](https://arxiv.org/abs/2311.08596).
+6. **社交面子維持與事實判斷解耦 ELEPHANT (ICLR 2026)**
+   - *Paper*: Cheng, M., et al. (2025/2026). "ELEPHANT: Measuring and Understanding Social Sycophancy in LLMs." *International Conference on Learning Representations (ICLR 2026)*. [arXiv:2505.02878](https://arxiv.org/abs/2505.02878).
+

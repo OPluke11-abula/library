@@ -44,7 +44,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
-- **後續節點**：[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]、國科會大專學生研究計畫 (C801)、頂大（台清交成）碩士班推甄書審。
+- **後續節點**：[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **難度等級**：學士畢業專題 / 碩士科研實戰。
 
 ---
@@ -144,7 +144,7 @@ successors:
 
 ### 1. 分支一：幾何抗變形手寫文字辨識引擎 (Robust HTR / OCR)
 - **空間變換網路 (Spatial Transformer Networks, STN)**：
-  引入 Jaderberg et al. (NeurIPS 2015) 的 STN 模組。在影像送入分類器之前，透過可微雙線性網格採樣，網路自動預測 $2 \times 3$ 仿射矩陣：
+  引入 Jaderberg et al. (NeurIPS 2015) `[LITERATURE_RESULT]` 的 STN 模組。在影像送入分類器之前，透過可微雙線性網格採樣，網路自動預測 $2 \times 3$ 仿射矩陣：
   $$\begin{bmatrix} x_i^s \\ y_i^s \end{bmatrix} = \begin{bmatrix} \theta_{11} & \theta_{12} & \theta_{13} \\ \theta_{21} & \theta_{22} & \theta_{23} \end{bmatrix} \begin{bmatrix} x_i^t \\ y_i^t \\ 1 \end{bmatrix}$$
   自主學會將歪斜的 7 擺正、將過小的 1 放大，從根本上解決旋轉與尺度變形。
 - **序列化端到端手寫文字行辨識**：
@@ -222,7 +222,7 @@ successors:
 - **前置條件**: 撰寫科研論文或專題成果報告中的實驗評測章節。
 - **決策邊界**:
   - 任何新提出的模組（如質心對齊、AWQ 量化、溫度縮放），必須提供**嚴格的單一變因消融實驗對比表格**。
-  - 所有對照組必須強制保持完全相同的：隨機種子 (`seed=42`)、批次大小、優化器學習率曲線與訓練總輪數。
+  - 所有對照組必須強制保持完全相同的：隨機種子 (`seed=42 `[DESIGN_DECISION]``)、批次大小、優化器學習率曲線與訓練總輪數。
 - **執行保證**: 杜絕將超參數調優帶來的偶然紅利歸功於演算法創新。
 
 ### [RULE-903-02] 實驗完全可復現性合約 (Reproducibility & Artifact Invariant)
@@ -232,10 +232,12 @@ successors:
   - 倉庫根目錄必須具備單指令復現腳本 (`python reproduce_all_results.py`)。
   - 必須附帶精確的環境鎖定清單（固定 PyTorch, CUDA, cuDNN 版本）與已校驗 Checkpoint 的 SHA-256 哈希值。
 - **可執行斷言**:
-  ```python
-  def verify_reproducibility(metric_run1, metric_run2, tolerance=1e-4):
-      assert abs(metric_run1 - metric_run2) < tolerance, "可復現性驗證失敗：兩次同種子運行結果不符！"
-  ```
+
+```python
+def verify_reproducibility(metric_run1: float, metric_run2: float, tolerance: float = 1e-4) -> bool:
+    assert abs(metric_run1 - metric_run2) < tolerance, "可復現性驗證失敗：兩次同種子運行結果不符！"
+    return True
+```
 
 ### [RULE-903-03] 推甄報告成果硬指標量化合約 (Quantitative Merit Metric Invariant)
 - **合約等級**: `STRATEGIC_DIRECTIVE`

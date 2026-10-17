@@ -55,7 +55,7 @@ This volume establishes a rigorous framework for decomposing top-tier academic p
               ▼                                           ▼                                           ▼
 ┌─────────────────────────────┐             ┌─────────────────────────────┐             ┌─────────────────────────────┐
 │ 1. Core Vision Foundations  │             │ 2. Multimodal Perception    │             │ 3. Edge Systems & Hardware  │
-│ • OpenCV / PyTorch Pipelines│             │ • 3D Gaussian Splatting `[LITERATURE_RESULT]`     │             │ • TensorRT / Jetson Orin    │
+│ • OpenCV / PyTorch Pipelines│             │ • 3D Gaussian Splatting     │             │ • TensorRT / Jetson Orin    │
 │ • Feature Moments & Centroid│             │ • Vision-Language Attention │             │ • Low-Latency Model Serving │
 │ • Geometric Invariance TTA  │             │ • Point Cloud Serialization │             │ • Real-Time GPU Pipelines   │
 └──────────────┬──────────────┘             └──────────────┬──────────────┘             └──────────────┬──────────────┘
@@ -74,7 +74,7 @@ This volume establishes a rigorous framework for decomposing top-tier academic p
 
 ## 2. Theoretical Derivations & Literature Case Studies
 
-### 1. View-Decomposed LoRA in 3D Gaussian Splatting (*Electronics 2025*)
+### 1. View-Decomposed LoRA in 3D Gaussian Splatting (*Electronics 2025*) `[LITERATURE_RESULT]`
 - **Core Challenge**: High-resolution 3D virtual try-on models typically suffer from cross-view texture bleeding (e.g., front garment prints corrupting back viewpoints) and require prohibitive VRAM (>48GB).
 - **Mathematical Decomposition**:
   The continuous viewpoint azimuth $\theta \in [0^\circ, 360^\circ)$ is decomposed into orthogonal subspaces:

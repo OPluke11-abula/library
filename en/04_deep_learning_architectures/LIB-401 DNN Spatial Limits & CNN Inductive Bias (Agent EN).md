@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Senior-ML-Engineer
 math_foundations:
-  - Permutation Invariance vs Translation Equivariance `[DERIVATION]`
+  - Permutation Invariance vs Translation Equivariance
   - Receptive Field Arithmetic & Dilation Geometry
   - Parameter Efficiency & Weight Sharing Bounds
 hardware_target:
@@ -41,18 +41,18 @@ successors:
 
 ## 1. Conceptual Mental Model
 
-Why can an MLP (Multi-Layer Perceptron) never serve as a reliable visual backbone? Because a dense layer treats input dimensions as an unordered bag of numbers. If an engineer randomly permutes the 784 pixels of an MNIST image via a fixed permutation matrix $P_\pi$ and feeds it to an MLP, the MLP trains with identical loss convergence. But to human vision, natural images rely on **spatial spatial locality**: nearby pixels share topological context, and edges preserve semantic meaning under translation.
+Why can an MLP (Multi-Layer Perceptron) never serve as a reliable visual backbone? Because a dense layer treats input dimensions as an unordered bag of numbers. If an engineer randomly permutes the 784 pixels of an MNIST image via a fixed permutation matrix $P_\pi$ and feeds it to an MLP, the MLP trains with identical loss convergence. But to human vision, natural images rely on **spatial locality**: nearby pixels share topological context, and edges preserve semantic meaning under translation.
 
 ---
 
 ## 2. Mathematical Formalization
 
-### 1. The Permutation Invariance Flaw of MLPs
+### 1. The Permutation Invariance Flaw of MLPs `[FACT]`
 Let $\pi \in S_d$ be a permutation of $d$ coordinates, represented by permutation matrix $P_\pi$. In a Dense MLP:
 $$z = W (P_\pi x) + b = (W P_\pi) x + b$$
 Because $W' = W P_\pi$ is an unconstrained weight matrix with identical capacity, the hypothesis class $\mathcal{H}_{\text{MLP}}$ has **zero prior preference** for spatial locality. Sample complexity scales as $O(d)$, requiring vast numbers of shifted samples to learn simple translation.
 
-### 2. Formal Translation Equivariance in Convolution
+### 2. Formal Translation Equivariance in Convolution `[DERIVATION]`
 A 2D continuous signal $f: \mathbb{R}^2 \to \mathbb{R}$ operated on by translation operator $T_v$ satisfies:
 $$(T_v f)(x) = f(x - v)$$
 The 2D convolution operator $\star$ with kernel $\psi$:

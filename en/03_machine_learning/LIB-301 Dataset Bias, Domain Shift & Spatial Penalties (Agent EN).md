@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Senior-ML-Engineer
 math_foundations:
-  - Covariate Shift `[FACT]` vs Concept Drift
+  - Covariate Shift vs Concept Drift
   - Maximum Mean Discrepancy (MMD) & Wasserstein Distance
   - Morphological Dataset Bias & Out-of-Distribution (OOD) Bounds
 hardware_target:
@@ -42,20 +42,20 @@ successors:
 
 ## 1. Conceptual Mental Model
 
-Models do not fail because deep learning is flawed; models fail because the **empirical training distribution $P_{\text{train}}(X)$ does not equal the production inference distribution $P_{\text{test}}(X)$**. In handwritten digit recognition, the benchmark MNIST dataset reflects historical sampling from NIST Special Database 1 (Census Bureau employees) and Special Database 3 (high school students), where the digit "7" is predominantly written with a pronounced slant ($\sim 60^\circ$) or continental European crossbar. When presented with upright, uncrossed handwritten "7"s (common in digital ink and standard upright penmanship), models trained without geometric augmentation suffer severe covariate shift, falsely misclassifying "7" into the negative spatial weight regions of "7" and triggering false predictions as "8" or "1" with high uncalibrated confidence.
+Models do not fail because deep learning is flawed; models fail because the **empirical training distribution $P_{\text{train}}(X)$ does not equal the production inference distribution $P_{\text{test}}(X)$**. In handwritten digit recognition, the benchmark MNIST dataset reflects historical sampling from NIST Special Database 1 (Census Bureau employees) and Special Database 3 (high school students) `[LITERATURE_RESULT]`, where the digit "7" is predominantly written with a pronounced slant ($\sim 60^\circ$) or continental European crossbar. When presented with upright, uncrossed handwritten "7"s (common in digital ink and standard upright penmanship), models trained without geometric augmentation suffer severe covariate shift, falsely misclassifying "7" into the negative spatial weight regions of "7" and triggering false predictions as "8" or "1" with high uncalibrated confidence.
 
 ---
 
 ## 2. Mathematical Formalization
 
-### 1. Covariate Shift vs Concept Shift
+### 1. Covariate Shift vs Concept Shift `[FACT]`
 Let $(X, Y) \sim P(X, Y) = P(Y|X) P(X)$.
 - **Covariate Shift**: The marginal input distribution drifts, while the underlying conditional label mapping remains invariant:
   $$P_{\text{train}}(X) \neq P_{\text{test}}(X), \quad P_{\text{train}}(Y|X) = P_{\text{test}}(Y|X)$$
 - **Concept Shift**: The conditional decision boundary itself changes:
   $$P_{\text{train}}(Y|X) \neq P_{\text{test}}(Y|X)$$
 
-### 2. Measuring Distribution Divergence: Maximum Mean Discrepancy (MMD)
+### 2. Measuring Distribution Divergence: Maximum Mean Discrepancy (MMD) `[DERIVATION]`
 In a Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}$ associated with kernel $k(\cdot, \cdot)$:
 $$\text{MMD}^2(\mathcal{H}, P, Q) = \left\| \mathbb{E}_{X \sim P}[\phi(X)] - \mathbb{E}_{Y \sim Q}[\phi(Y)] \right\|_{\mathcal{H}}^2$$
 Empirical estimator with $m$ source and $n$ target samples:

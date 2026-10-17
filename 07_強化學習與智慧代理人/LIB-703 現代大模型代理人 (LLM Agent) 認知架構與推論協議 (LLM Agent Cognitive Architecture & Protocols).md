@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Autonomous-Agent
 math_foundations:
-  - Partially Observable Markov Decision Process (POMDP `[FACT]`)
+  - Partially Observable Markov Decision Process (POMDP)
   - ReAct Trajectory Optimization & Thought-Action Synergy
   - Tree-of-Thoughts (ToT) Graph-Search & Heuristic Pruning
 hardware_target:
@@ -70,7 +70,7 @@ successors:
 
 ## 二、🎓 博士級數學形式化推導：POMDP 形式化、ReAct 迴圈與樹狀思考 (ToT)
 
-### 1. 部分可觀察馬可夫決策過程 (POMDP)
+### 1. 部分可觀察馬可夫決策過程 (POMDP) `[FACT]`
 代理人與軟體開發環境的互動在數學上構成一個 POMDP 7 元組：
 $$\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Omega, \mathcal{O}, \gamma \rangle$$
 - $\mathcal{S}$：軟體系統的全域狀態（檔案系統內容、記憶體變數、隱藏環境變數）。

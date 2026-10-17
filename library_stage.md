@@ -1,9 +1,9 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-10-10  
-> **當前交接基準 HEAD**: `4fa289dc91a1311a0b2b88532da43368cdb934e5`（PR #10: `4fa289d` 正式交接點）  
-> **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量，拓樸 DAG 100% 閉環驗證通過。
+> **更新時間**: 2026-10-17  
+> **當前交接基準 HEAD**: `a9455435337a57366f3e27cdd7699cb382f1064a`（PR #12 & PR #13: `a945543` 正式交接點）  
+> **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -29,13 +29,13 @@
 ## 🧭 二、當前知識庫基準狀態與結構會計 (Baseline Accounting)
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
-以下為本知識庫經自動化驗證腳本 (`validate_library.py`) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`4fa289dc91a1311a0b2b88532da43368cdb934e5`
+以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
+- **交接基準 Commit SHA**：`a9455435337a57366f3e27cdd7699cb382f1064a`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
-- **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter 100% 對齊。
-- **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、等級與計數在中英雙語完全對稱（0 重複、0 缺失）。
-- **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序 100% 驗證通過，零循環、零孤島、零失效鏈接。
-- **自動化驗證保證**：執行 `python scripts/validate_library.py` 保證 Exit Code 恆為 `0`。
+- **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter、內文拓樸導航與代碼實作 100% 對齊。
+- **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序与內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
+- **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含 AST 語法與標準證據分類學）保證 Exit Code 恆為 `0`。
 
 ### 2.2 交接文件聲明與元指引 (Handover Document Declarations)
 本文件（`library_stage.md`）作為首席圖書館管理員之跨階段交接藍圖，負責記錄專案演進脈絡、里程碑會計、規範合約與後續維護指引。交接聲明本身隨版本演進持續維護，不影響核心知識庫卷冊之不可變合約。
@@ -143,6 +143,23 @@
 - **P1: 雙語對稱與規範引證**：
   - 中英雙語完全對齊，補足 Williams et al. (T-RO 2017) 與 Rawlings et al. (2017) 經典控制權威引證。
 
+### 10. 全庫深度審查與 P0 數學代碼修復、P1 中英雙語合約與內文 DAG 全面對齊 (PR #12: `e283d3b`)
+- **P0: 核心演算法與科學精確度修復**：
+  - `LIB-406`（ZH & EN）：修正 `AdaLNZeroBlock` 與 `OptimalTransportFlowMatchingTrainer` 忽略時間變數 $t$ 之重大缺陷，補齊正弦時間嵌入（Sinusoidal Timestep Embedding）與條件組合 $c_{\text{joint}} = c + \text{MLP}(t)$，使流匹配真正學習時變速度場 $v_\theta(x_t, t)$。
+  - `LIB-506`（ZH & EN）：將 `BatchedMPPIController` 由純 CPU NumPy 全面升級為原生 PyTorch GPU 張量實現（`torch.Tensor` 支援 `cuda`/`cpu`），補齊李亞普諾夫終端代價 $\Phi(x_H)$、MPPI 重要性採樣交叉項 $\lambda u_{t-1, \tau}^\top \Sigma_\epsilon^{-1} \epsilon_{k, \tau}$ 與顯式加速度硬約束 `a_max`。
+  - `LIB-407`（ZH & EN）：消除 `RULE-407-03`（原寫 20 步）與正文 Section 3.2（50 步）之 DDIM 反演步數矛盾，統一為 $N_{\text{inv}} \ge 50$ 步。
+- **P1: 中英雙語實作對稱、合約等級對齊與拓樸導航同步**：
+  - 為 `LIB-407 EN`、`LIB-408 EN`、`LIB-505 EN`、`LIB-703 EN` 補齊缺失的 Python 核心架構實作區塊，並將 `LIB-000 EN` 總覽由 24 卷更新為 25 卷（納入 `LIB-906`）。
+  - 修復 `LIB-104 EN`、`LIB-401 EN`、`LIB-802 EN` 因控制字元轉義造成的 LaTeX 語法損毀（`\nabla`、`\rfloor`、`\neq`）。
+  - 全面校準 84 條 `RULE-xxx-xx` 的中英合約等級（Contract Level）與量化決策閾值，同步 16 卷內文 `前置依賴`/`後續節點` 與 YAML Frontmatter DAG，並將複合斜線標籤全數收斂至 10 大標準證據標籤。
+
+### 11. P2 自動化驗證器升級至 11 項嚴格檢查 (PR #13: `a945543`)
+- **P2: `scripts/validate_library.py` 擴充 Checks 8–11**：
+  - **Check 8**：驗證全部 84 條 `RULE-xxx-xx` 均定義合法之合約等級，且中英雙語等級 100% 一致。
+  - **Check 9**：驗證內文導覽區塊（`前置依賴`/`後續節點`/`Prerequisites`/`Successors`）與 YAML Frontmatter DAG 100% 對齊。
+  - **Check 10**：強制執行 10 大標準證據分類學（Canonical Evidence Taxonomy），攔截自創或斜線複合標籤。
+  - **Check 11**：使用 Python `ast.parse()` 對全庫所有 Python 程式碼區塊進行語法解析驗證，並強制檢驗中英雙語程式碼區塊對稱性。
+
 ---
 
 ## 🛡️ 四、核心規範與系統不變量約束 (System Invariants)
@@ -198,4 +215,4 @@
 2. **消融實驗重現環境建置**：
    - 針對 LIB-901、LIB-905、LIB-906 中的基準實驗，評估建立自動化測試與消融驗證腳本。
 3. **日常維護**：
-   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `4fa289dc91a1311a0b2b88532da43368cdb934e5`（或最新 main 分支 HEAD），工作區乾淨無漂移。
+   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `a9455435337a57366f3e27cdd7699cb382f1064a`（或最新 main 分支 HEAD），工作區乾淨無漂移。

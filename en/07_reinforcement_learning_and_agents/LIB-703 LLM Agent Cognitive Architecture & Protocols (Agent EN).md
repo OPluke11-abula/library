@@ -35,6 +35,10 @@ successors:
 
 # Large Language Model Agents: Cognitive Architectures & Execution Protocols
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]].
+- **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 A standard LLM is a static probabilistic auto-regressive function: given prefix $x$, it computes next-token distribution $P(w | x)$. An **Autonomous Agent** transforms this passive predictor into an active cybernetic controller operating inside an environment: perceiving state $s_t$, planning trajectories through internal reasoning chains, executing external tools $a_t \sim \pi(s_t)$, receiving environmental feedback $o_{t+1}$, and updating memory.
@@ -44,7 +48,7 @@ A standard LLM is a static probabilistic auto-regressive function: given prefix 
 ## 2. Mathematical Formalization
 
 ### 1. The ReAct (Reason + Act) POMDP Formulation
-We formalize agent operation as a Partially Observable Markov Decision Process (POMDP):
+We formalize agent operation as a Partially Observable Markov Decision Process (POMDP) `[FACT]`:
 $$\mathcal{M} = (\mathcal{S}, \mathcal{A}, \mathcal{O}, \mathcal{T}, \mathcal{R}, \Omega, \gamma)$$
 At timestep $t$:
 1. **Observation $o_t \in \mathcal{O}$**: Environmental state projected to text/multimodal tokens.
@@ -60,6 +64,12 @@ To operate over infinite time horizons within finite token contexts:
 - **Working Memory Scratchpad**: Structured state variables (active plan, subgoals, intermediate variables).
 - **Long-Term Episodic Memory**: Vector database using dense embeddings:
   $$\text{Query}(q) = \text{Top-k}_{m \in \mathcal{M}} \left( \frac{\langle E(q), E(m) \rangle}{\|E(q)\| \|E(m)\|} \right)$$
+
+---
+
+### 3. Systems & Hardware Alignment: KV-Cache Prefix Reuse & Memory Tiering
+- **Prefix KV-Cache Reuse Across ReAct Turns**: In multi-turn ReAct trajectories $c_t = (o_0, th_0, a_0, \dots, o_t)$, appending tool observations preserves the causal prefix. Serving engines (vLLM PagedAttention, LIB-602) cache KV blocks of prior turns in GPU HBM so only the newly appended observation $o_t$ incurs prefill compute `[DESIGN_DECISION]`.
+- **Three-Tier Memory Hierarchy**: High-bandwidth GPU HBM stores active KV-Cache ($W_{\text{recent}}$); host DRAM maintains structured JSON working scratchpads; NVMe-backed HNSW vector indices store long-term episodic trajectories `[HEURISTIC]`.
 
 ---
 
@@ -133,7 +143,7 @@ class ProductionAgentLoop:
 
 ### [RULE-703-03] Token Budget Conservation & Working Memory Pruning Heuristic
 - **Contract Level**: `RESOURCE_CONSTRAINT`
-- **Specification**: When active conversation context exceeds $70\%$ of the maximum token window, agents MUST summarize completed execution trajectories into structured summaries and prune redundant intermediate tool outputs.
+- **Specification**: When active conversation context exceeds $70\% `[HEURISTIC]`$ of the maximum token window, agents MUST summarize completed execution trajectories into structured summaries and prune redundant intermediate tool outputs.
 - **Violation Consequence**: Context exhaustion forces involuntary prompt truncation, triggering attention degradation and task failure.
 
 ### [RULE-703-04] Reflexion Retry Limit & Fallback Guardrail
@@ -141,3 +151,11 @@ class ProductionAgentLoop:
 - **Specification**: When tool execution fails, agents MUST limit automated retry attempts to a maximum of 3 consecutive iterations. After 2 consecutive identical failures, the agent MUST trigger internal reflection to modify strategy or escalate to human fallback.
 - **Violation Consequence**: Unbounded retries without strategy revision cause infinite loops and rapid API token exhaustion.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y.** (2023). "ReAct: Synergizing Reasoning and Acting in Language Models." *International Conference on Learning Representations (ICLR 2023)*. [arXiv:2210.03629](https://arxiv.org/abs/2210.03629).
+2. **Yao, S., Yu, D., Zhao, J., Shafran, I., Narasimhan, K., & Cao, Y.** (2023). "Tree of Thoughts: Deliberate Problem Solving with Large Language Models." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
+3. **Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K., & Yao, S.** (2023). "Reflexion: Language Agents with Verbal Reinforcement Learning." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
+4. **Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., Cancedda, N., & Scialom, T.** (2023). "Toolformer: Language Models Can Teach Themselves to Use Tools." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.

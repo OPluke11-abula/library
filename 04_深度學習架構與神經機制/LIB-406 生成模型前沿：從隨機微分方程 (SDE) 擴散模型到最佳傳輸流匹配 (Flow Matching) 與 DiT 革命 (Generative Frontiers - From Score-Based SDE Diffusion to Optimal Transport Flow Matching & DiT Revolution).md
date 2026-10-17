@@ -13,7 +13,7 @@ math_foundations:
   - Itô Stochastic Differential Equations (SDE) & Reverse-Time SDE Duality
   - Continuous Normalizing Flows (CNF) & Conditional Flow Matching (CFM)
   - Optimal Transport Displacement Interpolation & 2-Wasserstein Geodesics
-  - Adaptive Layer Normalization Zero (AdaLN-Zero) Jacobian Dynamics
+  - Adaptive Layer Normalization Zero (AdaLN-Zero `[DESIGN_DECISION]`) Jacobian Dynamics
 hardware_target:
   - Dense Matrix Tensor Cores (BF16/FP8 GEMM)
   - FlashAttention Tiling & SRAM Resident Activation
@@ -34,6 +34,7 @@ tags:
   - MM-DiT
   - AdaLN-Zero
 prerequisites:
+  - "[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]"
   - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
   - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
 successors:
@@ -46,8 +47,8 @@ successors:
 # 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]（連續時間微分方程極限與梯度流）、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]（自注意力與交叉注意力）。
-- **後續節點**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]（跨注意力調控與局部內容保持）、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]（條件式物件生成與光照合成）。
+- **前置依賴**：[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
+- **後續節點**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]。
 - **核心主題**：全面解構現代生成式 AI（Generative AI）從隨機熱力學擴散（DDPM / Score-SDE）走向微分幾何最佳傳輸流匹配（Flow Matching / Rectified Flow），並與可擴展 Transformer 骨幹（DiT / MM-DiT）深度融合的完整數學形式化與工程落地體系。
 
 ---
@@ -144,7 +145,7 @@ $$\frac{dx_t}{dt} = f(x_t, t) - \frac{1}{2} g(t)^2 \nabla_x \log p_t(x_t)$$
 
 ### 2. 條件流匹配 (Conditional Flow Matching, CFM) 與最佳傳輸幾何
 
-傳統連續歸一化流（Continuous Normalizing Flows, CNF）雖然具備解析似然與確定性軌跡，但過去訓練 CNF 需要對整個神經網路 ODE 進行昂貴的數值積分（Adjoint Method），計算成本高不可攀。Lipman et al. (ICLR 2023) 與 Albergo et al. (2023) 提出的 **Flow Matching** 徹底打破了這堵高牆。
+傳統連續歸一化流（Continuous Normalizing Flows, CNF）雖然具備解析似然與確定性軌跡，但過去訓練 CNF 需要對整個神經網路 ODE 進行昂貴的數值積分（Adjoint Method），計算成本高不可攀。Lipman et al. (ICLR 2023) `[LITERATURE_RESULT]` 與 Albergo et al. (2023) 提出的 **Flow Matching** 徹底打破了這堵高牆。
 
 #### (1) 連續歸一化流方程
 設連續可微流動映射 $\phi_t: [0, 1] \times \mathbb{R}^d \to \mathbb{R}^d$，由時變向量場 $v_t$ 定義：

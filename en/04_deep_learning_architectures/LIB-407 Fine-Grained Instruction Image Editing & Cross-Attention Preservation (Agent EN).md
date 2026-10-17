@@ -35,6 +35,10 @@ successors:
 
 # Fine-Grained Instruction Image Editing & Cross-Attention Preservation
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]].
+- **Successors**: [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+
 ## 1. Attention Map Modulation & Non-Target Protection
 
 Given cross-attention probabilities $A = \text{Softmax}(Q K^T / \sqrt{d})$ in a latent diffusion model, editing instructions ("change wheels to black") frequently corrupt non-target regions (car paint, background).

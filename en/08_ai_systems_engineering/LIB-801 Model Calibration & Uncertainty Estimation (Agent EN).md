@@ -24,6 +24,7 @@ tags:
   - uncertainty-estimation
   - reliability
 prerequisites:
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
 successors:
@@ -36,6 +37,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../08_AI%E7%B3%BB%E7%B5%B1%E5%B7%A5%E7%A8%8B%E8%88%87%E9%AB%98%E6%95%88%E9%83%A8%E7%BD%B2/LIB-801%20%E7%8F%BE%E4%BB%A3%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E4%B9%8B%E6%A8%A1%E5%9E%8B%E6%A0%A1%E6%BA%96%E3%80%81%E4%B8%8D%E7%A2%BA%E5%AE%9A%E6%80%A7%E4%BC%B0%E8%A8%88%E8%88%87%E9%81%8E%E5%BA%A6%E8%87%AA%E4%BF%A1%20%28Model%20Calibration%20%26%20Uncertainty%20Estimation%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Model Calibration, Uncertainty Estimation & Overconfidence in Deep Learning
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]].
+- **Successors**: [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -79,6 +84,12 @@ Conventional preference alignment (e.g., RLHF) optimizes scalar rewards, which c
 Recent research initiatives (e.g., Jev, see [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]) investigate **RLCD**:
 - **Publicly Documented Statement [FACT]**: TypeSafe AI publicly describes RLCD (Reinforcement Learning for Calibrated Decisions) as a training approach intended to produce calibrated decisions / probabilities for Jev.
 - **Undisclosed Implementation Details [OPEN_QUESTION]**: The exact reward function, scoring rule, calibration objective, loss formulation, and policy-gradient implementation have not been publicly disclosed in the cited official material; jointly optimizing discrete, non-smooth binned ECE within end-to-end policy gradients remains an open research challenge.
+---
+
+### 6. Systems & Hardware Alignment: Log-Sum-Exp (LSE) Numerical Guardrails on GPU SFUs
+- **Preventing IEEE 754 FP16/BF16 Overflow Under Temperature Scaling**: Dividing logits by small temperatures ($T \to 0.1$) amplifies logit magnitudes by $10\times$, pushing $|z_i / T|$ past the FP16 overflow ceiling ($65504 \approx e^{11.09}$) `[SAFETY_BOUND]`. Production kernels subtract the per-sample maximum $m = \max_k (z_k / T)$ prior to invoking GPU Special Function Unit (SFU) $\exp$ instructions:
+  $$\log \hat{p}_i = \frac{z_i}{T} - m - \log \sum_{j=1}^K \exp\left(\frac{z_j}{T} - m\right)$$
+
 ---
 
 ## 3. Production PyTorch Temperature Scaler
@@ -143,3 +154,11 @@ class TemperatureScaler(nn.Module):
 - **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $\mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \ge 1 - \alpha$ (default $\alpha = 0.05$, i.e. $95\%$ marginal coverage; escalate to human review when $|\mathcal{C}(X)| \ge 3$) under the foundational assumption of **data exchangeability** (where i.i.d. is a common sufficient condition) between calibration and test distributions. Note: The guarantee is marginal over joint draws, not conditional on an individual test instance. Standard marginal coverage does NOT hold under arbitrary out-of-distribution shift without explicit domain-shift or covariate-shift weighting adjustments based on verifiable likelihood ratios.
 - **Violation Consequence**: Relying on uncalibrated point predictions or assuming coverage under uncorrected distribution shifts provides false statistical confidence guarantees.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q.** (2017). "On Calibration of Modern Neural Networks." *Proceedings of the 34th International Conference on Machine Learning (ICML 2017)*, PMLR 70, pp. 1321–1330.
+2. **Angelopoulos, A. N., & Bates, S.** (2023). "Conformal Prediction: A Gentle Introduction." *Foundations and Trends in Machine Learning*, 16(4), 494–591. DOI: [10.1561/2200000101](https://doi.org/10.1561/2200000101).
+3. **Platt, J.** (1999). "Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized Likelihood Methods." *Advances in Large Margin Classifiers*, 10(3), 61–74.
+4. **Naeini, M. P., Cooper, G., & Hauskrecht, M.** (2015). "Obtaining Well Calibrated Probabilities Using Bayesian Binning." *Proceedings of the AAAI Conference on Artificial Intelligence (AAAI 2015)*, 29(1), 2901–2907.

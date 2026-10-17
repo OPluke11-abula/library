@@ -1,7 +1,7 @@
 ---
 call_number: LIB-906
 status: reviewed
-invariants_count: 0
+invariants_count: 3
 title: LLM Conversational Epistemic Revision - Selective Epistemic Revision under Conversational Pushback
 module: Research-Methodology
 category: NLP-LLM-Alignment-Research
@@ -34,9 +34,13 @@ successors: []
 
 # LLM Conversational Epistemic Revision: Research Baseline & Experimental Blueprint
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]].
+- **Successors**: None (Terminal capstone node).
+
 **Chinese title:** 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (Selective Epistemic Revision under Conversational Pushback)  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  
-**Current phase:** Related Work / Novelty Collision Audit (Completed)  
+**Current phase:** Related Work / Novelty Collision Audit (Primary Literature Verification In-Progress; 10-Paper Gap Matrix Verified)  
 **Evidence status:** This document records research design, unverified hypotheses, and audit standards; it is **NOT** a completed literature review or verified empirical evaluation. Except for explicit research definitions, this document must not be cited as an established empirical truth source.
 
 > **Core Research Question**  
@@ -252,24 +256,24 @@ Prevents evaluating 2024 outputs using 2026 world states.
 ### 12.2 Authoritative Decisions on the Five Core Questions
 
 1. **Does the gap actually exist?**  
-   **YES.** Prior work is fragmented across blind anti-sycophancy (Wei 2024, Guan 2024), single-turn draft verification (CoVe 2024), and prompt-only resistance benchmarks (TruthfulPushback 2025). There is no framework combining explicit claim provenance, a 4-way action space (Maintain/Revise/Verify/Clarify), and causal backtracking to prevent retracted claims from contaminating downstream multi-hop reasoning.
+   **YES `[HYPOTHESIS]`.** Prior work is fragmented across static anti-sycophancy fine-tuning (Wei et al. 2023, Sharma et al. 2024), single-turn draft verification (Dhuliawala et al. 2024 CoVe), and multi-turn flip-rate diagnostic benchmarks (Laban et al. 2023 FlipFlop, Hong et al. 2025 SYCON-Bench). There is no unified framework combining explicit claim provenance, a 4-way epistemic action space (Maintain/Revise/Verify/Clarify), and causal backtracking to prevent retracted claims from contaminating downstream multi-hop reasoning.
 
 2. **Which parts are already covered?**  
-   - Paired evaluation of False Capitulation (FCR) vs Stubborn Persistence (CCR) is established by TruthfulPushback (Chen 2025).
-   - Atomic claim decomposition in single responses is validated by CoVe (Dhuliawala 2024).
-   - The decoupling of conversational apologies from truth updates is established by ELEPHANT (Cheng 2024).
+   - Conversational stance flipping under ungrounded doubt and multi-turn pushback pressure is established by FlipFlop (Laban et al. 2023) and SYCON-Bench (Hong et al. 2025) `[LITERATURE_RESULT]`.
+   - Atomic claim decomposition in single responses is validated by CoVe (Dhuliawala et al. 2024) `[LITERATURE_RESULT]`.
+   - The decoupling of conversational apologies / face preservation from factual truth updates is established by ELEPHANT (Cheng et al. 2025/2026) `[LITERATURE_RESULT]`.
 
 3. **What remains defensible?**  
-   - **Contribution 1 (Core Architecture)**: The `Ledger-Backtrack` neuro-symbolic engine—explicitly isolating model assertions, user premises, and verified evidence, executing causal state backtracking upon retraction.
-   - **Contribution 2 (Evaluation Metric)**: `Downstream Contamination Test` within PushBack-Bench, proving that current LLMs continue to build multi-hop reasoning upon previously retracted false premises.
-   - **Contribution 3 (Temporal Snapshot)**: Formal distinction between logical contradiction and timestamped world-state evolution ($\tau_t$).
+   - **Contribution 1 (Core Architecture)**: The `Ledger-Backtrack` neuro-symbolic engine—explicitly isolating model assertions, user premises, and verified evidence, executing causal state backtracking upon retraction `[DESIGN_DECISION]`.
+   - **Contribution 2 (Evaluation Metric)**: `Downstream Contamination Test` within PushBack-Bench, auditing whether LLMs continue to build multi-hop reasoning upon previously retracted false premises `[TARGET]`.
+   - **Contribution 3 (Temporal Snapshot)**: Formal distinction between logical contradiction and timestamped world-state evolution ($\tau_t$) `[DESIGN_DECISION]`.
 
 4. **How should PushBack-Bench be narrowed?**  
    - **Main Benchmark**: Focus strictly on the $2 \times 2$ core matrix: `(Model Prior Correct / Incorrect) × (Pushback Valid / Invalid)` with objective ground truth, plus a focused subset of `Ambiguous / Insufficient Evidence` cases.
    - **Stress Test & Appendix**: Move open-ended temporal world-state shifts ($\tau_t$) and extended $>5$-turn multi-agent interactions to a dedicated Temporal Stress Test and Appendix.
 
 5. **Should Ledger-Backtrack be the Main Method?**  
-   - **Designated as the Main Architecture Contribution.** Pure prompt-based memory inevitably suffers from latent premise contamination as context length grows. `Ledger-Backtrack` introduces verifiable state-machine guarantees with clear novelty.
+   - **Designated as Candidate Main Architecture Contribution.** Pure prompt-based memory (e.g., Self-Refine / SYCON-Bench Prompt Baselines) remains vulnerable to latent premise contamination as context length grows; `Ledger-Backtrack` introduces verifiable state-machine guarantees whose marginal gains will be adjudicated via controlled ablation experiments.
 
 ---
 
@@ -299,3 +303,31 @@ Focus initial iterations on:
 - **Related Work / Novelty Collision**: **In-Progress**: 10 primary literature citations verified against primary sources; Novelty Audit remains actively open pending empirical experiments.
 - **Next Task**: Implement Minimum Viable Controlled Pilot on the 2x2 matrix and build Downstream Contamination Test.
 - **Core Stance**: The objective is not to maximize adversarial pushback resistance, but to reliably manage self-generated factual claims when evidence changes.
+
+---
+
+## 17. Agent Invariants & Decision Protocols
+
+### [RULE-906-01] Social-Epistemic Decoupling Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Evaluation metrics (FCR, CCR, ESA) and conversational arbitration policies MUST strictly decouple social politeness tokens (e.g., apologies, face-saving acknowledgments) from epistemic truth-value updates. Action classification $A_t \in \{\mathrm{Maintain}, \mathrm{Revise}, \mathrm{Verify}, \mathrm{Clarify}\}$ MUST be adjudicated solely on the substantive truth-state transition of atomic factual claims $C_i$.
+
+### [RULE-906-02] Retracted Premise Backtracking Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Whenever a prior claim $C_i$ in the Claim Ledger transitions to `Retracted` or `Contradicted` under valid counter-evidence, the system MUST execute epistemic backtracking to invalidate $C_i$ and its unverified dependent corollaries. Downstream multi-hop generations MUST NOT reuse retracted claims as valid premises.
+
+### [RULE-906-03] Pre-Experimental Novelty & Result Integrity Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Prior to completing controlled empirical benchmark runs and single-factor ablation studies, the Novelty Collision Audit status MUST remain `In-Progress` `[SAFETY_BOUND]`. All unexecuted architectural claims MUST be marked as `Proposed / Hypothesized` `[HYPOTHESIS]`; fabricating empirical deltas, $p$-values, or unverified citations from parametric memory is strictly prohibited.
+
+---
+
+## 18. Canonical & Peer-Reviewed References
+
+1. **Sharma, M., Tong, M., Korbak, T., Duvenaud, D., Askell, A., Bowman, S. R., ... & Perez, E.** (2024). "Towards Understanding Sycophancy in Language Models." *International Conference on Learning Representations (ICLR 2024)*. [arXiv:2310.13548](https://arxiv.org/abs/2310.13548).
+2. **Huang, J., Chen, X., Mishra, S., Zheng, H. S., Yu, A. W., Song, X., & Zhou, D.** (2024). "Large Language Models Cannot Self-Correct Reasoning Yet." *International Conference on Learning Representations (ICLR 2024)*. [arXiv:2310.01798](https://arxiv.org/abs/2310.01798).
+3. **Dhuliawala, S., Komeili, M., Xu, J., Raileanu, R., Li, X., Celikyilmaz, A., & Weston, J.** (2024). "Chain-of-Verification Reduces Hallucination in Large Language Models." *Findings of the Association for Computational Linguistics: ACL 2024*, pp. 3563–3578. URL: [https://aclanthology.org/2024.findings-acl.212/](https://aclanthology.org/2024.findings-acl.212/).
+4. **Hong, J., et al.** (2025). "Measuring Sycophancy of Language Models in Multi-turn Dialogues." *Findings of the Association for Computational Linguistics: EMNLP 2025*. [arXiv:2410.05353](https://arxiv.org/abs/2410.05353).
+5. **Laban, P., Murakhovs'ka, L., Xiong, C., & Wu, C.-S.** (2023). "Are You Sure? Challenging LLMs Leads to Performance Drops in The FlipFlop Experiment." [arXiv:2311.08596](https://arxiv.org/abs/2311.08596).
+6. **Cheng, M., et al.** (2025/2026). "ELEPHANT: Measuring and Understanding Social Sycophancy in LLMs." *International Conference on Learning Representations (ICLR 2026)*. [arXiv:2505.02878](https://arxiv.org/abs/2505.02878).
+

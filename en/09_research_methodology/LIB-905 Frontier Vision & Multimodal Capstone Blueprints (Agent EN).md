@@ -41,6 +41,7 @@ successors: []
 
 ## Conceptual Coordinates & Dependencies
 - **Prerequisites**: [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+- **Successors**: None (Terminal capstone node).
 - **Core Scope**: Translates five faculty capstone research proposals into production-grade systems architectures, mathematical models, ablation matrices, and competitive research grant proposals (e.g., NSTC Undergraduate Research Projects).
 
 ---
@@ -146,7 +147,7 @@ successors: []
 
 ---
 
-## 5. Canonical Research Literature
+## 5. Canonical Research Literature & Peer-Reviewed References
 
 1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**.
 2. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024**.

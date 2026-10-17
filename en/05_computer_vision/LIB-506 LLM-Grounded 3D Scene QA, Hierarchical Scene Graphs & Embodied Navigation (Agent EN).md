@@ -40,6 +40,10 @@ successors:
 
 # LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]].
+- **Successors**: [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+
 ## 1. Mathematical Foundations & Hierarchical Architecture
 
 ### 1.1 Formalization of Hierarchical 3D Scene Graphs (H-3DSG)

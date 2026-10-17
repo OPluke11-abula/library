@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Senior-ML-Engineer
 math_foundations:
-  - Covariate Shift vs Concept Drift
+  - Covariate Shift `[FACT]` vs Concept Drift
   - Maximum Mean Discrepancy (MMD) & Wasserstein Distance
   - Morphological Dataset Bias & Out-of-Distribution (OOD) Bounds
 hardware_target:
@@ -25,6 +25,7 @@ tags:
   - ood-generalization
 prerequisites:
   - "[[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]"
+  - "[[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]"
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
 successors:
   - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
@@ -34,6 +35,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../03_%E6%A9%9F%E5%99%A8%E5%AD%B8%E7%BF%92%E8%88%87%E7%B5%B1%E8%A8%88%E5%AD%B8%E7%BF%92%E5%8E%9F%E7%90%86/LIB-301%20%E8%B3%87%E6%96%99%E5%88%86%E4%BD%88%E5%81%8F%E5%B7%AE%E3%80%81%E9%A0%98%E5%9F%9F%E6%BC%82%E7%A7%BB%E8%88%87%E7%A9%BA%E9%96%93%E6%AC%8A%E9%87%8D%E6%87%B2%E7%BD%B0%E5%B9%BE%E4%BD%95%20%28Dataset%20Bias%2C%20Domain%20Shift%20%26%20Spatial%20Penalties%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Dataset Bias, Domain Shift & Spatial Penalties in Neural Perception
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]].
+- **Successors**: [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -117,3 +122,10 @@ def compute_mmd_loss(source_features: torch.Tensor, target_features: torch.Tenso
 - **Specification**: Training pipelines exposed to morphological shifts MUST incorporate geometric augmentations (affine rotations $\theta \in [-15^\circ, +15^\circ]$, shear $\in [-10^\circ, +10^\circ]$, translations $\pm 8\%$) while preserving $\ge 90\%$ foreground ink mass within the central receptive zone.
 - **Violation Consequence**: Omitting geometric augmentation causes coordinate memorization, while unbounded transforms truncate essential topological strokes.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Shimodaira, H.** (2000). "Improving predictive inference under covariate shift by weighting the log-likelihood function." *Journal of Statistical Planning and Inference*, 90(2), 227–244. DOI: [10.1016/S0378-3758(00)00115-4](https://doi.org/10.1016/S0378-3758(00)00115-4).
+2. **Torralba, A., & Efros, A. A.** (2011). "Unbiased look at dataset bias." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2011)*, pp. 1521–1528. DOI: [10.1109/CVPR.2011.5995347](https://doi.org/10.1109/CVPR.2011.5995347).
+3. **Geirhos, R., Jacobsen, J. H., Michaelis, C., Zemel, R., Brendel, W., Bethge, M., & Wichmann, F. A.** (2020). "Shortcut learning in deep neural networks." *Nature Machine Intelligence*, 2(11), 665–673. DOI: [10.1038/s42256-020-00257-z](https://doi.org/10.1038/s42256-020-00257-z).

@@ -36,6 +36,10 @@ successors:
 
 # Classic Project Post-Mortem: Evolving MNIST from Homework to Production
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
+- **Successors**: [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 Most university machine learning courses end with `model.fit(X_train, y_train)` in a Jupyter Notebook, producing an artificial $98\%$ validation accuracy score. In production, however, this represents less than $10\%$ of the complete engineering lifecycle. This case study documents the **six-stage empirical evolution of the canonical MNIST project**, showing how real-world distribution shifts (such as upright uncrossed digit stroke morphology), calibration failures, hardware bottlenecks, and serving requirements force an end-to-end architectural overhaul.
@@ -146,3 +150,10 @@ class ProductionMNISTEngine:
 - **Specification**: Deep perception models deployed in user-facing endpoints MUST incorporate dropout regularization during training and post-hoc temperature scaling calibration ($T > 0$) `[DESIGN_DECISION]` `[TARGET]`. Raw uncalibrated Softmax probabilities MUST NOT be reported as true confidence.
 - **Violation Consequence**: Over-parameterized models report deceptive $>99\%$ confidence on completely novel or ambiguous inputs.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **LeCun, Y., Bottou, L., Bengio, Y., & Haffner, P.** (1998). "Gradient-based learning applied to document recognition." *Proceedings of the IEEE*, 86(11), 2278–2324. DOI: [10.1109/5.726791](https://doi.org/10.1109/5.726791).
+2. **Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q.** (2017). "On Calibration of Modern Neural Networks." *International Conference on Machine Learning (ICML 2017)*, PMLR 70, pp. 1321–1330.
+3. **Kingma, D. P., & Ba, J.** (2015). "Adam: A Method for Stochastic Optimization." *International Conference on Learning Representations (ICLR 2015)*. [arXiv:1412.6980](https://arxiv.org/abs/1412.6980).

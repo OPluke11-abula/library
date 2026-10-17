@@ -28,9 +28,11 @@ tags:
   - Muon
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
+  - "[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]"
 successors:
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
   - "[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]"
+  - "[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]"
   - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
   - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
 ---
@@ -40,13 +42,13 @@ successors:
 # 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、多變量微積分。
-- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]、[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]。
+- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]、[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]、[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
 - **權威期刊/會議文獻出處**：
   - Polyak (USSR Comput. Math. Math. Phys. 1964) *Some methods of speeding up the convergence of iteration methods* (Heavy-ball Momentum).
   - Nesterov (Soviet Math. Dokl. 1983) *A method of solving a convex programming problem with convergence rate O(1/k^2)* (Nesterov Accelerated Gradient).
   - Kingma & Ba (ICLR 2015) *Adam: A Method for Stochastic Optimization*.
-  - Loshchilov & Hutter (ICLR 2019) *Decoupled Weight Decay Regularization (AdamW)*.
+  - Loshchilov & Hutter (ICLR 2019) `[LITERATURE_RESULT]` *Decoupled Weight Decay Regularization (AdamW)*.
   - Vyacheslav, et al. (ICML 2024) *SOAP: Improving and Accelerating Optimization with Preconditioning in the Eigenbasis*.
   - Jordan et al. (2024) *Muon: An optimizer for hidden layers in neural networks using Newton-Schulz matrix orthogonalization*.
 
@@ -74,7 +76,7 @@ successors:
 
 ---
 
-## 二、🎓 博士級數學形式化推導：Lipschitz 連續性、條件數與 2024 正交化前沿
+## 二、🎓 博士級數學形式化推導：Lipschitz 連續性 `[FACT]`、條件數與 2024 正交化前沿
 
 ### 1. Lipschitz 梯度連續性與下降引理 (Descent Lemma)
 設損失函數 $f: \mathbb{R}^d \to \mathbb{R}$ 具備 $L$-Lipschitz 連續梯度，即對所有 $x, y \in \mathbb{R}^d$：

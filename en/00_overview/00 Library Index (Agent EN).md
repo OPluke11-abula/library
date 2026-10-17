@@ -24,6 +24,7 @@ Primary Navigator:
   - [[LIB-001 Deep Learning First Principles (Agent EN)]]
 - **01 Mathematical & Theoretical Foundations**:
   - [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]]
+  - [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]]
   - [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]
 - **02 Computer Systems & Hardware Alignment**:
   - [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]
@@ -37,6 +38,7 @@ Primary Navigator:
   - [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]
 - **05 Computer Vision & High-Dimensional Sensing**:
   - [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]
+  - [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]
   - [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]
   - [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]
   - [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]

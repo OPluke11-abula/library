@@ -44,7 +44,7 @@ successors:
 
 ## 導讀與概念座標
 - **前置依賴**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]。
-- **後續模組**：[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
+- **後續節點**：[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **核心主題**：整合三維高斯場景渲染、階層式 3D 場景圖（Hierarchical 3D Scene Graph）與大語言模型（LLM）的空間推理能力，建構具備「自然語言問答 $\to$ 實體目標定位 $\to$ 最佳路徑規劃 $\to$ 實時視角漫遊導引」之端到端智慧虛擬導覽系統（涵蓋資工系實驗室、校園大樓與複雜展示空間）。
 
 ---

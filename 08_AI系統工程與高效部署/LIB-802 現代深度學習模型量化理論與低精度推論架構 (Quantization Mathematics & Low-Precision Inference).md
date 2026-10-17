@@ -12,7 +12,7 @@ audience:
 math_foundations:
   - Uniform Affine Quantization & Rounding Error Analysis
   - AWQ Activation-Aware Salient Channel Protection
-  - SmoothQuant Cross-Layer Invariant Scaling
+  - SmoothQuant `[LITERATURE_RESULT]` Cross-Layer Invariant Scaling
 hardware_target:
   - GPU INT4/FP8 Sub-byte Packing
   - Tensor Core CUTLASS High-Throughput Kernels
@@ -40,7 +40,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
-- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、邊緣端高效部署。
+- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
 - **權威期刊/會議文獻出處**：
   - Lin, Tang, Tang et al. (MIT & Tsinghua, **MLSys 2024 Best Paper Award**) *AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration*.
   - Xiao et al. (MIT, ICML 2023) *SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models*.
@@ -83,7 +83,7 @@ $$\hat{X} = S \cdot (q - Z)$$
 - 若強制 $Z = 0$，稱為**對稱量化 (Symmetric Quantization)**，硬體矩陣乘法更為高效（無額外偏置項補償）。
 
 ### 2. AWQ (Activation-aware Weight Quantization) 最佳化目標
-Lin et al. (MLSys 2024) 證明，權重-激活矩陣乘法 $Y = W X$ 的輸出重建誤差上界受激活特徵的二範數支配：
+Lin et al. (MLSys 2024) `[LITERATURE_RESULT]` 證明，權重-激活矩陣乘法 $Y = W X$ 的輸出重建誤差上界受激活特徵的二範數支配：
 $$\arg\min_{\hat{W}} \|W X - \hat{W} X\|_F^2 \approx \sum_{j=1}^{C_{\text{in}}} \|W_{:, j} - \hat{W}_{:, j}\|_2^2 \cdot \mathbb{E}[X_{j, :]^2]$$
 為了保護激活量級極大的顯著通道，AWQ 引入逐輸入通道的等效縮放向量 $\mathbf{s} \in \mathbb{R}^{C_{\text{in}}}$：
 $$W X = \left(W \cdot \text{diag}(\mathbf{s})^{-1}\right) \cdot \left(\text{diag}(\mathbf{s}) \cdot X\right) = W' X'$$

@@ -36,6 +36,10 @@ successors:
 
 # Dual-Process Neural Agents: S1 Non-Autoregressive Typed Engine (Jev) & Reflex Model (CUA-S1)
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
+- **Successors**: [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 Why do current commercial agents feel sluggish, consuming 3 to 10 seconds per click? Because they funnel every micro-interaction (clicking "Next", scrolling down, typing a keystroke) through massive, slow autoregressive LLM inference passes (System 2). Human cognition does not work this way. Humans operate via **Dual-Process Cognition** (Kahneman): $95\%$ of daily perceptual-motor reactions are executed by **System 1** (subconscious, instantaneous reflex, $< 100\text{ms}$), while **System 2** (deliberate, slow, logical tree-search) is activated only when novel obstacles or low-confidence thresholds arise.
@@ -75,6 +79,12 @@ $$p_{\max} = \max_{a \in \mathcal{A}} P_{\text{calibrated}}(a \mid x)$$
 The dual-process gating decision rule is:
 $$\text{Policy}(x) = \begin{cases} \text{Execute S1 Action}(a, u, v) & \text{if } p_{\max} \ge \tau_{\text{gate}} \land \text{Entropy}(H) \le \epsilon_H \\ \text{Escalate to System 2 Planner} & \text{otherwise} \end{cases}$$
 where canonical confidence threshold $\tau_{\text{gate}} = 0.85$.
+
+---
+
+### 4. Systems & Hardware Alignment: Non-Autoregressive GEMM vs. Memory-Bound Decoding
+- **Eliminating Autoregressive KV-Cache Bottlenecks**: Standard System 2 LLM decoding is strictly HBM memory-bandwidth bound (Arithmetic Intensity $\mathcal{I} \approx 1\text{ FLOP/Byte}$). By contrast, System 1 non-autoregressive scorers (Jev / CUA-S1) evaluate all $M$ candidate options in a single parallel forward pass, converting sequential token generation into a single compute-dense matrix multiplication `[DESIGN_DECISION]`.
+- **L2 Cache Residency**: At $706\text{K}$ parameters ($\approx 2.8\text{ MB}$ in FP32 or $1.4\text{ MB}$ in FP16), the entire CUA-S1 model fits inside modern CPU L3 or GPU L2 SRAM cache, achieving sub-50ms reflex latency `[LITERATURE_RESULT]`.
 
 ---
 
@@ -159,3 +169,11 @@ class DualProcessController:
 - **Specification**: Edge-deployed System 1 decision models SHOULD operate directly on raw byte-level embeddings (257 tokens: 0-255 bytes + 1 EOS), bypassing large BPE/SentencePiece vocabulary tables.
 - **Violation Consequence**: Bundling multi-megabyte tokenizer vocabulary files increases cold-start binary footprints and introduces Out-of-Vocabulary (OOV) token handling errors.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Kahneman, D.** (2011). *Thinking, Fast and Slow*. Farrar, Straus and Giroux.
+2. **Almeida, D., et al. (TypeSafe AI)** (2026). "Jev: A System One Architecture for Software Automation via Reinforcement Learning for Calibrated Decisions (RLCD)." *TypeSafe AI Research*.
+3. **Cua AI Team** (2026). "CUA-S1-FORMS: A 706K Parameter Byte-Level Parallel Option Scorer for Computer-Use Automation." *Hugging Face Repository (`cua-ai/cua-s1-forms`)*.
+4. **Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q.** (2017). "On Calibration of Modern Neural Networks." *International Conference on Machine Learning (ICML 2017)*, PMLR 70, pp. 1321–1330.

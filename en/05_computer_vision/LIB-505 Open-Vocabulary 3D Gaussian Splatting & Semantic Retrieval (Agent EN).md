@@ -34,6 +34,10 @@ successors:
 
 # Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]].
+- **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+
 ## 1. Mathematical Formalization of Semantic Splatting
 
 Each explicit 3D Gaussian primitive is extended with a low-dimensional semantic embedding vector $f_i \in \mathbb{R}^d$ ($d \ll D_{\text{CLIP}}$, typically $d \in \{16, 32\}$):

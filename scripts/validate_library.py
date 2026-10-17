@@ -421,16 +421,21 @@ def validate_all():
             if zl and el and zl != el:
                 errors.append(f"[Parity {cid}] {rid} contract level mismatch: ZH='{zl}' vs EN='{el}'")
 
-    # 9. Inline Body Navigation vs YAML Frontmatter DAG
+    # 9. Inline Body Navigation vs YAML Frontmatter DAG (Mandatory for all LIB-001..906)
     for cid in all_call_numbers:
         if cid in zh_docs:
             zfm = zh_docs[cid]['fm']
             zbody = zh_docs[cid]['body']
             fm_pre = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (zfm.get('prerequisites') or []) if re.search(r'(LIB-\d{3})', x))
             fm_suc = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (zfm.get('successors') or []) if re.search(r'(LIB-\d{3})', x))
-            head_lines = "\n".join(zbody.splitlines()[:25])
+            head_lines = "\n".join(zbody.splitlines()[:28])
             pre_m = re.search(r'前置依賴\*\*：([^\n]+)', head_lines)
             suc_m = re.search(r'(?:後續節點|後續模組)\*\*：([^\n]+)', head_lines)
+            if cid != 'LIB-000':
+                if not pre_m:
+                    errors.append(f"[ZH {cid}] Missing mandatory inline '前置依賴' navigation header")
+                if not suc_m:
+                    errors.append(f"[ZH {cid}] Missing mandatory inline '後續節點' navigation header")
             if pre_m:
                 body_pre = set(re.findall(r'LIB-\d{3}', pre_m.group(1)))
                 if body_pre != fm_pre:
@@ -445,9 +450,14 @@ def validate_all():
             ebody = en_docs[cid]['body']
             efm_pre = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (efm.get('prerequisites') or []) if re.search(r'(LIB-\d{3})', x))
             efm_suc = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (efm.get('successors') or []) if re.search(r'(LIB-\d{3})', x))
-            ehead_lines = "\n".join(ebody.splitlines()[:25])
+            ehead_lines = "\n".join(ebody.splitlines()[:28])
             epre_m = re.search(r'Prerequisites\*\*:\s*([^\n]+)', ehead_lines)
             esuc_m = re.search(r'Successors\*\*:\s*([^\n]+)', ehead_lines)
+            if cid != 'LIB-000':
+                if not epre_m:
+                    errors.append(f"[EN {cid}] Missing mandatory inline 'Prerequisites' navigation header")
+                if not esuc_m:
+                    errors.append(f"[EN {cid}] Missing mandatory inline 'Successors' navigation header")
             if epre_m:
                 ebody_pre = set(re.findall(r'LIB-\d{3}', epre_m.group(1)))
                 if ebody_pre != efm_pre:
@@ -457,13 +467,14 @@ def validate_all():
                 if ebody_suc != efm_suc:
                     errors.append(f"[EN {cid}] Body 'Successors' {sorted(ebody_suc)} != YAML successors {sorted(efm_suc)}")
 
-    # 10. Canonical Evidence Taxonomy Enforcement
+    # 10. Canonical Evidence Taxonomy Enforcement & Coverage
     for lang, docs in [('ZH', zh_docs), ('EN', en_docs)]:
         for cid, d in docs.items():
             body_nc = re.sub(r'```.*?```', '', d['body'], flags=re.DOTALL)
             body_nc = re.sub(r'\$\$.*?\$\$', '', body_nc, flags=re.DOTALL)
             body_nc = re.sub(r'\$[^$\n]+\$', '', body_nc)
             body_nc = re.sub(r'`(?!\[[A-Z][A-Z0-9_ /,-]{2,}\]\`)[^`\n]+`', '', body_nc)
+            canonical_found = []
             for match in re.finditer(r'\[([A-Z][A-Z0-9_ /,-]{2,})\](?!\()', body_nc):
                 tag = match.group(1).strip()
                 if re.match(r'^RULE-\d{3}-\d{2}$', tag):
@@ -472,8 +483,12 @@ def validate_all():
                     continue
                 if tag not in CANONICAL_EVIDENCE_TAGS:
                     errors.append(f"[{lang} {cid}] Non-canonical or compound evidence tag: [{tag}]")
+                else:
+                    canonical_found.append(tag)
+            if len(canonical_found) == 0:
+                errors.append(f"[{lang} {cid}] Missing canonical evidence tags (0 found in body)")
 
-    # 11. Python Code Block AST Syntax & Bilingual Code Parity
+    # 11. Python Code Block AST Syntax, Bilingual Code Parity & References Completeness
     for cid in all_call_numbers:
         if cid not in zh_docs or cid not in en_docs:
             continue
@@ -489,9 +504,13 @@ def validate_all():
                 ast.parse(textwrap.dedent(b))
             except SyntaxError as e:
                 errors.append(f"[EN {cid}] Python block #{idx+1} SyntaxError: {e}")
-        if cid not in ('LIB-000', 'LIB-903', 'LIB-905', 'LIB-906'):
+        if cid not in ('LIB-000', 'LIB-905', 'LIB-906'):
             if len(z_blocks) > 0 and len(e_blocks) == 0:
                 errors.append(f"[EN {cid}] Missing Python implementation block (ZH has {len(z_blocks)}, EN has 0)")
+        if not re.search(r'(?:參考文獻|文獻|引證|References|Literature)', zh_docs[cid]['body']):
+            errors.append(f"[ZH {cid}] Missing References / Literature section")
+        if not re.search(r'(?:References|Literature)', en_docs[cid]['body']):
+            errors.append(f"[EN {cid}] Missing References / Literature section")
 
     # Output report
     rep_dir = ROOT / 'reports'

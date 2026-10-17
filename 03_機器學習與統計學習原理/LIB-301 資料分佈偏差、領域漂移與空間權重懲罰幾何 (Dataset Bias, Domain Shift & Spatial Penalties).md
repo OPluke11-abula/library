@@ -38,8 +38,8 @@ successors:
 # 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、初等機率論。
-- **後續節點**：[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、初等機率論。
+- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
 - **難度等級**：學士進階 / 機器學習理論核心。
 
 ---
@@ -160,10 +160,10 @@ gpu_augmentation_pipeline = T.Compose([
   - 熔斷判定：若 $p_{\max} > 0.95$ 但 $\text{MSE}(x, \hat{x}) > \tau_{\text{OOD}} = 0.08$，判定發生**捷徑學習 (Shortcut Learning) 與領域漂移**。
 - **執行保證 (Post-conditions)**: 嚴禁採信該高置信度預測，標記為 OOD 警報並轉入人工或備用管線。
 - **可執行斷言**:
-  ```python
+```python
 if recon_error > 0.08 and max_prob > 0.95:
     raise OODDriftAlert("偵測到形態分佈漂移樣本！禁止採信捷徑過度自信預測。")
-  ```
+```
 
 ### [RULE-301-02] 空間墨水質心前處理牽引合約 (Center of Mass Alignment Safeguard)
 - **合約等級**: `BOUNDARY_GUARD`
@@ -174,14 +174,15 @@ if recon_error > 0.08 and max_prob > 0.95:
   - 重心容忍殘差：$|\bar{x}_{\text{aligned}} - 13.5| \le 0.5$ 像素。
 - **執行保證**: 防止因為書寫偏位直接踩入全連結權重矩陣的負權重扣分陷阱。
 
-### [RULE-301-03] 抗領域漂移資料增強強制合約 (Data Augmentation Invariant)
+### [RULE-301-03] 抗領域漂移資料增強與邊界保留強制合約 (Data Augmentation & Mass Preservation Invariant)
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
 - **前置條件 (Pre-conditions)**: 構建手寫字元訓練管線。
 - **量化決策邊界 (Decision Thresholds)**:
   - 必須強制包含幾何抗漂移增強：
-    - 隨機旋轉角度：$\theta \in [-15^\circ, +15^\circ]$（涵蓋美式傾斜與歐亞直立風格）。
+    - 隨機旋轉角度：$\theta \in [-15^\circ, +15^\circ]$（涵蓋傾斜與直立風格）。
     - 隨機橫向剪切：$\text{shear} \in [-10^\circ, +10^\circ]$。
     - 隨機平移：$\pm 8\%$ 畫布尺寸。
+  - 邊界墨水保留約束：增強變換後必須保證 $\ge 90\%$ 的前景墨水質量（Foreground Ink Mass）保留於中央有效感受野區域內，嚴禁將關鍵拓樸筆劃裁切出畫布外。
 - **執行保證**: 阻斷模型僅憑像素絕對空間座標做死記硬背，強迫學習拓樸筆劃特徵。
 ---
 

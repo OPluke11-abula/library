@@ -270,12 +270,12 @@ flowchart TD
 - **原則**: 內部跨筆記參照一律使用 Obsidian 原生雙向鏈結格式（例如 `[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]`）。
 - **驗證指標**: 全庫內部鏈結斷鏈數必須維持為 0（0 broken links），且無孤立節點（0 orphan notes）。
 - **驗證代碼**:
-  ```python
-  def verify_library_integrity(dag_graph: dict):
-      for node, prereqs in dag_graph.items():
-          for p in prereqs:
-              assert p in dag_graph, f"斷鏈警報: 節點 {node} 之依賴 {p} 不存在！"
-  ```
+```python
+def verify_library_integrity(dag_graph: dict):
+    for node, prereqs in dag_graph.items():
+        for p in prereqs:
+            assert p in dag_graph, f"斷鏈警報: 節點 {node} 之依賴 {p} 不存在！"
+```
 ---
 
 ## 六、標準分類體系與參考規範 (Canonical Standards & References)

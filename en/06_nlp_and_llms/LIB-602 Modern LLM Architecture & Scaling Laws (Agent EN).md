@@ -131,14 +131,14 @@ class DynamicTanh(nn.Module):
 - **Violation Consequence**: Training parameter-heavy models on insufficient token counts wastes compute and yields undertrained, suboptimal downstream models.
 
 ### [RULE-602-02] KV Cache Memory Allocation Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Production LLM serving engines MUST deploy Grouped-Query Attention (GQA, $H_{KV} \le H_Q / 4$) or Multi-Query Attention (MQA) when serving contexts exceeding $16\text{K}$ tokens. KV cache allocations MUST be pre-calculated using PagedAttention: $\text{Mem}_{\text{KV}} = 2 \times 2 \times n_{\text{layers}} \times n_{\text{heads, kv}} \times d_{\text{head}} \times B \times L_{\text{seq}}$ bytes.
+- **Contract Level**: `RESOURCE_CONSTRAINT`
+- **Specification**: Production LLM serving engines MUST deploy Grouped-Query Attention (GQA, $H_{KV} \le H_Q / 4$) or Multi-Query Attention (MQA) when serving contexts exceeding $16\text{K}$ tokens. KV cache allocations MUST be pre-calculated using PagedAttention: $\text{Mem}_{\text{KV}} = 2 \times 2 \times n_{\text{layers}} \times n_{\text{heads, kv}} \times d_{\text{head}} \times B \times L_{\text{seq}}$ bytes, guaranteeing $\ge 96\%$ effective memory utilization without fragmentation.
 - **Violation Consequence**: Uncompressed multi-head attention KV caching consumes over $80\%$ of GPU memory, bottlenecking serving concurrency.
 
 ### [RULE-602-03] RMSNorm Numerical Stability & Epsilon Guardrail
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Root Mean Square Normalization (RMSNorm) MUST configure variance epsilon $\epsilon \ge 10^{-6}$ for FP16/BF16 execution to prevent division by zero during zero-mean activation states.
-- **Violation Consequence**: Inadequate epsilon values in RMSNorm cause division overflow and catastrophic `NaN` gradient propagation in deep Transformer blocks.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Root Mean Square Normalization (RMSNorm) MUST configure variance epsilon $\epsilon \ge 10^{-6}$ and enforce FP32 accumulation when computing $\text{mean}(x^2)$ under FP16 mixed-precision before invoking `rsqrt` and casting back to FP16.
+- **Violation Consequence**: Squaring activations directly in FP16 risks exceeding the FP16 maximum representable value ($65504$), causing `Inf`/`NaN` overflow and catastrophic gradient collapse in deep Transformer blocks.
 
 ---
 

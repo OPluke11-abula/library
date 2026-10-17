@@ -73,7 +73,7 @@ $$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p,
 
 **Receding Horizon Principle [FACT]**: Upon finding optimal sequence $U^* = [u_0^*, u_1^*, \dots, u_{H-1}^*]$, the agent executes ONLY $u_0^*$. At $t+1$, state feedback $\hat{x}_{t+1}$ is observed and the optimization is repeated, transforming open-loop trajectories into a robust closed-loop policy.
 
-### 1.4 Pedagogical Toy Model vs. Rigorous Control Theory [FACT / SAFETY_BOUND]
+### 1.4 Pedagogical Toy Model vs. Rigorous Control Theory [FACT] [SAFETY_BOUND]
 To prevent conceptual ambiguity between introductory educational material and rigorous robotics engineering:
 
 | Dimension | Pedagogical Toy Model | Rigorous Robotics & Control Theory |
@@ -88,7 +88,7 @@ To prevent conceptual ambiguity between introductory educational material and ri
 ### 1.5 GPU-Batched Model Predictive Path Integral (MPPI) [DERIVATION]
 In dense 3DGS scenes where signed distance fields and opacity gradients are non-convex, sampling-based MPPI optimizes trajectories in parallel on GPU:
 1. Inject $K=512$ Gaussian perturbations: $u_k^{(i)} = u_k + \epsilon_k^{(i)}, \ \epsilon_k^{(i)} \sim \mathcal{N}(0, \Sigma)$.
-2. Vectorized rollout of $K$ candidate trajectories: $X^{(i)} \in \mathbb{R}^{H \times 4}$.
+2. Vectorized rollout of $K$ candidate trajectories: $X^{(i)} \in \mathbb{R}^{H \times 4}$, evaluating total cost $S(U^{(i)}) = \Phi(x_H^{(i)}) + \sum_{k=0}^{H-1} (\ell(x_k^{(i)}, u_k^{(i)}) + \lambda u_k^T \Sigma^{-1} \epsilon_k^{(i)})$.
 3. Importance sampling weight calculation:
    $$w^{(i)} = \frac{\exp\left( -\frac{1}{\lambda} (S(U^{(i)}) - \min_j S(U^{(j)})) \right)}{\sum_{m=1}^K \exp\left( -\frac{1}{\lambda} (S(U^{(m)}) - \min_j S(U^{(j)})) \right)}, \quad U^* = \sum_{i=1}^K w^{(i)} U^{(i)}$$
 4. Execute $u_0^*$ and shift $U^*$ forward for warm-starting the subsequent cycle.
@@ -117,7 +117,78 @@ In dense 3DGS scenes where signed distance fields and opacity gradients are non-
 
 ---
 
-## 3. Invariants & Implementation Specifications
+## 3. Production GPU-Batched MPPI Implementation
+
+```python
+import torch
+from typing import Tuple, Optional
+
+class BatchedMPPIController:
+    """GPU-Batched Model Predictive Path Integral Controller aligned with RULE-506-02 & RULE-506-03."""
+    def __init__(
+        self, horizon: int = 15, num_samples: int = 512, dt: float = 0.05,
+        temperature_lambda: float = 0.5, v_max: float = 1.5, a_max: float = 2.0,
+        w_max: float = 1.0, r_safe: float = 0.4, terminal_weight: float = 5.0,
+        device: Optional[str] = None
+    ):
+        self.H, self.K, self.dt, self.lam = horizon, num_samples, dt, temperature_lambda
+        self.v_max, self.a_max, self.w_max, self.r_safe, self.q_f = v_max, a_max, w_max, r_safe, terminal_weight
+        self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+        self.u_nominal = torch.zeros((self.H, 2), dtype=torch.float32, device=self.device)
+        self.noise_sigma = torch.tensor([0.5, 0.4], dtype=torch.float32, device=self.device)
+        self.inv_sigma_cov = 1.0 / (self.noise_sigma ** 2)
+
+    @torch.no_grad()
+    def rollout_and_solve(
+        self, state: torch.Tensor, target_pos: torch.Tensor, obstacles: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        state = state.to(device=self.device, dtype=torch.float32)
+        target_pos = target_pos.to(device=self.device, dtype=torch.float32)
+        obstacles = obstacles.to(device=self.device, dtype=torch.float32)
+
+        eps = torch.randn((self.K, self.H, 2), dtype=torch.float32, device=self.device) * self.noise_sigma
+        u_samples = self.u_nominal.unsqueeze(0) + eps
+        u_samples[:, :, 0] = torch.clamp(u_samples[:, :, 0], -self.a_max, self.a_max)
+        u_samples[:, :, 1] = torch.clamp(u_samples[:, :, 1], -self.w_max, self.w_max)
+        eps_clamped = u_samples - self.u_nominal.unsqueeze(0)
+
+        x_rollout = torch.zeros((self.K, self.H + 1, 4), dtype=torch.float32, device=self.device)
+        x_rollout[:, 0, :] = state.unsqueeze(0)
+
+        for t in range(self.H):
+            cx, cy, cth, cv = x_rollout[:, t, 0], x_rollout[:, t, 1], x_rollout[:, t, 2], x_rollout[:, t, 3]
+            acc, omega = u_samples[:, t, 0], u_samples[:, t, 1]
+            x_rollout[:, t + 1, 0] = cx + cv * torch.cos(cth) * self.dt
+            x_rollout[:, t + 1, 1] = cy + cv * torch.sin(cth) * self.dt
+            x_rollout[:, t + 1, 2] = cth + omega * self.dt
+            x_rollout[:, t + 1, 3] = torch.clamp(cv + acc * self.dt, 0.0, self.v_max)
+
+        pos_seq = x_rollout[:, 1:, 0:2]
+        dist_sq = torch.sum((pos_seq - target_pos.view(1, 1, 2)) ** 2, dim=-1)
+        ctrl_effort = 0.1 * torch.sum(u_samples ** 2, dim=-1)
+        info_cross = self.lam * torch.sum(self.u_nominal.unsqueeze(0) * self.inv_sigma_cov.view(1, 1, 2) * eps_clamped, dim=-1)
+        stage_cost = dist_sq + ctrl_effort + info_cross
+
+        if obstacles.numel() > 0:
+            obs_pos, obs_rad = obstacles[:, 0:2].view(1, 1, -1, 2), obstacles[:, 2].view(1, 1, -1)
+            dist_to_obs = torch.norm(pos_seq.unsqueeze(2) - obs_pos, dim=-1) - obs_rad
+            stage_cost = stage_cost + torch.sum(100.0 * (torch.clamp(self.r_safe - dist_to_obs, min=0.0) ** 2), dim=-1)
+
+        terminal_cost = self.q_f * torch.sum((x_rollout[:, -1, 0:2] - target_pos.view(1, 2)) ** 2, dim=-1)
+        traj_cost = torch.sum(stage_cost, dim=1) + terminal_cost
+
+        weights = torch.exp(-(traj_cost - torch.min(traj_cost)) / self.lam)
+        weights = weights / (torch.sum(weights) + 1e-8)
+        self.u_nominal = torch.sum(weights.view(self.K, 1, 1) * u_samples, dim=0)
+        action_to_execute = self.u_nominal[0].clone()
+        self.u_nominal = torch.roll(self.u_nominal, shifts=-1, dims=0)
+        self.u_nominal[-1].zero_()
+        return action_to_execute, x_rollout[int(torch.argmin(traj_cost).item()), 1:, 0:2]
+```
+
+---
+
+## 4. Invariants & Implementation Specifications
 
 ### [RULE-506-01] Hierarchical Spatial Containment Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
@@ -126,17 +197,17 @@ In dense 3DGS scenes where signed distance fields and opacity gradients are non-
 
 ### [RULE-506-02] Camera Elevation & Obstacle Clearance Invariant
 - **Contract Level**: `SAFETY_CRITICAL`
-- **Specification**: Navigational trajectories planned for embodied agents MUST maintain camera/sensor ground clearance between $[1.5\text{m}, 1.7\text{m}]$ and satisfy obstacle clearance boundary constraint $\mathcal{X}_{\text{safe}} = \{x \mid \text{dist}(p(x), \partial \Omega_{\text{obs}}) \ge 0.4\text{m}\}$ [SAFETY_BOUND].
+- **Specification**: Navigational trajectories planned for embodied agents or Unity cameras MUST maintain camera/sensor ground clearance between $[1.5\text{m}, 1.7\text{m}]$ and satisfy obstacle clearance boundary constraint $\mathcal{X}_{\text{safe}} = \{x \mid \text{dist}(p(x), \partial \Omega_{\text{obs}}) \ge 0.4\text{m}\}$ against all 3D Gaussian primitives with opacity $\alpha > 0.5$ [SAFETY_BOUND].
 - **Violation Consequence**: Violating ground or obstacle clearance bounds produces camera clipping through physical geometries and collisions in physical robotic execution.
 
 ### [RULE-506-03] Real-Time Scene QA & Navigation Interactive Frame Rate SLA
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: Interactive embodied navigation engines MUST sustain rendering frame rates of $\ge 30\text{ FPS}$ ($< 33.3\text{ms}$ per frame) on target hardware. Local MPC / MPPI rollout solve latency MUST be bounded under $20\text{ms}$, with LLM spatial question-answering query latency bounded under $800\text{ms}$ [TARGET].
-- **Violation Consequence**: Control solve latencies exceeding $20\text{ms}$ degrade tracking stability and cause VR motion sickness or controller divergence.
+- **Specification**: Interactive embodied navigation clients MUST sustain Gaussian Splatting rendering frame rates of $\ge 45\text{ FPS}$ at 1080p ($\ge 72\text{ FPS}$ in VR mode). Local MPPI rollout solve latency MUST be bounded under $< 15\text{ms}$ ($\ge 30\text{Hz}$), global A* route replanning under $< 100\text{ms}$, and LLM spatial question-answering query latency under $< 800\text{ms}$ [TARGET].
+- **Violation Consequence**: Control solve latencies exceeding $15\text{ms}$ degrade tracking stability and cause VR motion sickness or controller divergence.
 
 ---
 
-## 4. Canonical References
+## 5. Canonical References
 
 1. **Gu, J., Trevithick, A., Lin, K. E., et al.** (2024). *ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Robot Perception*. **ICRA 2024**.
 2. **Rana, K., Haviland, J., Garg, S., et al.** (2023). *SayPlan: Grounding Large Language Models using 3D Scene Graphs for Scalable Robot Task Planning*. **CoRL 2023**.

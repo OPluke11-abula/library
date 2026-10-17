@@ -39,7 +39,7 @@ successors:
 # 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
 - **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、邊緣端高效部署。
 - **權威期刊/會議文獻出處**：
   - Lin, Tang, Tang et al. (MIT & Tsinghua, **MLSys 2024 Best Paper Award**) *AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration*.
@@ -208,10 +208,10 @@ if __name__ == "__main__":
   - 比例因子非零保證：$S = \frac{x_{\max} - x_{\min}}{2^b - 1} \ge 10^{-7}$。
   - 零點整數邊界鉗制：$Z = \text{clamp}\left(\text{round}\left(-\frac{x_{\min}}{S}\right), 0, 2^b - 1\right)$。
 - **可執行斷言**:
-  ```python
+```python
 assert S > 0, "量化 Scale 必須嚴格大於 0！"
 assert 0 <= Z <= (2**b - 1), f"量化 Zero-point {Z} 超出 [0, {2**b - 1}] 範圍！"
-  ```
+```
 
 ### [RULE-802-03] 次位元組打包與硬體對齊合約 (Sub-Byte Packing & Alignment Heuristic)
 - **合約等級**: `PERFORMANCE_CRITICAL`

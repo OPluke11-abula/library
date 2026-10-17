@@ -109,18 +109,16 @@ def compute_loss_surface_curvature(model: torch.nn.Module, loss_fn, x_batch, y_b
 
 ### [RULE-104-01] Lipschitz Learning Rate & Gradient Clipping Guardrail
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: For loss functions with $L$-Lipschitz continuous gradients ($\|
-abla f(x) - 
-abla f(y)\| \le L \|x - y\|$), the learning rate MUST satisfy $\eta < 2/L$. In deep neural networks where global $L$ cannot be determined analytically, adaptive gradient norm clipping $\|\mathbf{g}\| \le \tau_{\text{clip}}$ (default $\tau_{\text{clip}} = 1.0$) MUST be enforced.
+- **Specification**: For loss functions with $L$-Lipschitz continuous gradients ($\|\nabla f(x) - \nabla f(y)\|_2 \le L \|x - y\|_2$), the learning rate MUST satisfy $\eta < 2/L$. In deep neural networks where global $L$ cannot be determined analytically, adaptive gradient norm clipping $\|\mathbf{g}\|_2 \le g_{\text{clip}}$ (default $g_{\text{clip}} = 1.0$) MUST be enforced; if $\text{Loss} == \text{NaN}$ or $\|\mathbf{g}\|_2 > 100.0$ persists for 3 consecutive batches, decay $\eta$ by $10\times$ and roll back to the previous checkpoint.
 - **Violation Consequence**: Step sizes violating Lipschitz bounds induce oscillatory divergence along steep loss valley boundaries.
 
 ### [RULE-104-02] Optimizer Memory Footprint Constraint
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When planning model training memory budgets, agents MUST account for optimizer state overhead. For standard AdamW, each parameter requires 8 bytes for 1st ($m_t$) and 2nd ($v_t$) FP32 moment tracking, plus 4 bytes for FP32 master weights. If model parameters occupy $M$ bytes, optimizer states MUST be budgeted as at least $2 \times$ to $3 \times M$.
+- **Contract Level**: `RESOURCE_CONSTRAINT`
+- **Specification**: When planning model training memory budgets, agents MUST account for optimizer state overhead. For standard mixed-precision AdamW, each parameter requires 8 bytes for 1st ($m_t$) and 2nd ($v_t$) FP32 moment tracking, plus 4 bytes for FP32 master weights ($12 \times N_{\text{params}}$ bytes total optimizer overhead). If $VRAM_{\text{free}} < 1.3 \times (8 N_{\text{params}} + 4 N_{\text{params}})$, agents MUST switch to `AdamW8bit` (2 bytes/param) or Muon.
 - **Violation Consequence**: Underestimating optimizer state memory requirements leads to unexpected CUDA Out-of-Memory (OOM) aborts at the initial backward pass.
 
 ### [RULE-104-03] Numerical Stability & Subnormal Prevention
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: The second-moment denominator constant $\epsilon$ in adaptive optimizers (Adam/AdamW) MUST be configured to match numerical precision: $\epsilon \ge 10^{-8}$ for FP32, and $\epsilon \ge 10^{-6}$ for FP16/BF16 to prevent subnormal floating-point divisions.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: The second-moment denominator constant $\epsilon$ in adaptive optimizers (Adam/AdamW) MUST be configured to match numerical precision: $\epsilon = 10^{-8}$ for FP32/BF16, and $\epsilon \ge 10^{-6}$ for pure FP16 to prevent subnormal floating-point divisions (below FP16 minimum normal $6.1 \times 10^{-5}$).
 - **Violation Consequence**: Excessively small $\epsilon$ under half-precision generates subnormal denormalized numbers, causing severe hardware ALU pipeline stalls.
 

@@ -41,7 +41,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、多變量微積分。
-- **後續節點**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
+- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]、[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]。
 - **權威期刊/會議文獻出處**：
   - Polyak (USSR Comput. Math. Math. Phys. 1964) *Some methods of speeding up the convergence of iteration methods* (Heavy-ball Momentum).
   - Nesterov (Soviet Math. Dokl. 1983) *A method of solving a convex programming problem with convergence rate O(1/k^2)* (Nesterov Accelerated Gradient).
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 - **合約等級**: `RESOURCE_CONSTRAINT`
 - **前置條件 (Pre-conditions)**: 設定模型訓練最佳化器。
 - **量化決策邊界 (Decision Thresholds)**:
-  - 顯存開銷公式：標準 FP16/BF16 混合精度訓練中，AdamW 額外消耗顯存為 $8 \times N_{\text{params}}$ Bytes（一階動量 4B + 二階動量 4B，全為 FP32）。
+  - 顯存開銷公式：標準 FP16/BF16 混合精度訓練中，AdamW 額外消耗顯存為 $8 \times N_{\text{params}}$ Bytes（一階動量 4B + 二階動量 4B，全為 FP32），外加 FP32 Master Weights $4 \times N_{\text{params}}$ Bytes。
   - 若可用顯存滿足 $VRAM_{\text{free}} < 1.3 \times (8 \times N_{\text{params}} + 2 \times N_{\text{params}} \times 2)$，判定顯存即將 OOM。
 - **執行保證**: 禁止在大模型（如 7B 以上）單卡訓練中直接調用常規 FP32 AdamW。
 - **例外回退 (Fallback Protocol)**: 自動切換至 `bitsandbytes.optim.AdamW8bit`（顯存降至 2 Bytes/param）或切換至 2024 前沿 Muon 最佳化器。
@@ -221,10 +221,10 @@ if __name__ == "__main__":
   - FP32 / BF16 訓練：$\epsilon = 10^{-8}$。
   - 純 FP16 訓練：$\epsilon \ge 10^{-6}$（以防止在 FP16 最小正正規數 $6.1 \times 10^{-5}$ 下引發下溢或非規格化浮點數 Subnormal Numbers 導致 GPU 運算速度暴跌 100 倍）。
 - **可執行斷言**:
-  ```python
+```python
 if dtype == torch.float16:
     assert eps >= 1e-6, f"FP16 下 eps={eps} 過小，將引發非規格化數效能驟降！"
-  ```
+```
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)

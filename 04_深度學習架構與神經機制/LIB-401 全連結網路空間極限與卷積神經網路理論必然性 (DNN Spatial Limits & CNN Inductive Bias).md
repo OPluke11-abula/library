@@ -40,8 +40,8 @@ successors:
 # 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]。
-- **後續節點**：[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
+- **後續節點**：[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
 - **難度等級**：學士核心 / 深度學習架構基石。
 
 ---
@@ -198,10 +198,10 @@ if __name__ == "__main__":
   - 前端特徵擷取必須強制使用具有局部連接與權重共享特性的運算元（如 `nn.Conv2d` 或 Patch-based Vision Transformer 投影）。
 - **執行保證**: 確保網路參數量受限於局部核大小，且具備李群平移等變性。
 - **可執行斷言**:
-  ```python
+```python
 first_layer = list(model.children())[0]
 assert not isinstance(first_layer, torch.nn.Linear), "空間網格輸入嚴禁第一層直接採用全連結層！"
-  ```
+```
 
 ### [RULE-401-02] 有效感受野 (ERF) 尺度覆蓋合約 (Receptive Field Scale Invariant)
 - **合約等級**: `BOUNDARY_GUARD`
@@ -212,11 +212,11 @@ assert not isinstance(first_layer, torch.nn.Linear), "空間網格輸入嚴禁�
 - **例外回退 (Fallback Protocol)**: 若層數過淺導致感受野不足，Agent 必須自動引入空洞卷積 (Dilated Convolution) 或階層式 Pooling。
 
 ### [RULE-401-03] 邊界效應與特徵圖對齊合約 (Feature Map Padding Invariant)
-- **合約等級**: `OPTIMIZATION_HEURISTIC`
+- **合約等級**: `BOUNDARY_GUARD`
 - **前置條件 (Pre-conditions)**: 配置卷積核尺寸 $k$ 與填充 $p$。
 - **量化決策邊界 (Decision Thresholds)**:
-  - 對於保持解析度之卷積層，必須嚴格配置奇數卷積核 $k \in \{3, 5, 7\}$ 且 $p = \lfloor k/2 \rfloor$（即 `padding='same'`）。
-- **執行保證**: 杜絕特徵圖邊界像素權重退化與維度偏心。
+  - 對於保持解析度之卷積層（步幅 $s = 1$），必須嚴格配置奇數卷積核 $k \in \{3, 5, 7\}$ 且對稱填充 $p = \lfloor k/2 \rfloor$（即 `padding='same'`）。
+- **執行保證**: 杜絕特徵圖邊界像素權重退化與空間座標漂移。
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)

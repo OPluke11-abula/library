@@ -109,8 +109,8 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 - **Violation Consequence**: Unnormalized quaternions or negative scaling parameters produce indefinite covariance matrices, causing 2D projection Jacobian breakdown and catastrophic rendering artifacts.
 
 ### [RULE-504-02] 2D Screen-Space Low-Pass Anti-Aliasing Guardrail
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When projecting 3D Gaussians to 2D screen space, a low-pass filter variance $\sigma_{\text{filter}}^2 = 0.3\text{ px}^2$ MUST be added to the 2D projected covariance $\Sigma_{2D}' = J \Sigma J^T + \sigma_{\text{filter}}^2 I_{2 \times 2}$.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: When projecting 3D Gaussians to 2D screen space, a low-pass filter variance $\sigma_{\text{filter}}^2 = 0.3\text{ px}^2$ MUST be added to the 2D projected covariance $\Sigma_{2D}' = J W \Sigma W^T J^T + \sigma_{\text{filter}}^2 I_{2 \times 2}$.
 - **Violation Consequence**: Omitting the screen-space low-pass footprint causes severe high-frequency pixel popping and aliasing during camera translation.
 
 ### [RULE-504-03] Ray Transmittance Early-Exit Heuristic

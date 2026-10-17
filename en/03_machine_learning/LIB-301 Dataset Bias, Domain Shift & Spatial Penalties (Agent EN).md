@@ -102,18 +102,18 @@ def compute_mmd_loss(source_features: torch.Tensor, target_features: torch.Tenso
 
 ## 4. Agent Invariants & Decision Protocols
 
-### [RULE-301-01] Covariate Shift & Morphological OOD Guardrail
+### [RULE-301-01] Covariate Shift & OOD Reconstruction Guardrail
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Perception models exposed to distribution shifts MUST incorporate synthetic geometric data augmentations (affine rotations $\pm 15^\circ$, shear $\le 10^\circ$, bounding-box translations) reproducing morphological stroke variants (e.g., upright uncrossed vs slanted crossed strokes).
-- **Violation Consequence**: Omitting morphological variation from training yields sharp spatial negative-weight traps, producing $>95\%$ overconfident false misclassifications on out-of-distribution inputs.
+- **Specification**: For test inputs $x_{\text{test}}$, agents MUST monitor both peak Softmax confidence $p_{\max} = \max_k P(y=k|x)$ and auxiliary Autoencoder reconstruction error $\text{MSE}(x, \hat{x})$. If $p_{\max} > 0.95$ while $\text{MSE}(x, \hat{x}) > \tau_{\text{OOD}} = 0.08$, the prediction MUST be flagged as a shortcut-learning / covariate-shift OOD anomaly and rejected.
+- **Violation Consequence**: Unchecked spatial negative-weight traps produce $>95\%$ overconfident false misclassifications on out-of-distribution stroke morphologies.
 
 ### [RULE-301-02] Center of Mass Alignment Safeguard
 - **Contract Level**: `BOUNDARY_GUARD`
-- **Specification**: All isolated character/digit inputs MUST undergo center of mass (CoM) alignment via spatial moments before entering convolutional feature extractors, positioning the pixel intensity centroid at $(13.5, 13.5)$.
+- **Specification**: All isolated character/digit inputs MUST undergo center of mass (CoM) alignment via spatial moments (`LIB-501`) before entering feature extractors, positioning the pixel intensity centroid at $(13.5, 13.5)$ with residual tolerance $|\bar{x}_{\text{aligned}} - 13.5| \le 0.5\text{ px}$.
 - **Violation Consequence**: Geometric bounding box center positioning leaves mass centroids eccentric, causing strokes to collide with spatial negative-weight hyperplanes.
 
-### [RULE-301-03] Data Augmentation Geometric Boundary Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Random affine and projective data augmentations MUST NOT displace stroke pixels outside canvas boundaries. Invariant bounding boxes MUST preserve $\ge 90\%$ foreground ink mass within the central receptive zone.
-- **Violation Consequence**: Unbounded geometric augmentations truncate essential topological loops or strokes, corrupting semantic label integrity.
+### [RULE-301-03] Data Augmentation & Mass Preservation Invariant
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: Training pipelines exposed to morphological shifts MUST incorporate geometric augmentations (affine rotations $\theta \in [-15^\circ, +15^\circ]$, shear $\in [-10^\circ, +10^\circ]$, translations $\pm 8\%$) while preserving $\ge 90\%$ foreground ink mass within the central receptive zone.
+- **Violation Consequence**: Omitting geometric augmentation causes coordinate memorization, while unbounded transforms truncate essential topological strokes.
 

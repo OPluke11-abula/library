@@ -44,8 +44,8 @@ successors:
 # 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
-- **後續節點**：[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]。
+- **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
+- **後續節點**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **權威期刊/會議文獻出處**：
   - Kaplan et al. (arXiv 2020) *Scaling Laws for Neural Language Models*.
   - Hoffmann et al. (DeepMind, NeurIPS 2022) *Training Compute-Optimal Large Language Models (Chinchilla)*.
@@ -269,10 +269,10 @@ if __name__ == "__main__":
     $$D_{\text{optimal}} \approx 20 \times N_{\text{optimal}}$$
   - 嚴禁出現如 70B 模型僅訓練 300B Tokens 的「嚴重欠訓練 (Under-trained)」架構配置。
 - **可執行斷言**:
-  ```python
+```python
 token_param_ratio = num_training_tokens / num_params
 assert token_param_ratio >= 18.0, f"Token 與參數比例 {token_param_ratio:.1f} 低於 Chinchilla 最優界限 (20:1)，算力分配無效！"
-  ```
+```
 
 ### [RULE-602-02] KV 快取顯存預算與分頁合約 (KV Cache Memory Allocation Invariant)
 - **合約等級**: `RESOURCE_CONSTRAINT`

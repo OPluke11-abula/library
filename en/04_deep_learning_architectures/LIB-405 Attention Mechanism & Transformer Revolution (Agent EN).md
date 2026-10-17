@@ -167,8 +167,8 @@ class ProductionMHA(nn.Module):
 - **Violation Consequence**: Standard attention materializes the full $N \times N$ attention matrix in HBM, causing quadratic memory allocation and memory bandwidth bottlenecks.
 
 ### [RULE-405-03] Rotary Position Embedding (RoPE) Extrapolation Guardrail
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When extending context length beyond pretraining windows using Rotary Position Embeddings (RoPE), agents MUST apply continuous frequency interpolation (e.g., NTK-aware or YaRN scaling) rather than naive linear extrapolation.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: When extending context length $L_{\text{target}}$ beyond pretraining windows $L_{\text{train}}$ using Rotary Position Embeddings (RoPE), agents MUST apply continuous frequency interpolation (YaRN or dynamic NTK-aware scaling $s = L_{\text{target}} / L_{\text{train}}, \theta'_i = \theta_i \cdot s^{-2i/(d-2)}$) or fall back to sliding-window truncation at $L_{\text{train}}$ rather than naive unscaled extrapolation.
 - **Violation Consequence**: Unscaled rotational frequencies on out-of-distribution positions produce catastrophic perplexity degradation.
 
 ---

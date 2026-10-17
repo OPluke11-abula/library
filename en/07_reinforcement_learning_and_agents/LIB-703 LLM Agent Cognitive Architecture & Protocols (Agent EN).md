@@ -63,7 +63,7 @@ To operate over infinite time horizons within finite token contexts:
 
 ---
 
-## 3. Production JSON-RPC Tool Schema Contract
+## 3. Production JSON-RPC Tool Schema & Closed-Loop Reference Implementation
 
 ```json
 {
@@ -88,6 +88,35 @@ To operate over infinite time horizons within finite token contexts:
 }
 ```
 
+```python
+import traceback
+from typing import Callable, Dict, Any, List, Optional
+
+class ProductionAgentLoop:
+    def __init__(self, tools_dict: Dict[str, Callable[..., str]], max_iterations: int = 10):
+        self.tools = tools_dict
+        self.max_iterations = max_iterations
+        self.trajectory: List[Dict[str, Any]] = []
+
+    def execute_step(self, user_goal: str, reasoning_fn: Callable[..., Dict[str, Any]]) -> Optional[str]:
+        for _ in range(self.max_iterations):
+            decision = reasoning_fn(user_goal, self.trajectory)
+            thought, action, action_input = decision["thought"], decision["action"], decision["action_input"]
+            self.trajectory.append({"role": "assistant", "thought": thought, "action": action})
+            if action == "finish":
+                return str(action_input)
+            tool_fn = self.tools.get(action)
+            if not tool_fn:
+                obs = f"Error: Unknown tool '{action}'"
+            else:
+                try:
+                    obs = tool_fn(**action_input)
+                except Exception as e:
+                    obs = f"Tool execution exception: {str(e)}\n{traceback.format_exc()}"
+            self.trajectory.append({"role": "environment", "observation": obs})
+        return None
+```
+
 ---
 
 ## 4. Agent Invariants & Decision Protocols
@@ -98,12 +127,12 @@ To operate over infinite time horizons within finite token contexts:
 - **Violation Consequence**: Open-loop action sequences hallucinate intermediate tool results, compounding reasoning errors uncontrollably.
 
 ### [RULE-703-02] External Cortex Persistence (Obsidian Vault) Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Critical architectural decisions, experiment outcomes, and system state transitions MUST be persisted into human- and agent-readable Markdown files within the local knowledge vault (`AGENTS.md`, `reports/`). Long-term state MUST NOT rely solely on volatile context window memory.
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Critical architectural decisions, experiment outcomes, and system state transitions MUST be persisted into human- and agent-readable Markdown files within the local knowledge vault (`AGENTS.md`, `LIB-XXX`). Long-term state MUST NOT rely solely on volatile context window memory.
 - **Violation Consequence**: Ephemeral conversational context wipes out cumulative architectural memory between session restarts.
 
 ### [RULE-703-03] Token Budget Conservation & Working Memory Pruning Heuristic
-- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Contract Level**: `RESOURCE_CONSTRAINT`
 - **Specification**: When active conversation context exceeds $70\%$ of the maximum token window, agents MUST summarize completed execution trajectories into structured summaries and prune redundant intermediate tool outputs.
 - **Violation Consequence**: Context exhaustion forces involuntary prompt truncation, triggering attention degradation and task failure.
 

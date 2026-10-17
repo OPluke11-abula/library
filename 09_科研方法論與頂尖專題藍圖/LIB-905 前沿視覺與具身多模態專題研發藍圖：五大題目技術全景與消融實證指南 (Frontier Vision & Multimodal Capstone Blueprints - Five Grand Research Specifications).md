@@ -40,7 +40,7 @@ successors: []
 # 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)
 
 ## 導讀與概念座標
-- **前置依賴**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]。
+- **前置依賴**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
 - **核心定位**：本卷冊直接對齊指導教授提出之「五大專題研究題目建議」，將 5 份研發海報與規格書，結構化提煉為大專生專題實作、國科會大專生研究計畫（C801）以及學術競賽與推甄之核心作戰藍圖。
 
 ---
@@ -90,9 +90,9 @@ successors: []
 ### 題目 4：細粒度指令影像編輯與非目標保持 (LIB-407)
 - **核心管線**：
   1. **指令解析**：解析「把汽車輪框改成黑色，其他地方不要變」 $\to$ 目標 Token: `wheels`, 屬性: `black`, 保持: `car body, background`。
-  2. **注意力增強與抑制**：$A_{\text{target}} \times 1.5$，$A_{\text{bg}} \times 0.2$ [HEURISTIC / DESIGN_DECISION]。
+  2. **注意力增強與抑制**：$A_{\text{target}} \times 1.5$，$A_{\text{bg}} \times 0.2$ `[HEURISTIC]` `[DESIGN_DECISION]`。
   3. **非目標特徵鎖定 (MasaCtrl 範式)**：在 U-Net 自注意力層中，背景像素直接抄取 DDIM Inversion 原始影像的 Key/Value，徹底杜絕背景重繪。
-- **量化指標**：背景 $\text{LPIPS} \le 0.04$ [TARGET]、編輯成功率 $\ge 90\%$ [TARGET]、CLIP Score $\ge 28.5$ [TARGET]。
+- **量化指標**：背景 $\text{LPIPS} \le 0.04$ `[TARGET]`、編輯成功率 $\ge 90\%$ `[TARGET]`、CLIP Score $\ge 28.5$ `[TARGET]`。
 
 ### 題目 5：情境感知物件生成與光照幾何一致性影像融合 (LIB-408)
 - **五階段物理融合管線**：
@@ -128,11 +128,11 @@ successors: []
 
 ### [RULE-905-01] 3DGS 語意標註多視角一致性防呆
 - **等級**: `QUALITY_BOUND`
-- **邊界**: 在構建 3D 語意高斯場時，實體物件在各訓練視角下的反投影 Intersection-over-Union (IoU) 建議達到 $\ge 0.65$ [HEURISTIC / TARGET]。若在消融評估中低於此閾值，該視角特徵不得參與三維語意碼本更新，以防語意標籤擴散失真。
+- **邊界**: 在構建 3D 語意高斯場時，實體物件在各訓練視角下的反投影 Intersection-over-Union (IoU) 建議達到 $\ge 0.65$ `[HEURISTIC]` `[TARGET]`。若在消融評估中低於此閾值，該視角特徵不得參與三維語意碼本更新，以防語意標籤擴散失真。
 
 ### [RULE-905-02] 影像編輯非目標區域嚴格無損防護
 - **等級**: `QUALITY_BOUND`
-- **邊界**: 在細粒度指令影像編輯中，任何標註為「保持不變」的背景像素，建議在編輯前後的平均絕對誤差達到 $\text{MAE} \le 3/255$，且結構相似性指標 $\text{SSIM} \ge 0.96$ [DESIGN_DECISION / TARGET]。
+- **邊界**: 在細粒度指令影像編輯中，任何標註為「保持不變」的背景像素，建議在編輯前後的平均絕對誤差達到 $\text{MAE} \le 3/255$，且結構相似性指標 $\text{SSIM} \ge 0.96$ `[DESIGN_DECISION]` `[TARGET]`。
 
 ### [RULE-905-03] 影像融合接觸陰影衰減物理律
 - **等級**: `HIGH_INVARIANT`
@@ -140,11 +140,11 @@ successors: []
 
 ### [RULE-905-04] 大規模校園 3DGS 分塊記憶體預算
 - **等級**: `BOUNDARY_GUARD`
-- **邊界**: 大規模場景（校園/大樓）必須實施空間八叉樹（Octree）或網格分塊（Spatial Chunking），單一渲染視錐體內的高斯數量目標上限為 $4.5 \times 10^6$ 點，動態 VRAM 佔用控制在 $\le 14\text{GB}$ 預算之內 [DESIGN_DECISION / TARGET]。
+- **邊界**: 大規模場景（校園/大樓）必須實施空間八叉樹（Octree）或網格分塊（Spatial Chunking），單一渲染視錐體內的高斯數量目標上限為 $4.5 \times 10^6$ 點，動態 VRAM 佔用控制在 $\le 14\text{GB}$ 預算之內 `[DESIGN_DECISION]` `[TARGET]`。
 
 ### [RULE-905-05] 具身路徑規劃零碰撞原則
 - **等級**: `SAFETY_CRITICAL`
-- **邊界**: 導航演算法生成的相機或虛擬人移動軌跡，其與場景中任何實體障礙物的幾何距離必須恆大於安全半徑限幅 $R_{\text{safe}} \ge 0.35\text{m}$ [SAFETY_BOUND]。
+- **邊界**: 導航演算法生成的相機或虛擬人移動軌跡，其與場景中任何實體障礙物的幾何距離必須恆大於安全半徑限幅 $R_{\text{safe}} \ge 0.35\text{m}$ `[SAFETY_BOUND]`。
 
 ---
 

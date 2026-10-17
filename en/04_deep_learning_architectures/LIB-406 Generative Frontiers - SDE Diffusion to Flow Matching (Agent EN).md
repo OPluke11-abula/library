@@ -71,29 +71,37 @@ Replacing legacy U-Nets with standard Vision Transformer backbones:
 
 ---
 
-## 3. Production Optimal Transport Flow Matching Sampler
+## 3. Production Optimal Transport Flow Matching Trainer & Sampler
 
 ```python
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from typing import Optional
 
-@torch.no_grad()
-def sample_flow_matching_euler(model, noise: torch.Tensor, steps: int = 10) -> torch.Tensor:
-    """
-    Solves probability flow ODE via simple Euler integration in 10 steps.
-    Trajectory: x(0) ~ N(0, I) -> x(1) ~ Data
-    """
-    dt = 1.0 / steps
-    x = noise
-    for i in range(steps):
-        t_scalar = i / steps
-        t = torch.full((x.shape[0],), t_scalar, device=x.device, dtype=x.dtype)
-        
-        # Predict constant velocity vector field v_theta(x, t)
-        v = model(x, t)
-        
-        # Euler step: x_{t + dt} = x_t + v * dt
-        x = x + v * dt
-    return x
+class OptimalTransportFlowMatchingTrainer:
+    """OT-CFM Trainer & Euler ODE Sampler aligned with RULE-406-01 ~ RULE-406-03."""
+    def __init__(self, velocity_model: nn.Module, sigma_min: float = 1e-4):
+        self.model = velocity_model
+        self.sigma_min = sigma_min
+
+    def compute_loss(self, x_1: torch.Tensor, cond: Optional[torch.Tensor] = None) -> torch.Tensor:
+        B = x_1.size(0)
+        t = torch.rand(B, 1, 1, device=x_1.device, dtype=x_1.dtype)
+        x_0 = torch.randn_like(x_1)
+        x_t = (1.0 - (1.0 - self.sigma_min) * t) * x_0 + t * x_1
+        u_t = x_1 - (1.0 - self.sigma_min) * x_0
+        v_pred = self.model(x_t, t.view(B, 1), cond)
+        return F.mse_loss(v_pred, u_t)
+
+    @torch.no_grad()
+    def sample_euler_ode(self, noise: torch.Tensor, cond: Optional[torch.Tensor] = None, num_steps: int = 8) -> torch.Tensor:
+        dt = 1.0 / num_steps
+        x_t = noise.clone()
+        for step in range(num_steps):
+            t = torch.full((x_t.size(0), 1), step * dt, device=x_t.device, dtype=x_t.dtype)
+            x_t = x_t + self.model(x_t, t, cond) * dt
+        return x_t
 ```
 
 ---
@@ -102,21 +110,32 @@ def sample_flow_matching_euler(model, noise: torch.Tensor, steps: int = 10) -> t
 
 ### [RULE-406-01] Optimal Transport Straight-Flow Path Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In Flow Matching and Rectified Flow generative architectures, probability trajectories MUST follow optimal transport conditioning $x_t = (1 - t) x_0 + t x_1$ with constant target velocity $u_t(x_t) = x_1 - x_0$.
+- **Specification**: In Flow Matching and Rectified Flow generative architectures, probability trajectories MUST follow optimal transport linear displacement interpolation $x_t = (1 - (1 - \sigma_{\min}) t) x_0 + t x_1$ with constant target velocity $u_t = x_1 - (1 - \sigma_{\min}) x_0$ `[DERIVATION]`.
 - **Violation Consequence**: Non-linear diffusion noise schedules introduce high trajectory curvature, requiring excessive ODE solver integration steps during inference.
 
 ### [RULE-406-02] AdaLN-Zero Identity Initialization Invariant
 - **Contract Level**: `STABILITY_CRITICAL`
-- **Specification**: In Diffusion Transformer (DiT) blocks, projection layers modulating scale and shift parameters ($\gamma, \beta, \alpha$) MUST be initialized strictly to zero (`nn.init.zeros_`).
+- **Specification**: In Diffusion Transformer (DiT) blocks, projection layers modulating scale, shift, and residual gate parameters ($\gamma_1, \beta_1, \alpha_1, \gamma_2, \beta_2, \alpha_2$) MUST be initialized strictly to zero (`nn.init.zeros_`) `[FACT]`.
 - **Violation Consequence**: Non-zero initialization breaks identity mapping at initialization, causing initial forward activations to explode in deep residual stacks.
 
 ### [RULE-406-03] ODE Solver Truncation Error Bound Invariant
 - **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: In Flow Matching numerical ODE sampling, solver step counts $N_{\text{steps}}$ MUST balance truncation error $\mathcal{O}(\Delta t^p)$ and compute latency. Single-step Euler integration is restricted to distilled flow networks.
+- **Specification**: In Flow Matching numerical ODE sampling, solver step counts $N_{\text{steps}} \ge 8$ SHOULD use first-order Euler or Midpoint solvers rather than 4th-order Runge-Kutta (RK4) to avoid $4\times$ redundant forward evaluations; step counts $N_{\text{steps}} \le 4$ MUST employ Reflow-distilled straight-trajectory weights, targeting $< 50\text{ms}$ latency on RTX 4090 `[TARGET]`.
 - **Violation Consequence**: Under-stepping ODE integration without distillation introduces severe perceptual truncation artifacts and mode collapse.
 
 ### [RULE-406-04] MM-DiT Dual-Stream Modality Isolation Invariant
 - **Contract Level**: `BOUNDARY_GUARD`
-- **Specification**: Multi-modal Diffusion Transformers (MM-DiT) MUST maintain distinct linear projections and LayerNorm parameters for visual and textual token sequences, joining representations exclusively within the cross-attention kernel.
-- **Violation Consequence**: Forcing heterogeneous modalities through shared projection layers causes severe cross-modal interference and degraded text-image alignment.
+- **Specification**: Multi-modal Diffusion Transformers (MM-DiT) MUST maintain distinct linear projections, LayerNorm, and FFN parameters for visual and textual token sequences, joining representations exclusively within the joint attention dot-product kernel `[DESIGN_DECISION]`.
+- **Violation Consequence**: Forcing heterogeneous modalities through shared projection and FFN layers causes severe cross-modal interference and degraded text-image alignment.
+
+---
+
+## 5. Canonical References
+
+1. **Ho, J., Jain, A., & Abbeel, P.** (2020). *Denoising Diffusion Probabilistic Models*. **NeurIPS 2020**.
+2. **Song, Y., Sohl-Dickstein, J., Kingma, D. P., et al.** (2021). *Score-Based Generative Modeling through Stochastic Differential Equations*. **ICLR 2021**.
+3. **Lipman, Y., Chen, R. T., Ben-Hamu, H., et al.** (2023). *Flow Matching for Generative Modeling*. **ICLR 2023**.
+4. **Liu, X., Gong, C., & Liu, Q.** (2023). *Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow*. **ICLR 2023**.
+5. **Peebles, W., & Xie, S.** (2023). *Scalable Diffusion Models with Transformers*. **ICCV 2023**.
+6. **Esser, P., Kulal, S., Blattmann, A., et al.** (2024). *Scaling Rectified Flow Transformers for High-Resolution Image Synthesis*. **ICML 2024** (`arXiv:2403.03206`).
 

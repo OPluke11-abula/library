@@ -45,8 +45,8 @@ successors:
 # 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
-- **後續節點**：本卷為學術文獻研讀與科研方法論之總成節點，直接支撐大專學生研究計畫與深度學習自主科研體系。
+- **前置依賴**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **後續節點**：[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]（本卷亦為學術文獻研讀與科研方法論之總成節點，直接支撐大專學生研究計畫與深度學習自主科研體系）。
 - **學術定位**：建立獨立研究員（Luke）研讀頂級會議與同行評審權威期刊論文的系統化方法論。以電腦視覺、神經渲染（3DGS）、高維幾何點雲序列化、度量學習（Metric Learning）與測試時增強（TTA）等前沿研究為實戰範例，架構從理論形式化、消融實驗分析、GPU 硬體映射到代碼復現之完整學術研讀閉環：
 
 ```
@@ -315,11 +315,11 @@ if __name__ == "__main__":
   - 嚴禁直接將整張大圖等比例降採樣至 $640 \times 640$ 進入檢測器（此舉會使微小目標直接被低通濾波抹除，對齊 [[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]）。
   - 必須執行 Testing Time Grid Cropping：以重疊率 20% 的滑動窗口切片為子圖分別偵測，最後使用 Mean-NMS 合併重疊框。
 - **可執行斷言**:
-  ```python
-  def verify_small_object_pipeline(img_w, img_h, target_px, use_grid_cropping):
-      if img_w >= 1920 and target_px < 32:
-          assert use_grid_cropping, "超高畫質微小目標偵測必須強制啟用網格切片管線！"
-  ```
+```python
+def verify_small_object_pipeline(img_w, img_h, target_px, use_grid_cropping):
+    if img_w >= 1920 and target_px < 32:
+        assert use_grid_cropping, "超高畫質微小目標偵測必須強制啟用網格切片管線！"
+```
 
 ### [RULE-904-04] 動態生物特徵差分融合防偽合約 (Frame-Difference Liveness Invariant)
 - **合約等級**: `SAFETY_CRITICAL`

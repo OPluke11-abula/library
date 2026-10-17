@@ -109,12 +109,12 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
 - **Violation Consequence**: Fully connected networks discard grid spatial topology, requiring exponential parameter counts ($O(H W \cdot C)$) that overfit training coordinates.
 
 ### [RULE-401-02] Effective Receptive Field (ERF) Scale Coverage Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Neural feature extractors MUST be engineered such that the theoretical receptive field at the final representation layer covers $\ge 100\%$ of target input object spatial bounds.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Neural feature extractors MUST be engineered such that the theoretical receptive field at the final representation layer covers $RF \ge S_{\text{object}}$ ($\ge 24\text{ px}$ for $28\times 28$ inputs; $> 200\text{ px}$ for $224\times 224$ inputs), introducing dilated convolutions or hierarchical pooling if shallow.
 - **Violation Consequence**: Insufficient receptive field spans prevent the network from integrating global contextual relationships, causing semantic misclassifications on large-scale objects.
 
 ### [RULE-401-03] Feature Map Padding & Boundary Consistency Invariant
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Convolutional layer padding MUST be symmetric and configured ($p = \lfloor k/2 floor$ for stride 1) to prevent feature map drift and boundary truncation across deep hierarchies.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Resolution-preserving convolutional layers (stride $s = 1$) MUST use odd kernel sizes $k \in \{3, 5, 7\}$ with symmetric padding ($p = \lfloor k/2 \rfloor$, `padding='same'`) to prevent feature map drift and boundary truncation across deep hierarchies.
 - **Violation Consequence**: Asymmetric or unpadded convolutions induce spatial feature shifts toward frame edges, causing structural distortion in downstream feature representations.
 

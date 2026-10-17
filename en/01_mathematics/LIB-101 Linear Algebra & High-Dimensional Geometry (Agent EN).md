@@ -106,16 +106,16 @@ def truncated_svd_projection(x: torch.Tensor, target_rank: int) -> torch.Tensor:
 
 ### [RULE-101-01] Dimension Compatibility & Tensor Core Alignment
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Inner reduction dimensions $K$ and outer dimensions $M, N$ in matrix multiplications ($M \times K \times N$) MUST be integer multiples of 16 (for FP16/BF16) or 32 (for INT8/FP8) to align with NVIDIA Tensor Core MMA (Matrix Multiply-Accumulate) hardware micro-tile boundaries without thread masking or padding penalties.
+- **Specification**: Inner reduction dimensions $K$ and outer dimensions $M, N$ in matrix multiplications ($M \times K \times N$) MUST satisfy `A.shape[1] == B.shape[0] == K` and be integer multiples of 8 (recommended 16) for FP16/BF16, or 16/32 for INT8/FP8/INT4, to align with NVIDIA Tensor Core MMA micro-tile boundaries. If dimensions are unaligned, zero-padding (`F.pad`) MUST be applied automatically.
 - **Violation Consequence**: Non-aligned matrix dimensions disable Tensor Core hardware fast paths, degrading GEMM compute throughput by up to $60\%$.
 
 ### [RULE-101-02] Condition Number & Rank Collapse Guardrail
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Prior to executing matrix inversion or solving linear systems $A x = b$, agents MUST evaluate the condition number $\kappa(A) = \sigma_{\max} / \sigma_{\min}$. If $\kappa(A) > 10^5$, explicit matrix inversion MUST be substituted by truncated SVD or Tikhonov regularized pseudoinversion: $(A^T A + \lambda I)^{-1} A^T$.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Prior to executing matrix inversion on feature covariance $C = X^T X \in \mathbb{R}^{D \times D}$ or solving linear systems, agents MUST evaluate the condition number $\kappa(C) = \sigma_{\max} / \sigma_{\min}$. If $\kappa(C) > 10^6$, explicit inversion (`torch.inverse`) is strictly prohibited; agents MUST fall back to Tikhonov regularization $C_{\text{reg}} = C + \lambda I$ ($\lambda = 10^{-4} \cdot \text{Tr}(C)/D$) or truncated SVD.
 - **Violation Consequence**: Inverting ill-conditioned matrices amplifies floating-point roundoff errors exponentially, causing loss explosions and catastrophic numerical instability.
 
-### [RULE-101-03] LoRA Rank Selection & Initialization Heuristic
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: In low-rank adaptation ($W = W_0 + \frac{\alpha}{r} B A$), adapter matrix $A \in \mathbb{R}^{r \times d_{\text{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (e.g., Kaiming uniform/normal) and matrix $B \in \mathbb{R}^{d_{\text{out}} \times r}$ MUST be initialized strictly to zero ($B = 0$). This ensures $\Delta W = 0$ at step $t = 0$. Adapter rank $r$ MUST satisfy $r \ll \min(d_{\text{in}}, d_{\text{out}})$.
-- **Violation Consequence**: Non-zero initialization of $B$ perturbs pretrained parameter manifolds before any adaptation signal is observed.
+### [RULE-101-03] LoRA Rank Selection & Zero-Init Heuristic
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: In low-rank adaptation ($W = W_0 + \frac{\alpha}{r} B A$, e.g., $d_{\text{model}} = 4096$), adapter matrix $A \in \mathbb{R}^{r \times d_{\text{in}}}$ MUST be initialized from $\mathcal{N}(0, \sigma^2)$ (Kaiming) and matrix $B \in \mathbb{R}^{d_{\text{out}} \times r}$ MUST be initialized strictly to zero ($B = 0$) so $\Delta W = 0$ at $t = 0$. Default rank selection: $r \in \{8, 16\}$ ($\alpha = 2r$) for standard instruction tuning, $r \ge 64$ for vertical domain injection, enforcing parameter ratio $(2 d_{\text{model}} r) / d_{\text{model}}^2 \le 0.01$ and $r \le 128$.
+- **Violation Consequence**: Non-zero initialization of $B$ perturbs pretrained parameter manifolds at step 0, while excessive rank ($r > 128$) induces overfitting and VRAM overflow.
 

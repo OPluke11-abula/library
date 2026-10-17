@@ -94,7 +94,7 @@ class ProductionMNISTEngine:
     """
     End-to-end production inference pipeline with CV preprocessing and calibration.
     """
-    def __init__(self, model: torch.nn.Module, temperature: float = 1.5): # [HEURISTIC_BASELINE]
+    def __init__(self, model: torch.nn.Module, temperature: float = 1.5): # [HEURISTIC]
         self.model = model
         self.model.eval()
         self.temperature = temperature
@@ -138,11 +138,11 @@ class ProductionMNISTEngine:
 
 ### [RULE-901-03] Bounding Box & Center of Mass Defensive Clip Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In interactive sketchpad environments, stroke bounding box cropping and center of mass translation shifts MUST enforce defensive clipping ($\Delta x, \Delta y \in [-3.0, 3.0]\text{ px}$) [HEURISTIC / SAFETY_BOUND].
+- **Specification**: In interactive sketchpad environments, stroke bounding box cropping and center of mass translation shifts MUST enforce defensive clipping ($\Delta x, \Delta y \in [-3.0, 3.0]\text{ px}$) `[HEURISTIC]` `[SAFETY_BOUND]`.
 - **Violation Consequence**: Unclamped shifts on edge-drawn strokes push valid handwriting entirely outside canvas boundaries, creating empty frames.
 
 ### [RULE-901-04] Model Capacity & Confidence Calibration Guardrail
 - **Contract Level**: `QUALITY_BOUND`
-- **Specification**: Deep perception models deployed in user-facing endpoints MUST incorporate dropout regularization during training and post-hoc temperature scaling calibration ($T > 0$) [DESIGN_DECISION / TARGET]. Raw uncalibrated Softmax probabilities MUST NOT be reported as true confidence.
+- **Specification**: Deep perception models deployed in user-facing endpoints MUST incorporate dropout regularization during training and post-hoc temperature scaling calibration ($T > 0$) `[DESIGN_DECISION]` `[TARGET]`. Raw uncalibrated Softmax probabilities MUST NOT be reported as true confidence.
 - **Violation Consequence**: Over-parameterized models report deceptive $>99\%$ confidence on completely novel or ambiguous inputs.
 

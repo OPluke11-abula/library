@@ -177,7 +177,7 @@ class CrossAttentionModulator:
 
 ### [RULE-407-03] DDIM 反演步數與容差保證 (DDIM Inversion SLA)
 - **等級**: `HIGH_INVARIANT`
-- **邊界**: DDIM 反演步數不得低於 50 步，重構重建誤差 $\|z_0 - \hat{z}_0\|_2 / \|z_0\|_2$ 必須小於 $1.5 \times 10^{-2}$，確保在無編輯指令時輸出影像完全位元級復原。
+- **邊界**: DDIM 反演步數必須滿足 $N_{\text{inv}} \ge 50$ 步，重構相對誤差 $\|z_0 - \hat{z}_0\|_2 / \|z_0\|_2 < 1.5 \times 10^{-2}$，確保在無編輯指令時輸出影像近乎零誤差復原，且目標 GPU 上單張推論延遲控制在 $< 1.5\text{s}$ `[TARGET]`。
 
 ---
 

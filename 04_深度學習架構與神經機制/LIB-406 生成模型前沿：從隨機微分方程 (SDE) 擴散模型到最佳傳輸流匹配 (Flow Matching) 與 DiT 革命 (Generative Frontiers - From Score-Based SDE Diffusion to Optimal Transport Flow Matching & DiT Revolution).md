@@ -46,8 +46,8 @@ successors:
 # 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]（特徵值分解與投影幾何）、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]（連續時間微分方程極限）、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（Roofline 頻寬與 Tensor Core 運算）、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]（自注意力與交叉注意力）。
-- **後續節點**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]（2D 生成擴散引導 3D 虛擬試穿）、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]（少步數 ODE 求解與低精度推論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]（前沿自適應風格融合論文）。
+- **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]（連續時間微分方程極限與梯度流）、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]（自注意力與交叉注意力）。
+- **後續節點**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]（跨注意力調控與局部內容保持）、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]（條件式物件生成與光照合成）。
 - **核心主題**：全面解構現代生成式 AI（Generative AI）從隨機熱力學擴散（DDPM / Score-SDE）走向微分幾何最佳傳輸流匹配（Flow Matching / Rectified Flow），並與可擴展 Transformer 骨幹（DiT / MM-DiT）深度融合的完整數學形式化與工程落地體系。
 
 ---
@@ -255,11 +255,18 @@ from typing import Tuple, Optional
 
 class AdaLNZeroBlock(nn.Module):
     # 擴散與流匹配 Transformer 核心塊：
-    # 整合 Adaptive LayerNorm Zero (AdaLN-Zero) 與多頭自注意力機制
+    # 整合時間步嵌入、Adaptive LayerNorm Zero (AdaLN-Zero) 與多頭自注意力機制
     def __init__(self, d_model: int = 256, n_heads: int = 8, d_cond: int = 128):
         super().__init__()
         self.d_model = d_model
         self.n_heads = n_heads
+        
+        # 0. 連續時間步 t in [0, 1] 嵌入層
+        self.time_mlp = nn.Sequential(
+            nn.Linear(1, d_cond),
+            nn.SiLU(),
+            nn.Linear(d_cond, d_cond)
+        )
         
         # 1. 條件向量調製線性投影 (輸出 6 個純量: gamma1, beta1, alpha1, gamma2, beta2, alpha2)
         self.ada_lin = nn.Linear(d_cond, 6 * d_model, bias=True)
@@ -281,12 +288,14 @@ class AdaLNZeroBlock(nn.Module):
         nn.init.zeros_(self.ada_lin.weight)
         nn.init.zeros_(self.ada_lin.bias)
 
-    def forward(self, x: torch.Tensor, cond: torch.Tensor) -> torch.Tensor:
-        # x: [Batch, SeqLen, d_model], cond: [Batch, d_cond]
+    def forward(self, x: torch.Tensor, t: torch.Tensor, cond: Optional[torch.Tensor] = None) -> torch.Tensor:
+        # x: [Batch, SeqLen, d_model], t: [Batch, 1], cond: [Batch, d_cond]
         B, N, D = x.shape
+        t_emb = self.time_mlp(t.view(B, 1).to(dtype=x.dtype))
+        joint_cond = t_emb + cond if cond is not None else t_emb
         
         # 計算調製參數並切分為 6 個分量
-        params = self.ada_lin(cond).unsqueeze(1) # [B, 1, 6*D]
+        params = self.ada_lin(joint_cond).unsqueeze(1) # [B, 1, 6*D]
         gamma1, beta1, alpha1, gamma2, beta2, alpha2 = params.chunk(6, dim=-1)
         
         # 分支 1: 自注意力層 (含調製與門控)
@@ -316,7 +325,7 @@ class OptimalTransportFlowMatchingTrainer:
         # x_1: 真實資料分佈樣本 [Batch, SeqLen, Dim]
         B = x_1.size(0)
         # 1. 採樣隨機時間步 t ~ Uniform[0, 1]
-        t = torch.rand(B, 1, 1, device=x_1.device)
+        t = torch.rand(B, 1, 1, device=x_1.device, dtype=x_1.dtype)
         
         # 2. 採樣高斯先驗噪聲 x_0 ~ N(0, I)
         x_0 = torch.randn_like(x_1)
@@ -328,8 +337,8 @@ class OptimalTransportFlowMatchingTrainer:
         # 4. 目標速度向量場 (Target Vector Field: dx_t / dt)
         u_t = x_1 - (1.0 - self.sigma_min) * x_0
         
-        # 5. 模型預測速度場 v_theta(x_t, t)
-        v_pred = self.model(x_t, cond)
+        # 5. 模型預測時變速度場 v_theta(x_t, t, cond)
+        v_pred = self.model(x_t, t.view(B, 1), cond)
         
         # 6. 計算 L2 迴歸損失
         loss = F.mse_loss(v_pred, u_t)
@@ -342,15 +351,15 @@ class OptimalTransportFlowMatchingTrainer:
         cond: torch.Tensor, 
         num_steps: int = 8
     ) -> torch.Tensor:
-        # 使用一階歐拉法求解 ODE: dx/dt = v_theta(x, t) 從 t=0 積分至 t=1
+        # 使用一階歐拉法求解 ODE: dx/dt = v_theta(x, t, cond) 從 t=0 積分至 t=1
         x_t = init_noise.clone()
         dt = 1.0 / num_steps
         
         for step in range(num_steps):
             t_val = step * dt
-            t_tensor = torch.full((x_t.size(0), 1), t_val, device=x_t.device)
-            # 評估瞬時速度向量
-            v_t = self.model(x_t, cond)
+            t_tensor = torch.full((x_t.size(0), 1), t_val, device=x_t.device, dtype=x_t.dtype)
+            # 評估瞬時速度向量 v_theta(x_t, t, cond)
+            v_t = self.model(x_t, t_tensor, cond)
             # 沿直線推進
             x_t = x_t + v_t * dt
             
@@ -363,9 +372,10 @@ if __name__ == "__main__":
     # 測試 AdaLNZeroBlock 零初始化不變量
     block = AdaLNZeroBlock(d_model=128, n_heads=4, d_cond=64).to(device)
     dummy_x = torch.randn(2, 16, 128, device=device)
+    dummy_t = torch.zeros(2, 1, device=device)
     dummy_cond = torch.randn(2, 64, device=device)
     
-    out_init = block(dummy_x, dummy_cond)
+    out_init = block(dummy_x, dummy_t, dummy_cond)
     diff = torch.norm(out_init - dummy_x).item()
     print(f"[*] AdaLN-Zero 初始殘差偏離度: {diff:.8f}")
     assert diff < 1e-5, "零初始化不變量違反：初始輸出必須嚴格恆等於輸入！"

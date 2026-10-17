@@ -42,8 +42,8 @@ successors:
 # 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]。
-- **後續節點**：[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]。
+- **後續節點**：[[LIB-406 生成模型前沿：從隨機微分方程 (SDE) 擴散模型到最佳傳輸流匹配 (Flow Matching) 與 DiT 革命 (Generative Frontiers - From Score-Based SDE Diffusion to Optimal Transport Flow Matching & DiT Revolution)]]、[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]。
 - **權威期刊/會議文獻出處**：
   - Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, Polosukhin (Google Brain, NeurIPS 2017) *Attention Is All You Need*.
   - Su, Ahmed, Lu, Pan, Bo, Liu (IEEE/ACM Trans. ASLP 2024 / RoFormer) *RoFormer: Enhanced Transformer with Rotary Position Embedding*.
@@ -249,10 +249,10 @@ if __name__ == "__main__":
   - 縮放因子必須嚴格滿足：$\text{scale} = \frac{1}{\sqrt{d_k}}$。
   - 嚴禁漏乘縮放因子。若未縮放，當頭部維度 $d_k = 128$ 時，點積方差將達到 128，導致 Softmax 進入飽和區，反向傳播梯度瞬間下溢為 0（Vanishing Gradient）。
 - **可執行斷言**:
-  ```python
+```python
 expected_scale = 1.0 / math.sqrt(d_k)
 assert abs(actual_scale - expected_scale) < 1e-6, "注意力縮放係數必須精確等於 1/sqrt(d_k)！"
-  ```
+```
 
 ### [RULE-405-02] 長序列 FlashAttention 算子強制調度合約 (FlashAttention Operator Dispatch Invariant)
 - **合約等級**: `PERFORMANCE_CRITICAL`

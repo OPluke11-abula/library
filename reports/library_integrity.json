@@ -29,6 +29,7 @@
     "LIB-906"
   ],
   "invariants_total": 84,
+  "checks_enabled": 11,
   "error_count": 0,
   "errors": [],
   "warning_count": 0,

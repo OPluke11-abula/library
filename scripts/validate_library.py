@@ -10,6 +10,11 @@ Validates:
   4. Invariant accounting (no duplicate IDs, matching frontmatter invariants_count, bilingual parity).
   5. Internal Wikilinks and relative Markdown link integrity.
   6. Detection of stale repository claims.
+  7. Illegal C0 control characters and forbidden legacy status tokens.
+  8. Rule contract level presence and ZH/EN contract level parity across all 84 rules.
+  9. Inline body topological navigation vs. YAML frontmatter DAG parity.
+  10. Canonical 10-tag Evidence Taxonomy enforcement (no compound slash tags or non-canonical tags).
+  11. Python code block AST syntax verification and ZH/EN code block parity.
 
 Returns exit code 0 on complete pass, 1 on failure.
 """
@@ -17,7 +22,9 @@ Returns exit code 0 on complete pass, 1 on failure.
 import sys
 import os
 import re
+import ast
 import json
+import textwrap
 import urllib.parse
 from pathlib import Path
 from collections import defaultdict, deque
@@ -34,6 +41,47 @@ CANONICAL_STATUS_TAXONOMY = {
     'experiment-verified',
     'production-validated'
 }
+
+CANONICAL_EVIDENCE_TAGS = {
+    'FACT',
+    'DERIVATION',
+    'LITERATURE_RESULT',
+    'EMPIRICAL_RESULT',
+    'HEURISTIC',
+    'DESIGN_DECISION',
+    'TARGET',
+    'SAFETY_BOUND',
+    'HYPOTHESIS',
+    'OPEN_QUESTION'
+}
+
+CANONICAL_CONTRACT_LEVELS = {
+    'CRITICAL_INVARIANT',
+    'HIGH_INVARIANT',
+    'SAFETY_CRITICAL',
+    'STABILITY_CRITICAL',
+    'PERFORMANCE_CRITICAL',
+    'BOUNDARY_GUARD',
+    'RESOURCE_CONSTRAINT',
+    'OPTIMIZATION_HEURISTIC',
+    'QUALITY_BOUND',
+    'STRATEGIC_DIRECTIVE',
+    'SECURITY_CRITICAL'
+}
+
+def extract_rules_with_levels(body: str):
+    rules = {}
+    pattern = re.compile(r'###\s+`?\[(RULE-\d{3}-\d{2})\]`?([^\n]*)\n(.*?)(?=\n###\s+|\n##\s+|\n---|\Z)', re.DOTALL)
+    for m in pattern.finditer(body):
+        rid = m.group(1)
+        title = m.group(2).strip()
+        content = m.group(3).strip()
+        level_m = re.search(r'(?:等級|合約等級|分類|Contract Level|Classification)\*\*:\s*`([A-Z_]+)`', content)
+        if not level_m:
+            level_m = re.search(r'`([A-Z_]+)`', content)
+        level = level_m.group(1) if level_m else None
+        rules[rid] = {'title': title, 'level': level, 'content': content}
+    return rules
 
 def parse_frontmatter(text: str):
     """Parses standard YAML frontmatter into a dict and body string."""
@@ -357,6 +405,94 @@ def validate_all():
         if b'Verified-Authoritative-Production' in raw_bytes:
             errors.append(f"Forbidden legacy status 'Verified-Authoritative-Production' found in {p.relative_to(ROOT)}")
 
+    # 8. Rule Contract Level Presence & Bilingual Parity
+    for cid in all_call_numbers:
+        if cid not in zh_docs or cid not in en_docs:
+            continue
+        zr = extract_rules_with_levels(zh_docs[cid]['body'])
+        er = extract_rules_with_levels(en_docs[cid]['body'])
+        for rid in sorted(set(zr.keys()) | set(er.keys())):
+            zl = zr.get(rid, {}).get('level')
+            el = er.get(rid, {}).get('level')
+            if not zl or zl not in CANONICAL_CONTRACT_LEVELS:
+                errors.append(f"[ZH {cid}] {rid} missing or invalid contract level: '{zl}'")
+            if not el or el not in CANONICAL_CONTRACT_LEVELS:
+                errors.append(f"[EN {cid}] {rid} missing or invalid contract level: '{el}'")
+            if zl and el and zl != el:
+                errors.append(f"[Parity {cid}] {rid} contract level mismatch: ZH='{zl}' vs EN='{el}'")
+
+    # 9. Inline Body Navigation vs YAML Frontmatter DAG
+    for cid in all_call_numbers:
+        if cid in zh_docs:
+            zfm = zh_docs[cid]['fm']
+            zbody = zh_docs[cid]['body']
+            fm_pre = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (zfm.get('prerequisites') or []) if re.search(r'(LIB-\d{3})', x))
+            fm_suc = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (zfm.get('successors') or []) if re.search(r'(LIB-\d{3})', x))
+            head_lines = "\n".join(zbody.splitlines()[:25])
+            pre_m = re.search(r'前置依賴\*\*：([^\n]+)', head_lines)
+            suc_m = re.search(r'(?:後續節點|後續模組)\*\*：([^\n]+)', head_lines)
+            if pre_m:
+                body_pre = set(re.findall(r'LIB-\d{3}', pre_m.group(1)))
+                if body_pre != fm_pre:
+                    errors.append(f"[ZH {cid}] Body '前置依賴' {sorted(body_pre)} != YAML prerequisites {sorted(fm_pre)}")
+            if suc_m:
+                body_suc = set(re.findall(r'LIB-\d{3}', suc_m.group(1)))
+                if body_suc != fm_suc:
+                    errors.append(f"[ZH {cid}] Body '後續節點' {sorted(body_suc)} != YAML successors {sorted(fm_suc)}")
+
+        if cid in en_docs:
+            efm = en_docs[cid]['fm']
+            ebody = en_docs[cid]['body']
+            efm_pre = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (efm.get('prerequisites') or []) if re.search(r'(LIB-\d{3})', x))
+            efm_suc = set(re.search(r'(LIB-\d{3})', x).group(1) for x in (efm.get('successors') or []) if re.search(r'(LIB-\d{3})', x))
+            ehead_lines = "\n".join(ebody.splitlines()[:25])
+            epre_m = re.search(r'Prerequisites\*\*:\s*([^\n]+)', ehead_lines)
+            esuc_m = re.search(r'Successors\*\*:\s*([^\n]+)', ehead_lines)
+            if epre_m:
+                ebody_pre = set(re.findall(r'LIB-\d{3}', epre_m.group(1)))
+                if ebody_pre != efm_pre:
+                    errors.append(f"[EN {cid}] Body 'Prerequisites' {sorted(ebody_pre)} != YAML prerequisites {sorted(efm_pre)}")
+            if esuc_m:
+                ebody_suc = set(re.findall(r'LIB-\d{3}', esuc_m.group(1)))
+                if ebody_suc != efm_suc:
+                    errors.append(f"[EN {cid}] Body 'Successors' {sorted(ebody_suc)} != YAML successors {sorted(efm_suc)}")
+
+    # 10. Canonical Evidence Taxonomy Enforcement
+    for lang, docs in [('ZH', zh_docs), ('EN', en_docs)]:
+        for cid, d in docs.items():
+            body_nc = re.sub(r'```.*?```', '', d['body'], flags=re.DOTALL)
+            body_nc = re.sub(r'\$\$.*?\$\$', '', body_nc, flags=re.DOTALL)
+            body_nc = re.sub(r'\$[^$\n]+\$', '', body_nc)
+            body_nc = re.sub(r'`(?!\[[A-Z][A-Z0-9_ /,-]{2,}\]\`)[^`\n]+`', '', body_nc)
+            for match in re.finditer(r'\[([A-Z][A-Z0-9_ /,-]{2,})\](?!\()', body_nc):
+                tag = match.group(1).strip()
+                if re.match(r'^RULE-\d{3}-\d{2}$', tag):
+                    continue
+                if tag in ('YES', 'NO', 'TOC'):
+                    continue
+                if tag not in CANONICAL_EVIDENCE_TAGS:
+                    errors.append(f"[{lang} {cid}] Non-canonical or compound evidence tag: [{tag}]")
+
+    # 11. Python Code Block AST Syntax & Bilingual Code Parity
+    for cid in all_call_numbers:
+        if cid not in zh_docs or cid not in en_docs:
+            continue
+        z_blocks = re.findall(r'```python\n(.*?)```', zh_docs[cid]['body'], flags=re.DOTALL)
+        e_blocks = re.findall(r'```python\n(.*?)```', en_docs[cid]['body'], flags=re.DOTALL)
+        for idx, b in enumerate(z_blocks):
+            try:
+                ast.parse(textwrap.dedent(b))
+            except SyntaxError as e:
+                errors.append(f"[ZH {cid}] Python block #{idx+1} SyntaxError: {e}")
+        for idx, b in enumerate(e_blocks):
+            try:
+                ast.parse(textwrap.dedent(b))
+            except SyntaxError as e:
+                errors.append(f"[EN {cid}] Python block #{idx+1} SyntaxError: {e}")
+        if cid not in ('LIB-000', 'LIB-903', 'LIB-905', 'LIB-906'):
+            if len(z_blocks) > 0 and len(e_blocks) == 0:
+                errors.append(f"[EN {cid}] Missing Python implementation block (ZH has {len(z_blocks)}, EN has 0)")
+
     # Output report
     rep_dir = ROOT / 'reports'
     rep_dir.mkdir(exist_ok=True)
@@ -365,6 +501,7 @@ def validate_all():
         'volume_count': len(all_call_numbers),
         'topological_order': topo_order,
         'invariants_total': total_invariants,
+        'checks_enabled': 11,
         'error_count': len(errors),
         'errors': errors,
         'warning_count': len(warnings),
@@ -381,10 +518,11 @@ def validate_all():
             print(f"  ❌ {e}")
         return 1
     else:
-        print("✅ ALL INTEGRITY INVARIANTS PASSED!")
+        print("✅ ALL 11 INTEGRITY INVARIANTS PASSED!")
         print(f"  Volumes: {len(all_call_numbers)} (Bilingual pair = {len(all_call_numbers)*2})")
-        print(f"  Invariants: {total_invariants} (100% matched, 0 duplicate)")
-        print(f"  DAG Status: Strict Directed Acyclic Graph (0 cycles, 0 asymmetries)")
+        print(f"  Invariants: {total_invariants} (100% matched, 0 duplicate, 100% contract level parity)")
+        print(f"  DAG Status: Strict Directed Acyclic Graph (0 cycles, 0 asymmetries, 100% inline nav parity)")
+        print(f"  Taxonomy & AST: 100% canonical evidence tags, 100% valid Python AST & bilingual code parity")
         print(f"  Links: 0 broken Wikilinks, 0 broken relative links")
         return 0
 

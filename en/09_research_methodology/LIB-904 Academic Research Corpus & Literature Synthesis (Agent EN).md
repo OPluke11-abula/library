@@ -180,23 +180,23 @@ def compute_ca_jaccard_distance(
 
 ### [RULE-904-01] View-Decomposed 3DGS LoRA Dispatch Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In multi-view 3D Gaussian Splatting and diffusion editing architectures, low-rank adaptation modules (LoRA) MUST be conditioned on viewpoint camera pose parameters, routing view-dependent updates through decomposed low-rank projections.
-- **Violation Consequence**: Monolithic global LoRA adapters fail to capture view-dependent radiance variations, producing blurry multi-view reconstructions.
+- **Specification**: In multi-view 3D Gaussian Splatting virtual try-on and diffusion editing architectures, low-rank adaptation modules (LoRA) MUST be decomposed across at least 3 camera azimuth subspaces ($\theta \in [-45^\circ, 45^\circ]$ front, side, and $[135^\circ, 225^\circ]$ back) and blended via smooth cosine weighting rather than a single global LoRA adapter.
+- **Violation Consequence**: Monolithic global LoRA adapters cause front garment prints to bleed onto back viewpoints and produce multi-view geometric artifacts.
 
-### [RULE-904-02] 3D Point Cloud Spatial Ray Serialization Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: When serializing 3D point cloud or Gaussian primitive coordinates for autoregressive LLM consumption, spatial positions MUST follow a deterministic Hilbert space-filling curve or Morton Z-order serialization.
-- **Violation Consequence**: Unordered spatial serialization destroys spatial locality, preventing sequence models from learning 3D geometric structures.
+### [RULE-904-02] 3D Point Cloud Spatial Serialization Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: When processing 3D point clouds with $M > 10,000$ points for semantic segmentation, unordered 3D coordinates MUST be serialized into 1D sequences via Hilbert or Morton (Z-order) space-filling curves and partitioned into local patches of size $P \in \{32, 64\}$, bounding self-attention complexity at $\mathcal{O}(M \cdot P)$ with coalesced cache hits.
+- **Violation Consequence**: Global self-attention on unordered point clouds incurs $\mathcal{O}(M^2)$ complexity and uncoalesced GPU memory accesses.
 
 ### [RULE-904-03] Grid-Cropping Test-Time Augmentation Invariant
-- **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: In high-resolution vision tasks with tiny target objects, inference pipelines MUST support grid-cropping Test-Time Augmentation (TTA), decomposing inputs into overlapping sub-tiles and fusing multiscale bounding boxes via Non-Maximum Suppression (NMS).
-- **Violation Consequence**: Direct downsampling of high-resolution scenes obliterates sub-pixel features of small objects, degrading detection recall.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: In high-resolution vision tasks ($\ge 1920 \times 1080$) targeting tiny objects ($< 32 \times 32\text{ px}$), inference pipelines MUST enforce Testing-Time Grid Cropping with $20\%$ sliding-window overlap and fuse detections via Mean-NMS / WBF rather than directly downsampling the full frame to $640 \times 640$.
+- **Violation Consequence**: Direct downsampling of high-resolution scenes obliterates sub-pixel features of small objects via low-pass filtering, severely degrading detection recall.
 
 ### [RULE-904-04] Dynamic Biometric Frame-Difference Liveness Invariant
-- **Contract Level**: `SECURITY_CRITICAL`
-- **Specification**: Real-time biometric verification pipelines MUST combine static spatial facial feature representations with temporal frame-difference liveness detection ($\Delta I_t = \|I_t - I_{t-1}\|_1$), requiring biological micro-motion confirmation before identity release.
-- **Violation Consequence**: Purely static 2D image facial recognition is vulnerable to physical presentation attacks (printed photographs or replayed video screens).
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: Real-time lip or facial biometric verification pipelines MUST combine spatial keypoint/appearance features with adjacent frame-difference liveness detection ($\Delta I_t = |I_t - I_{t-1}|$ and keypoint velocity vectors), guaranteeing Half Total Error Rate $\text{HTER} \le 9.0\%$.
+- **Violation Consequence**: Relying solely on static frames or un-differenced image sequences exposes the system to photo/replay presentation attacks (up to $84\%$ False Acceptance Rate).
 
 ## 6. Canonical Literature References
 

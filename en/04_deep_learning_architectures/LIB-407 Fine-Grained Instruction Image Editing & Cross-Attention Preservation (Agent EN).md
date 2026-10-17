@@ -51,25 +51,74 @@ where $S_t$ denotes deep self-attention affinity tensors, enforcing structural p
 
 ---
 
-## 2. Invariants & Implementation Specifications
+## 2. Production Implementation: Region-Aware Cross-Attention Modulator
+
+```python
+import torch
+
+class CrossAttentionModulator:
+    """
+    Region-aware cross-attention modulation and non-target latent preservation engine.
+    Aligns with RULE-407-01 ~ RULE-407-03.
+    """
+    def __init__(self, boost_factor: float = 1.5, suppress_factor: float = 0.8):
+        self.boost = boost_factor
+        self.suppress = suppress_factor
+
+    def modulate_attention(
+        self,
+        attn_probs: torch.Tensor,        # [Batch, Heads, HW, Tokens]
+        target_mask: torch.Tensor,       # [Batch, 1, HW, 1] (0 or 1)
+        edit_token_indices: list
+    ) -> torch.Tensor:
+        assert attn_probs.dim() == 4, f"Expected 4D attention tensor, got {attn_probs.dim()}D"
+        assert target_mask.shape[2] == attn_probs.shape[2], "Spatial mask dimension mismatch"
+
+        modified_attn = attn_probs.clone()
+        bg_mask = 1.0 - target_mask.detach()
+
+        for idx in edit_token_indices:
+            token_attn = modified_attn[:, :, :, idx:idx+1]
+            boosted = token_attn * (1.0 + self.boost * target_mask.detach())
+            suppressed = boosted * (1.0 - self.suppress * bg_mask)
+            modified_attn[:, :, :, idx:idx+1] = suppressed
+
+        return modified_attn / (modified_attn.sum(dim=-1, keepdim=True) + 1e-8)
+
+    @staticmethod
+    def compute_preservation_loss(
+        latent_current: torch.Tensor,
+        latent_original: torch.Tensor,
+        target_mask: torch.Tensor
+    ) -> torch.Tensor:
+        bg_mask = 1.0 - target_mask.detach()
+        diff = (latent_current - latent_original) * bg_mask
+        return torch.mean(diff ** 2)
+```
+
+---
+
+## 3. Invariants & Implementation Specifications
 
 ### [RULE-407-01] Non-Target Background LPIPS Drift Upper Bound
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In fine-grained instruction-based image editing, perceptual feature drift in non-target background regions MUST satisfy $\text{LPIPS}(I_{\text{edit}} \odot M_{\text{bg}}, I_{\text{orig}} \odot M_{\text{bg}}) \le 0.05$ [SAFETY_BOUND].
+- **Specification**: In fine-grained instruction-based image editing, perceptual feature drift in non-target background regions MUST satisfy $\text{LPIPS}(I_{\text{edit}} \odot M_{\text{bg}}, I_{\text{orig}} \odot M_{\text{bg}}) \le 0.05$ and $\text{PSNR} \ge 32\text{ dB}$ [SAFETY_BOUND].
 - **Violation Consequence**: Unconstrained generative editing alters unrelated scene elements, corrupting visual identity and contextual consistency.
 
 ### [RULE-407-02] Cross-Attention Mask Gradient Isolation Guardrail
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Target segmentation masks directing cross-attention editing operations MUST be explicitly detached (`.detach()`) from autograd computation graphs.
+- **Specification**: Target segmentation masks $M_{\text{target}}$ directing cross-attention editing operations MUST be explicitly detached (`.detach()`) from autograd computation graphs.
 - **Violation Consequence**: Backpropagating editing loss through spatial mask generation causes target boundary erosion and semantic bleeding into background pixels.
 
-### [RULE-407-03] DDIM Inversion Step Count & Latency SLA
-- **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: Deterministic DDIM inversion for image reconstruction MUST complete within $N_{\text{inv}} \le 50$ steps, maintaining per-frame latency under $1.5\text{s}$ on target GPU hardware [TARGET].
-- **Violation Consequence**: Excessive inversion trajectories exceed interactive serving SLAs without yielding statistically significant reconstruction quality gains.
+### [RULE-407-03] DDIM Inversion Step Count & Reconstruction SLA
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Deterministic DDIM inversion for image reconstruction MUST execute $N_{\text{inv}} \ge 50$ steps with relative latent reconstruction error $\|z_0 - \hat{z}_0\|_2 / \|z_0\|_2 < 1.5 \times 10^{-2}$, while maintaining per-frame editing latency under $1.5\text{s}$ on target GPU hardware [TARGET].
+- **Violation Consequence**: Insufficient inversion steps ($N_{\text{inv}} < 50$) accumulate discretization drift, degrading background reconstruction fidelity.
 
-## 3. Canonical References
+## 4. Canonical References
 
 1. **Brooks, T., et al.** (2023). *InstructPix2Pix: Learning to Follow Image Editing Instructions*. **CVPR 2023**.
 2. **Hertz, A., et al.** (2023). *Prompt-to-Prompt Image Editing with Cross-Attention Control*. **ICLR 2023**.
 3. **Cao, M., et al.** (2023). *MasaCtrl: Tuning-Free Mutual Self-Attention Control for Consistent Image Synthesis and Editing*. **ICCV 2023**.
+4. **Mokady, R., et al.** (2023). *Null-text Inversion for Editing Real Images using Guided Diffusion Models*. **CVPR 2023**.
+5. **Winter, R., et al.** (2024). *LEDITS++: Limitless Image Editing using Text-to-Image Diffusion Models*. **CVPR 2024**.

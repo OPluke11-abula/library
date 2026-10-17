@@ -40,7 +40,7 @@ successors: []
 # Frontier Vision & Multimodal Capstone Blueprints: Five Grand Research Specifications
 
 ## Conceptual Coordinates & Dependencies
-- **Prerequisites**: [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]].
+- **Prerequisites**: [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
 - **Core Scope**: Translates five faculty capstone research proposals into production-grade systems architectures, mathematical models, ablation matrices, and competitive research grant proposals (e.g., NSTC Undergraduate Research Projects).
 
 ---
@@ -72,7 +72,7 @@ successors: []
                                                                      [Unity / WebGL Custom Highlight Shader Display]
 ```
 - **Scoring Formulation**: $\text{Score} = \alpha S_{\text{text}} + \beta S_{\text{view}} + \gamma S_{\text{conf}}$.
-- **Metrics**: [TARGET] Top-1 / Top-3 Accuracy ($\ge 85\%$), Retrieval mAP ($\ge 0.76$), Query Latency $< 300\text{ms}$.
+- **Metrics**: `[TARGET]` Top-1 / Top-3 Accuracy ($\ge 85\%$), Retrieval mAP ($\ge 0.76$), Query Latency $< 300\text{ms}$.
 
 ### Topic 2: LLM + 3DGS Intelligent Scene QA & Tour Guide (LIB-506)
 - **Architecture**:
@@ -90,9 +90,9 @@ successors: []
 ### Topic 4: Fine-Grained Instruction Image Editing (LIB-407)
 - **Pipeline**:
   1. **Instruction Parsing**: "Change the car rims to black, keep everything else unchanged" $\to$ Target: `rims`, Attribute: `black`, Invariant: `car body, background`.
-  2. **Cross-Attention Modulation**: $A_{\text{target}} \times 1.5$, $A_{\text{bg}} \times 0.2$ [HEURISTIC / DESIGN_DECISION].
+  2. **Cross-Attention Modulation**: $A_{\text{target}} \times 1.5$, $A_{\text{bg}} \times 0.2$ `[HEURISTIC]` `[DESIGN_DECISION]`.
   3. **Mutual Self-Attention Locking (MasaCtrl Paradigm)**: Inject source image Key/Value states into non-target tokens to prevent hallucinated changes.
-- **Quantitative Baselines**: Background $\text{LPIPS} \le 0.04$, Editing Success Rate $\ge 90\%$, CLIP-Score $\ge 28.5$.
+- **Quantitative Baselines**: Background $\text{LPIPS} \le 0.04$ `[TARGET]`, Editing Success Rate $\ge 90\%$ `[TARGET]`, CLIP-Score $\ge 28.5$ `[TARGET]`.
 
 ### Topic 5: Context-Aware Generation & Illumination Compositing (LIB-408)
 - **Five-Stage Physical Integration Pipeline**:
@@ -126,11 +126,11 @@ successors: []
 
 ### [RULE-905-01] Multi-View Semantic Consensus Safeguard
 - **Classification**: `QUALITY_BOUND`
-- **Bound**: When building 3D semantic Gaussian fields, multi-view back-projected IoU SHOULD target $\ge 0.65$ [HEURISTIC / TARGET]. Views falling below this threshold in ablation trials are disqualified from feature codebook updates to prevent semantic label bleeding.
+- **Bound**: When building 3D semantic Gaussian fields, multi-view back-projected IoU SHOULD target $\ge 0.65$ `[HEURISTIC]` `[TARGET]`. Views falling below this threshold in ablation trials are disqualified from feature codebook updates to prevent semantic label bleeding.
 
 ### [RULE-905-02] Background Non-Target Lossless Preservation
 - **Classification**: `QUALITY_BOUND`
-- **Bound**: For instruction editing, background invariant pixels SHOULD target $\text{MAE} \le 3/255$ and $\text{SSIM} \ge 0.96$ against original inputs [DESIGN_DECISION / TARGET].
+- **Bound**: For instruction editing, background invariant pixels SHOULD target $\text{MAE} \le 3/255$ and $\text{SSIM} \ge 0.96$ against original inputs `[DESIGN_DECISION]` `[TARGET]`.
 
 ### [RULE-905-03] Gravitational Contact Shadow Physicality
 - **Classification**: `HIGH_INVARIANT`
@@ -138,11 +138,11 @@ successors: []
 
 ### [RULE-905-04] Large-Scale 3DGS Spatial Octree Memory Budget
 - **Classification**: `BOUNDARY_GUARD`
-- **Bound**: Large campus scenes must enforce spatial chunking (e.g., octree partitioning). Active frustum Gaussian points target $\le 4.5 \times 10^6$, maintaining dynamic VRAM within a $\le 14\text{GB}$ engineering budget [DESIGN_DECISION / TARGET].
+- **Bound**: Large campus scenes must enforce spatial chunking (e.g., octree partitioning). Active frustum Gaussian points target $\le 4.5 \times 10^6$, maintaining dynamic VRAM within a $\le 14\text{GB}$ engineering budget `[DESIGN_DECISION]` `[TARGET]`.
 
 ### [RULE-905-05] Collision-Free Topological Navigation Clearance
 - **Classification**: `SAFETY_CRITICAL`
-- **Bound**: Navigational trajectories generated by spatial pathing algorithms must enforce a Euclidean clearance safety bound $R_{\text{safe}} \ge 0.35\text{m}$ [SAFETY_BOUND] from all reconstructed obstacle surfaces or centroids.
+- **Bound**: Navigational trajectories generated by spatial pathing algorithms must enforce a Euclidean clearance safety bound $R_{\text{safe}} \ge 0.35\text{m}$ `[SAFETY_BOUND]` from all reconstructed obstacle surfaces or centroids.
 
 ---
 

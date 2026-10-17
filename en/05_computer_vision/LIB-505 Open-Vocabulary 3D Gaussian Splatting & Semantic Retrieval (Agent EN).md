@@ -53,25 +53,75 @@ where $S_{\text{view}}$ enforces cross-view consensus across training camera fru
 
 ---
 
-## 2. Invariants & Implementation Specifications
+## 2. Production Implementation: Open-Vocabulary 3D Gaussian Retriever
+
+```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class SemanticGaussianRetriever(nn.Module):
+    """
+    Open-vocabulary 3D Gaussian Splatting semantic retrieval engine.
+    Aligns with RULE-505-01 ~ RULE-505-03.
+    """
+    def __init__(self, feat_dim: int = 16, clip_dim: int = 512):
+        super().__init__()
+        self.feat_dim = feat_dim
+        self.clip_dim = clip_dim
+        self.feature_decoder = nn.Sequential(
+            nn.Linear(feat_dim, 128),
+            nn.LayerNorm(128),
+            nn.SiLU(),
+            nn.Linear(128, clip_dim)
+        )
+
+    def forward(
+        self,
+        gaussian_features: torch.Tensor,     # [N_gaussians, feat_dim]
+        gaussian_opacities: torch.Tensor,    # [N_gaussians, 1]
+        query_clip_embed: torch.Tensor,      # [1, clip_dim]
+        similarity_threshold: float = 0.65
+    ) -> dict:
+        assert gaussian_features.shape[1] == self.feat_dim
+        assert query_clip_embed.shape == (1, self.clip_dim)
+
+        decoded_feats = F.normalize(self.feature_decoder(gaussian_features), p=2, dim=-1)
+        query_norm = F.normalize(query_clip_embed, p=2, dim=-1)
+        cosine_sim = torch.mm(decoded_feats, query_norm.t()).squeeze(-1)
+        weighted_score = cosine_sim * gaussian_opacities.squeeze(-1).clamp(0.0, 1.0)
+        target_mask = (weighted_score >= similarity_threshold) & (gaussian_opacities.squeeze(-1) > 0.1)
+
+        return {
+            "similarity_scores": weighted_score,
+            "target_mask": target_mask,
+            "matched_count": target_mask.sum().item()
+        }
+```
+
+---
+
+## 3. Invariants & Implementation Specifications
 
 ### [RULE-505-01] Semantic Feature Embedding Compression Ratio Invariant
-- **Contract Level**: `PERFORMANCE_CRITICAL`
-- **Specification**: High-dimensional vision-language feature embeddings (e.g., 512-dim CLIP vectors) associated with 3D Gaussians MUST be compressed via dimensionality reduction (PCA or trained Autoencoders) to $d \le 32$ before in-memory storage [SAFETY_BOUND].
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: High-dimensional vision-language feature embeddings (e.g., 512-dim CLIP vectors) stored directly on 3D Gaussians MUST be compressed via dimensionality reduction (PCA or trained Autoencoders) to $d \le 64$ (recommended $d \in \{16, 32\}$) so full-scene semantic VRAM remains within $\le 4\text{ GB}$ [SAFETY_BOUND].
 - **Violation Consequence**: Storing raw uncompressed 512-dim FP32 vectors across millions of Gaussians exhausts GPU VRAM, limiting scene scalability.
 
 ### [RULE-505-02] Multi-View Observation Consensus Verification Invariant
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Candidate 3D semantic Gaussian clusters MUST be validated across at least $\ge 60\%$ of visible unoccluded camera viewpoints before confirmation [SAFETY_BOUND].
+- **Contract Level**: `HIGH_INVARIANT`
+- **Specification**: Candidate 3D semantic Gaussian clusters MUST achieve a cross-view observation consensus ratio $S_{\text{view}}(\mathcal{O}_m) \ge 0.60$ across visible unoccluded camera viewpoints before confirmation [SAFETY_BOUND].
 - **Violation Consequence**: Single-view semantic assignment incorporates viewpoint-dependent specular reflections and occlusion artifacts into global 3D semantic representations.
 
 ### [RULE-505-03] Spatial Outlier Point Connectivity Rejection
 - **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Semantic Gaussians lacking at least $K \ge 5$ spatial neighbors of matching semantic label within a radius $R = 0.1\text{m}$ MUST be pruned as isolated noise [HEURISTIC].
+- **Specification**: Semantic Gaussian subsets selected via similarity thresholding MUST undergo DBSCAN or Radius Outlier Removal (requiring $K \ge 5$ matching neighbors within radius $R = 0.1\text{m}$ and pruning isolated points beyond $2\times$ the object's primary extent) [HEURISTIC].
 - **Violation Consequence**: Unfiltered floating outlier Gaussians introduce severe spatial noise during open-vocabulary 3D scene querying.
 
-## 3. Canonical References
+## 4. Canonical References
 
-1. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024**.
-2. **Zhou, S., et al.** (2024). *Feature 3DGS: Feature 3D Gaussian Splatting for Language and Spatial Reasoning*. **ECCV 2024**.
-3. **Kerr, J., et al.** (2023). *LERF: Language Embedded Radiance Fields*. **CVPR 2023**.
+1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**.
+2. **Kerr, J., et al.** (2023). *LERF: Language Embedded Radiance Fields*. **CVPR 2023**.
+3. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024**.
+4. **Zhou, S., et al.** (2024). *Feature 3DGS: Feature 3D Gaussian Splatting for Language and Spatial Reasoning*. **ECCV 2024**.
+5. **Kirillov, A., et al.** (2023). *Segment Anything*. **ICCV 2023**.

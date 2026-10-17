@@ -201,8 +201,8 @@ class ContextAwarePlacementEngine:
 - **邊界**: 合成物件之接觸陰影投射角度與場景主光源估計方向夾角偏差不得超過 $15^\circ$，且陰影衰減係數在物件底部接縫處必須達到 $S \ge 0.70$（呈現紮實深黑接觸暗部）。
 
 ### [RULE-408-03] 色彩直方圖分佈一致性 (Color Harmonization EMD SLA)
-- **等級**: `HIGH_INVARIANT`
-- **邊界**: 經過色調調和後，新合成實體與周邊 $50\text{px}$ 鄰域背景的色相/飽和度分佈，其推土機距離（Earth Mover's Distance, EMD）必須小於 $0.08$。
+- **等級**: `QUALITY_BOUND`
+- **邊界**: 經過色調調和後，新合成實體與周邊 $50\text{px}$ 鄰域背景的色相/飽和度分佈，其推土機距離（Earth Mover's Distance, EMD）必須滿足 $\text{EMD} \le 0.08$ `[TARGET]`。
 
 ---
 

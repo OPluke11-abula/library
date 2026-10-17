@@ -107,9 +107,8 @@ def dequantize_symmetric_int8(q: torch.Tensor, scale: torch.Tensor) -> torch.Ten
 - **Violation Consequence**: Uniform quantization of outlier channels causes catastrophic perplexity degradation in low-bit quantized models.
 
 ### [RULE-802-02] Scale Factor & Zero-Point Numerical Validity Invariant
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Quantization scale factors $S$ and zero-points $Z$ MUST remain strictly valid: $S > 0$, $S 
-eq \text{NaN}$, and $Z \in [\text{qmin}, \text{qmax}]$. Symmetric quantization MUST enforce $Z \equiv 0$.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: Quantization scale factors $S$ and zero-points $Z$ MUST remain strictly valid: $S = \frac{x_{\max} - x_{\min}}{2^b - 1} \ge 10^{-7}$, $S \neq \text{NaN}$, and $Z = \text{clamp}(\text{round}(-x_{\min}/S), q_{\min}, q_{\max})$. Symmetric quantization MUST enforce $Z \equiv 0$.
 - **Violation Consequence**: Zero or invalid scale factors cause division by zero during dequantization ($x = S(q - Z)$), corrupting all downstream activations.
 
 ### [RULE-802-03] Sub-Byte Packing & Memory Alignment Heuristic

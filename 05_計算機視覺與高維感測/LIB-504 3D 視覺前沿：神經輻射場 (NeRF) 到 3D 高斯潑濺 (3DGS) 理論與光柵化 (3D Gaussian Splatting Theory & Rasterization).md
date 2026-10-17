@@ -41,7 +41,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]。
-- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]（多模態前沿渲染課題）。
+- **後續節點**：[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **權威期刊/會議文獻出處**：
   - Mildenhall et al. (ECCV 2020) *NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis*.
   - Zwicker et al. (IEEE TVCG 2001) *Surface Splatting*.
@@ -206,15 +206,15 @@ if __name__ == "__main__":
   - 強制加上低通濾波常數項：$\Sigma'_{2D} = \Sigma' + 0.3 I_2$。
 - **執行保證**: 防止高斯橢球在極度縮小或視角極度傾斜時退化為無窮小奇異點，消除像素級高頻閃爍。
 - **可執行斷言**:
-  ```python
+```python
 cov2d[0, 0] += 0.3
 cov2d[1, 1] += 0.3
 det = cov2d[0, 0] * cov2d[1, 1] - cov2d[0, 1] ** 2
 assert det > 0.0, f"2D 協方差行列式非正: det={det}"
-  ```
+```
 
 ### [RULE-504-03] 射線透射率早停合約 (Ray Transmittance Early-Exit Heuristic)
-- **合約等級**: `OPTIMIZATION_HEURISTIC`
+- **合約等級**: `PERFORMANCE_CRITICAL`
 - **前置條件 (Pre-conditions)**: 依序自前向後（Front-to-back）累積 Alpha 合成光柵化。
 - **量化決策邊界 (Decision Thresholds)**:
   - 累積透射率：$T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$。

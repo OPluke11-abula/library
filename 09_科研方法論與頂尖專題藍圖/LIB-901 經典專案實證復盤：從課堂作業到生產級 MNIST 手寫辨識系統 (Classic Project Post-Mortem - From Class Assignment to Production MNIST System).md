@@ -45,8 +45,8 @@ successors:
 ---
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator)]]、[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]（模型學習六大基石）、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（GPU Warp 對齊）、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]（DNN 空間死記缺陷）、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]（LeCun 前處理規範）。
-- **後續節點**：[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]（美式 7 空間負權重）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（8 層過度自信與校準理論）、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
+- **前置依賴**：[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]（GPU Warp 對齊）、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]（DNN 空間死記缺陷）、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]（LeCun 前處理規範）、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]（8 層過度自信與校準理論）。
+- **後續節點**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
 - **核心定位**：本卷為整座圖書館的**「創生實戰案例典籍（Genesis Case Study）」**，原汁原味復盤中原大學資工系蔡老師課堂作業從陽春範本進化為生產級手寫辨識系統的完整工程與理論全景。
 
 ---
@@ -382,19 +382,23 @@ def preprocess_image(inp):
 ## 🤖 AI Agent 推論協議與工程不變量合約
 
 ### `[RULE-901-01]` 互動視覺拉桿維度防呆合約 (Interactive Dimension Invariant)
+* **合約等級**：`CRITICAL_INVARIANT`
 * **規範**：任何對共享資料集執行 `imshow` 的視覺化函數，必須強制在首行執行 `.reshape(28, 28)`。
 * **物理違規後果**：若下游訓練管線將矩陣攤平成 784 維向量，回頭觸發未防呆的視覺化函數將引發形狀不匹配崩潰。
 
 ### `[RULE-901-02]` 像素數值正規化防溢位合約 (Pixel Normalization Invariant)
+* **合約等級**：`CRITICAL_INVARIANT`
 * **規範**：黑白影像輸入網路前，必須強制執行 `/ 255.0` 縮放至 $[0.0, 1.0]$ 區間。
 * **物理違規後果**：未經縮放的 255 數值經過兩層矩陣相乘與 ReLU 激活後，數值將突破浮點數上限引發數值溢位與梯度爆炸。
 
 ### `[RULE-901-03]` 手繪板邊界框與質心安全限幅合約 (BBox & CoM Clip Invariant)
-* **規範**：真實手繪影像必須先執行 `np.argwhere` 邊界框裁切，且質心平移位移量必須強制限幅在 $[-3, 3]$ 像素以內。
+* **合約等級**：`CRITICAL_INVARIANT`
+* **規範**：真實手繪影像必須先執行 `np.argwhere` 邊界框裁切，且質心平移位移量必須強制限幅在 $[-3, 3]$ 像素以內 `[HEURISTIC]` `[SAFETY_BOUND]`。
 * **物理違規後果**：若無邊界框裁切，留白將使數字過細（畫 1 猜 5）；若質心位移無限幅，空畫板或雜訊點將使畫布平移出界。
 
 ### `[RULE-901-04]` 模型深度與置信度校準監控合約 (Confidence Calibration Invariant)
-* **規範**：在建構超過 4 層的分類網路時，必須強制加入 Dropout 或權重衰減，並監控預測機率分佈熵值。
+* **合約等級**：`QUALITY_BOUND`
+* **規範**：在建構超過 4 層的分類網路時，必須強制加入 Dropout 或權重衰減，並執行溫度縮放後處理校準（$T > 0$）`[DESIGN_DECISION]` `[TARGET]`，同時監控預測機率分佈熵值。
 * **物理違規後果**：缺乏正則化的深層網路將誘發極端過度自信，即便猜錯亦給出 100% 機率，在生產環境引發靜默災難。
 
 ---

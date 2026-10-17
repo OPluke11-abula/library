@@ -344,19 +344,23 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 為保證自律 AI 代理人或學生在建構訓練腳本時不犯下隱蔽錯誤，所有程式碼必須遵守以下四條不變量合約：
 
 ### `[RULE-001-01]` 梯度歸零防累加不變量 (Zero Gradient Invariant)
-* **規範**：在呼叫 `loss.backward()` 之前，必須嚴格執行 `optimizer.zero_grad()`。
+* **合約等級**：`CRITICAL_INVARIANT`
+* **規範**：在呼叫 `loss.backward()` 之前，必須嚴格執行 `optimizer.zero_grad(set_to_none=True)`。
 * **物理違規後果**：PyTorch 預設會累加梯度。若未清除，上一個 Batch 的梯度將與當前 Batch 疊加，導致有效學習率變相擴大數倍，引發權重震盪與訓練發散。
 
 ### `[RULE-001-02]` 學習率診斷與數值爆炸防範不變量 (Learning Rate Stability)
-* **規範**：若前 5 個 Epoch 內訓練 Loss 出現 `NaN` 或 `Inf`，Agent 必須強制將學習率降低一個數量級（除以 10），並檢查輸入特徵是否已執行標準化（Z-score Normalization）。
+* **合約等級**：`CRITICAL_INVARIANT`
+* **規範**：若前 5 個 Epoch 內訓練 Loss 出現 `NaN` 或 `Inf`，Agent 必須強制將學習率降低一個數量級（除以 10），並檢查輸入特徵是否已執行標準化（Z-score 或 $[0, 1]$ Normalization）。
 * **物理違規後果**：未標準化的過大輸入特徵搭配過激學習率，將使矩陣相乘瞬間超出 FP32/FP16 表示範圍。
 
 ### `[RULE-001-03]` 類別不平衡評估指標防詐欺不變量 (Metric Integrity)
+* **合約等級**：`HIGH_INVARIANT`
 * **規範**：當正負樣本比例失衡超過 $3:1$ 時，嚴禁單獨以 Accuracy（準確率）作為模型上線或收斂指標；必須強制回報 Precision, Recall, F1-Score 與混淆矩陣。
 * **物理違規後果**：盲目追求高 Accuracy 將掩蓋模型在少數關鍵類別（如瑕疵、癌症）完全喪失召回率的致命缺陷。
 
 ### `[RULE-001-04]` 特徵感受野與張量維度對齊不變量 (Tensor Shape Trace)
-* **規範**：在編寫任何自訂 CNN 或特徵提取層時，必須在註解中明確標註每一層的四維張量形狀 `(Batch, Channel, Height, Width)`，並驗證感受野足以覆蓋目標物體尺寸。
+* **合約等級**：`CRITICAL_INVARIANT`
+* **規範**：在編寫任何自訂 CNN 或特徵提取層時，必須在註解中明確標註每一層的四維張量形狀 `(Batch, Channel, Height, Width)`，並驗證空間特徵圖在進入最終分類頭前不會坍縮至 $< 1 \times 1$。
 * **物理違規後果**：過度的池化下採樣會導致微小目標（如遠距交通號誌、微小病灶）在進入深層前即因特徵圖縮減至 $1 \times 1$ 而徹底湮滅。
 
 ---

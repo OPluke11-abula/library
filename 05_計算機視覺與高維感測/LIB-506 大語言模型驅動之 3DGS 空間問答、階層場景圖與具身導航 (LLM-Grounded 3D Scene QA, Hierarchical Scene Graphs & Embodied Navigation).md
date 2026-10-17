@@ -43,7 +43,7 @@ successors:
 # 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)
 
 ## 導讀與概念座標
-- **前置依賴**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]。
+- **前置依賴**：[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]。
 - **後續模組**：[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **核心主題**：整合三維高斯場景渲染、階層式 3D 場景圖（Hierarchical 3D Scene Graph）與大語言模型（LLM）的空間推理能力，建構具備「自然語言問答 $\to$ 實體目標定位 $\to$ 最佳路徑規劃 $\to$ 實時視角漫遊導引」之端到端智慧虛擬導覽系統（涵蓋資工系實驗室、校園大樓與複雜展示空間）。
 
@@ -96,14 +96,14 @@ $$x_t = \begin{bmatrix} p_{x, t} \\ p_{y, t} \\ \theta_t \\ v_t \end{bmatrix} \i
 其中 $p_t = (p_{x, t}, p_{y, t})$ 為 2D 平面位置，$\theta_t$ 為航向角，$v_t$ 為線速度；$a_t$ 為線加速度控制，$\omega_t$ 為轉向角速度控制。
 
 離散時間運動學動態模型 $x_{t+1} = f(x_t, u_t)$ [DERIVATION]：
-$$x_{t+1} = \begin{bmatrix} p_{x, t} + v_t \cos(\theta_t) \Delta t \\ p_{y, t} + v_t \sin(\theta_t) \Delta t \\ \theta_t + \omega_t \Delta t \\ \text{clip}(v_t + a_t \Delta t, -v_{\max}, v_{\max}) \end{bmatrix}$$
+$$x_{t+1} = \begin{bmatrix} p_{x, t} + v_t \cos(\theta_t) \Delta t \\ p_{y, t} + v_t \sin(\theta_t) \Delta t \\ \theta_t + \omega_t \Delta t \\ \text{clip}(v_t + a_t \Delta t, 0, v_{\max}) \end{bmatrix}$$
 
 #### (2) 有限時域約束最佳控制問題 (OCP Formulation)
 在預測範圍 $H$（Prediction Horizon）內，求解最優控制輸入序列 $U^* = [u_t^*, u_{t+1}^*, \dots, u_{t+H-1}^*]$：
 $$\min_{u_{t:t+H-1}} \left[ \Phi(x_{t+H}) + \sum_{k=0}^{H-1} \ell(x_{t+k}, u_{t+k}) \right]$$
 $$\begin{aligned}
 \text{s.t.} \quad & x_{t+k+1} = f(x_{t+k}, u_{t+k}), \quad k = 0, \dots, H-1 \\
-& u_{t+k} \in \mathcal{U} = [a_{\min}, a_{\max}] \times [\omega_{\min}, \omega_{\max}] \quad \text{[SAFETY_BOUND]} \\
+& u_{t+k} \in \mathcal{U} = [-a_{\max}, a_{\max}] \times [-\omega_{\max}, \omega_{\max}] \quad \text{[SAFETY_BOUND]} \\
 & x_{t+k} \in \mathcal{X}_{\text{safe}} = \{x \mid \text{dist}(p(x), \partial \Omega_{\text{obs}}) \ge R_{\text{safe}}\} \quad \text{[SAFETY_BOUND]} \\
 & x_t = \hat{x}_{\text{current}}
 \end{aligned}$$
@@ -118,7 +118,7 @@ $$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p,
 求解器求得長度為 $H$ 的最優序列 $U^* = [u_0^*, u_1^*, \dots, u_{H-1}^*]$ 後，**僅執行第一個動作 $u_0^*$**。在下一控制步 $t+1$，感測器觀測實際狀態 $\hat{x}_{t+1}$，重置預測區間並重新規劃。此機制將開環前向規劃轉化為封閉反饋迴路，具備強大的外力抗擾性與非受控誤差自修正能力。
 
 
-#### (5) 教學簡化模型 vs. 機器人控制理論真型 (Pedagogical Toy vs. Rigorous Control Theory) [FACT / SAFETY_BOUND]
+#### (5) 教學簡化模型 vs. 機器人控制理論真型 (Pedagogical Toy vs. Rigorous Control Theory) [FACT] [SAFETY_BOUND]
 在科普或初學圖解教材中，常對 MPC 進行大幅度抽象簡化。在真實機器人學與控制理論研究中，必須嚴格釐清以下六大本質維度：
 
 | 維度 | 教學簡化模型 (Toy Model) | 機器人學與控制理論真型 (Rigorous Robotics Formulation) |
@@ -164,9 +164,9 @@ $$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p,
 ```
 
 1. **階層式導航控制頻率解耦**：
-   - 語意層（LLM API / 本地 vLLM）：延遲約 $500\text{ms} \sim 1.5\text{s}$，非同步發布語意目標節點 $v^*$。
-   - 拓樸層（A* 演算法）：計算時間 $< 10\text{ms}$，在離散場景圖上更新全局長程路徑。
-   - 局部動態層（Batched MPPI）：運算時間 $< 15\text{ms}$（RTX 4090 上 512 條軌跡），滿足 $\ge 30\text{Hz}$ 閉環動態避障要求 [PERFORMANCE_CRITICAL]。
+   - 語意層（LLM API / 本地 vLLM）：延遲約 $500\text{ms} \sim 800\text{ms}$，非同步發布語意目標節點 $v^*$ [TARGET]。
+   - 拓樸層（A* 演算法）：計算時間 $< 10\text{ms}$（導航路徑重算延遲 $< 100\text{ms}$），在離散場景圖上更新全局長程路徑。
+   - 局部動態層（Batched MPPI）：運算時間 $< 15\text{ms}$（RTX 4090 上 512 條軌跡），滿足 $\ge 30\text{Hz}$ 閉環動態避障要求 [TARGET]。
 2. **Unity 3DGS 渲染整合**：
    - 採用基於 Compute Shader 的高性能光柵化插件（如 Aras-p UnityGaussianSplatting）。
    - 在 Shader 中動態傳入目標高斯掩碼數組 `StructuredBuffer<int> TargetMask`。對目標物件的高斯點動態疊加輪廓發光（Outline Glow）與著色變換，推論端開銷 $< 0.5\text{ms}$。
@@ -177,10 +177,11 @@ $$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p,
 
 ## 四、工業級工程實作與防禦規範 (Production-Grade Code)
 
-以下為 3D 場景圖導航路由與目標定位實作：
+以下為 3D 場景圖導航路由與 PyTorch CUDA 向量化 MPPI 控制器實作：
 
 ```python
 import numpy as np
+import torch
 import heapq
 from typing import Dict, List, Tuple, Optional
 
@@ -240,7 +241,7 @@ class SceneGraphNavigator:
             p2 = waypoints[i + 1]
             p3 = waypoints[min(len(waypoints) - 1, i + 2)]
             
-            # 線性/分段插值防劇烈抖動
+            # Catmull-Rom 樣條分段插值防劇烈抖動
             for t in np.linspace(0, 1, samples_per_segment, endpoint=False):
                 point = 0.5 * ((2 * p1) + (-p0 + p2) * t + 
                                (2 * p0 - 5 * p1 + 4 * p2 - p3) * (t**2) + 
@@ -252,7 +253,7 @@ class SceneGraphNavigator:
 class BatchedMPPIController:
     """
     GPU-Accelerated Model Predictive Path Integral (MPPI) 局部動態軌跡最佳化控制器
-    實作滾動時域隨機最佳控制，支援動態避障與非完整約束。對齊 RULE-506-02 與 RULE-506-03。
+    實作滾動時域隨機最佳控制，包含終端 Lyapunov 代價與資訊理論交叉項，對齊 RULE-506-02 與 RULE-506-03。
     """
     def __init__(
         self,
@@ -261,45 +262,55 @@ class BatchedMPPIController:
         dt: float = 0.05,
         temperature_lambda: float = 0.5,
         v_max: float = 1.5,
+        a_max: float = 2.0,
         w_max: float = 1.0,
-        r_safe: float = 0.4
+        r_safe: float = 0.4,
+        terminal_weight: float = 5.0,
+        device: Optional[str] = None
     ):
         self.H = horizon
         self.K = num_samples
         self.dt = dt
         self.lam = temperature_lambda
         self.v_max = v_max
+        self.a_max = a_max
         self.w_max = w_max
         self.r_safe = r_safe
+        self.q_f = terminal_weight
+        self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         
-        # 名義控制輸入序列 [H, 2]: [加速度 a, 角速度 omega]
-        self.u_nominal = np.zeros((self.H, 2), dtype=np.float32)
-        # 控制擾動協方差標準差 [std_a, std_w]
-        self.noise_sigma = np.array([0.5, 0.4], dtype=np.float32)
+        # 名義控制輸入序列 [H, 2]: [線加速度 a, 角速度 omega]
+        self.u_nominal = torch.zeros((self.H, 2), dtype=torch.float32, device=self.device)
+        # 控制擾動標準差與協方差逆矩陣對角項 Sigma^{-1}
+        self.noise_sigma = torch.tensor([0.5, 0.4], dtype=torch.float32, device=self.device)
+        self.inv_sigma_cov = 1.0 / (self.noise_sigma ** 2)
 
+    @torch.no_grad()
     def rollout_and_solve(
         self,
-        state: np.ndarray,          # 當前狀態 [px, py, theta, v], 形狀 (4,)
-        target_pos: np.ndarray,     # 局部導航目標點 [gx, gy], 形狀 (2,)
-        obstacles: np.ndarray       # 障礙物數組 [M, 3], 每行為 [ox, oy, radius]
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        state: torch.Tensor,        # 當前狀態 [px, py, theta, v], 形狀 (4,)
+        target_pos: torch.Tensor,   # 局部導航目標點 [gx, gy], 形狀 (2,)
+        obstacles: torch.Tensor     # 障礙物張量 [M, 3], 每行為 [ox, oy, radius]
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        執行向量化前向 Rollout、評估累積代價並更新最優控制序列。
-        返回:
-            action_to_execute: 當前控制週期執行的首步動作 u_0* (2,)
-            best_trajectory: 最佳預測軌跡航點 (H, 2) 用於視覺化
+        執行 CUDA 向量化前向 Rollout、評估累積代價（含終端代價與資訊理論交叉項）並更新最優控制序列。
         """
-        # 1. 採樣控制擾動: (K, H, 2)
-        noise = np.random.normal(0.0, self.noise_sigma, size=(self.K, self.H, 2)).astype(np.float32)
-        u_samples = self.u_nominal[None, :, :] + noise  # (K, H, 2)
-        
-        # 邊界限幅截斷防超速與急轉 [SAFETY_BOUND]
-        u_samples[:, :, 0] = np.clip(u_samples[:, :, 0], -self.v_max / self.dt, self.v_max / self.dt)
-        u_samples[:, :, 1] = np.clip(u_samples[:, :, 1], -self.w_max, self.w_max)
+        state = state.to(device=self.device, dtype=torch.float32)
+        target_pos = target_pos.to(device=self.device, dtype=torch.float32)
+        obstacles = obstacles.to(device=self.device, dtype=torch.float32)
 
-        # 2. 向量化前向展開 (K 條軌跡並行遞迴推進)
-        x_rollout = np.zeros((self.K, self.H + 1, 4), dtype=np.float32)
-        x_rollout[:, 0, :] = state
+        # 1. 採樣控制擾動 epsilon ~ N(0, Sigma): (K, H, 2)
+        eps = torch.randn((self.K, self.H, 2), dtype=torch.float32, device=self.device) * self.noise_sigma
+        u_samples = self.u_nominal.unsqueeze(0) + eps  # (K, H, 2)
+        
+        # 執行器物理飽和截斷 [-a_max, a_max] x [-w_max, w_max] [SAFETY_BOUND]
+        u_samples[:, :, 0] = torch.clamp(u_samples[:, :, 0], -self.a_max, self.a_max)
+        u_samples[:, :, 1] = torch.clamp(u_samples[:, :, 1], -self.w_max, self.w_max)
+        eps_clamped = u_samples - self.u_nominal.unsqueeze(0)
+
+        # 2. 向量化馬可夫前向展開 (K 條軌跡並行遞迴推進)
+        x_rollout = torch.zeros((self.K, self.H + 1, 4), dtype=torch.float32, device=self.device)
+        x_rollout[:, 0, :] = state.unsqueeze(0)
 
         for t in range(self.H):
             curr_x = x_rollout[:, t, 0]
@@ -310,50 +321,54 @@ class BatchedMPPIController:
             acc = u_samples[:, t, 0]
             omega = u_samples[:, t, 1]
 
-            next_v = np.clip(curr_v + acc * self.dt, 0.0, self.v_max)
+            next_x = curr_x + curr_v * torch.cos(curr_th) * self.dt
+            next_y = curr_y + curr_v * torch.sin(curr_th) * self.dt
             next_th = curr_th + omega * self.dt
-            next_x = curr_x + next_v * np.cos(curr_th) * self.dt
-            next_y = curr_y + next_v * np.sin(curr_th) * self.dt
+            next_v = torch.clamp(curr_v + acc * self.dt, 0.0, self.v_max)
 
             x_rollout[:, t + 1, 0] = next_x
             x_rollout[:, t + 1, 1] = next_y
             x_rollout[:, t + 1, 2] = next_th
             x_rollout[:, t + 1, 3] = next_v
 
-        # 3. 代價函數計算 (Stage Cost + Barrier Penalty)
+        # 3. 階段代價 + MPPI 資訊理論控制交叉項 lambda * u_k^T Sigma^{-1} eps_k^{(i)}
         pos_seq = x_rollout[:, 1:, 0:2]  # (K, H, 2)
-        dist_to_target = np.sum((pos_seq - target_pos[None, None, :]) ** 2, axis=-1)  # (K, H)
-        stage_cost = dist_to_target + 0.1 * (u_samples[:, :, 0] ** 2 + u_samples[:, :, 1] ** 2)
+        dist_sq = torch.sum((pos_seq - target_pos.view(1, 1, 2)) ** 2, dim=-1)  # (K, H)
+        ctrl_effort = 0.1 * torch.sum(u_samples ** 2, dim=-1)                   # (K, H)
+        info_cross = self.lam * torch.sum(
+            self.u_nominal.unsqueeze(0) * self.inv_sigma_cov.view(1, 1, 2) * eps_clamped, dim=-1
+        )  # (K, H)
+        stage_cost = dist_sq + ctrl_effort + info_cross
 
         # 3DGS 幾何障礙物距離阻尼懲罰 (對齊 RULE-506-02)
-        if len(obstacles) > 0:
-            obs_pos = obstacles[None, None, :, 0:2]
-            obs_rad = obstacles[None, None, :, 2]
-            dist_to_obs = np.linalg.norm(pos_seq[:, :, None, :] - obs_pos, axis=-1) - obs_rad  # (K, H, M)
-            violation = np.maximum(0.0, self.r_safe - dist_to_obs)  # (K, H, M)
-            obs_cost = np.sum(100.0 * (violation ** 2), axis=-1)     # (K, H)
-            stage_cost += obs_cost
+        if obstacles.numel() > 0:
+            obs_pos = obstacles[:, 0:2].view(1, 1, -1, 2)
+            obs_rad = obstacles[:, 2].view(1, 1, -1)
+            dist_to_obs = torch.norm(pos_seq.unsqueeze(2) - obs_pos, dim=-1) - obs_rad  # (K, H, M)
+            violation = torch.clamp(self.r_safe - dist_to_obs, min=0.0)
+            stage_cost = stage_cost + torch.sum(100.0 * (violation ** 2), dim=-1)
 
-        traj_cost = np.sum(stage_cost, axis=1)  # (K,)
+        # 終端李亞普諾夫代價 Phi(x_H)
+        terminal_cost = self.q_f * torch.sum((x_rollout[:, -1, 0:2] - target_pos.view(1, 2)) ** 2, dim=-1)
+        traj_cost = torch.sum(stage_cost, dim=1) + terminal_cost  # (K,)
 
         # 4. Softmax 重要性加權 (Free Energy Minimization)
-        min_cost = np.min(traj_cost)
-        weights = np.exp(-(traj_cost - min_cost) / self.lam)
-        weights /= (np.sum(weights) + 1e-8)  # (K,)
+        min_cost = torch.min(traj_cost)
+        weights = torch.exp(-(traj_cost - min_cost) / self.lam)
+        weights = weights / (torch.sum(weights) + 1e-8)  # (K,)
 
         # 5. 更新名義控制序列並滾動執行 (Receding Horizon)
-        self.u_nominal = np.sum(weights[:, None, None] * u_samples, axis=0)  # (H, 2)
-        action_to_execute = self.u_nominal[0].copy()
+        self.u_nominal = torch.sum(weights.view(self.K, 1, 1) * u_samples, dim=0)  # (H, 2)
+        action_to_execute = self.u_nominal[0].clone()
 
         # 時域滑動熱啟動 (Shift Warm-start)
-        self.u_nominal[:-1] = self.u_nominal[1:]
-        self.u_nominal[-1] = 0.0
+        self.u_nominal = torch.roll(self.u_nominal, shifts=-1, dims=0)
+        self.u_nominal[-1].zero_()
 
-        best_idx = np.argmin(traj_cost)
+        best_idx = int(torch.argmin(traj_cost).item())
         best_trajectory = x_rollout[best_idx, 1:, 0:2]
 
         return action_to_execute, best_trajectory
-
 ```
 
 ---
@@ -362,15 +377,15 @@ class BatchedMPPIController:
 
 ### [RULE-506-01] 階層場景空間包含性約束 (Hierarchy Containment Invariant)
 - **等級**: `CRITICAL_INVARIANT`
-- **邊界**: 場景圖中的物件節點（如印表機）必須嚴格隸屬於單一房間/區域節點，房間必須隸屬於樓層。禁止跨層懸掛孤立實體節點，拓樸深度深度驗證樹必須為嚴格樹狀收斂。
+- **邊界**: 場景圖中的物件節點（如印表機）必須嚴格隸屬於單一房間/區域節點，房間必須隸屬於樓層。禁止跨層懸掛孤立實體節點，拓樸深度驗證樹必須為嚴格樹狀收斂。
 
 ### [RULE-506-02] 導航相機垂直高度防穿牆限幅 (Camera Clearance Invariant)
-- **等級**: `HIGH_INVARIANT`
-- **邊界**: Unity 虛擬漫遊軌跡在插值生成時，相機高度 $z$ 軸必須維持在地面高度 $+1.5\text{m} \sim +1.7\text{m}$（人眼視角），且與任何 3D 高斯不透明度 $\alpha > 0.5$ 的實體障礙物保持 $\ge 0.4\text{m}$ 碰撞安全餘裕。
+- **等級**: `SAFETY_CRITICAL`
+- **邊界**: Unity 虛擬漫遊或具身機器人軌跡在規劃與插值生成時，相機高度 $z$ 軸必須維持在地面高度 $+1.5\text{m} \sim +1.7\text{m}$（人眼視角），且與任何 3D 高斯不透明度 $\alpha > 0.5$ 的實體障礙物保持 $\text{dist}(p(x), \partial\Omega_{\text{obs}}) \ge 0.4\text{m}$ 碰撞安全餘裕 [SAFETY_BOUND]。
 
 ### [RULE-506-03] 實時導航互動渲染幀率 (Interactive Frame Rate SLA)
-- **等級**: `HIGH_INVARIANT`
-- **邊界**: 在 Unity 或 WebXR 導覽客戶端執行時，高斯潑濺渲染幀率在 1080p 解析度下必須維持 $\ge 45\text{ FPS}$（VR 模式下 $\ge 72\text{ FPS}$），導航路徑重算延遲 $< 100\text{ms}$。
+- **等級**: `PERFORMANCE_CRITICAL`
+- **邊界**: 在 Unity 或 WebXR 導覽客戶端執行時，高斯潑濺渲染幀率在 1080p 解析度下必須維持 $\ge 45\text{ FPS}$（VR 模式下 $\ge 72\text{ FPS}$）；局部 MPPI 滾動時域求解延遲必須 $< 15\text{ms}$（$\ge 30\text{Hz}$），全局 A* 路徑重算延遲 $< 100\text{ms}$，LLM 空間問答查詢延遲 $< 800\text{ms}$ [TARGET]。
 
 ---
 

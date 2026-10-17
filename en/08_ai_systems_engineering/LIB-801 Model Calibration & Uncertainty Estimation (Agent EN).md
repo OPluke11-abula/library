@@ -92,7 +92,7 @@ class TemperatureScaler(nn.Module):
     """
     Optimizes temperature parameter T on a validation set via NLL minimization.
     Mathematical requirement: T > 0 strictly preserves top-1 logit rank ordering.
-    Project heuristic bound: T in [0.1, 5.0] [HEURISTIC / BOUNDARY_GUARD] prevents degenerate calibration.
+    Project heuristic bound: T in [0.1, 5.0] [HEURISTIC] [SAFETY_BOUND] prevents degenerate calibration.
     Mathematically enforced via sigmoid reparameterization: T = 0.1 + 4.9 * torch.sigmoid(raw_temperature).
     Initial raw_temperature = -0.9163 yields T ≈ 1.5.
     """
@@ -130,16 +130,16 @@ class TemperatureScaler(nn.Module):
 
 ### [RULE-801-01] Expected Calibration Error (ECE) Release Gate
 - **Contract Level**: `QUALITY_BOUND`
-- **Specification**: Classification models submitted for production release MUST report Expected Calibration Error (ECE) across a minimum of 15 bins alongside Top-1 Accuracy. Models exhibiting $\text{ECE} > 0.05$ (5%) MUST undergo post-hoc temperature scaling or conformal calibration [DESIGN_DECISION / TARGET].
+- **Specification**: Classification models submitted for production release MUST report Expected Calibration Error (ECE) across a minimum of 15 bins alongside Top-1 Accuracy. Models exhibiting $\text{ECE} > 0.05$ (5%) MUST undergo post-hoc temperature scaling or conformal calibration `[DESIGN_DECISION]` `[TARGET]`.
 - **Violation Consequence**: Uncalibrated models produce severe overconfidence on ambiguous edge-case inputs, creating critical reliability risks in automated decision systems.
 
 ### [RULE-801-02] Temperature Scaling Parameter Range Guardrail
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: When optimizing temperature parameter $T$ via negative log-likelihood (NLL) minimization on a held-out validation set, $T$ MUST be strictly positive ($T > 0$) as a mathematical requirement to preserve logit rank ordering and strictly monotonic Softmax mapping. The bounded range $T \in [0.1, 5.0]$ is an engineering heuristic [HEURISTIC / BOUNDARY_GUARD] enforced via bounded sigmoid parameterization ($T = 0.1 + 4.9 \cdot \sigma(\theta)$) to prevent numerical instability or probability collapse. Note: NLL minimization optimizes continuous likelihood, which empirically reduces calibration error but does NOT mathematically guarantee monotonic reduction of discrete binned ECE due to non-smooth bin boundary partitioning.
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: When optimizing temperature parameter $T$ via negative log-likelihood (NLL) minimization on a held-out validation set, $T$ MUST be strictly positive ($T > 0$) as a mathematical requirement to preserve logit rank ordering and strictly monotonic Softmax mapping. The bounded range $T \in [0.1, 5.0]$ is an engineering heuristic `[HEURISTIC]` `[SAFETY_BOUND]` enforced via bounded sigmoid parameterization ($T = 0.1 + 4.9 \cdot \sigma(\theta)$) to prevent numerical instability or probability collapse. Note: NLL minimization optimizes continuous likelihood, which empirically reduces calibration error but does NOT mathematically guarantee monotonic reduction of discrete binned ECE due to non-smooth bin boundary partitioning.
 - **Violation Consequence**: Setting $T \le 0$ violates mathematical monotonicity and inverts top-1 predictions; unconstrained $T \gg 5$ collapses predictive distributions toward uniform entropy.
 
 ### [RULE-801-03] Conformal Prediction Distribution-Free Coverage Guarantee
-- **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $\mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \ge 1 - \alpha$ under the foundational assumption of **data exchangeability** (where i.i.d. is a common sufficient condition) between calibration and test distributions. Note: The guarantee is marginal over joint draws, not conditional on an individual test instance. Standard marginal coverage does NOT hold under arbitrary out-of-distribution shift without explicit domain-shift or covariate-shift weighting adjustments based on verifiable likelihood ratios.
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: In high-stakes safety-critical deployments, point predictions MUST be complemented by split conformal prediction sets $\mathcal{C}(X) \subseteq \{1, \dots, K\}$ guaranteeing statistical marginal coverage $\mathbb{P}(Y_{\text{test}} \in \mathcal{C}(X_{\text{test}})) \ge 1 - \alpha$ (default $\alpha = 0.05$, i.e. $95\%$ marginal coverage; escalate to human review when $|\mathcal{C}(X)| \ge 3$) under the foundational assumption of **data exchangeability** (where i.i.d. is a common sufficient condition) between calibration and test distributions. Note: The guarantee is marginal over joint draws, not conditional on an individual test instance. Standard marginal coverage does NOT hold under arbitrary out-of-distribution shift without explicit domain-shift or covariate-shift weighting adjustments based on verifiable likelihood ratios.
 - **Violation Consequence**: Relying on uncalibrated point predictions or assuming coverage under uncorrected distribution shifts provides false statistical confidence guarantees.
 

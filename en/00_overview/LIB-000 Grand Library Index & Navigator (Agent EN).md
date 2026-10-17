@@ -36,9 +36,9 @@ successors:
 The knowledge base is formalized as a finite, directed, acyclic graph:
 $$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A})$$
 where:
-- $\mathcal{V} = \{v_1, v_2, \dots, v_{24}\}$ is the set of 24 canonical academic volumes.
+- $\mathcal{V} = \{v_1, v_2, \dots, v_{25}\}$ is the set of 25 canonical academic volumes.
 - $\mathcal{E} \subset \mathcal{V} \times \mathcal{V}$ is the set of directed dependency edges representing prerequisite orderings. If $(u, v) \in \mathcal{E}$, volume $u$ MUST be ingested and verified prior to volume $v$.
-- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-905-05}\}$ ($|\mathcal{I}| = 84$).
+- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 84$).
 
 ### Topological Sort & Execution Order
 Because $\mathcal{G}$ contains no directed cycles ($\nexists \text{ path } u \rightsquigarrow u$), there exists at least one linear topological ordering $\tau: \mathcal{V} \to \{1, \dots, |\mathcal{V}|\}$ satisfying:
@@ -50,7 +50,7 @@ The canonical 3-tier linear ingestion schedule for autonomous agents is:
 2. **Tier 2: Perception, Spatial Biases, Architectures & Systems**:
    $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-801} \to \text{LIB-405} \to \text{LIB-501} \to \text{LIB-406} \to \text{LIB-602} \to \text{LIB-504} \to \text{LIB-407} \to \text{LIB-703} \to \text{LIB-802} \to \text{LIB-505} \to \text{LIB-408} \to \text{LIB-704} \to \text{LIB-506}$$
 3. **Tier 3: Empirical Systems & Capstone Research**:
-   $$\text{LIB-901} \to \text{LIB-903} \to \text{LIB-904} \to \text{LIB-905}$$
+   $$\text{LIB-901} \to \text{LIB-903} \to \text{LIB-904} \to \text{LIB-905} \to \text{LIB-906}$$
 
 ---
 
@@ -115,20 +115,26 @@ graph TD
   F --> J["Verify Confidence Gating tau >= 0.85"]
 ```
 
-### [RULE-000-01] Strict DAG Dependency Ordering Invariant
+### [RULE-000-01] Topological Dependency Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Autonomous agents and researchers MUST NOT adopt, modify, or extend a library node without resolving and verifying its upstream DAG prerequisites.
+- **Specification**: Autonomous agents and researchers MUST NOT adopt, modify, or extend a library node without resolving and verifying its upstream DAG `prerequisites` (e.g., consulting `LIB-101` & `LIB-203` prior to modifying Attention kernels, or `LIB-501` & `LIB-301` prior to vision pipeline engineering).
 - **Enforcement**: Automated topological sort verification via `scripts/validate_library.py`.
 
-### [RULE-000-02] Deterministic Execution & Reproducibility Invariant
+### [RULE-000-02] Multi-Perspective Content & Reproducibility Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: All code artifacts and benchmarks MUST declare exact execution seeds, framework versions, deterministic algorithm flags (`torch.use_deterministic_algorithms(True)`), and hardware specifications.
+- **Specification**: Every core volume addition or revision MUST integrate four orthogonal dimensions: (1) physical & geometric intuition, (2) closed-form mathematical derivations, (3) hardware microarchitecture alignment (memory hierarchy, Warp scheduling, cache locality), and (4) reproducible executable code with explicit tensor shape annotations and boundary assertions.
 
-### [RULE-000-03] Dual-Track Mathematical & Code Verification Invariant
+### [RULE-000-03] Peer-Reviewed Citation Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Conceptual assertions MUST be accompanied by formal mathematical derivations (with tensor dimension annotations) and runnable defensive unit tests.
+- **Specification**: All theoretical claims and algorithmic benchmarks MUST cite primary peer-reviewed literature (top-tier conferences: NeurIPS, ICML, ICLR, CVPR, ICCV, ECCV, SIGGRAPH, MLSys, SOSP, OSDI; journals: IEEE TPAMI, IEEE TIT, ACM TOG, CACM, Nature, Science, SIAM; or canonical monographs: Strang, Boyd, Nesterov, Vapnik, LeCun, Hennessy & Patterson) with authors, year, venue, and DOI/arXiv identifier. Secondary unreviewed blog sources are strictly prohibited.
 
-### [RULE-000-04] Hardware Boundedness & Memory Budget Invariant
-- **Contract Level**: `HIGH_INVARIANT`
-- **Specification**: Algorithmic architectures designed for local or edge deployment MUST specify and adhere to explicit hardware resource ceilings (VRAM, SRAM tiling, compute budget).
+### [RULE-000-04] Bidirectional Linkage & Graph Integrity Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: All cross-volume references MUST use native Obsidian bidirectional Wikilinks and symmetric YAML `prerequisites`/`successors` edges. The repository MUST maintain 0 broken internal links and 0 orphan nodes, verified via `scripts/validate_library.py`:
+```python
+def verify_library_integrity(dag_graph: dict):
+    for node, prereqs in dag_graph.items():
+        for p in prereqs:
+            assert p in dag_graph, f"Broken link alert: dependency {p} of node {node} does not exist!"
+```
 

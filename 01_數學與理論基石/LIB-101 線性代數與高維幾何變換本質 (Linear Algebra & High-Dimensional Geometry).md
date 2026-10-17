@@ -43,8 +43,8 @@ successors:
 # 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：中學解析幾何與基礎矩陣乘法。
-- **後續節點**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
+- **前置依賴**：[[LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)]]、中學解析幾何與基礎矩陣乘法。
+- **後續節點**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]、[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]。
 - **難度等級**：學士進階 / 碩博基石。
 
 ---
@@ -169,13 +169,13 @@ if __name__ == "__main__":
 - **前置條件 (Pre-conditions)**: 執行矩陣乘法 $C = A \cdot B$，其中 $A \in \mathbb{R}^{M \times K}, B \in \mathbb{R}^{K \times N}$。
 - **量化決策邊界 (Decision Thresholds)**:
   - 嚴格內積一致性：`A.shape[1] == B.shape[0] == K`。
-  - 硬體加速對齊：在 GPU FP16/BF16 模式下，強制 $M \pmod{8} = 0, N \pmod{8} = 0, K \pmod{8} = 0$；在 INT8/INT4 模式下強制為 16 之倍數（參見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]）。
+  - 硬體加速對齊：在 GPU FP16/BF16 模式下，強制 $M \pmod{8} = 0, N \pmod{8} = 0, K \pmod{8} = 0$（建議對齊 16 之倍數）；在 INT8/FP8/INT4 模式下強制為 16 或 32 之倍數（參見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]）。
 - **例外回退 (Fallback Protocol)**: 若維度不滿足對齊要求，Agent 必須自動插入零填充 (Zero-Padding) 或透過 `F.pad` 補齊至 8/16 之整數倍。
 - **可執行斷言**:
-  ```python
+```python
 assert A.shape[1] == B.shape[0], f"內積維度不符: {A.shape[1]} vs {B.shape[0]}"
 assert all(dim % 8 == 0 for dim in (A.shape[0], A.shape[1], B.shape[1])), "維度未對齊 8 之倍數，無法啟用 Tensor Cores！"
-  ```
+```
 
 ### [RULE-101-02] 奇異值條件數與數值病態熔斷合約 (Condition Number & Rank Collapse Guardrail)
 - **合約等級**: `BOUNDARY_GUARD`
@@ -186,10 +186,11 @@ assert all(dim % 8 == 0 for dim in (A.shape[0], A.shape[1], B.shape[1])), "維�
 - **執行保證 (Post-conditions)**: 嚴禁直接調用 `torch.inverse(C)`。
 - **例外回退 (Fallback Protocol)**: 自動切換為嶺迴歸/吉洪諾夫正則化 (Tikhonov Regularization)：$C_{\text{reg}} = C + \lambda I$，其中 $\lambda = 10^{-4} \cdot \text{Tr}(C) / D$，或切換至 Truncated SVD 降維。
 
-### [RULE-101-03] LoRA 秩超參數啟發式決策合約 (LoRA Rank Selection Heuristic)
+### [RULE-101-03] LoRA 秩超參數與零初始化決策合約 (LoRA Rank Selection & Zero-Init Heuristic)
 - **合約等級**: `OPTIMIZATION_HEURISTIC`
-- **前置條件 (Pre-conditions)**: 大語言模型參數微調，原始層特徵維度 $d_{\text{model}} = 4096$。
+- **前置條件 (Pre-conditions)**: 大語言模型低秩微調（$W = W_0 + \frac{\alpha}{r} B A$），原始層特徵維度 $d_{\text{model}} = 4096$。
 - **量化決策邊界 (Decision Thresholds)**:
+  - 非對稱初始化：降維矩陣 $A \in \mathbb{R}^{r \times d_{\text{in}}}$ 採用高斯/Kaiming 隨機初始化，升維矩陣 $B \in \mathbb{R}^{d_{\text{out}} \times r}$ 強制初始化為全零（$B = 0$），確保訓練起始步 $\Delta W = 0$。
   - 常規微調 / 指令跟隨：$r \in \{8, 16\}$，$\alpha = 2r$。
   - 全新垂直領域知識注入：$r \ge 64$。
   - 壓縮比硬性約束：低秩參數量 $(2 \times d_{\text{model}} \times r) / d_{\text{model}}^2 \le 0.01$（小於原始參數 1%）。

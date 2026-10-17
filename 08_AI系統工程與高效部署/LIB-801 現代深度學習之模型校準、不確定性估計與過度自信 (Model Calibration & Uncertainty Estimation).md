@@ -42,7 +42,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
-- **後續節點**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **後續節點**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **主要文獻與官方來源**：
   - Guo, Pleiss, Sun, Weinberger (Cornell University, ICML 2017) *On Calibration of Modern Neural Networks*.
   - Angelopoulos & Bates (UC Berkeley, Foundations and Trends in Machine Learning 2023) *Conformal Prediction: A Gentle Introduction*.
@@ -127,7 +127,7 @@ import torch.optim as optim
 class TemperatureScaler(nn.Module):
     """實作 Guo et al. (ICML 2017) 溫度縮放後處理校準器。
     數學要求：T > 0 嚴格保證 Logits 的排序不變性與單調映射。
-    工程啟發式約束：T 限制在 [0.1, 5.0] [HEURISTIC / BOUNDARY_GUARD]，防止極端數值崩潰。
+    工程啟發式約束：T 限制在 [0.1, 5.0] [HEURISTIC] [SAFETY_BOUND]，防止極端數值崩潰。
     透過 Sigmoid 參數化嚴格在數學上滿足該區間：T = 0.1 + 4.9 * torch.sigmoid(raw_temperature)。
     初始 raw_temperature = -0.9163 對應 T ≈ 1.5。
     註：NLL 最佳化在經驗上能顯著改善校準度，但在數學上並不保證離散分箱 ECE 的嚴格單調遞減。
@@ -203,23 +203,23 @@ if __name__ == "__main__":
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
 ### [RULE-801-01] ECE 模型校準檢驗與發布門檻合約 (ECE Calibration Release Gate)
-- **合約等級**: `CRITICAL_INVARIANT`
+- **合約等級**: `QUALITY_BOUND`
 - **前置條件 (Pre-conditions)**: 模型完成訓練準備投入推論部署。
 - **量化決策邊界 (Decision Thresholds)**:
   - 必須在獨立留出驗證集（Validation Set）上計算 15-bin 的期望校準誤差（ECE）。
-  - 生產上線門檻：$\text{ECE} \le 0.05$（5%）。
+  - 生產上線門檻：$\text{ECE} \le 0.05$（5%）`[DESIGN_DECISION]` `[TARGET]`。
   - 若 $\text{ECE} > 0.05$，**嚴禁直接發布**，必須強制進入溫度縮放（Temperature Scaling）後處理優化階段。
 - **可執行斷言**:
-  ```python
+```python
 assert ece_val <= 0.05, f"模型校準度不足: ECE={ece_val:.4f} 超出 0.05 上限，禁止上線！"
-  ```
+```
 
 ### [RULE-801-02] 溫度縮放參數數值邊界合約 (Temperature Parameter Range Guardrail)
 - **合約等級**: `BOUNDARY_GUARD`
 - **前置條件 (Pre-conditions)**: 透過驗證集負對數似然（NLL）擬合溫度標量 $T$。
 - **量化決策邊界 (Decision Thresholds)**:
   - 數學不變量：溫度標量必須滿足 $T > 0$，以保證 Logit 排秩與 Softmax 映射之嚴格單調性（Top-1 準確率完全守恆）。
-  - 工程啟發邊界：$T \in [0.1, 5.0]$ 屬於工程防護邊界 [HEURISTIC / BOUNDARY_GUARD]，由 Sigmoid 參數化 $T = 0.1 + 4.9 \cdot \sigma(\theta)$ 於數學上予以保證，防範極端分佈平滑或數值不穩定。
+  - 工程啟發邊界：$T \in [0.1, 5.0]$ 屬於工程防護邊界 `[HEURISTIC]` `[SAFETY_BOUND]`，由 Sigmoid 參數化 $T = 0.1 + 4.9 \cdot \sigma(\theta)$ 於數學上予以保證，防範極端分佈平滑或數值不穩定。
 - **執行保證**: 杜絕過度平滑導致所有預測退化為均勻分佈。
 
 ### [RULE-801-03] 共形預測統計邊際覆蓋保證合約 (Conformal Prediction Coverage Guarantee)

@@ -2,8 +2,8 @@
 
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
-> **當前交接基準 HEAD**: `a9455435337a57366f3e27cdd7699cb382f1064a`（PR #12 & PR #13: `a945543` 正式交接點）  
-> **專案狀態**: 25 卷雙語完備（共 50 份核心文件），84 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
+> **專案狀態**: 27 卷雙語完備（共 54 份核心文件），93 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -30,22 +30,23 @@
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`a9455435337a57366f3e27cdd7699cb382f1064a`
+- **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
-- **卷冊總數與結構對稱**：25 卷（繁體中文 25 卷，英文對齊 25 卷，共 50 份主體文件），所有 YAML Frontmatter、內文拓樸導航與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 84 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
-- **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序与內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
-- **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含 AST 語法與標準證據分類學）保證 Exit Code 恆為 `0`。
+- **卷冊總數與結構對稱**：27 卷（繁體中文 27 卷，英文對齊 27 卷，共 54 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
+- **決策合約不變量**：精確維持 93 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
+- **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
 ### 2.2 交接文件聲明與元指引 (Handover Document Declarations)
 本文件（`library_stage.md`）作為首席圖書館管理員之跨階段交接藍圖，負責記錄專案演進脈絡、里程碑會計、規範合約與後續維護指引。交接聲明本身隨版本演進持續維護，不影響核心知識庫卷冊之不可變合約。
 
-### 📚 現行 25 卷清單與對齊結構
+### 📚 現行 27 卷清單與對齊結構
 | 索書號 | 中文卷名 | 英文卷名 (Agent EN) | 核心範疇 |
 | :--- | :--- | :--- | :--- |
 | **LIB-000** | 圖書館總覽與拓樸導覽系統 | Grand Library Index & Navigator | 全庫 DAG 拓樸、決策樹、三大學習路徑 |
 | **LIB-001** | 深度學習第一性原理先修精要 | Deep Learning First Principles | 六大基石：幾何、活化、Loss、反向傳播、優化器、歸納偏置 |
 | **LIB-101** | 線性代數與高維幾何變換本質 | Linear Algebra & High-Dimensional Geometry | 矩陣分解、奇異值分解 (SVD)、特徵空間投影 |
+| **LIB-102** | 機率統計、資訊理論與變分推論基石 | Probability, Information Theory & Variational Inference | 夏農熵、前向/反向 KL 散度、ELBO 與重參數化、Online Softmax |
 | **LIB-104** | 凸最佳化理論與一階二階梯度幾何 | Convex Optimization & Gradient Descent | Lipschitz 平滑度、Hessian 條件數、動量動態 |
 | **LIB-203** | 計算機體系結構與硬體對齊 | Computer Architecture & Hardware-Aware Deep Learning | 記憶體階層、CUDA Warp 分歧、Tensor Core GEMM、Roofline |
 | **LIB-301** | 資料分佈偏差與空間權重懲罰幾何 | Dataset Bias, Domain Shift & Spatial Penalties | 協變量漂移、OOD 泛化界、文化筆畫偏差、空間權重 |
@@ -55,6 +56,7 @@
 | **LIB-407** | 指令影像編輯與內容保持 | Fine-Grained Instruction Image Editing | 潛空間反轉、跨注意力調控、自注意力特徵鎖定 |
 | **LIB-408** | 情境感知物件生成與光照融合 | Context-Aware Object Generation & Compositing | 深度估計、球諧函數 (SH) 光照、接觸陰影合成 |
 | **LIB-501** | CV 前處理規範與質心定位演算法 | CV Preprocessing & Center of Mass Alignment | 邊界框安全截斷、墨跡動差質心、Bunch TTA 增強 |
+| **LIB-502** | 相機射影幾何、對極幾何與運動結構恢復 | Camera Projective Geometry, Epipolar Geometry & SfM | 針孔投影、$\mathrm{SO}(3)/\mathrm{SE}(3)$ 李代數、EWA 透視雅可比 $\mathbf{J}$、Hartley 八點法、舒爾補 BA |
 | **LIB-504** | 3D 高斯潑濺 (3DGS) 理論與光柵化 | 3D Gaussian Splatting Theory & Rasterization | 連續輻射場離散化、3D 高斯投影、GPU Tile 光柵化 |
 | **LIB-505** | 開放詞彙 3DGS 與語意場景圖 | Open-Vocabulary 3DGS & Semantic Retrieval | 2D 語意蒸餾、跨視角共識、場景圖查詢 |
 | **LIB-506** | LLM 驅動之 3DGS 導航與問答 | LLM-Grounded 3D Scene QA & Navigation | ConceptGraphs、空間 ReAct 推論迴圈、具身導覽 |
@@ -155,10 +157,25 @@
 
 ### 11. P2 自動化驗證器升級至 11 項嚴格檢查 (PR #13: `a945543`)
 - **P2: `scripts/validate_library.py` 擴充 Checks 8–11**：
-  - **Check 8**：驗證全部 84 條 `RULE-xxx-xx` 均定義合法之合約等級，且中英雙語等級 100% 一致。
+  - **Check 8**：驗證全部 `RULE-xxx-xx` 均定義合法之合約等級，且中英雙語等級 100% 一致。
   - **Check 9**：驗證內文導覽區塊（`前置依賴`/`後續節點`/`Prerequisites`/`Successors`）與 YAML Frontmatter DAG 100% 對齊。
   - **Check 10**：強制執行 10 大標準證據分類學（Canonical Evidence Taxonomy），攔截自創或斜線複合標籤。
   - **Check 11**：使用 Python `ast.parse()` 對全庫所有 Python 程式碼區塊進行語法解析驗證，並強制檢驗中英雙語程式碼區塊對稱性。
+
+### 12. Phase 3 英文高密度標準化與 Phase 4 過渡基礎專卷擴建 (PR #15: `7f65131`, PR #16: `9138fba`)
+- **P0: 新增兩大核心過渡基礎專卷（`LIB-102` 與 `LIB-502`）與 `LIB-906` 不變量形式化**：
+  - **`LIB-102`（機率統計、資訊理論與變分推論基石，`RULE-102-01..03`）**：完整推導夏農熵、交叉熵分解、Gibbs 非負不等式嚴格證明、前向（Mode-Covering）與反向（Mode-Seeking）KL 散度幾何偏置、變分證據下界（ELBO）與重參數化技巧（Reparameterization Trick）、Fisher 資訊矩陣與自然梯度，以及 GPU SFU `F.log_softmax` 融合算子與 Online Softmax 單趟暫存器歸約。
+  - **`LIB-502`（相機射影幾何、對極幾何與運動結構恢復，`RULE-502-01..03`）**：完整推導針孔透視投影、$\mathrm{SO}(3)/\mathrm{SE}(3)$ 李群與李代數指數映射、連結 3DGS（`LIB-504`）之 EWA 局部仿射透視雅可比矩陣 $\mathbf{J}$、對極幾何本質/基礎矩陣與 Hartley 各向同性正規化八點法（含 Eckart-Young 秩-2 流形投影），以及非線性光束法平差（Bundle Adjustment）之 $3 \times 3$ 分塊對角舒爾補（Schur Complement）消元。
+  - **`LIB-906`（ZH & EN）**：正式定義 `RULE-906-01..03` 三條認知修訂不變量與第 18 節權威參考文獻，全庫擴展至 **27 卷雙語典籍（54 份主體文件）** 與 **93 條正式決策不變量**。
+- **P1: 全庫拓樸圖譜優化與 `Agent EN` 高密度標準化**：
+  - 解除不自然的 `LIB-401 (CNN) -> LIB-405 (Transformer)` 硬性耦合；建立 `LIB-101 -> LIB-102 -> LIB-301/406/602/801` 與 `LIB-501 -> LIB-502 -> LIB-408/504` 由淺入深之過渡鏈路，54 份檔案之 YAML 與內文導覽 100% 雙向同步。
+  - 為全部 27 份 `Agent EN` 英文卷補齊內文拓樸導覽、標準證據分類標籤、`Systems & Hardware Alignment` 硬體微架構對齊章節與 `Canonical & Peer-Reviewed References` 權威文獻引證。
+
+### 13. P2 驗證器完整性強制門檻升級 (PR #17: `12fb584`)
+- **P2: `scripts/validate_library.py` 強化完整性覆蓋檢查**：
+  - 強制要求 `LIB-001` 至 `LIB-906` 所有中英文卷必須顯式宣告內文 `前置依賴`/`後續節點` 與 `Prerequisites`/`Successors`（禁止缺失跳過）。
+  - 強制要求每一份中英文卷正文至少包含 1 個以上標準證據標籤（攔截 0 標籤卷冊）。
+  - 將 `LIB-903` 納入 Python 區塊雙語對稱強制檢驗，並強制要求全部 54 份中英文卷具備參考文獻（References / Literature）章節。
 
 ---
 
@@ -215,4 +232,4 @@
 2. **消融實驗重現環境建置**：
    - 針對 LIB-901、LIB-905、LIB-906 中的基準實驗，評估建立自動化測試與消融驗證腳本。
 3. **日常維護**：
-   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `a9455435337a57366f3e27cdd7699cb382f1064a`（或最新 main 分支 HEAD），工作區乾淨無漂移。
+   - 每次開啟新 Thread，第一步必須執行初始化自檢，確保環境處於 `12fb584c248bce1714d0ff2605fed3548f6349d3`（或最新 main 分支 HEAD），工作區乾淨無漂移。

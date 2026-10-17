@@ -33,7 +33,7 @@ prerequisites:
   - "[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]"
 successors:
   - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
-  - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]"
   - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
 ---
 
@@ -42,8 +42,8 @@ successors:
 # 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]、數位訊號處理基礎。
-- **後續節點**：[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
+- **前置依賴**：[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]]。
+- **後續節點**：[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
 - **難度等級**：學士核心 / 視覺工程實戰。
 
 ---

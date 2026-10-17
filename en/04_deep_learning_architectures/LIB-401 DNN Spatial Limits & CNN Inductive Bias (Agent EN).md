@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Senior-ML-Engineer
 math_foundations:
-  - Permutation Invariance vs Translation Equivariance
+  - Permutation Invariance vs Translation Equivariance `[DERIVATION]`
   - Receptive Field Arithmetic & Dilation Geometry
   - Parameter Efficiency & Weight Sharing Bounds
 hardware_target:
@@ -27,7 +27,6 @@ prerequisites:
   - "[[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]"
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
 successors:
-  - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
   - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
   - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
@@ -35,6 +34,10 @@ successors:
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-401%20%E5%85%A8%E9%80%A3%E7%B5%90%E7%B6%B2%E8%B7%AF%E7%A9%BA%E9%96%93%E6%A5%B5%E9%99%90%E8%88%87%E5%8D%B7%E7%A9%8D%E7%A5%9E%E7%B6%93%E7%B6%B2%E8%B7%AF%E7%90%86%E8%AB%96%E5%BF%85%E7%84%B6%E6%80%A7%20%28DNN%20Spatial%20Limits%20%26%20CNN%20Inductive%20Bias%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # DNN Spatial Limits & CNN Inductive Bias: Theoretical Inevitability
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]].
+- **Successors**: [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -118,3 +121,11 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
 - **Specification**: Resolution-preserving convolutional layers (stride $s = 1$) MUST use odd kernel sizes $k \in \{3, 5, 7\}$ with symmetric padding ($p = \lfloor k/2 \rfloor$, `padding='same'`) to prevent feature map drift and boundary truncation across deep hierarchies.
 - **Violation Consequence**: Asymmetric or unpadded convolutions induce spatial feature shifts toward frame edges, causing structural distortion in downstream feature representations.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **Cybenko, G.** (1989). "Approximation by superpositions of a sigmoidal function." *Mathematics of Control, Signals and Systems*, 2(4), 303–314. DOI: [10.1007/BF02551274](https://doi.org/10.1007/BF02551274).
+2. **Hornik, K., Stinchcombe, M., & White, H.** (1989). "Multilayer feedforward networks are universal approximators." *Neural Networks*, 2(5), 359–366. DOI: [10.1016/0893-6080(89)90020-8](https://doi.org/10.1016/0893-6080(89)90020-8).
+3. **LeCun, Y., Bottou, L., Bengio, Y., & Haffner, P.** (1998). "Gradient-based learning applied to document recognition." *Proceedings of the IEEE*, 86(11), 2278–2324. DOI: [10.1109/5.726791](https://doi.org/10.1109/5.726791).
+4. **He, K., Zhang, X., Ren, S., & Sun, J.** (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770–778. DOI: [10.1109/CVPR.2016.90](https://doi.org/10.1109/CVPR.2016.90).

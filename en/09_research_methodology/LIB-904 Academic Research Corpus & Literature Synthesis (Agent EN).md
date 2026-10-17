@@ -35,6 +35,10 @@ successors:
 
 # Academic Research Corpus & Literature Synthesis: Systematic Paper Reproduction & Methodological Alignment
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+- **Successors**: [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 Scientific inquiry is fundamentally cumulative. High-velocity independent learning requires mastering the methodology of reading, synthesizing, dissecting, and reproducing peer-reviewed academic literature. A common failure mode in technical learning is treating algorithms as disconnected black-box packages without understanding the physical and mathematical constraints that forced their invention.
@@ -51,7 +55,7 @@ This volume establishes a rigorous framework for decomposing top-tier academic p
               ▼                                           ▼                                           ▼
 ┌─────────────────────────────┐             ┌─────────────────────────────┐             ┌─────────────────────────────┐
 │ 1. Core Vision Foundations  │             │ 2. Multimodal Perception    │             │ 3. Edge Systems & Hardware  │
-│ • OpenCV / PyTorch Pipelines│             │ • 3D Gaussian Splatting     │             │ • TensorRT / Jetson Orin    │
+│ • OpenCV / PyTorch Pipelines│             │ • 3D Gaussian Splatting `[LITERATURE_RESULT]`     │             │ • TensorRT / Jetson Orin    │
 │ • Feature Moments & Centroid│             │ • Vision-Language Attention │             │ • Low-Latency Model Serving │
 │ • Geometric Invariance TTA  │             │ • Point Cloud Serialization │             │ • Real-Time GPU Pipelines   │
 └──────────────┬──────────────┘             └──────────────┬──────────────┘             └──────────────┬──────────────┘
@@ -90,7 +94,7 @@ This volume establishes a rigorous framework for decomposing top-tier academic p
 
 ---
 
-### 3. Camera-Aware Jaccard Distance Metric (CA-Jaccard) (*Algorithms 2025*)
+### 3. Camera-Aware Jaccard Distance Metric (CA-Jaccard `[DERIVATION]`) (*Algorithms 2025*)
 - **Core Challenge**: In non-overlapping camera networks for person re-identification, camera-specific biases (illumination, sensor color temperature) cause false proximal clustering.
 - **Metric Formulation**:
   Let $q$ and $g$ be query and gallery features with initial distance $d(q, g)$. Identify $k$-reciprocal nearest neighbor sets:

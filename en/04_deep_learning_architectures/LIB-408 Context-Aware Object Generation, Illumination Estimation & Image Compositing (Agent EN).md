@@ -28,6 +28,7 @@ prerequisites:
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
   - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
   - "[[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]"
+  - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
 successors:
   - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
@@ -35,6 +36,10 @@ successors:
 > Language / 語言: [🇹🇼 繁體中文](../../04_%E6%B7%B1%E5%BA%A6%E5%AD%B8%E7%BF%92%E6%9E%B6%E6%A7%8B%E8%88%87%E7%A5%9E%E7%B6%93%E6%A9%9F%E5%88%B6/LIB-408%20%E6%83%85%E5%A2%83%E6%84%9F%E7%9F%A5%E6%93%B4%E6%95%A3%E7%89%A9%E4%BB%B6%E7%94%9F%E6%88%90%E3%80%81%E5%B9%BE%E4%BD%95%E5%85%89%E7%85%A7%E5%88%86%E6%9E%90%E8%88%87%E7%84%A1%E7%B8%AB%E5%BD%B1%E5%83%8F%E8%9E%8D%E5%90%88%20%28Context-Aware%20Object%20Generation,%20Illumination%20Estimation%20&%20Image%20Compositing%29.md) | 🇺🇸 **English**
 
 # Context-Aware Object Generation, Illumination Estimation & Image Compositing
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]].
+- **Successors**: [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
 
 ## 1. Physical Formulation of Realistic Object Insertion
 

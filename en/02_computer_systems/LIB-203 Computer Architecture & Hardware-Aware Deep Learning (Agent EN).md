@@ -40,6 +40,10 @@ successors:
 
 # Computer Architecture & Hardware-Aware Deep Learning
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]].
+- **Successors**: [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 Hardware does not execute mathematical abstraction; it executes physical data movement across wires and registers. In modern deep learning systems, computational FLOPs are virtually free, while **memory transfers are exponentially expensive** in energy and latency. Algorithms that align with the physical memory hierarchy dominate algorithms that minimize theoretical arithmetic operation counts.
@@ -173,3 +177,10 @@ def benchmark_memory_coalescing(batch_size: int = 4096, dim: int = 1024):
 - **Specification**: Production inference pipelines deployed on NVIDIA GPUs with strict latency and throughput SLAs SHOULD undergo graph optimization via TensorRT `[HEURISTIC]`, enforcing vertical kernel fusion ($\text{Conv} + \text{Bias} + \text{ReLU}$) and horizontal GEMM fusion where supported by the target environment.
 - **Violation Consequence**: Operating without kernel fusion writes intermediate activation tensors to DRAM between successive layers, increasing memory bandwidth pressure and latency.
 
+---
+
+## 6. Canonical & Peer-Reviewed References
+
+1. **Williams, S., Waterman, A., & Patterson, D.** (2009). "Roofline: An insightful visual performance model for multicore architectures." *Communications of the ACM*, 52(4), 65–76. DOI: [10.1145/1498765.1498785](https://doi.org/10.1145/1498765.1498785).
+2. **Choquette, J., Gandhi, W., Giroux, O., Stam, N., & Krashinsky, R.** (2021). "NVIDIA A100 Tensor Core GPU: Performance and Innovation." *IEEE Micro*, 41(2), 29–35. DOI: [10.1109/MM.2021.3061389](https://doi.org/10.1109/MM.2021.3061389).
+3. **Hennessy, J. L., & Patterson, D. A.** (2019). *Computer Architecture: A Quantitative Approach* (6th ed.). Morgan Kaufmann.

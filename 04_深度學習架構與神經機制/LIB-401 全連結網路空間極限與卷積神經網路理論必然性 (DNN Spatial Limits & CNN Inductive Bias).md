@@ -30,7 +30,6 @@ prerequisites:
   - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
 successors:
-  - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
   - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
   - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
 ---
@@ -41,7 +40,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
-- **後續節點**：[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
+- **後續節點**：[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]。
 - **難度等級**：學士核心 / 深度學習架構基石。
 
 ---
@@ -63,7 +62,7 @@ successors:
 ## 二、🎓 博士級數學形式化推導：通用近似定理的虛妄與平移等變性證明
 
 ### 1. 通用近似定理 (Universal Approximation Theorem) 的樣本複雜度陷阱
-Cybenko (1989) 與 Hornik (1991) 證明了著名的通用近似定理：
+Cybenko (1989) `[LITERATURE_RESULT]` 與 Hornik (1991) 證明了著名的通用近似定理：
 > 「一個包含單一隱藏層與非線性激活函數 $\sigma$ 的前饋全連結網路，只要神經元數量足夠多，就能在緊緻子集上以任意精度逼近任意連續泛函。」
 
 **博士級反思**：為什麼 8 層、90 萬參數的全連結網路在手寫板上依然崩潰？

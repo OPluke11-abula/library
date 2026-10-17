@@ -36,6 +36,10 @@ successors:
 
 # Capstone Blueprint, Graduate Admissions & Multimodal Research Evolution
 
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]].
+- **Successors**: [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+
 ## 1. Conceptual Mental Model
 
 An undergraduate capstone project is not a simple homework programming assignment; it is a rigorous mini-dissertation and an empirical proof of capability for top-tier graduate admissions and research grant awards (such as the National Science and Technology Council NSTC C801 undergraduate research grant). True research begins where textbook exercises end: formulating an authentic scientific question, establishing formal hypotheses, conducting ablation studies to isolate confounding factors, and publishing peer-reviewed findings.
@@ -76,7 +80,7 @@ This project is authored and executed independently by **Luke**, spanning all en
 
 | Core Engineering Dimension | Lead Researcher | Key Technical Deliverables & Milestones |
 | :--- | :--- | :--- |
-| **System Architecture & Mathematical Derivations** | **Luke** | • Formalization of 84 mathematical invariants and system rules and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with top-tier academic literature corpus and GPU compute architecture |
+| **System Architecture & Mathematical Derivations** | **Luke** | • Formalization of 93 mathematical invariants and system rules and knowledge DAG<br>• Lead author of NSTC C801 research grant proposal<br>• Direct alignment with top-tier academic literature corpus and GPU compute architecture |
 | **Data Pipelines & Experimental Evaluation** | **Luke** | • Large-scale handwriting collection, cleaning, and subpixel moment centering<br>• Design and execution of ablation studies across all model baselines<br>• Monitoring of Expected Calibration Error (ECE) and loss convergence |
 | **Systems Engineering & Edge Acceleration** | **Luke** | • ONNX export, FP16/INT4 quantization, and TensorRT microsecond acceleration<br>• Interactive Gradio web application with real-time feedback canvas<br>• CI/CD pipeline automation and reproducible Docker environments |
 
@@ -86,13 +90,19 @@ This project is authored and executed independently by **Luke**, spanning all en
 
 ### [RULE-903-01] Controlled Ablation Single-Factor Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Empirical research and capstone contributions MUST conduct ablation studies adhering to strict single-variable control: exactly one component (e.g., loss term, normalization layer, preprocessing step) is altered per ablation run while holding random seeds (`seed=42`), batch sizes, and optimizer schedules constant.
+- **Specification**: Empirical research and capstone contributions MUST conduct ablation studies adhering to strict single-variable control: exactly one component (e.g., loss term, normalization layer, preprocessing step) is altered per ablation run while holding random seeds (`seed=42 `[DESIGN_DECISION]``), batch sizes, and optimizer schedules constant.
 - **Violation Consequence**: Concurrently modifying multiple hyperparameters obscures causal attribution and invalidates scientific claims.
 
 ### [RULE-903-02] Full Experimental Reproducibility & Artifact Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Every empirical benchmark in the library MUST provide complete reproducibility artifacts: fixed random seeds, pinned library versions (`torch`, `cuda`, `cuDNN`), training scripts, and cryptographically verified checkpoint hashes (SHA-256).
+- **Specification**: Every empirical benchmark in the library MUST provide complete reproducibility artifacts: fixed random seeds, pinned library versions (`torch`, `cuda`, `cuDNN`), training scripts, and cryptographically verified checkpoint hashes (SHA-256 `[SAFETY_BOUND]`).
 - **Violation Consequence**: Unverifiable benchmark assertions degrade scientific integrity and violate peer-reviewed research standards.
+
+```python
+def verify_reproducibility(metric_run1: float, metric_run2: float, tolerance: float = 1e-4) -> bool:
+    assert abs(metric_run1 - metric_run2) < tolerance, "Reproducibility check failed: deterministic runs diverged!"
+    return True
+```
 
 ### [RULE-903-03] Quantitative Empirical Merit Metric Invariant
 - **Contract Level**: `STRATEGIC_DIRECTIVE`
@@ -104,3 +114,11 @@ This project is authored and executed independently by **Luke**, spanning all en
 - **Specification**: Mathematical notation across the library MUST maintain formal integrity: tensor dimensions MUST be explicitly declared for every symbol, operator domains and ranges MUST be bounded, and engineering heuristics MUST NOT masquerade as mathematical theorems.
 - **Violation Consequence**: Unsound pseudo-mathematical formalization misleads autonomous agents and damages the scientific authority of the knowledge base.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **National Science and Technology Council (NSTC)** (2024). *Operational Guidelines for NSTC Research Grants for University Students (Form C801)*.
+2. **He, K., Zhang, X., Ren, S., & Sun, J.** (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770–778. DOI: [10.1109/CVPR.2016.90](https://doi.org/10.1109/CVPR.2016.90).
+3. **Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., ... & Sutskever, I.** (2021). "Learning Transferable Visual Models From Natural Language Supervision." *International Conference on Machine Learning (ICML 2021)*, PMLR 139, pp. 8748–8763.
+4. **Jaderberg, M., Simonyan, K., Zisserman, A., & Kavukcuoglu, K.** (2015). "Spatial Transformer Networks." *Advances in Neural Information Processing Systems (NeurIPS 2015)*, 28, 2017–2025.

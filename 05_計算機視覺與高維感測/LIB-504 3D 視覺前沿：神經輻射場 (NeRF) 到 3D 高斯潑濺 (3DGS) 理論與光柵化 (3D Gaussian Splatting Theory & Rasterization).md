@@ -28,7 +28,7 @@ tags:
 prerequisites:
   - "[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]"
   - "[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]"
-  - "[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]"
+  - "[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]"
 successors:
   - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
@@ -40,7 +40,7 @@ successors:
 # 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]。
+- **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]。
 - **後續節點**：[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **權威期刊/會議文獻出處**：
   - Mildenhall et al. (ECCV 2020) *NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis*.
@@ -66,7 +66,7 @@ successors:
 - **致命痛點**：每渲染一張 1080p 照片，需要調用神經網路數百萬次，渲染一幀耗時數秒甚至數分鐘，根本無法做到即時互動！
 
 ### 3. 3D 高斯潑濺 (3DGS) 的頓悟：浮空潑灑的彩色水滴
-- Kerbl et al. (SIGGRAPH 2023) 徹底揚棄了昂貴的神經網路射線查詢，回歸顯式幾何表示：
+- Kerbl et al. (SIGGRAPH 2023) `[LITERATURE_RESULT]` 徹底揚棄了昂貴的神經網路射線查詢，回歸顯式幾何表示：
 - 在 3D 空間中撒下幾百萬個**半透明、可旋轉、可拉伸的 3D 彩色橢球（3D Gaussians）**。
 - 當你從某個視角看過去時，GPU 像高速投影儀一樣，在毫秒級瞬間把這些 3D 橢球「拍扁」成 2D 橢圓貼紙，並透過硬體光柵化迅速疊加混色。
 - 運算速度直接從 NeRF 的 0.1 FPS 暴衝至 **150+ FPS**，同時畫質更加銳利！

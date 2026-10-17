@@ -27,6 +27,7 @@ tags:
   - 共形預測
   - RLCD
 prerequisites:
+  - "[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]"
   - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
 successors:
@@ -41,7 +42,7 @@ successors:
 # 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
+- **前置依賴**：[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
 - **後續節點**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **主要文獻與官方來源**：
   - Guo, Pleiss, Sun, Weinberger (Cornell University, ICML 2017) *On Calibration of Modern Neural Networks*.

@@ -27,13 +27,17 @@ prerequisites:
   - "[[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]]"
 successors:
   - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
-  - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
   - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-501%20%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E5%89%8D%E8%99%95%E7%90%86%E8%A6%8F%E7%AF%84%E8%88%87%E5%BD%B1%E5%83%8F%E8%B3%AA%E5%BF%83%E5%AE%9A%E4%BD%8D%E6%BC%94%E7%AE%97%E6%B3%95%20%28CV%20Preprocessing%20%26%20Center%20of%20Mass%20Alignment%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
 
 # Computer Vision Preprocessing Standards & Center of Mass Alignment
+
+## Conceptual Coordinates & Topological Navigation
+- **Prerequisites**: [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]].
+- **Successors**: [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -166,3 +170,12 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 - **Specification**: In production inference pipelines, critical predictions MAY deploy Test-Time Augmentation (TTA) across at least 3 geometric transformations (e.g., slight scaling $\pm 5\%$, small shifts), averaging output probability distributions $\bar{p} = \frac{1}{K} \sum_{k=1}^K p_k$.
 - **Violation Consequence**: Single-pass inference on boundary-drawn digits suffers elevated false-negative rates under slight drawing jitter.
 
+---
+
+## 5. Canonical & Peer-Reviewed References
+
+1. **LeCun, Y., Cortes, C., & Burges, C. J.** (1998). "The MNIST Database of Handwritten Digits." *Courant Institute & Bell Labs*.
+2. **Shannon, C. E.** (1949). "Communication in the Presence of Noise." *Proceedings of the IRE*, 37(1), 10–21. DOI: [10.1109/JRPROC.1949.232969](https://doi.org/10.1109/JRPROC.1949.232969).
+3. **Lanczos, C.** (1956). *Applied Analysis*. Prentice Hall.
+4. **Hu, M. K.** (1962). "Visual pattern recognition by moment invariants." *IRE Transactions on Information Theory*, 8(2), 179–187. DOI: [10.1109/TIT.1962.1057692](https://doi.org/10.1109/TIT.1962.1057692).
+5. **Jaderberg, M., Simonyan, K., Zisserman, A., & Kavukcuoglu, K.** (2015). "Spatial Transformer Networks." *Advances in Neural Information Processing Systems (NeurIPS 2015)*, 28, 2017–2025.

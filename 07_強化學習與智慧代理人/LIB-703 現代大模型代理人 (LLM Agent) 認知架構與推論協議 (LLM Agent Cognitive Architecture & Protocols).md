@@ -10,7 +10,7 @@ audience:
   - Graduate-PhD
   - Autonomous-Agent
 math_foundations:
-  - Partially Observable Markov Decision Process (POMDP)
+  - Partially Observable Markov Decision Process (POMDP `[FACT]`)
   - ReAct Trajectory Optimization & Thought-Action Synergy
   - Tree-of-Thoughts (ToT) Graph-Search & Heuristic Pruning
 hardware_target:
@@ -81,7 +81,7 @@ $$\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Ome
 - 代理人的目標是學習或提示出一個最優策略 $\pi^*(a_t \mid h_t)$，最大化累積任務獎勵 $\mathbb{E}\left[\sum_{t} \gamma^t \mathcal{R}(s_t, a_t)\right]$。
 
 ### 2. ReAct (Reasoning + Acting) 動態推論追蹤
-Yao et al. (ICLR 2023) 證明了純推論（Chain-of-Thought）容易累積推理錯誤而無外部糾錯，而純行動（Act-only）缺乏長程目標規劃。
+Yao et al. (ICLR 2023) `[LITERATURE_RESULT]` 證明了純推論（Chain-of-Thought）容易累積推理錯誤而無外部糾錯，而純行動（Act-only）缺乏長程目標規劃。
 ReAct 將推論軌跡 $\tau_t$ 與動作 $a_t$ 交替交織：
 $$\tau_t = \text{LLM}(\text{Prompt}, o_1, a_1, \dots, o_{t-1}, a_{t-1}) \quad \text{[思考：分析當前現狀與下一步假說]}$$
 $$a_t = \text{Extractor}(\tau_t) \quad \text{[行動：調用具體 API / Tool]}$$

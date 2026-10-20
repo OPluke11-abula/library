@@ -79,6 +79,9 @@ At convergence, gradient $g = 0$. The error is governed by Hessian $H = 2 X X^T$
 ### 4. Systems & Hardware Alignment: Sub-Byte Register Packing & LOP3 Dequantization
 - **32-Bit Register Sub-Byte Packing**: Because GPU global memory transactions address byte-aligned words, 4-bit weights (INT4) are packed 8 elements per `uint32_t` register aligned to 128-byte L1 cache lines, cutting HBM weight transfer volume by $4\times$ compared to FP16 `[DESIGN_DECISION]`.
 - **In-Register LOP3 Bitwise Unpacking**: During W4A16 GEMM execution, CUDA kernels load packed `uint32_t` words from HBM into registers and use hardware 3-input logical lookup instructions (`lop3.b32`) with bitmasking and FP16 scale multiplication directly inside registers before feeding Tensor Core MMA instructions `[LITERATURE_RESULT]`.
+- **End-to-End W4A16 VRAM Budgeting Formula**: For a $b_w$-bit group-quantized model ($N_{\mathrm{params}}$ in billions, group size $g=128$, 16-bit scale $b_{\mathrm{scale}}$, 4-bit zero-point $b_{\mathrm{zp}}$), total device memory is governed by `[DERIVATION]` `[HEURISTIC]`:
+  $$\mathrm{VRAM}_{\mathrm{total}}(\mathrm{GB}) = N_{\mathrm{params}} \times \left(\frac{b_w}{8} + \frac{b_{\mathrm{scale}} + b_{\mathrm{zp}}}{8 \cdot g}\right) + \mathrm{Mem}_{\mathrm{KV}}(B, S) + \mathrm{Mem}_{\mathrm{act/ctx}}$$
+  For a 4-bit $20\text{B}$ model, weights require $0.5 \times 20 = 10.0\text{ GB}$, group scales/zero-points require $\sim 0.39\text{ GB}$, and KV-Cache plus CUDA runtime buffers add $1.0\text{--}2.0\text{ GB}$ ($\approx 11.4\text{--}12.4\text{ GB}$ total VRAM) `[DERIVATION]`.
 
 ---
 

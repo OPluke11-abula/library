@@ -36,9 +36,9 @@ successors:
 The knowledge base is formalized as a finite, directed, acyclic graph:
 $$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A})$$
 where:
-- $\mathcal{V} = \{v_1, v_2, \dots, v_{27}\}$ is the set of 27 canonical academic volumes.
+- $\mathcal{V} = \{v_1, v_2, \dots, v_{28}\}$ is the set of 28 canonical academic volumes.
 - $\mathcal{E} \subset \mathcal{V} \times \mathcal{V}$ is the set of directed dependency edges representing prerequisite orderings. If $(u, v) \in \mathcal{E}$, volume $u$ MUST be ingested and verified prior to volume $v$.
-- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 93$).
+- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 96$).
 
 ### Topological Sort & Execution Order
 Because $\mathcal{G}$ contains no directed cycles ($\nexists \text{ path } u \rightsquigarrow u$), there exists at least one linear topological ordering $\tau: \mathcal{V} \to \{1, \dots, |\mathcal{V}|\}$ satisfying:
@@ -48,7 +48,7 @@ The canonical 3-tier linear ingestion schedule for autonomous agents is:
 1. **Tier 1: Core Mathematical & Hardware Primitives**:
    $$\text{LIB-000} \to \text{LIB-001} \to \text{LIB-101} \to \text{LIB-102} \to \text{LIB-104} \to \text{LIB-203}$$
 2. **Tier 2: Perception, Spatial Biases, Architectures & Systems**:
-   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-801} \to \text{LIB-405} \to \text{LIB-501} \to \text{LIB-502} \to \text{LIB-406} \to \text{LIB-602} \to \text{LIB-504} \to \text{LIB-407} \to \text{LIB-703} \to \text{LIB-802} \to \text{LIB-505} \to \text{LIB-408} \to \text{LIB-704} \to \text{LIB-506}$$
+   $$\text{LIB-301} \to \text{LIB-401} \to \text{LIB-801} \to \text{LIB-405} \to \text{LIB-501} \to \text{LIB-502} \to \text{LIB-406} \to \text{LIB-602} \to \text{LIB-603} \to \text{LIB-504} \to \text{LIB-407} \to \text{LIB-703} \to \text{LIB-802} \to \text{LIB-505} \to \text{LIB-408} \to \text{LIB-704} \to \text{LIB-506}$$
 3. **Tier 3: Empirical Systems & Capstone Research**:
    $$\text{LIB-901} \to \text{LIB-903} \to \text{LIB-904} \to \text{LIB-905} \to \text{LIB-906}$$
 
@@ -93,7 +93,7 @@ The library indexes volumes into 10 specialized functional wings based on the AC
 | **LIB-300 ~ 399** | **03 Machine Learning Principles** | Covariate Shift & Spatial Penalties | [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]] |
 | **LIB-400 ~ 499** | **04 Deep Learning Architectures** | CNNs, Transformers, Flow Matching, Instruction Editing & Harmonization | [[LIB-401 DNN Spatial Limits & CNN Inductive Bias (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]] |
 | **LIB-500 ~ 599** | **05 Computer Vision & Sensing** | Centering Moments, Projective/Epipolar Geometry, SfM, 3DGS Splatting, Semantic Retrieval & Spatial QA | [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] |
-| **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws & Architecture Scaling | [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]] |
+| **LIB-600 ~ 699** | **06 NLP & Large Language Models** | Scaling Laws, Architecture, MoE, Dense Retrieval, RAG & CAG | [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]] |
 | **LIB-700 ~ 799** | **07 RL & Intelligent Agents** | Dual-Process Cognition & Protocols | [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]] |
 | **LIB-800 ~ 899** | **08 Systems & Deployment** | Model Calibration & Quantization | [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]] |
 | **LIB-900 ~ 999** | **09 Research Methodology** | Capstone Post-Mortem, Literature Synthesis, Five Frontier Blueprints & Conversational Epistemic Revision | [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]] |

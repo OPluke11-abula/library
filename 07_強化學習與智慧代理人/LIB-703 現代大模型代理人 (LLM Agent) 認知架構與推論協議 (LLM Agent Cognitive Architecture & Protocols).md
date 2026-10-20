@@ -29,6 +29,7 @@ tags:
 prerequisites:
   - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
   - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
+  - "[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]"
 successors:
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
   - "[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]"
@@ -39,7 +40,7 @@ successors:
 # 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]。
+- **前置依賴**：[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]、[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]。
 - **後續節點**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]。
 - **難度等級**：學士進階 / 前沿系統工程。
 
@@ -65,6 +66,11 @@ successors:
 - **Obsidian 雙向鏈結知識庫就是 Agent 的持久化硬碟**：
   - 將踩坑經驗、系統不變量、架構決策（ADR）以 Markdown 存檔。
   - 任何接手的後續 Agent 只要讀取 `index.md` 與各分館 `LIB-XXX`，能在 3 秒內無縫繼承人類團隊數個月沉澱的全部認知。
+- **Karpathy 的「LLM Wiki」知識編譯範式 vs. 碎塊化 RAG** `[DESIGN_DECISION]`：
+  - 傳統 Naive RAG 將文件盲目切為固定字數碎塊，容易切斷跨段落的數學推導與系統依賴。
+  - 在「LLM Wiki」架構中，原始素材（論文、簡報、代碼庫）先放入 `raw/`，再由 LLM 代理「編譯（Compile）」為結構化 Markdown 維基（`wiki/`，對應本庫之 `LIB-000` 總索引與各分館專卷），自動維護摘要、雙向反向連結（Backlinks）與自動化健檢（Linting，如 `validate_library.py` 檢查前後矛盾與斷鏈），使 Agent 在百篇專卷規模（$\sim 400\text{K}$ 字）下無需碎塊化向量切分即可實現 100% 拓樸精準推理。
+- **三元角色狀態空間與多供應商統一路由 (`provider:model`)** `[FACT]` `[DESIGN_DECISION]`：
+  - 現代對話與代理人 API 嚴格區分 `system`（全局人設、行為約束與領域知識基準 $s_{\mathrm{sys}}$）、`user`（環境或人類輸入 $u_t$）與 `assistant`（模型動作與回應 $a_t$），條件生成分佈形式化為 $P_\theta(a_t \mid s_{\mathrm{sys}}, u_1, a_1, \dots, u_t)$。透過統一抽象層（如吳恩達 `aisuite` 之 `provider:model` 路由協議），Agent 可在單一狀態機內無縫切換雲端前沿推理模型與本地端低延遲模型。
 
 ---
 
@@ -201,7 +207,7 @@ if __name__ == "__main__":
 - **前置條件 (Pre-conditions)**: 執行架構重構、重大錯誤修復、演算法調優或任務交接。
 - **決策邊界**: 
   - 禁止將關鍵長期記憶僅保留在揮發性的上下文窗口（Context Window）中。
-  - 必須強制將架構決策寫入本地 Obsidian Vault Markdown 文件（遵循 `AGENTS.md`, `LIB-XXX` 格式）。
+  - 必須強制將架構決策寫入本地 Obsidian Vault Markdown 文件（遵循 `AGENTS.md`, `LIB-XXX` 格式），並透過「LLM Wiki」編譯流程（`raw/` $\to$ 結構化專卷 + 雙向 DAG 連結 + 自動化 Linter 健檢）消除知識碎片與跨卷矛盾。
 - **執行保證**: 保證跨 Agent Session、跨進程具備 100% 可重播之確定性長程記憶。
 
 ### [RULE-703-03] Token 預算經濟學與動態滑動摘要合約 (Token Budget & Memory Pruning Heuristic)

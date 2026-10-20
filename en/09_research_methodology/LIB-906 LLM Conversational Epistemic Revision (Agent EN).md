@@ -25,6 +25,7 @@ tags:
   - novelty-audit
 prerequisites:
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]"
   - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
   - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
 successors: []
@@ -35,7 +36,7 @@ successors: []
 # LLM Conversational Epistemic Revision: Research Baseline & Experimental Blueprint
 
 ## Conceptual Coordinates & Topological Navigation
-- **Prerequisites**: [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]].
+- **Prerequisites**: [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]].
 - **Successors**: None (Terminal capstone node).
 
 **Chinese title:** 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (Selective Epistemic Revision under Conversational Pushback)  
@@ -147,7 +148,7 @@ $$
 $$
 \mathrm{status} \in \{\mathrm{Supported}, \mathrm{Contradicted}, \mathrm{Unknown}, \mathrm{Retracted}\}
 $$
-**Provenance Tracking**: Distinguish Model self-generated claims, User-provided premises, External retrieved evidence, Contextual assumptions, and Temporal snapshots. Context Axioms must never be conflated with Real-world Ground Truth.
+**Provenance Tracking**: Distinguish Model self-generated claims, User-provided premises, External retrieved evidence, Contextual assumptions, and Temporal snapshots. Context Axioms must never be conflated with Real-world Ground Truth. For external retrieved evidence (see `LIB-603`), the `evidence` field encapsulates structured provenance metadata $\mathcal{M}_{\mathrm{evid}} = (\texttt{title}, \texttt{doc\_type}, \texttt{authority}, \texttt{source\_url}, \texttt{snapshot\_date}, \texttt{disclaimer})$, explicitly distinguishing binding primary texts from simplified pedagogical summaries `[DESIGN_DECISION]`.
 
 ### 4.3 Evidence Arbitration
 Compares Prior Claim, User Evidence, Retrieved Evidence, and Temporal Context. Categorization: **Support / Contradict / Insufficient**. Conflicting evidence must record provenance without artificial flattening.
@@ -230,7 +231,7 @@ Prevents evaluating 2024 outputs using 2026 world states.
 - **Temperature**: Alters diversity, does not inherently improve factuality.
 - **Inference Routing vs Catastrophic Forgetting**: Routing brittleness must not be termed catastrophic forgetting.
 - **Attention**: Observed weights do not equate to causal factual beliefs.
-- **Observed Output vs Internal Cause**: Distinguish measurable stance updates from speculative claims about internal safety classifiers.
+- **Observed Output vs Internal Cause**: Distinguish measurable stance updates from speculative claims about internal safety classifiers. Furthermore, ungrounded internal Chain-of-Thought reasoning is vulnerable to Hijacking Chain-of-Thought attacks (H-CoT, Kuo et al. 2025, arXiv:2502.12893), where adversarial premises collapse safety refusal rates from $98\%$ to $2\%$ `[LITERATURE_RESULT]`, underscoring the necessity of external evidence arbitration over raw CoT length.
 
 ---
 
@@ -330,4 +331,5 @@ Focus initial iterations on:
 4. **Hong, J., et al.** (2025). "Measuring Sycophancy of Language Models in Multi-turn Dialogues." *Findings of the Association for Computational Linguistics: EMNLP 2025*. [arXiv:2410.05353](https://arxiv.org/abs/2410.05353).
 5. **Laban, P., Murakhovs'ka, L., Xiong, C., & Wu, C.-S.** (2023). "Are You Sure? Challenging LLMs Leads to Performance Drops in The FlipFlop Experiment." [arXiv:2311.08596](https://arxiv.org/abs/2311.08596).
 6. **Cheng, M., et al.** (2025/2026). "ELEPHANT: Measuring and Understanding Social Sycophancy in LLMs." *International Conference on Learning Representations (ICLR 2026)*. [arXiv:2505.02878](https://arxiv.org/abs/2505.02878).
+7. **Kuo, M., Zhang, J., Ding, A., Wang, Q., DiValentin, L., Bao, Y., Wei, W., Li, H., & Chen, Y.** (2025). "H-CoT: Hijacking the Chain-of-Thought Safety Reasoning Mechanism to Jailbreak Large Reasoning Models." [arXiv:2502.12893](https://arxiv.org/abs/2502.12893).
 

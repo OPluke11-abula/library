@@ -54,6 +54,7 @@ Let $(X, Y) \sim P(X, Y) = P(Y|X) P(X)$.
   $$P_{\text{train}}(X) \neq P_{\text{test}}(X), \quad P_{\text{train}}(Y|X) = P_{\text{test}}(Y|X)$$
 - **Concept Shift**: The conditional decision boundary itself changes:
   $$P_{\text{train}}(Y|X) \neq P_{\text{test}}(Y|X)$$
+  In Large Language Models, extreme asymmetry in pretraining corpus proportions across linguistic/cultural domains (e.g., Simplified vs. Traditional Chinese corpus density $P_{\text{train}}(\mathcal{D}_{\text{SC}}) \gg P_{\text{train}}(\mathcal{D}_{\text{TC}})$) embeds persistent conceptual priors and lexical framing into $P_\theta(Y|X)$ that post-hoc refusal abliteration (e.g., R1-1776) cannot erase `[FACT]` `[HEURISTIC]`.
 
 ### 2. Measuring Distribution Divergence: Maximum Mean Discrepancy (MMD) `[DERIVATION]`
 In a Reproducing Kernel Hilbert Space (RKHS) $\mathcal{H}$ associated with kernel $k(\cdot, \cdot)$:

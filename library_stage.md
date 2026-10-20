@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
 > **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
-> **專案狀態**: 27 卷雙語完備（共 54 份核心文件），93 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），96 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -32,15 +32,15 @@
 以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
-- **卷冊總數與結構對稱**：27 卷（繁體中文 27 卷，英文對齊 27 卷，共 54 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 93 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
+- **決策合約不變量**：精確維持 96 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
 ### 2.2 交接文件聲明與元指引 (Handover Document Declarations)
 本文件（`library_stage.md`）作為首席圖書館管理員之跨階段交接藍圖，負責記錄專案演進脈絡、里程碑會計、規範合約與後續維護指引。交接聲明本身隨版本演進持續維護，不影響核心知識庫卷冊之不可變合約。
 
-### 📚 現行 27 卷清單與對齊結構
+### 📚 現行 28 卷清單與對齊結構
 | 索書號 | 中文卷名 | 英文卷名 (Agent EN) | 核心範疇 |
 | :--- | :--- | :--- | :--- |
 | **LIB-000** | 圖書館總覽與拓樸導覽系統 | Grand Library Index & Navigator | 全庫 DAG 拓樸、決策樹、三大學習路徑 |
@@ -60,7 +60,8 @@
 | **LIB-504** | 3D 高斯潑濺 (3DGS) 理論與光柵化 | 3D Gaussian Splatting Theory & Rasterization | 連續輻射場離散化、3D 高斯投影、GPU Tile 光柵化 |
 | **LIB-505** | 開放詞彙 3DGS 與語意場景圖 | Open-Vocabulary 3DGS & Semantic Retrieval | 2D 語意蒸餾、跨視角共識、場景圖查詢 |
 | **LIB-506** | LLM 驅動之 3DGS 導航與問答 | LLM-Grounded 3D Scene QA & Navigation | ConceptGraphs、空間 ReAct 推論迴圈、具身導覽 |
-| **LIB-602** | 現代大語言模型架構解剖與縮放定律 | Modern LLM Architecture & Scaling Laws | Chinchilla 定律、Decoder-Only、RMSNorm、SwiGLU、GQA |
+| **LIB-602** | 現代大語言模型架構解剖與縮放定律 | Modern LLM Architecture & Scaling Laws | Chinchilla 定律、Decoder-Only、RMSNorm、SwiGLU、GQA、稀疏 MoE |
+| **LIB-603** | 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 | Dense Retrieval, RAG & Cache-Augmented Generation Architecture | InfoNCE 互資訊下界、Bi-Encoder vs Cross-Encoder、Metadata 解耦、RAG vs CAG、LLM Wiki |
 | **LIB-703** | 大模型代理人認知架構與推論協議 | LLM Agent Cognitive Architecture & Protocols | ReAct 思考迴圈、結構化工具模式、動態規劃 |
 | **LIB-704** | 雙進程神經代理人 (Jev & CUA-S1) | Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 | S1 非自迴歸型態決策引擎、位元組級反射模型、信心門控 |
 | **LIB-801** | 模型校準、不確定性估計與過度自信 | Model Calibration & Uncertainty Estimation | ECE、溫度縮放 (Temperature Scaling)、共形預測、可靠度圖 |
@@ -175,7 +176,16 @@
 - **P2: `scripts/validate_library.py` 強化完整性覆蓋檢查**：
   - 強制要求 `LIB-001` 至 `LIB-906` 所有中英文卷必須顯式宣告內文 `前置依賴`/`後續節點` 與 `Prerequisites`/`Successors`（禁止缺失跳過）。
   - 強制要求每一份中英文卷正文至少包含 1 個以上標準證據標籤（攔截 0 標籤卷冊）。
-  - 將 `LIB-903` 納入 Python 區塊雙語對稱強制檢驗，並強制要求全部 54 份中英文卷具備參考文獻（References / Literature）章節。
+  - 將 `LIB-903` 納入 Python 區塊雙語對稱強制檢驗，並強制要求全部 56 份中英文卷具備參考文獻（References / Literature）章節。
+
+### 14. 密集檢索與 RAG/CAG 系統架構專卷 (`LIB-603`) 入庫、MoE/LPU 硬體經濟學與 LLM Wiki 認知編譯對齊
+- **P0: 新增 `LIB-603`（密集檢索、RAG 與 CAG 系統架構，`RULE-603-01..03`）**：
+  - 推導對比學習 InfoNCE 損失與互資訊變分下界 $I(Q; K^+) \ge \log(N) - \mathcal{L}_{\mathrm{InfoNCE}}$、非對稱雙編碼器 MIPS 與交叉編碼器重排序複雜度、結構化 Metadata 解耦，以及 RAG 與長上下文預計算 KV-Cache（CAG）之顯存預算與路由邊界。
+- **P0: 擴充 `LIB-602`、`LIB-802`、`LIB-703` 與 `LIB-906`**：
+  - `LIB-602`：補足稀疏混合專家模型（Sparse MoE）活躍參數 $N_{\mathrm{active}}$ 與總容量 $N_{\mathrm{total}}$ 解耦公式，以及獨立 GPU HBM、Unified Memory SoC 與確定性片上 SRAM LPU（Groq）之推論頻寬分析。
+  - `LIB-802`：補足端側部署 W4A16 顯存容量閉式解 $\mathrm{VRAM}_{\mathrm{total}} = N_{\mathrm{params}}(b_w/8 + (b_{\mathrm{scale}}+b_{\mathrm{zp}})/(8g)) + \mathrm{Mem}_{\mathrm{KV}} + \mathrm{Mem}_{\mathrm{act/ctx}}$。
+  - `LIB-703`：納入 Karpathy「LLM Wiki」結構化知識編譯範式（`raw/` $\to$ `wiki/` + `index.md` + 自動化 Linter）與 `provider:model` 統一路由協議。
+  - `LIB-906`：補充 H-CoT 思維鏈劫持攻擊（Kuo et al., 2025, arXiv:2502.12893）與 `Claim Ledger` 外部檢索證據之結構化 Metadata 溯源規範。
 
 ---
 

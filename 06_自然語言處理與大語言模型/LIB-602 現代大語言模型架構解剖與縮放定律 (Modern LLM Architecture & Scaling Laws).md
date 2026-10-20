@@ -35,6 +35,7 @@ prerequisites:
   - "[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]"
 successors:
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]"
   - "[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
   - "[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]"
@@ -46,7 +47,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-405 注意力機制、Transformer 革命與位置編碼幾何 (Attention Mechanism & Transformer Revolution)]]。
-- **後續節點**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
+- **後續節點**：[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]、[[LIB-703 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **權威期刊/會議文獻出處**：
   - Kaplan et al. (arXiv 2020) *Scaling Laws for Neural Language Models*.
   - Hoffmann et al. (DeepMind, NeurIPS 2022) *Training Compute-Optimal Large Language Models (Chinchilla)*.
@@ -138,6 +139,12 @@ $$\text{Ratio} = \frac{H_Q}{H_{KV}} = 4\times \sim 8\times$$
 - **極致參數壓縮**：以 GPT-2 (Small) 為例，$V \approx 50,257, d=768$，原本 Embedding 與 LM Head 各佔約 38.5M 參數。採用 Weight Tying 後，直接省下近 $20\%$ 的總參數量。對於小型模型（如 Gemma 2B、Qwen 0.5B），這是顯著的輕量化妙招。
 - **架構取捨**：雖然節省了大量參數，但強制輸入（表達語義）與輸出（表達預測機率）共用同一表徵空間，有時會限制模型的表達上限。因此在百億參數以上的大型模型（如 LLaMA 3 8B/70B）中，為了追求極致的準確率，通常會**放棄 (Untie)** Weight Tying，重新分離這兩個矩陣。
 
+### 6. 稀疏混合專家模型 (Sparse Mixture-of-Experts, MoE) 路由與活躍參數經濟學 `[FACT]` `[DERIVATION]` `[LITERATURE_RESULT]`
+傳統稠密模型（Dense LLM）每生成一個 Token，都必須激活全部 $N_{\mathrm{total}}$ 個參數。**稀疏混合專家模型（Sparse MoE，Fedus et al., JMLR 2022）** 將標準前饋網路（FFN）拆分為 $E$ 個獨立專家子網路 $\{\mathrm{FFN}_e\}_{e=1}^E$，並透過門控路由器（Router $W_g \in \mathbb{R}^{d \times E}$）為每個 Token 動態選取前 $k$ 個專家（通常 $k \in \{1, 2\} \ll E$）：
+$$y = \sum_{e \in \mathcal{T}_k(x)} G(x)_e \cdot \mathrm{FFN}_e(x), \quad G(x) = \mathrm{Softmax}\left(\mathrm{TopK}(x W_g, k)\right)$$
+- **總容量 $N_{\mathrm{total}}$ 與單步活躍參數 $N_{\mathrm{active}}$ 解耦**：模型知識儲量由總參數 $N_{\mathrm{total}}$ 決定（決定所需 VRAM 容量），但單一 Token 的浮點運算量（FLOPs）與**每步必須從顯存讀取的權重位元組數**僅由活躍參數 $N_{\mathrm{active}} \approx N_{\mathrm{attn}} + \frac{k}{E} N_{\mathrm{FFN}}$ 決定 `[DERIVATION]`。
+- **為何同規模 MoE 生成速度遠快於稠密模型**：在自迴歸解碼階段（Autoregressive Decode, Batch Size $B=1$），算術強度 $\mathcal{I} \approx 1\text{ OP/Byte}$ 處於極端**記憶體頻寬受限（Memory-Bandwidth Bound）**區域。由於 MoE 每步僅需從 HBM 串流讀取 $N_{\mathrm{active}}$ 的權重分塊，在相同總參數量下，其理論 Token 生成速度較稠密模型提升約 $\frac{N_{\mathrm{total}}}{N_{\mathrm{active}}}$ 倍 `[DERIVATION]`。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：PagedAttention 與虛擬記憶體分頁
@@ -161,6 +168,12 @@ Frame 7: [KV of Token 0, 1, 2, 3]
 ```
 - 徹底消除顯存碎片，將顯存浪費率壓低至 4% 以下。
 - 支援不同請求間 Copy-on-Write 共享前綴（如系統 Prompt、Few-shot 範例），推論吞吐量提升 2~4 倍。
+
+### 2. 推論硬體微架構光譜：獨立 GPU HBM vs. 統一記憶體 (Unified Memory) vs. 確定性 SRAM LPU `[FACT]` `[DESIGN_DECISION]`
+自迴歸生成速度的上限由**有效記憶體頻寬 $\mathrm{BW}_{\mathrm{mem}}$** 與**單步活躍權重體積 $M_{\mathrm{active}}$** 之比值支配（$\mathrm{Tokens/s}_{\max} \approx \frac{\mathrm{BW}_{\mathrm{mem}}}{M_{\mathrm{active}}}$）：
+1. **獨立顯示卡 HBM/GDDR（NVIDIA RTX 4090 24GB / RTX 5090 32GB / H100 80GB）**：具備極高頻寬（$1.0\text{--}3.35\text{ TB/s}$），但單卡顯存容量受限，超過顯存上限時若透過 PCIe 向系統 RAM 卸載（Offloading），生成速度會因 PCIe 頻寬瓶頸驟降 $10\times$ 以上。
+2. **SoC 統一記憶體架構（Unified Memory：Apple Silicon M 系列最高 512GB、AMD Ryzen AI Max+ 395 / NVIDIA DGX Spark 128GB）**：CPU 與 GPU 共享同一塊大容量 LPDDR5x 實體記憶體池（免除 PCIe 複製開銷），能直接在本機完整載入 70B~120B 量化大模型或超大 MoE 模型；惟其記憶體頻寬（約 $256\text{--}800\text{ GB/s}$）低於 HBM，故更適合搭配低 $N_{\mathrm{active}}$ 之 MoE 架構 `[DESIGN_DECISION]`。
+3. **確定性片上 SRAM 語言處理單元（Groq LPU）**：徹底捨棄外部 HBM 動態快取階層，將權重直接分散存放於多晶片高頻寬片上 SRAM（單晶片頻寬高達 $\sim 80\text{ TB/s}$），以編譯期靜態排程消除記憶體存取延遲，使單用戶自迴歸生成階段突破數百 Tokens/s `[FACT]`。
 
 ---
 
@@ -316,3 +329,6 @@ assert token_param_ratio >= 18.0, f"Token 與參數比例 {token_param_ratio:.1f
 7. **Weight Tying 權重綁定經典文獻**
    - *Paper*: Press, O., & Wolf, L. (2017). "Using the Output Embedding to Improve Language Models." *EACL 2017*. arXiv: [1608.05859](https://arxiv.org/abs/1608.05859).
    - *Core Contribution*: 證明語言模型的輸入 Token 嵌入矩陣與輸出 LM Head 投影矩陣可強制共用同一份權重，在節省超過 20% 參數量的同時提升語言模型之理論上限。
+8. **Switch Transformers 與稀疏混合專家模型 (JMLR 頂刊)**
+   - *Paper*: Fedus, W., Zoph, B., & Shazeer, N. (2022). "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." *Journal of Machine Learning Research (JMLR)*, 23(120), 1–39. arXiv: [2101.03961](https://arxiv.org/abs/2101.03961).
+   - *Core Contribution*: 建立稀疏激活路由機制，將模型總參數容量 $N_{\mathrm{total}}$ 與單 Token 活躍計算量 $N_{\mathrm{active}}$ 解耦，實現萬億參數規模下的次線性推論延遲。

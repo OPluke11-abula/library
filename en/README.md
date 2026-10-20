@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-93_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-96_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
 
 <p align="center">
   <b>Technical Notes on Mathematical Foundations, GPU Systems, and Production Deep Learning</b>
@@ -138,7 +138,8 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-504** | **05 Vision** | [3D Gaussian Splatting Theory & Rasterization](05_computer_vision/LIB-504%203D%20Gaussian%20Splatting%20Theory%20&%20Rasterization%20%28Agent%20EN%29.md) | Continuous radiance fields vs 3D Gaussians, GPU tile rasterization |
 | **LIB-505** | **05 Vision** | [Open-Vocabulary 3DGS & Semantic Retrieval](05_computer_vision/LIB-505%20Open-Vocabulary%203D%20Gaussian%20Splatting%20&%20Semantic%20Retrieval%20%28Agent%20EN%29.md) | 2D-to-3D language distillation, multi-view consensus, open-vocabulary queries |
 | **LIB-506** | **05 Vision** | [LLM-Grounded 3D Scene QA & Navigation](05_computer_vision/LIB-506%20LLM-Grounded%203D%20Scene%20QA,%20Hierarchical%20Scene%20Graphs%20&%20Embodied%20Navigation%20%28Agent%20EN%29.md) | ConceptGraphs, spatial reasoning ReAct loops, hierarchical campus tour |
-| **LIB-602** | **06 NLP & LLMs** | [Modern LLM Architecture & Scaling Laws](06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20&%20Scaling%20Laws%20%28Agent%20EN%29.md) | Chinchilla scaling laws, SwiGLU, RMSNorm, Grouped-Query Attention (GQA) |
+| **LIB-602** | **06 NLP & LLMs** | [Modern LLM Architecture & Scaling Laws](06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20&%20Scaling%20Laws%20%28Agent%20EN%29.md) | Chinchilla scaling laws, SwiGLU, RMSNorm, Grouped-Query Attention (GQA), MoE |
+| **LIB-603** | **06 NLP & LLMs** | [Dense Retrieval, RAG & Cache-Augmented Generation Architecture](06_nlp_and_llms/LIB-603%20Dense%20Retrieval,%20RAG%20&%20Cache-Augmented%20Generation%20Architecture%20%28Agent%20EN%29.md) | InfoNCE mutual information bound, Bi-Encoder vs Cross-Encoder, RAG vs CAG, LLM Wiki |
 | **LIB-703** | **07 Agents** | [LLM Agent Cognitive Architecture & Protocols](07_reinforcement_learning_and_agents/LIB-703%20LLM%20Agent%20Cognitive%20Architecture%20&%20Protocols%20%28Agent%20EN%29.md) | ReAct reasoning loops, Plan-and-Solve, structured tool schema |
 | **LIB-704** | **07 Agents** | [Dual-Process Neural Agent: S1-Jev & Reflex CUA-S1](07_reinforcement_learning_and_agents/LIB-704%20Dual-Process%20Neural%20Agent%20S1-Jev%20&%20Reflex%20CUA-S1%20%28Agent%20EN%29.md) | Non-autoregressive typed execution, byte-level interface reflex, gating |
 | **LIB-801** | **08 Systems Eng** | [Model Calibration & Uncertainty Estimation](08_ai_systems_engineering/LIB-801%20Model%20Calibration%20&%20Uncertainty%20Estimation%20%28Agent%20EN%29.md) | Expected Calibration Error (ECE), Temperature Scaling, reliability diagrams |

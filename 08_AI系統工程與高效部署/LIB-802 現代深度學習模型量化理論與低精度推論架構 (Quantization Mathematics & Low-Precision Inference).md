@@ -116,6 +116,11 @@ Bit:  [7 6 5 4]  |  [3 2 1 0]
 ```
 在 CUDA Kernel 中，利用位移與遮罩指令（Bitwise Shift & Masking）將 INT4 快速解包至暫存器，並以 Tensor Core 專屬的 `mma.sync` 矩陣指令全速運算。
 
+### 3. 端側部署顯存容量閉式解 (End-to-End W4A16 VRAM Budgeting Formula) `[DERIVATION]` `[HEURISTIC]`
+在評估本地端設備（如單卡 GPU 或統一記憶體系統）能否運行參數量為 $N_{\mathrm{params}}$（以十億 $10^9$ 為單位）的 $b_w$-bit 分組量化模型（Group Size $g$，如 $g=128$）時，總顯存需求並非僅有權重本身，其嚴格閉式分解為：
+$$\mathrm{VRAM}_{\mathrm{total}}(\mathrm{GB}) = N_{\mathrm{params}} \times \left(\frac{b_w}{8} + \frac{b_{\mathrm{scale}} + b_{\mathrm{zp}}}{8 \cdot g}\right) + \mathrm{Mem}_{\mathrm{KV}}(B, S) + \mathrm{Mem}_{\mathrm{act/ctx}}$$
+- **實例驗算（4-bit 量化之 20B 模型）**：主權重佔 $20 \times (4/8) = 10.0\text{ GB}$；若採 $g=128$ 分組（每組含 16-bit Scale 與 4-bit Zero-Point），額外元數據佔 $20 \times \frac{20}{8 \times 128} \approx 0.39\text{ GB}$；加上單用戶上下文 KV-Cache 與 CUDA Context / 激活緩衝區約 $1.0\text{--}2.0\text{ GB}$ `[HEURISTIC]`，總計需 **$11.4\text{--}12.4\text{ GB}$ VRAM**（即工程經驗法則 $\mathrm{VRAM}_{4\text{-bit}} \approx 0.5 \times N_{\mathrm{params}}(\text{B}) + 1.5\text{--}2.5\text{ GB}$ 之精確數學來源） `[DERIVATION]`。
+
 ---
 
 ## 四、💻 工業級工程實作：對稱通道量化與 AWQ 顯著性保護模擬

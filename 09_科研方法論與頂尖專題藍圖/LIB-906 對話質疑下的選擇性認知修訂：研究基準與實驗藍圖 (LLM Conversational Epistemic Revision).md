@@ -25,6 +25,7 @@ tags:
   - Novelty-Audit
 prerequisites:
   - "[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]"
+  - "[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]"
   - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
   - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
 successors: []
@@ -35,7 +36,7 @@ successors: []
 # 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
+- **前置依賴**：[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
 - **後續節點**：無（終端專題節點）。
 
 **English title:** LLM Conversational Epistemic Revision — Selective Epistemic Revision under Conversational Pushback  
@@ -167,7 +168,7 @@ $$
 \mathrm{Unknown},\mathrm{Retracted}\}.
 $$
 
-**Provenance（來源溯源）必須區分：** Model self-generated claim、User-provided premise、External retrieved evidence、System / Context assumption、Temporal snapshot。Context Axiom（對話內指定假設）不得當成 Real-world Ground Truth（真實世界真值）。
+**Provenance（來源溯源）必須區分：** Model self-generated claim、User-provided premise、External retrieved evidence、System / Context assumption、Temporal snapshot。Context Axiom（對話內指定假設）不得當成 Real-world Ground Truth（真實世界真值）。此外，針對外部檢索證據（External retrieved evidence，參見 `LIB-603`），其 `evidence` 欄位建議封裝結構化元數據 $\mathcal{M}_{\mathrm{evid}} = (\texttt{title}, \texttt{doc\_type}, \texttt{authority}, \texttt{source\_url}, \texttt{snapshot\_date}, \texttt{disclaimer})$，嚴格區分「官方原始法規/論文全文」與「教學改寫摘要」，防止仲裁器將簡化摘要誤判為完整排他性條文 `[DESIGN_DECISION]`。
 
 **狀態語意注意：** Supported / Contradicted 是相對於特定證據與時間的評估；Retracted 是對先前主張的撤回事件，兩者概念不同。若實驗發現單一 `status` 無法可靠表示兩種性質，應在保持最小設計的前提下拆成 `evidence_status` 與 `revision_status`，而非假設目前 Schema 已最優。
 
@@ -344,7 +345,7 @@ Previous self-generated claim
 | **Catastrophic Forgetting** | 通常涉及 Parameter Update 後舊能力受損。 | Inference-time If/Else / Routing 不會直接造成這種遺忘。 |
 | **Routing Risks** | Brittleness、Routing Error、Threshold Sensitivity、Latency、Over-retrieval、Distribution Shift。 | 不應錯歸因為 Catastrophic Forgetting。 |
 | **Attention** | Raw Attention 是模型運算中可觀察的權重。 | 未經驗證不得直接當作 Belief、Commitment、Factual Confidence 或因果理由。 |
-| **CoT** | 可作為一種 Prompt / Reasoning Format。 | Longer Reasoning 不保證 Truthfulness；可產生 Post-hoc Rationalization。 |
+| **CoT** | 可作為一種 Prompt / Reasoning Format。 | Longer Reasoning 不保證 Truthfulness；可產生 Post-hoc Rationalization，且在思維鏈劫持攻擊（H-CoT, Kuo et al. 2025, arXiv:2502.12893）下，未受外部證據約束的內部推理鏈甚至會將安全拒絕率由 $98\%$ 壓低至 $2\%$ `[LITERATURE_RESULT]`。 |
 | **Provenance** | 追蹤 Claim 出處、證據及時間範圍。 | Context Axiom 不等於 Real-world Ground Truth。 |
 | **Observed vs Internal** | 可以描述 Stance Change、Tool Invocation 與 Unsupported Justification。 | 不得憑輸出聲稱 Safety Classifier、Router、隱藏 Template、Attention 或 RLHF 的單次因果作用。 |
 
@@ -496,4 +497,6 @@ Previous self-generated claim
    - *Paper*: Laban, P., Murakhovs'ka, L., Xiong, C., & Wu, C.-S. (2023). "Are You Sure? Challenging LLMs Leads to Performance Drops in The FlipFlop Experiment." [arXiv:2311.08596](https://arxiv.org/abs/2311.08596).
 6. **社交面子維持與事實判斷解耦 ELEPHANT (ICLR 2026)**
    - *Paper*: Cheng, M., et al. (2025/2026). "ELEPHANT: Measuring and Understanding Social Sycophancy in LLMs." *International Conference on Learning Representations (ICLR 2026)*. [arXiv:2505.02878](https://arxiv.org/abs/2505.02878).
+7. **思維鏈劫持與推理模型脆弱性 H-CoT (2025)**
+   - *Paper*: Kuo, M., Zhang, J., Ding, A., Wang, Q., DiValentin, L., Bao, Y., Wei, W., Li, H., & Chen, Y. (2025). "H-CoT: Hijacking the Chain-of-Thought Safety Reasoning Mechanism to Jailbreak Large Reasoning Models." [arXiv:2502.12893](https://arxiv.org/abs/2502.12893).
 

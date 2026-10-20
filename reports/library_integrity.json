@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "volume_count": 27,
+  "volume_count": 28,
   "topological_order": [
     "LIB-000",
     "LIB-001",
@@ -15,12 +15,13 @@
     "LIB-401",
     "LIB-801",
     "LIB-407",
-    "LIB-703",
+    "LIB-603",
     "LIB-501",
     "LIB-802",
-    "LIB-704",
+    "LIB-703",
     "LIB-502",
     "LIB-901",
+    "LIB-704",
     "LIB-408",
     "LIB-504",
     "LIB-903",
@@ -30,7 +31,7 @@
     "LIB-906",
     "LIB-905"
   ],
-  "invariants_total": 93,
+  "invariants_total": 96,
   "checks_enabled": 11,
   "error_count": 0,
   "errors": [],

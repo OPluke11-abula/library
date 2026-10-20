@@ -26,6 +26,7 @@ tags:
 prerequisites:
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]"
 successors:
   - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
   - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
@@ -36,7 +37,7 @@ successors:
 # Large Language Model Agents: Cognitive Architectures & Execution Protocols
 
 ## Conceptual Coordinates & Topological Navigation
-- **Prerequisites**: [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]].
+- **Prerequisites**: [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]].
 - **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]].
 
 ## 1. Conceptual Mental Model
@@ -70,6 +71,8 @@ To operate over infinite time horizons within finite token contexts:
 ### 3. Systems & Hardware Alignment: KV-Cache Prefix Reuse & Memory Tiering
 - **Prefix KV-Cache Reuse Across ReAct Turns**: In multi-turn ReAct trajectories $c_t = (o_0, th_0, a_0, \dots, o_t)$, appending tool observations preserves the causal prefix. Serving engines (vLLM PagedAttention, LIB-602) cache KV blocks of prior turns in GPU HBM so only the newly appended observation $o_t$ incurs prefill compute `[DESIGN_DECISION]`.
 - **Three-Tier Memory Hierarchy**: High-bandwidth GPU HBM stores active KV-Cache ($W_{\text{recent}}$); host DRAM maintains structured JSON working scratchpads; NVMe-backed HNSW vector indices store long-term episodic trajectories `[HEURISTIC]`.
+- **LLM Wiki Compilation vs. Naive Chunked RAG**: Rather than slicing axiomatic documents into arbitrary fixed-length chunks that sever cross-section derivations, agents compile raw sources (`raw/`) into a hierarchically indexed, bidirectionally linked Markdown knowledge graph (`wiki/` + `index.md` + automated consistency linting, LIB-603), enabling exact topological traversal across $\sim 10^2$ volumes ($\sim 400\text{K}$ words) `[DESIGN_DECISION]`.
+- **Role-Conditioned State Space & Unified Multi-Provider Routing (`provider:model`)**: Agent APIs formalize dialogue state via `system` ($s_{\mathrm{sys}}$ persona/constraints), `user` ($u_t$), and `assistant` ($a_t$) roles, sampling $P_\theta(a_t \mid s_{\mathrm{sys}}, u_1, a_1, \dots, u_t)$ across interchangeable cloud and local backends via unified `provider:model` routing interfaces `[FACT]` `[DESIGN_DECISION]`.
 
 ---
 
@@ -138,7 +141,7 @@ class ProductionAgentLoop:
 
 ### [RULE-703-02] External Cortex Persistence (Obsidian Vault) Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`
-- **Specification**: Critical architectural decisions, experiment outcomes, and system state transitions MUST be persisted into human- and agent-readable Markdown files within the local knowledge vault (`AGENTS.md`, `LIB-XXX`). Long-term state MUST NOT rely solely on volatile context window memory.
+- **Specification**: Critical architectural decisions, experiment outcomes, and system state transitions MUST be persisted into human- and agent-readable Markdown files within the local knowledge vault (`AGENTS.md`, `LIB-XXX`) following the LLM Wiki compilation workflow (`raw/` $\to$ structured volumes + bidirectional DAG links + automated linter verification). Long-term state MUST NOT rely solely on volatile context window memory.
 - **Violation Consequence**: Ephemeral conversational context wipes out cumulative architectural memory between session restarts.
 
 ### [RULE-703-03] Token Budget Conservation & Working Memory Pruning Heuristic

@@ -35,6 +35,7 @@ successors:
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
+  - "[[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]"
   - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
 ---
 
@@ -44,7 +45,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-001 Deep Learning First Principles (Agent EN)]], [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]].
-- **Successors**: [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
+- **Successors**: [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
 
 ---
 

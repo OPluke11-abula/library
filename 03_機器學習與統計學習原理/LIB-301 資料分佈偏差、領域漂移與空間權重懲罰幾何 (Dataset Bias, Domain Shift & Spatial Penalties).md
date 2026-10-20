@@ -76,6 +76,7 @@ Ben-David et al. (Machine Learning 2010) 證明了領域適應的泛化誤差上
 $$\epsilon_{\text{target}}(f) \le \epsilon_{\text{source}}(f) + \frac{1}{2} d_{\mathcal{H}\Delta\mathcal{H}}(\mathcal{D}_{\text{source}}, \mathcal{D}_{\text{target}}) + \lambda^*$$
 其中 $d_{\mathcal{H}\Delta\mathcal{H}}$ 為兩個領域在假設空間 $\mathcal{H}$ 下的 $\mathcal{H}$-散度（H-Divergence），$\lambda^*$ 為理想聯合假設的誤差。
 - 美式 MNIST 分佈 $\mathcal{D}_{\text{source}}$ 與亞洲書寫分佈 $\mathcal{D}_{\text{target}}$ 的散度極大，使原先在測試集高達 98.24% 的模型，在目標領域泛化誤差界限直接失控崩潰。
+- **延伸至大型語言模型之預訓練語料文化與語系偏差 (Pretraining Linguistic & Cultural Corpus Bias)** `[FACT]` `[HEURISTIC]`：分佈偏差同樣支配自然語言模型。當預訓練語料中不同語系或文化圈之文本比例嚴重失衡（例如簡體中文語料佔比遠高於繁體中文，$P_{\text{train}}(\mathcal{D}_{\text{SC}}) \gg P_{\text{train}}(\mathcal{D}_{\text{TC}})$），即使後續透過後處理微調或表徵消融移除顯式敏感詞審查（如 R1-1776 去審查模型），底層參數分佈 $P_\theta(Y \mid X)$ 仍會保留高密度語料區的詞彙慣用度、概念框架與隱性價值假設，在跨語境部署時產生潛移默化的概念漂移（Concept & Prior Drift）。
 
 ### 2. Logits 空間超曲面與空間懲罰向量分析
 全連結輸出層在 Softmax 前對第 $c$ 類別的評分為線性內積：

@@ -32,6 +32,7 @@ prerequisites:
   - "[[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]]"
 successors:
   - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]"
   - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
   - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
   - "[[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]]"
@@ -43,7 +44,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-405 Attention Mechanism & Transformer Revolution (Agent EN)]].
-- **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
+- **Successors**: [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -87,6 +88,11 @@ $$N_{\text{opt}} \propto C^a, \quad D_{\text{opt}} \propto C^b, \quad a = \frac{
    - **Dot-Product Similarity Intuition**: Conceptually, it reframes the LM Head not as an independent classifier, but as a similarity space where the output hidden state $h$ is dot-producted against the initial input token representations to find the closest match.
    - **Parameter Compression**: By tying these weights, models save roughly $20\%$ of their total parameters (e.g., saving $\sim 38.5\text{M}$ parameters on GPT-2 Small where $V \approx 50,257$ and $d = 768$), making it a crucial technique for lightweight architectures (e.g., Gemma 2B).
    - **Expressivity Trade-off**: Enforcing the same representation space for semantic input meaning and output probability prediction can bound theoretical capacity. Consequently, ultra-large modern models (like LLaMA-3 70B) often **untie** these weights to maximize capacity and predictive accuracy.
+6. **Sparse Mixture-of-Experts (MoE) Routing & Active Parameter Economics** `[FACT]` `[DERIVATION]` `[LITERATURE_RESULT]`:
+   Instead of activating all $N_{\mathrm{total}}$ parameters per token, Sparse MoE layers (Fedus et al., JMLR 2022) partition the FFN into $E$ experts $\{\mathrm{FFN}_e\}_{e=1}^E$ and route each token $x$ to the Top-$k$ experts ($k \in \{1, 2\} \ll E$) via a learned router $W_g \in \mathbb{R}^{d \times E}$:
+   $$y = \sum_{e \in \mathcal{T}_k(x)} G(x)_e \cdot \mathrm{FFN}_e(x), \quad G(x) = \mathrm{Softmax}\left(\mathrm{TopK}(x W_g, k)\right)$$
+   - **Decoupling Capacity ($N_{\mathrm{total}}$) from Bandwidth Footprint ($N_{\mathrm{active}}$)**: While VRAM capacity must hold $N_{\mathrm{total}}$, per-token FLOPs and HBM weight-streaming bytes during autoregressive decoding (Batch Size $B=1$, Arithmetic Intensity $\mathcal{I} \approx 1\text{ OP/Byte}$, strictly Memory-Bandwidth Bound) scale only with $N_{\mathrm{active}} \approx N_{\mathrm{attn}} + \frac{k}{E} N_{\mathrm{FFN}}$, accelerating token generation by $\sim \frac{N_{\mathrm{total}}}{N_{\mathrm{active}}}$ over a dense model of equal total size `[DERIVATION]`.
+   - **Hardware Spectrum Alignment (GPU HBM vs. Unified Memory vs. Deterministic SRAM LPU)**: Discrete GPUs (RTX 4090 24GB / RTX 5090 32GB / H100 80GB) deliver $1.0\text{--}3.35\text{ TB/s}$ HBM/GDDR bandwidth but face strict VRAM capacity ceilings; Unified Memory SoCs (Apple Silicon up to 512GB, AMD Ryzen AI Max+ 395 / NVIDIA DGX Spark 128GB LPDDR5x) eliminate PCIe offloading bottlenecks to host massive MoE models locally; deterministic SRAM architectures (Groq LPU, $\sim 80\text{ TB/s}$ on-chip SRAM) bypass external DRAM caches entirely for ultra-low-latency token streaming `[FACT]` `[DESIGN_DECISION]`.
 
 ---
 
@@ -165,4 +171,6 @@ class DynamicTanh(nn.Module):
 7. **Weight Tying**
    - *Paper*: Press, O., & Wolf, L. (2017). "Using the Output Embedding to Improve Language Models." *EACL 2017*.
    - *Core Contribution*: Demonstrated that tying the input embedding and output projection matrices significantly reduces parameter count while enhancing language model performance.
+8. **Switch Transformers & Sparse MoE Scaling (JMLR)**
+   - *Paper*: Fedus, W., Zoph, B., & Shazeer, N. (2022). "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." *Journal of Machine Learning Research (JMLR)*, 23(120), 1–39. arXiv: [2101.03961](https://arxiv.org/abs/2101.03961).
 

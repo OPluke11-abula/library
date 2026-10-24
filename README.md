@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-96_Invariants-0ea5e9.svg)](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20%28Grand%20Library%20Index%20&%20Navigator%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-100_Invariants-0ea5e9.svg)](00_總覽與拓樸導覽/LIB-000%20圖書館總覽與拓樸導覽系統%20%28Grand%20Library%20Index%20&%20Navigator%29.md)
 
 <p align="center">
   <b>結合理論推導、GPU 體系結構與工程實踐的深度學習自學筆記</b>

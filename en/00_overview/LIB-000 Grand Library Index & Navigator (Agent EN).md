@@ -38,7 +38,7 @@ $$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{A})$$
 where:
 - $\mathcal{V} = \{v_1, v_2, \dots, v_{28}\}$ is the set of 28 canonical academic volumes.
 - $\mathcal{E} \subset \mathcal{V} \times \mathcal{V}$ is the set of directed dependency edges representing prerequisite orderings. If $(u, v) \in \mathcal{E}$, volume $u$ MUST be ingested and verified prior to volume $v$.
-- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 96$).
+- $\mathcal{A}: \mathcal{V} \to 2^{\mathcal{I}}$ maps each node to a set of formal invariant rules $\mathcal{I} = \{\text{RULE-000-01}, \dots, \text{RULE-906-03}\}$ ($|\mathcal{I}| = 100$).
 
 ### Topological Sort & Execution Order
 Because $\mathcal{G}$ contains no directed cycles ($\nexists \text{ path } u \rightsquigarrow u$), there exists at least one linear topological ordering $\tau: \mathcal{V} \to \{1, \dots, |\mathcal{V}|\}$ satisfying:

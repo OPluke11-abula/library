@@ -1,7 +1,7 @@
 ---
 call_number: LIB-301
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: Dataset Bias, Domain Shift & Spatial Penalties (Agent Edition)
 module: ML-Statistical-Foundations
 category: Theory-Perception
@@ -68,6 +68,14 @@ $$\mathcal{L}_{\text{total}}(x, y) = \mathcal{L}_{\text{CE}}(f(x), y) + \lambda 
 where:
 $$\Omega_{\text{spatial}}(x, \hat{y}) = \mathbb{I}(\hat{y} = 1 \land y = 7) \cdot \left\| \nabla_x \text{TopStroke}(x) \right\|_2^2$$
 
+### 4. Network Depth Capacity, $L_1 / L_2$ Weight Decay & `EarlyStopping` Rollback Mechanics `[DERIVATION]` `[FACT]` `[SAFETY_BOUND]`
+1. **Depth Capacity vs. Decision Boundary Curvature**: Increasing ReLU network depth ($L = 2 \to 6$) exponentially increases piecewise-linear partitioning regions, causing unregularized deep models to carve high-curvature decision pockets around noisy training outliers (e.g., on 2D Moons manifolds).
+2. **$L_2$ Proportional Weight Contraction vs. $L_1$ Subgradient Sparsity** `[DERIVATION]`:
+   - Minimizing $\tilde{J}(W) = J(W) + \frac{\alpha}{2}\|W\|_2^2$ yields $W_{t+1} = (1 - \eta\alpha)W_t - \eta\nabla J(W_t)$, shrinking weights isotropically by $(1 - \eta\alpha) < 1$ to smooth decision boundaries ($\alpha \in [10^{-5}, 10^{-2}]$; $\alpha \ge 0.1$ causes underfitting).
+   - Minimizing $\tilde{J}(W) = J(W) + \alpha\|W\|_1$ subtracts constant subgradient $\eta\alpha \cdot \text{sign}(W_t)$, driving redundant feature weights to exact zero.
+3. **Inverted Dropout & `EarlyStopping(restore_best_weights=True)` Guardrail** `[SAFETY_BOUND]`:
+   Inverted Dropout scales active training units by $\frac{1}{1-p}$ to break feature co-adaptation while preserving test-time expectation. When training with `EarlyStopping(patience=P)`, terminating at epoch $t^* + P$ without state rollback retains weights that have overfitted for $P$ epochs past optimal validation epoch $t^*$; pipelines MUST enforce `restore_best_weights=True`.
+
 ---
 
 ## 3. Production Domain Adaptation Contract
@@ -122,6 +130,11 @@ def compute_mmd_loss(source_features: torch.Tensor, target_features: torch.Tenso
 - **Contract Level**: `OPTIMIZATION_HEURISTIC`
 - **Specification**: Training pipelines exposed to morphological shifts MUST incorporate geometric augmentations (affine rotations $\theta \in [-15^\circ, +15^\circ]$, shear $\in [-10^\circ, +10^\circ]$, translations $\pm 8\%$) while preserving $\ge 90\%$ foreground ink mass within the central receptive zone.
 - **Violation Consequence**: Omitting geometric augmentation causes coordinate memorization, while unbounded transforms truncate essential topological strokes.
+
+### [RULE-301-04] Regularization Capacity & EarlyStopping Rollback Invariant
+- **Contract Level**: `QUALITY_BOUND`
+- **Specification**: Multi-layer networks ($L \ge 3$) trained on finite or noisy datasets MUST pair bounded weight decay ($\alpha \in [10^{-5}, 10^{-2}]$) and Inverted Dropout ($p \in [0.2, 0.5]$) with validation `EarlyStopping` configured with `restore_best_weights=True` (or explicit reload of the optimal epoch $t^* = \arg\min_t \mathcal{L}_{\text{val}}(t)$ checkpoint). Exporting terminal epoch $t^* + P$ weights after patience expiration is STRICTLY PROHIBITED.
+- **Violation Consequence**: Leaving `restore_best_weights=False` exports parameters degraded by $P$ consecutive epochs of validation overfitting.
 
 ---
 

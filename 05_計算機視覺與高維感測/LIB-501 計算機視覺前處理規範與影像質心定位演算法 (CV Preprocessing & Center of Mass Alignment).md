@@ -102,6 +102,14 @@ $$\mathbf{y}_{\text{final}} = \sum_{k=1}^K w_k \cdot \mathcal{T}_k^{-1}\left(f_\
 - $\mathcal{T}_k^{-1}$ 為對應的幾何逆映射（Inverse Transformation）。
 - 透過在推論時多路並行前向傳播再加權融合，有效消除了相機視角偏斜與局部遮擋帶來的模型誤判，將微小目標與邊界敏感特徵的漏檢率大幅壓縮。
 
+### 5. 單張影像防除零標準化 (`per_image_standardization`) 與兩階段隨機裁切擴增 (`Resize 247` $\to$ `RandomCrop 227`) `[DERIVATION]` `[SAFETY_BOUND]`
+1. **單張影像零均值單位方差防除零標準化 (`per_image_standardization`)**：
+   在自然場景視覺任務（如 CIFAR-10 / ImageNet / 實景貓狗分類）中，不同照片之環境曝光與背光強度差異巨大。單張影像標準化將每張影像 $I \in \mathbb{R}^{H \times W \times C}$（總像素元素數 $N = H \cdot W \cdot C$）獨立正規化為零均值與單位方差，並在分母強制導入**防除零標準差下界 $\sigma_{\text{adj}}$**：
+   $$\hat{I} = \frac{I - \mu_I}{\sigma_{\text{adj}}}, \quad \text{其中 } \sigma_{\text{adj}} = \max\left(\sigma_I, \; \frac{1}{\sqrt{N}}\right)$$
+   - **`[SAFETY_BOUND]` 分母安全下界之物理必要性**：當輸入為純黑畫布、大面積過曝白牆或極低對比度區塊時，樣本標準差 $\sigma_I \to 0$。若直接除以 $\sigma_I$，微小的感測器量化雜訊會被放大至 $\pm \infty$ 並引發 `NaN` 梯度爆炸；下界 $\frac{1}{\sqrt{N}}$ 將最大增益嚴格鎖定於 $\le \sqrt{N}$。
+2. **兩階段過採樣隨機裁切 (`Resize(247, 247)` $\to$ `RandomCrop(227, 227)`)**：
+   若直接在原圖上大幅裁切易截斷主體語意。標準視覺管線先將影像等比縮放至略大於模型輸入之過採樣網格（例如 AlexNet 先縮放至 $247 \times 247$ 再隨機裁切出 $227 \times 227$；VGG/ResNet 先縮放至 $256 \times 256$ 再隨機裁切 $224 \times 224$），可在一張影像上生成 $(247 - 227 + 1)^2 = 441$ 種亞尺度平移視角，同時保證每次裁切至少涵蓋原圖 $\left(\frac{227}{247}\right)^2 \approx 84.5\%$ 的空間視野，推論階段則固定採用中心裁切（`central_crop`）。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射
@@ -260,7 +268,7 @@ if __name__ == "__main__":
 - **量化決策邊界**:
   - 零階矩（前景像素灰階總和）：$M_{00} = \sum_{x,y} I(x,y)$。
   - 最小筆劃有效閾值：$M_{00} \ge 15.0$ `[SAFETY_BOUND]`。此門檻為工程防禦性安全邊界（防範極端空畫布、離散雜訊或一階矩質心計算時的分母除以零例外），非 LeCun et al. (1998) 原始文獻之規範常數。
-  - 若 $M_{00} < 15.0$，判定影像為空白畫布或極端噪聲，直接中斷管線並拋出 `EmptyImageException`。
+  - 若 $M_{00} < 15.0$，判定影像為空白畫布或極端噪聲，直接中斷管線並拋出 `EmptyImageException`；若執行單張影像零均值標準化（`per_image_standardization`），分母標準差必須強制施加下限截斷 $\sigma_{\text{adj}} = \max(\sigma_I, 1/\sqrt{N})$ `[SAFETY_BOUND]`，嚴禁直接除以原始 $\sigma_I$。
 - **可執行斷言**:
   ```python
 M00 = float(np.sum(img_array))

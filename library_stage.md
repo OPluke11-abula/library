@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
 > **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），96 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），100 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 96 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 100 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -186,6 +186,16 @@
   - `LIB-802`：補足端側部署 W4A16 顯存容量閉式解 $\mathrm{VRAM}_{\mathrm{total}} = N_{\mathrm{params}}(b_w/8 + (b_{\mathrm{scale}}+b_{\mathrm{zp}})/(8g)) + \mathrm{Mem}_{\mathrm{KV}} + \mathrm{Mem}_{\mathrm{act/ctx}}$。
   - `LIB-703`：納入 Karpathy「LLM Wiki」結構化知識編譯範式（`raw/` $\to$ `wiki/` + `index.md` + 自動化 Linter）與 `provider:model` 統一路由協議。
   - `LIB-906`：補充 H-CoT 思維鏈劫持攻擊（Kuo et al., 2025, arXiv:2502.12893）與 `Claim Ledger` 外部檢索證據之結構化 Metadata 溯源規範。
+
+### 15. 莊啟宏教授視覺與深度學習課程對齊：經典 CNN 骨幹演進、二次病態曲面軌跡、非零中心梯度與早停回滾合約（100 條不變量里程碑）
+- **P0: 方案 A — 擴充 `LIB-401`（CNN 骨幹演進與時序序列張量秩守恆，`RULE-401-04`）**：
+  - 推導 Sobel 一階差分先驗、VGG 雙/三層 $3 \times 3$ 卷積因式分解（參數量削減 $44.9\%$）、GoogLeNet/Inception $1 \times 1$ 逐點卷積瓶頸（$9.68\times$ MACs 壓縮證明）與 `GlobalAvgPool2D` 取代全連結分類頭（消除 $74.5\%$ 冗餘參數），以及 `Conv1D` vs. 多層堆疊 `RNN` 非終端層 `return_sequences=True` 三階張量秩 $[B, T, D_h]$ 守恆定理。
+- **P0: 方案 B — 擴充 `LIB-104`（病態二次曲面軌跡基準與 AdaGrad 早衰證明，`RULE-104-04`）**：
+  - 以 $f(x,y) = 0.5x^2 + 2.5y^2$（$\kappa = 5, L = 5$）定量推導 SGD 跨壁震盪、Momentum 正負抵消、AdaGrad 二階單調累加 $G_t = \sum g_\tau^2$ 引發有效學習率 $\eta/\sqrt{G_t} \to 0$ 早衰停滯，以及 RMSprop/Adam 指數移動平均（EMA）遺忘視窗與偏差修正機制。
+- **P0: 方案 C — 擴充 `LIB-001`（Sigmoid 非零中心化鋸齒動態、單調性凸性迷思勘誤與 `from_logits=True` 數值穩定性，`RULE-001-05`）**：
+  - 嚴密證明非零中心化激活輸出 $a_i > 0$ 如何迫使下游權重梯度 $\frac{\partial \mathcal{L}}{\partial w_i} = \delta \cdot a_i$ 全同號並受限於全正/全負象限（Zig-Zagging Dynamics）；勘誤「單調激活函數保證網路損失為凸函數」之入門迷思；補充 `from_logits=True` 融合 Log-Sum-Exp 防下溢公式與 ROC 曲線門檻掃描 / Wilcoxon-Mann-Whitney AUC 統計等價性。
+- **P0: 方案 D — 擴充 `LIB-301` 與 `LIB-501`（$L_1/L_2$ 權重衰減、`EarlyStopping` 狀態回滾與單張影像防除零標準化，`RULE-301-04`）**：
+  - 在 `LIB-301` 推導網路深度容量對雙月流形決策邊界曲率之影響、$L_2$ 比例收縮 $(1-\eta\alpha)W$ vs. $L_1$ 次梯度 $\text{sign}(W)$ 稀疏化，並建立 `EarlyStopping(restore_best_weights=True)` 狀態回滾不變量；在 `LIB-501` 增補 `per_image_standardization` 分母防除零安全下界 $\sigma_{\text{adj}} = \max(\sigma_I, 1/\sqrt{N})$ 與兩階段過採樣隨機裁切（`Resize 247` $\to$ `RandomCrop 227`）。全庫正式達成 **28 卷雙語典籍、100 條決策合約不變量**里程碑。
 
 ---
 

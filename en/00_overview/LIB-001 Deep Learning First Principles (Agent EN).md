@@ -1,7 +1,7 @@
 ---
 call_number: LIB-001
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: Deep Learning First Principles - The Six Pillars of How Models Learn
 module: DL-Foundations
 category: Theory-Core
@@ -80,6 +80,13 @@ Consider binary classification with sigmoid probability $P = \sigma(z) = \frac{1
 - **Information Theory & Convexity** `[FACT]`:
   - Self-information (Surprisal) $I(x) = -\log P(x)$ imposes unbounded asymptotic penalty as $P \to 0$. Minimizing Cross-Entropy directly maximizes likelihood (MLE).
   - With respect to scalar logit $z$, $-\ln \sigma(z) = \ln(1 + e^{-z})$ (Softplus) is strictly convex ($\frac{\partial^2}{\partial z^2} = P(1 - P) > 0$). In single-layer Generalized Linear Models (e.g., Logistic Regression), this preserves convexity in parameters $(w, b)$, avoiding the non-convex plateaus and saturation traps of MSE; in multi-layer deep networks, non-linear composition renders the overall landscape non-convex, where Cross-Entropy's primary advantage is eliminating output-layer gradient saturation ($\frac{\partial \mathcal{L}}{\partial z} = P - y$) rather than conferring global convexity.
+  - **Pedagogical Note on Monotonic Activations vs. Loss Convexity** `[FACT]` `[SAFETY_BOUND]`: Introductory lectures occasionally state that a monotonic activation function guarantees a convex network loss function. Formally, monotonicity of the link function preserves convexity only in single-layer GLMs under canonical exponential-family losses; in multi-layer networks ($L \ge 2$), inter-layer matrix products $W^{(2)}\sigma(W^{(1)}x)$ and hidden-unit permutation symmetries inevitably create non-convex saddle points regardless of activation monotonicity.
+  - **Non-Zero-Centered Sigmoid Outputs & Orthant Zig-Zagging Dynamics** `[DERIVATION]`:
+    For a downstream neuron $z = \sum_{i=1}^d w_i a_i + b$ receiving strictly positive activations $a_i = \sigma(u_i) > 0$, the weight gradients $\frac{\partial \mathcal{L}}{\partial w_i} = \delta \cdot a_i$ ($\delta = \frac{\partial \mathcal{L}}{\partial z}$) share the exact same sign across all coordinates $i \in \{1, \dots, d\}$: $\text{sign}(\frac{\partial \mathcal{L}}{\partial w_i}) = \text{sign}(\delta)$. Weight updates $\Delta \mathbf{w} = -\eta \delta \mathbf{a}$ are restricted to the all-positive or all-negative orthant, forcing slow zig-zagging trajectories whenever optimal parameter displacements require mixed signs (LeCun et al., 1998). Zero-centered activations (`Tanh`, `ELU`, `GELU`) or `BatchNorm`/`LayerNorm` eliminate this orthant restriction.
+  - **Fused `from_logits=True` & Log-Sum-Exp Numerical Stability** `[DERIVATION]` `[SAFETY_BOUND]`:
+    Evaluating $\hat{y}_c = \text{softmax}(z)_c$ followed by $-\ln(\hat{y}_c)$ underflows to `0.0` in FP32 when $z_c - \max_j z_j < -88.7$, yielding `log(0.0) = -inf` and `NaN`. Production pipelines MUST pass raw logits to `F.cross_entropy` (`from_logits=True`), executing the shifted Log-Sum-Exp identity $\mathcal{L}_{\text{CE}}(z, c) = -z_c + M + \ln \sum_{j=1}^K e^{z_j - M}$ ($M = \max_k z_k$).
+  - **ROC Curve Threshold Sweep & Wilcoxon-Mann-Whitney AUC Equivalence** `[FACT]`:
+    Sweeping classification threshold $\tau \in [1, 0]$ traces $\text{TPR}(\tau) = \frac{\text{TP}(\tau)}{P}$ against $\text{FPR}(\tau) = \frac{\text{FP}(\tau)}{N}$, stepping vertically by $1/P$ on true positives and horizontally by $1/N$ on false positives. The area under the curve satisfies $\text{ROC-AUC} = P(s(x^+) > s(x^-))$.
 
 ### Pillar 04: Backpropagation & The Jacobian Chain Rule
 In a computational DAG of layers $l = 1, \dots, L$, the gradient of scalar loss $\mathcal{L}$ with respect to weight matrix $W^{[l]}$ is evaluated via reverse-mode automatic differentiation:
@@ -177,6 +184,11 @@ class CanonicalPillarClassifier(nn.Module):
 - **Contract Level**: `CRITICAL_INVARIANT`
 - **Specification**: When constructing neural architectures, spatial tensor dimensions `(Batch, Channel, Height, Width)` MUST be formally traced across every strided convolution and pooling layer. Spatial feature map dimensions MUST NOT collapse to $< 1 \times 1$ before the terminal classification head.
 - **Violation Consequence**: Premature spatial dimension collapse obliterates convolutional inductive biases and causes irrecoverable spatial feature truncation.
+
+### [RULE-001-05] Zero-Centered Activation & Fused Logit Cross-Entropy Invariant
+- **Contract Level**: `STABILITY_CRITICAL`
+- **Specification**: (1) Deep hidden layers MUST NOT use unnormalized non-zero-centered Sigmoid activations alone (which force $\text{sign}(\partial \mathcal{L}/\partial w_i) = \text{sign}(\delta)$ across all fan-in weights and induce orthant zig-zagging); agents MUST use ReLU/GELU/Tanh or pair activations with BatchNorm/LayerNorm; (2) Cross-entropy losses MUST consume raw unnormalized logits (`F.cross_entropy(logits, y)` or `from_logits=True`) via the shifted Log-Sum-Exp trick rather than chaining `log(softmax(z))`.
+- **Violation Consequence**: Unfused `log(softmax(z))` underflows to `-inf`/`NaN` when $|z| > 88.7$ (FP32) or $|z| > 11.0$ (FP16).
 
 ## 5. Canonical Open Courseware Mapping & Textual Synthesis
 

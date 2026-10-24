@@ -1,7 +1,7 @@
 ---
 call_number: LIB-001
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn)
 module: Fundamentals-First-Principles
 category: Deep-Learning-Primer
@@ -144,6 +144,17 @@ successors:
    - **`[SAFETY_BOUND]` 理論邊界界定**：
      - 在**單層廣義線性模型（經典邏輯迴歸 $z = w^T x + b$）**中，Affine 變換保持凸性，損失對參數 $(w, b)$ 呈現凸性（若特徵矩陣滿秩則為嚴格凸），消除了 MSE 的非凸鞍點困境；但若資料嚴格線性可分，未正則化的最大似然估計會使權重向量發散（$\|w\| \to \infty$），實務上必須加入 $L_2$ 正則化以保證有限極值點。
      - 在**多層深度神經網路**中，非線性隱藏層的複合映射使整體參數景觀呈現高度非凸性（Non-convex）。此時交叉熵的核心優勢在於輸出層梯度的代數對消 $\frac{\partial \mathcal{L}}{\partial z} = P - y$，使模型在嚴重犯錯時仍具備恆定的線性推動力，杜絕輸出層梯度飽和與腦死，而非賦予深層網路全域凸性。
+     - **教材常見迷思勘誤（單調激活函數 vs. 損失函數凸性）** `[FACT]` `[SAFETY_BOUND]`：部分入門教材或簡報常宣稱「當激活函數具有單調性（Monotonicity）時，能保證網路的損失函數是凸函數」。嚴格數理上，此命題**僅在單層廣義線性模型（Single-layer GLM）搭配指數族自然配對損失（如邏輯迴歸搭配二元交叉熵）時成立**；一旦進入 $L \ge 2$ 之多層神經網路，即便激活函數嚴格單調，層間權重矩陣乘積 $W^{(2)} \sigma(W^{(1)} x)$ 與隱藏層神經元排列對稱性（Permutation Symmetry）必然產生大量鞍點與非凸極值區。
+   - **Sigmoid 非零中心化輸出（Non-Zero-Centered Output）導致權重梯度同號與 Zig-Zag 鋸齒收斂證明** `[DERIVATION]`：
+     為何隱藏層應避免使用 Sigmoid $\sigma(u) \in (0, 1)$？設下一層某神經元之線性組合為 $z = \sum_{i=1}^d w_i a_i + b$，其中輸入激活值 $a_i = \sigma(u_i) > 0$ **恆為正數**。對第 $i$ 個權重求偏導：
+     $$\frac{\partial \mathcal{L}}{\partial w_i} = \frac{\partial \mathcal{L}}{\partial z} \cdot \frac{\partial z}{\partial w_i} = \delta \cdot a_i, \quad \text{其中 } \delta = \frac{\partial \mathcal{L}}{\partial z}$$
+     由於 $a_i > 0$ 恆正，同一神經元所有權重梯度的正負號完全受單一純量 $\delta$ 綁定：
+     $$\text{sign}\left(\frac{\partial \mathcal{L}}{\partial w_i}\right) = \text{sign}(\delta), \quad \forall i \in \{1, \dots, d\}$$
+     這意味著在單次梯度更新中，權重向量 $\Delta \mathbf{w} = -\eta \delta \mathbf{a}$ **要麼全部分量同時增加（$\Delta w_i > 0, \forall i$），要麼全部同時減少（$\Delta w_i < 0, \forall i$）**，幾何上被禁錮於全正象限或全負象限（Orthant Restriction）。若真實最優權重方向需要 $w_1$ 增加而 $w_2$ 減少，模型無法沿對角線直達，只能被迫以低效的「Z 字形鋸齒路徑（Zig-Zagging Dynamics）」緩慢逼近（LeCun et al., *Efficient BackProp*, 1998）。改用零均值激活函數（如 Tanh、ELU、GELU）或引入 BatchNorm / LayerNorm 將特徵拉回零中心（$\mathbb{E}[a_i] \approx 0$），即可解放全象限自由更新。
+   - **`from_logits=True` 融合算子與 Log-Sum-Exp 防下溢數值穩定性** `[DERIVATION]` `[SAFETY_BOUND]`：
+     在工程實作中，若先獨立計算 $\hat{y}_c = \frac{e^{z_c}}{\sum_j e^{z_j}}$ 再代入 $-\log(\hat{y}_c)$，當某類別 Logit $z_c \ll 0$（例如 $z_c = -100$）時，FP32 指數運算 $e^{-100} \approx 3.7 \times 10^{-44}$ 會直接發生浮點數下溢（Underflow）歸零為 `0.0`，隨即觸發 `log(0.0) = -inf` 與 `NaN` 崩潰。因此，生產級代碼必須將未歸一化 Logits 直接傳入 `F.cross_entropy(logits, target)`（或 Keras `from_logits=True`），在底層透過減去最大值 $M = \max_k z_k$ 的 **Log-Sum-Exp 恆等式**完成單趟數值穩定計算：
+     $$\mathcal{L}_{\text{CE}}(z, c) = -\log \frac{e^{z_c - M}}{\sum_{j=1}^K e^{z_j - M}} = -z_c + M + \log \sum_{j=1}^K e^{z_j - M}$$
+     確保指數項最大為 $e^0 = 1$、對數內總和嚴格介於 $[1, K]$ 之間，徹底根除上下溢。
 
 ---
 
@@ -253,6 +264,9 @@ $$\text{新旋鈕設定} = \text{舊旋鈕設定} - \eta \cdot \text{梯度}$$
     * 全場所有混進來的小偷當中，警報系統成功揪出了幾成？漏掉了幾個？
     * 公式：$\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}$。
     * *關鍵場景*：癌症篩檢、交通違規停車科技執法、動態唇紋生物特徵防偽。
+  * **ROC 曲線門檻掃描幾何與 AUC 機率意義** `[FACT]` `[DERIVATION]`：
+    * 二元分類器輸出連續分數 $s(x) \in [0, 1]$，隨判定門檻 $\tau$ 由 $1.0$ 逐步調降至 $0.0$，真正率 $\text{TPR}(\tau) = \frac{\text{TP}(\tau)}{P}$（縱軸，成功抓出多少正類）與假正率 $\text{FPR}(\tau) = \frac{\text{FP}(\tau)}{N}$（橫軸，誤抓多少負類）同步單調非減：每當門檻跨過一個真實正樣本，軌跡垂直向上移動 $\frac{1}{P}$；每跨過一個真實負樣本，軌跡水平向右移動 $\frac{1}{N}$，理想頂點為左上角 $(\text{FPR}=0, \text{TPR}=1)$。
+    * **ROC-AUC（曲線下面積）之 Wilcoxon-Mann-Whitney 統計等價性**：$\text{AUC} = \int_0^1 \text{TPR}(\text{FPR}) \, d(\text{FPR}) = P(s(x^+) > s(x^-))$，即隨機抽取一個正樣本 $x^+$ 與一個負樣本 $x^-$ 時，模型給正樣本打分高於負樣本的機率（門檻無關之排序分辨力指標）。
 
 #### (2) 物件偵測評估：框得準不準？
 * **IoU (Intersection over Union，交併比)**：
@@ -346,7 +360,7 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 
 ## 🤖 五、AI Agent 新手除錯與推論不變量合約
 
-為保證自律 AI 代理人或學生在建構訓練腳本時不犯下隱蔽錯誤，所有程式碼必須遵守以下四條不變量合約：
+為保證自律 AI 代理人或學生在建構訓練腳本時不犯下隱蔽錯誤，所有程式碼必須遵守以下五條不變量合約：
 
 ### `[RULE-001-01]` 梯度歸零防累加不變量 (Zero Gradient Invariant)
 * **合約等級**：`CRITICAL_INVARIANT`
@@ -367,6 +381,11 @@ print(f"訓練成功！單步 Loss 由 {loss.item():.4f} 開始下降，權重�
 * **合約等級**：`CRITICAL_INVARIANT`
 * **規範**：在編寫任何自訂 CNN 或特徵提取層時，必須在註解中明確標註每一層的四維張量形狀 `(Batch, Channel, Height, Width)`，並驗證空間特徵圖在進入最終分類頭前不會坍縮至 $< 1 \times 1$。
 * **物理違規後果**：過度的池化下採樣會導致微小目標（如遠距交通號誌、微小病灶）在進入深層前即因特徵圖縮減至 $1 \times 1$ 而徹底湮滅。
+
+### `[RULE-001-05]` 零中心化隱藏層激活與融合 Logits 交叉熵數值穩定不變量 (Zero-Centered Activation & Fused Logit CE Invariant)
+* **合約等級**：`STABILITY_CRITICAL`
+* **規範**：(1) 深層網路之內部隱藏層嚴禁單獨採用非零中心化的 Sigmoid 激活函數（防止下游權重梯度 $\frac{\partial \mathcal{L}}{\partial w_i} = \delta \cdot a_i$ 因 $a_i > 0$ 被迫全同號而引發 Zig-Zag 鋸齒收斂），必須採用 ReLU/GELU/Tanh 或搭配 BatchNorm/LayerNorm；(2) 分類交叉熵損失必須直接接收未歸一化 Logits（PyTorch `F.cross_entropy(logits, y)` 或 Keras `from_logits=True`）以執行融合 Log-Sum-Exp 減最大值技巧，嚴禁手動先取 `softmax`/`sigmoid` 再呼叫 `torch.log()`。
+* **物理違規後果**：手動分離計算 `log(softmax(z))` 在 $|z| > 88.7$（FP32）或 $|z| > 11.0$（FP16）時會因指數下溢為 `0.0` 直接產生 `-inf` 與 `NaN` 梯度崩潰。
 
 ---
 

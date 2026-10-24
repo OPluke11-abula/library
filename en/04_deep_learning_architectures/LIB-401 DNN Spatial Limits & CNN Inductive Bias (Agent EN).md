@@ -1,7 +1,7 @@
 ---
 call_number: LIB-401
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: DNN Spatial Limits & CNN Inductive Bias (Agent Edition)
 module: DL-Architectures
 category: Architecture-Core
@@ -73,6 +73,34 @@ In a hierarchy of $L$ convolutional layers with kernel sizes $k_l$, strides $s_l
 With dilation $d_l$:
 $$r_l = r_{l-1} + ((k_l - 1) d_l) \times j_{l-1}$$
 
+### 4. Discrete Directional Derivatives (Sobel Prior) & Backbone Evolution (LeNet-5 $\to$ VGG $\to$ Inception) `[DERIVATION]` `[LITERATURE_RESULT]`
+1. **Sobel First-Order Derivative Priors**:
+   Classical 2D edge detection convolves intensity $I(x, y)$ with horizontal and vertical Sobel kernels:
+   $$K_x = \begin{bmatrix} -1 & 0 & +1 \\ -2 & 0 & +2 \\ -1 & 0 & +1 \end{bmatrix} \approx \frac{\partial I}{\partial x}, \quad K_y = K_x^T \approx \frac{\partial I}{\partial y}$$
+   First-layer CNN filters trained via backpropagation spontaneously converge to oriented Sobel-like gradient operators and Gabor filters.
+2. **VGG Small-Kernel Factorization (Simonyan & Zisserman, ICLR 2015)** `[DERIVATION]`:
+   Stacking $m$ stride-1 $3 \times 3$ convolutions yields an effective receptive field $RF = 2m + 1$ ($m=2 \implies 5\times 5$, $m=3 \implies 7\times 7$). For channel width $C$, replacing a single $7 \times 7$ layer ($49 C^2$ parameters, 1 non-linearity) with three $3 \times 3$ layers ($3 \times 9 C^2 = 27 C^2$ parameters, 3 ReLU non-linearities) reduces parameters and MACs by **$44.9\%$**.
+3. **GoogLeNet / Inception $1 \times 1$ Pointwise Bottleneck & Global Average Pooling (`GlobalAvgPool2D`)** (Szegedy et al., CVPR 2015; Lin et al., ICLR 2014) `[DERIVATION]` `[FACT]`:
+   - **$1 \times 1$ Bottleneck Compute Compression**: For an input feature map $H \times W \times C_{\text{in}}$ ($C_{\text{in}} = 192$) and a $5 \times 5$ spatial filter outputting $C_{\text{out}} = 32$ channels:
+     - Direct $5 \times 5$ convolution requires $5^2 \cdot 192 \cdot 32 = 153,600$ MACs/pixel.
+     - Inserting a $1 \times 1$ projection bottleneck ($C_{\text{in}}=192 \xrightarrow{1\times 1} C_{\text{mid}}=16 \xrightarrow{5\times 5} C_{\text{out}}=32$) requires:
+       $$\text{MACs/pixel}_{\text{bottleneck}} = (1^2 \cdot 192 \cdot 16) + (5^2 \cdot 16 \cdot 32) = 3,072 + 12,800 = 15,872$$
+       achieving a **$9.68\times$ reduction** in parameters and FLOPs while preserving the $5 \times 5$ spatial receptive field.
+   - **Global Average Pooling (`GlobalAvgPool2D`) vs. Dense Classifier Head**:
+     Flattening a $7 \times 7 \times 512 = 25,088$-dimensional feature map into `Dense(4096)` in VGG-16 consumes $1.0276 \times 10^8$ weights ($74.5\%$ of total network parameters). Replacing `Flatten() + Dense` with `GlobalAvgPool2D` ($z_c = \frac{1}{HW}\sum_{i,j} F_{i,j,c}$) reduces transitional parameters to **$0$** and prevents overfitting.
+
+### 5. Temporal 1D-CNN (`Conv1D`) vs. Stacked Recurrent Networks (`RNN`) & Tensor Rank Conservation `[DERIVATION]` `[FACT]`
+For discrete token embedding sequences $X \in \mathbb{R}^{B \times T \times D_{\text{emb}}}$:
+1. **Temporal 1D-CNN (`Conv1D + GlobalMaxPool1D`)**: Applies kernel $W \in \mathbb{R}^{k \times D_{\text{emb}} \times C_{\text{out}}}$ across time $T$ with $O(1)$ sequential dependency depth, enabling full GPU warp parallelization across all time steps.
+2. **Stacked Recurrent Networks & Tensor Rank Conservation (`return_sequences=True`)** `[SAFETY_BOUND]`:
+   Recurrent cells evolve $h_t^{(l)} = \tanh(W_{xh}^{(l)} h_t^{(l-1)} + W_{hh}^{(l)} h_{t-1}^{(l)} + b_h^{(l)})$ with $O(T)$ sequential depth (where single-step output and state share memory identity). When stacking $L \ge 2$ recurrent layers, every non-terminal layer $l \in \{1, \dots, L-1\}$ MUST preserve the temporal axis by emitting a 3D tensor $H^{(l)} \in \mathbb{R}^{B \times T \times D_h}$ (`return_sequences=True`), whereas only the final recurrent layer $L$ collapses the time dimension to $h_T^{(L)} \in \mathbb{R}^{B \times D_h}$ (`return_sequences=False`) before dense classification.
+
+---
+
+## 2.5 Systems & Hardware Alignment: Im2Col GEMM & Winograd Transform `[FACT]`
+- **Implicit GEMM (`Im2Col`)**: Modern GPU libraries (cuDNN) lower 2D sliding-window convolutions into matrix multiplications by unrolling local $k \times k \times C_{\text{in}}$ patches into columns, mapping directly onto NVIDIA Tensor Core MMA tiles.
+- **Winograd Minimal Filtering**: For $3 \times 3$ stride-1 convolutions, Winograd $F(2\times 2, 3\times 3)$ reduces arithmetic multiplications per $2\times 2$ output tile from $36$ to $16$ ($2.25\times$ compute reduction).
+
 ---
 
 ## 3. Production PyTorch Equivariance Verification
@@ -100,6 +128,21 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
     valid_slice = slice(4, -4)
     diff = torch.max(torch.abs(out1[:, :, valid_slice, valid_slice] - out2_shifted[:, :, valid_slice, valid_slice]))
     return float(diff.item()) < 1e-5
+
+
+def verify_inception_bottleneck_compression(c_in: int = 192, c_mid: int = 16, c_out: int = 32, k: int = 5) -> float:
+    """
+    Verifies parameter and MACs compression ratio of Inception 1x1 pointwise bottleneck
+    versus direct k x k spatial convolution.
+    """
+    direct = nn.Conv2d(c_in, c_out, kernel_size=k, padding=k // 2, bias=False)
+    bottleneck = nn.Sequential(
+        nn.Conv2d(c_in, c_mid, kernel_size=1, bias=False),
+        nn.Conv2d(c_mid, c_out, kernel_size=k, padding=k // 2, bias=False)
+    )
+    p_direct = sum(p.numel() for p in direct.parameters())
+    p_bn = sum(p.numel() for p in bottleneck.parameters())
+    return p_direct / p_bn
 ```
 
 ---
@@ -121,6 +164,11 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
 - **Specification**: Resolution-preserving convolutional layers (stride $s = 1$) MUST use odd kernel sizes $k \in \{3, 5, 7\}$ with symmetric padding ($p = \lfloor k/2 \rfloor$, `padding='same'`) to prevent feature map drift and boundary truncation across deep hierarchies.
 - **Violation Consequence**: Asymmetric or unpadded convolutions induce spatial feature shifts toward frame edges, causing structural distortion in downstream feature representations.
 
+### [RULE-401-04] Pointwise Bottleneck, Global Average Pooling & Sequence Rank Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: (1) When input channels $C_{\text{in}} \ge 128$ and spatial kernel size $k \ge 5$, architectures MUST prepend a $1 \times 1$ pointwise bottleneck projection ($C_{\text{mid}} \le C_{\text{in}} / 4$) to achieve $\ge 4.0\times$ MACs reduction; (2) When terminal spatial feature volume $H \times W \times C > 4096$, `GlobalAvgPool2D` / `AdaptiveAvgPool2d((1, 1))` MUST replace `Flatten() + Dense(4096)`; (3) In $L$-layer stacked recurrent models ($L \ge 2$), all non-terminal layers $l < L$ MUST maintain 3D temporal rank $[B, T, D_h]$ (`return_sequences=True`).
+- **Violation Consequence**: Uncompressed large-kernel convolutions and dense flattening cause severe parameter bloat ($>10^8$ weights), while omitting `return_sequences=True` in intermediate recurrent layers collapses the time dimension and aborts multi-layer sequence propagation.
+
 ---
 
 ## 5. Canonical & Peer-Reviewed References
@@ -129,3 +177,5 @@ def verify_translation_equivariance(conv_layer: nn.Conv2d, shift_x: int = 2, shi
 2. **Hornik, K., Stinchcombe, M., & White, H.** (1989). "Multilayer feedforward networks are universal approximators." *Neural Networks*, 2(5), 359–366. DOI: [10.1016/0893-6080(89)90020-8](https://doi.org/10.1016/0893-6080(89)90020-8).
 3. **LeCun, Y., Bottou, L., Bengio, Y., & Haffner, P.** (1998). "Gradient-based learning applied to document recognition." *Proceedings of the IEEE*, 86(11), 2278–2324. DOI: [10.1109/5.726791](https://doi.org/10.1109/5.726791).
 4. **He, K., Zhang, X., Ren, S., & Sun, J.** (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770–778. DOI: [10.1109/CVPR.2016.90](https://doi.org/10.1109/CVPR.2016.90).
+5. **Simonyan, K., & Zisserman, A.** (2015). "Very Deep Convolutional Networks for Large-Scale Image Recognition." *International Conference on Learning Representations (ICLR 2015)*. [arXiv:1409.1556](https://arxiv.org/abs/1409.1556).
+6. **Szegedy, C., Liu, W., Jia, Y., et al.** (2015). "Going deeper with convolutions." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2015)*, pp. 1–9. DOI: [10.1109/CVPR.2015.7298594](https://doi.org/10.1109/CVPR.2015.7298594).

@@ -79,6 +79,12 @@ When executing real-time image augmentation on GPU (e.g., gain adjustments and c
 - **Eager Memory Thrashing**: Executing consecutive pointwise transformations without fusion forces multiple memory-bound kernel launches with extremely low arithmetic intensity (under FP32, $I \approx 0.1875\text{ FLOP/Byte}$), inducing sawtooth GPU utilization patterns.
 - **Triton / Compiler Fusion**: Decorating preprocessing functions with `@torch.compile` allows TorchInductor to fuse transformations into a single Triton kernel, caching intermediate values in SM registers/L1 SRAM, halving theoretical DRAM memory traffic from $16N$ to $8N\text{ Bytes}$, and preventing preprocessing from bottlenecking neural inference.
 
+### 6. Per-Image Zero-Mean Standardization Floor & Two-Stage Scale-Jittered Cropping `[DERIVATION]` `[SAFETY_BOUND]`
+- **Adjusted Standard Deviation Floor (`per_image_standardization`)**: To eliminate per-frame exposure drift across natural images $I \in \mathbb{R}^{H \times W \times C}$ ($N = H \cdot W \cdot C$), per-image standardization normalizes each frame using a lower-bounded denominator:
+  $$\hat{I} = \frac{I - \mu_I}{\sigma_{\text{adj}}}, \quad \sigma_{\text{adj}} = \max\left(\sigma_I, \; \frac{1}{\sqrt{N}}\right)$$
+  The floor $\frac{1}{\sqrt{N}}$ `[SAFETY_BOUND]` prevents division-by-zero (`NaN`) on uniform or blank frames ($\sigma_I \to 0$) by capping maximum noise amplification to $\sqrt{N}$.
+- **Two-Stage Oversampled Cropping (`Resize 247` $\to$ `RandomCrop 227`)**: Resizing input images to $247 \times 247$ prior to extracting random $227 \times 227$ crops during training (and `central_crop` at inference) yields $(247 - 227 + 1)^2 = 441$ translation-augmented views while retaining $\ge 84.5\%$ spatial field coverage.
+
 ---
 
 ## 3. Production PyTorch / OpenCV Preprocessing Implementation
@@ -157,7 +163,7 @@ def preprocess_canvas_digit(raw_image: np.ndarray) -> torch.Tensor:
 
 ### [RULE-501-02] Foreground Mask & Zero-Moment Filter
 - **Contract Level**: `BOUNDARY_GUARD`
-- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`. The threshold $M_{00} \ge 15.0$ is a project-specific defensive engineering safety bound `[SAFETY_BOUND]` designed to prevent division-by-zero during centroid computation ($M_{10}/M_{00}$) and suppress sensor noise, rather than a canonical constant defined in LeCun et al. (1998).
+- **Specification**: The raw input image MUST be filtered to extract the zero-th spatial moment $M_{00} = \sum_{x,y} I(x, y)$. If total ink mass satisfies $M_{00} < 15.0$, the input MUST be rejected as an empty or noise-only canvas via an explicit `EmptyImageException`. The threshold $M_{00} \ge 15.0$ is a project-specific defensive engineering safety bound `[SAFETY_BOUND]` designed to prevent division-by-zero during centroid computation ($M_{10}/M_{00}$) and suppress sensor noise, rather than a canonical constant defined in LeCun et al. (1998). When applying per-image zero-mean standardization (`per_image_standardization`), the denominator MUST enforce the adjusted variance floor $\sigma_{\text{adj}} = \max(\sigma_I, 1/\sqrt{N})$ `[SAFETY_BOUND]`.
 - **Violation Consequence**: Processing empty or sub-threshold noise frames produces numerical instability in center of mass division ($M_{10}/M_{00}$) and spurious high-confidence predictions.
 
 ### [RULE-501-03] Centroid Clamping & Canvas Boundary Invariant

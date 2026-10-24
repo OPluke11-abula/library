@@ -1,7 +1,7 @@
 ---
 call_number: LIB-104
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)
 module: Mathematical-Foundations
 category: Optimization
@@ -114,6 +114,21 @@ $$\theta_t = \theta_{t-1} - \eta \lambda \theta_{t-1} - \frac{\eta}{\sqrt{\hat{v
   $$X_0 = \frac{G}{\|G\|_F}, \quad X_{k+1} = \frac{1}{2} X_k (3 I - X_k^T X_k)$$
 - 使所有奇異值均被拉平為 1，徹底消除病態曲面條件數 $\kappa$ 的影響，收斂速度大幅超越 AdamW，成為超大模型訓練的次世代候選！
 
+### 5. 病態二次曲面基準 $f(x, y) = 0.5x^2 + 2.5y^2$ 軌跡幾何解剖與 AdaGrad 早衰證明 `[DERIVATION]` `[FACT]`
+為直觀定量比較各代最佳化器在峽谷地形中的動態行為，考慮經典二維各向異性二次損失基準函數：
+$$f(x, y) = 0.5x^2 + 2.5y^2, \quad \nabla f(x, y) = \begin{bmatrix} x \\ 5y \end{bmatrix}, \quad H = \nabla^2 f(x, y) = \begin{bmatrix} 1 & 0 \\ 0 & 5 \end{bmatrix}$$
+其特徵值為 $\lambda_{\min} = 1$（平緩谷底 $x$ 軸）與 $\lambda_{\max} = 5$（陡峭峽谷壁 $y$ 軸），幾何條件數 $\kappa = \frac{\lambda_{\max}}{\lambda_{\min}} = 5$，全域 Lipschitz 常數 $L = \lambda_{\max} = 5$（故單調收斂學習率上限為 $\eta < \frac{2}{L} = 0.4$）。設初始座標為 $(x_0, y_0) = (-7.0, 2.0)$，基礎學習率 $\eta = 0.3$：
+1. **純 SGD 的跨軸震盪機制**：
+   單步更新為 $x_{t+1} = (1 - \eta) x_t = 0.7 x_t$，$y_{t+1} = (1 - 5\eta) y_t = -0.5 y_t$。因為 $\eta = 0.3$ 超過了 $y$ 軸無震盪臨界步長 $\frac{1}{\lambda_{\max}} = 0.2$，導致 $y_t$ 每一步正負號反轉（$2.0 \to -1.0 \to +0.5 \to -0.25\dots$），在峽谷兩壁間劇烈鋸齒反彈，而緩坡 $x_t$ 卻收斂遲緩。
+2. **Momentum 動量正負相消 ($\gamma = 0.9$)**：
+   動量項 $v_t = \gamma v_{t-1} - \eta \nabla f(x_t, y_t)$ 在 $y$ 軸因正負梯度交替而相互抵消，抑制垂直震盪振幅；在 $x$ 軸則因梯度同號而持續累積動能加速推進。
+3. **AdaGrad 單調累積與有效學習率早衰定理 (Duchi et al., JMLR 2011)** `[DERIVATION]`：
+   AdaGrad 累積從 $t=1$ 起的所有歷史梯度平方和 $G_t = \sum_{\tau=1}^t g_\tau \odot g_\tau$，更新步為 $\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t} + \epsilon} \odot g_t$。由於平方項非負（$g_{\tau, i}^2 \ge 0$），累積量 $G_{t, i}$ 隨迭代步數單調遞增：
+   $$\lim_{t \to \infty} G_{t, i} = \sum_{\tau=1}^\infty g_{\tau, i}^2 = \infty \implies \lim_{t \to \infty} \eta_{\text{eff}, i}(t) = \frac{\eta}{\sqrt{G_{t, i}} + \epsilon} = 0$$
+   在深度非凸網路長週期訓練中，初期陡峭高原產生的巨額梯度會永久鎖死在分母 $G_t$ 中，導致有效學習率 $\eta_{\text{eff}}(t)$ 在抵達極值點前過早衰減歸零（Premature Stagnation）。
+4. **RMSprop 與 Adam 指數移動平均 (EMA) 遺忘機制與偏差修正**：
+   RMSprop 將無界累加改為指數衰減移動平均 $v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t \odot g_t$（$\beta_2 \in [0.9, 0.999]$），使有效記憶視窗限制於近 $\frac{1}{1 - \beta_2}$ 步內，徹底根除 AdaGrad 早衰停滯；Adam 進一步結合一階動量 $m_t$ 與初期零初始化偏差修正 $\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$，在 $f(x,y) = 0.5x^2 + 2.5y^2$ 上自動將 $y$ 軸步長相對於 $x$ 軸壓縮約 $\frac{\|\nabla_y f\|}{\|\nabla_x f\|}$，沿對角最短測地線平滑收斂至 $(0, 0)$。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：訓練顯存佔用剖析
@@ -198,6 +213,17 @@ if __name__ == "__main__":
 
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
+### [RULE-104-04] 二階矩指數移動平均與防 AdaGrad 早衰停滯合約 (Second-Moment EMA & Stagnation Guardrail)
+- **合約等級**: `STABILITY_CRITICAL`
+- **前置條件 (Pre-conditions)**: 配置非凸深度神經網路之長週期訓練（總步數 $T > 10^4$ 且條件數 $\kappa = \lambda_{\max}/\lambda_{\min} \ge 5$）。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **嚴禁採用無遺忘因子之單調累加二階矩 (`AdaGrad`)**：因 $G_t = \sum_{\tau=1}^t g_\tau^2$ 單調遞增會使有效學習率 $\eta_{\text{eff}}(t) = \eta / \sqrt{G_t} \to 0$，引發訓練中期停滯。
+  - **強制使用指數移動平均 (`AdamW` / `RMSprop`) 或正交化 (`Muon`)**：二階矩衰減率必須設定於 $\beta_2 \in [0.95, 0.999]$（LLM 訓練推薦 $\beta_2 = 0.95$ 以快速遺忘突發梯度尖峰），並開啟初期偏差修正 $\hat{v}_t = v_t / (1 - \beta_2^t)$。
+- **可執行斷言**:
+```python
+assert not isinstance(optimizer, torch.optim.Adagrad), "非凸深度網路長週期訓練嚴禁使用無遺忘機制之 AdaGrad！"
+```
+
 ### [RULE-104-01] Lipschitz 連續性與學習率上限熔斷合約 (Lipschitz Learning Rate & Gradient Clipping)
 - **合約等級**: `CRITICAL_INVARIANT`
 - **前置條件 (Pre-conditions)**: 模型訓練反向傳播梯度計算完畢。
@@ -246,3 +272,6 @@ if dtype == torch.float16:
 5. **2024 矩陣正交化最佳化前沿 (Muon)**
    - *Report*: Bernstein, J., et al. (2024). "Muon: An Optimizer for Hidden Layers in Neural Networks." *CleanRL Technical Report*, 2024.
    - *Core Contribution*: 利用 Newton-Schulz 奇異值正交化疊代取代逐元素梯度更新，徹底消除條件數極度病態引發之訓練震盪。
+6. **AdaGrad 自適應次梯度演算法奠基作 (JMLR 2011)**
+   - *Paper*: Duchi, J., Hazan, E., & Singer, Y. (2011). "Adaptive Subgradient Methods for Online Learning and Stochastic Optimization." *Journal of Machine Learning Research (JMLR)*, 12(Jul), 2121-2159.
+   - *Core Contribution*: 提出按歷史梯度平方和進行座標級預條件縮放之 AdaGrad 演算法，奠定後續 RMSprop 與 Adam 自適應學習率家族之理論基礎。

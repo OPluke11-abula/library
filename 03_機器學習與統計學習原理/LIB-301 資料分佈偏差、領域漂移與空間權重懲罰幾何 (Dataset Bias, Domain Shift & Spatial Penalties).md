@@ -1,7 +1,7 @@
 ---
 call_number: LIB-301
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)
 module: Machine-Learning-Theory
 category: Statistical-Learning
@@ -91,6 +91,19 @@ $$z_7(\mathbf{x}) = \underbrace{\mathbf{w}_{7, \text{pos}}^T \mathbf{x}_{\text{s
 $$z_8(\mathbf{x}) = \mathbf{w}_{8, \text{pos}}^T \mathbf{x}_{\text{penalty}} + \dots > 0$$
 當 $z_7 \to -\infty$ 且 $z_8 \gg 0$ 時，Softmax 機率呈現病態飽和：
 $$P(Y = 8 \mid \mathbf{x}) = \frac{e^{z_8}}{e^{z_8} + e^{z_7} + \sum_{k \neq 7, 8} e^{z_k}} \approx 1.000000$$
+
+### 3. 網路容量決策邊界、$L_1 / L_2$ 權重衰減微積分推導與 `EarlyStopping` 狀態回滾機制 `[DERIVATION]` `[FACT]` `[SAFETY_BOUND]`
+1. **網路深度容量與決策邊界曲率（以雙月流形 Moons 為例）**：
+   在帶雜訊之二維非線性交錯流形（如 Moons 資料集）中，ReLU 網路將輸入空間切割為指數級數量之分段線性超平面區域（$O((n_{\text{hidden}})^L)$）。當隱藏層由 2 層增至 5～6 層且未施加正則化時，過剩的模型容量會彎曲決策邊界以孤立包圍個別離群雜訊點（高方差過擬合）。
+2. **$L_2$ 權重衰減（比例收縮）vs. $L_1$ 正則化（次梯度稀疏特徵選擇）** `[DERIVATION]`：
+   - **$L_2$ 正則化 (Ridge / Weight Decay)**：在原始損失 $J(W)$ 加入二次範數懲罰 $\tilde{J}(W) = J(W) + \frac{\alpha}{2} \|W\|_2^2$，對權重求導得 $\nabla \tilde{J}(W) = \nabla J(W) + \alpha W$。代入梯度下降更新步：
+     $$W_{t+1} = W_t - \eta \left(\nabla J(W_t) + \alpha W_t\right) = (1 - \eta \alpha) W_t - \eta \nabla J(W_t)$$
+     這在幾何上等價於每一步更新前先將權重向量以因子 $(1 - \eta\alpha) < 1$ **等比例向原點線性收縮**，抑制高頻權重震盪並平滑決策邊界（$\alpha \in [10^{-4}, 10^{-2}]$ 為理想平滑區間；若 $\alpha \ge 0.1$ 則過度壓制權重引發欠擬合）。
+   - **$L_1$ 正則化 (Lasso)**：加入絕對值總和懲罰 $\tilde{J}(W) = J(W) + \alpha \|W\|_1$，其更新步包含常數次梯度項 $W_{t+1} = W_t - \eta \nabla J(W_t) - \eta \alpha \cdot \text{sign}(W_t)$，以恆定力道將微弱冗餘特徵之權重直接推至精確的 $0$，達成稀疏化特徵篩選。
+3. **Inverted Dropout 破除神經元共適應 (Co-adaptation)** `[FACT]`：
+   訓練時以保留率 $q = 1 - p$ 執行伯努利遮罩並放大 $\tilde{h} = \frac{1}{q} (m \odot h)$，強迫每個神經元無法依賴特定同伴特徵（破除共適應），同時維持前向期望值 $\mathbb{E}[\tilde{h}] = h$，使推論階段無需再次縮放權重。
+4. **`EarlyStopping` 權重回滾陷阱 (`restore_best_weights=True`)** `[SAFETY_BOUND]`：
+   當以容忍輪數 `patience = P`（如 $P = 20$）與最小改善閾值 `min_delta` 監控驗證集指標時，若驗證損失在第 $t^*$ 輪達到極小值後連續上升 $P$ 輪並於第 $t^* + P$ 輪觸發停訓：若未顯式開啟 `restore_best_weights=True`（多數框架早期預設為 `False`），最終保留在記憶體中的模型實際上是**已經過擬合退化 $P$ 個 Epoch 的第 $t^* + P$ 輪劣質權重**！生產管線必須強制鎖定 `restore_best_weights=True` 或顯式重載最佳 Checkpoint。
 
 ---
 
@@ -186,6 +199,17 @@ if recon_error > 0.08 and max_prob > 0.95:
     - 隨機平移：$\pm 8\%$ 畫布尺寸。
   - 邊界墨水保留約束：增強變換後必須保證 $\ge 90\%$ 的前景墨水質量（Foreground Ink Mass）保留於中央有效感受野區域內，嚴禁將關鍵拓樸筆劃裁切出畫布外。
 - **執行保證**: 阻斷模型僅憑像素絕對空間座標做死記硬背，強迫學習拓樸筆劃特徵。
+
+### [RULE-301-04] 正則化容量約束與早停最佳權重回滾合約 (Regularization Capacity & EarlyStopping Rollback Invariant)
+- **合約等級**: `QUALITY_BOUND`
+- **前置條件 (Pre-conditions)**: 在有限樣本或含噪資料集上訓練多層神經網路（$L \ge 3$）並配置驗證集早停機制（`EarlyStopping`）。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **權重衰減區間**：必須配置 $L_2$ 權重衰減係數 $\alpha \in [10^{-5}, 10^{-2}]$（防止 $\alpha = 0$ 高曲率過擬合或 $\alpha \ge 0.1$ 欠擬合坍縮）與隱藏層 `Dropout`（$p \in [0.2, 0.5]$）。
+  - **早停狀態強制回滾 (`restore_best_weights=True`)**：任何 `EarlyStopping(patience=P)` 回調或自訂早停迴圈，必須強制設定 `restore_best_weights=True`（或在停訓時從磁碟重載 $t^* = \arg\min_t \mathcal{L}_{\text{val}}(t)$ 之最佳權重），嚴禁直接導出第 $t^* + P$ 輪之末端退化權重。
+- **可執行斷言**:
+```python
+assert getattr(early_stopping_cb, "restore_best_weights", False) is True, "EarlyStopping 必須開啟 restore_best_weights=True 防止保留過擬合末端權重！"
+```
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)

@@ -1,7 +1,7 @@
 ---
 call_number: LIB-401
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)
 module: Deep-Learning-Foundations
 category: Neural-Architectures
@@ -93,6 +93,34 @@ $$\begin{aligned}
 $$RF_l = RF_{l-1} + (k_l - 1) \cdot \prod_{i=1}^{l-1} s_i, \quad \text{其中 } RF_0 = 1$$
 深層網路透過堆疊多個小卷積核（如兩個 $3 \times 3$ 卷積核等效於一個 $5 \times 5$ 的感受野，但參數量減少了 $2 \times 9 / 25 = 28\%$，且多了兩次非線性激活），實現由局部邊緣向全域抽象語意的金字塔式提煉。
 
+### 4. 離散方向導數先驗（Sobel 算子）與經典 CNN 骨幹演進（LeNet-5 $\to$ VGG $\to$ GoogLeNet/Inception） `[DERIVATION]` `[LITERATURE_RESULT]`
+1. **Sobel 一階差分邊緣算子先驗**：
+   在傳統數位影像處理中，偵測垂直與水平灰階梯度依靠 $3 \times 3$ Sobel 卷積核：
+   $$K_x = \begin{bmatrix} -1 & 0 & +1 \\ -2 & 0 & +2 \\ -1 & 0 & +1 \end{bmatrix} \approx \frac{\partial I}{\partial x}, \quad K_y = \begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ +1 & +2 & +1 \end{bmatrix} \approx \frac{\partial I}{\partial y}$$
+   現代 CNN 第一層卷積核在隨機初始化後經反向傳播訓練，會自發收斂出與 Sobel 差分算子及 Gabor 濾波器高度同構的邊緣與頻率基函數。
+2. **VGG 小卷積核因式分解定理 (Simonyan & Zisserman, ICLR 2015)** `[DERIVATION]`：
+   由感受野遞迴公式可知，連續堆疊 $m$ 層步幅 $s=1$ 的 $3 \times 3$ 卷積層，其等效感受野為 $RF = 2m + 1$（即 $m=2$ 等效於 $5 \times 5$，$m=3$ 等效於 $7 \times 7$）。設輸入與輸出通道數同為 $C$：
+   - 單層 $7 \times 7$ 卷積參數量：$7^2 C^2 = 49 C^2$（僅含 1 次 ReLU 非線性折疊）。
+   - 三層 $3 \times 3$ 卷積堆疊參數量：$3 \times (3^2 C^2) = 27 C^2$（**參數量與計算量直接削減 $44.9\%$**，且注入 3 次 ReLU 非線性決策折疊）。
+3. **GoogLeNet / Inception $1 \times 1$ 逐點卷積瓶頸 (Pointwise Bottleneck) 與全域平均池化 (`GlobalAvgPool2D`)** (Szegedy et al., CVPR 2015; Lin et al., ICLR 2014) `[DERIVATION]` `[FACT]`：
+   - **$1 \times 1$ 降維瓶頸計算量壓縮證明**：設輸入特徵圖尺寸為 $H \times W \times C_{\text{in}}$（例如 $C_{\text{in}} = 192$），目標經由 $k \times k$（如 $5 \times 5$）卷積輸出 $C_{\text{out}} = 32$ 通道：
+     - **直接 $5 \times 5$ 卷積**：每像素乘加次數（MACs/pixel）為 $5^2 \cdot C_{\text{in}} \cdot C_{\text{out}} = 25 \times 192 \times 32 = 153,600$。
+     - **Inception $1 \times 1$ 瓶頸分解**（先以 $1 \times 1$ 卷積將通道投影至低維瓶頸 $C_{\text{mid}} = 16$，再執行 $5 \times 5$ 卷積）：
+       $$\text{MACs/pixel}_{\text{bottleneck}} = (1^2 \cdot C_{\text{in}} \cdot C_{\text{mid}}) + (k^2 \cdot C_{\text{mid}} \cdot C_{\text{out}}) = (1 \times 192 \times 16) + (25 \times 16 \times 32) = 3,072 + 12,800 = 15,872$$
+       壓縮比達 **$\frac{153,600}{15,872} \approx 9.68\times$**，在不損失 $5 \times 5$ 空間感受野的前提下消除了近九成冗餘運算。
+   - **以 `GlobalAvgPool2D` 終結全連結分類頭的參數黑洞**：
+     在 VGG-16 中，末端 $7 \times 7 \times 512 = 25,088$ 維特徵圖經 `Flatten()` 接入 `Dense(4096)`，單層即消耗 $25,088 \times 4,096 \approx 1.0276 \times 10^8$ 個參數（佔全網路 $1.38 \times 10^8$ 總參數量的 **$74.5\%$**），極易在小樣本資料集上引發嚴重過擬合。GoogLeNet 與 ResNet 引入全域平均池化（Global Average Pooling, GAP）：
+     $$z_c = \frac{1}{H \times W} \sum_{i=1}^H \sum_{j=1}^W F_{i, j, c}, \quad \forall c \in \{1, \dots, C\}$$
+     將每個空間通道直接坍縮為單一純量語意響應（輸出 $[B, C]$），使特徵圖至分類頭之過渡層參數量降至 **$0$**，同時賦予任意輸入解析度的平移不變性。
+
+### 5. 一維時序卷積 (`Conv1D`) 與多層循環神經網路 (`RNN`) 之張量秩守恆定理 `[DERIVATION]` `[FACT]`
+當處理離散序列特徵（如自然語言詞嵌入序列 $X \in \mathbb{R}^{B \times T \times D_{\text{emb}}}$，$B$ 為批次、$T$ 為序列長度、$D_{\text{emb}}$ 為嵌入維度）時，存在兩大歸納偏置範式：
+1. **時序一維卷積 (`Conv1D + GlobalMaxPool1D`)**：
+   以核寬 $k$ 的一維濾波器 $W \in \mathbb{R}^{k \times D_{\text{emb}} \times C_{\text{out}}}$ 沿時間軸 $T$ 滑動萃取局部 $k$-gram 組合特徵，時間步之間完全無狀態依賴，序列平行深度為 **$O(1)$**，可 100% 映射至 GPU SIMT Warp 並行矩陣乘法。
+2. **循環神經網路 (`SimpleRNN` / `LSTM`) 與多層堆疊張量秩守恆**：
+   RNN 透過隱狀態遞迴方程 $h_t^{(l)} = \tanh(W_{xh}^{(l)} h_t^{(l-1)} + W_{hh}^{(l)} h_{t-1}^{(l)} + b_h^{(l)})$ 維護跨時間步記憶（單步執行時單元輸出與新狀態共享同一記憶體參照 `out is h1[0]`），其序列相依深度為 **$O(T)$**，且隨 $T$ 增長受雅可比連乘 $\frac{\partial h_T}{\partial h_1} = \prod_{t=2}^T \text{diag}(1 - (h_t)^2) W_{hh}^T$ 支配而易生梯度消失或爆炸。
+   - **`[SAFETY_BOUND]` 多層堆疊張量秩守恆定理 (`return_sequences=True`)**：當垂直堆疊 $L \ge 2$ 層循環網路時，第 $l$ 層（$1 \le l \le L-1$）必須對下一層 $l+1$ 的每一個時間步 $t \in \{1, \dots, T\}$ 提供輸入向量。因此，所有**非終端循環層**（$l < L$）必須保留時間維度，輸出三階張量 $H^{(l)} = [h_1^{(l)}, \dots, h_T^{(l)}] \in \mathbb{R}^{B \times T \times D_h}$（即強制設定 `return_sequences=True`）；僅最後一層循環層（$l = L$）在接入序列級分類頭 `Dense` 前可取末端狀態 $h_T^{(L)} \in \mathbb{R}^{B \times D_h}$（`return_sequences=False`）。若在中間層誤設為 `False`，三階時序張量將提前坍縮為二階矩陣 $[B, D_h]$，導致下一層循環算子因喪失時間軸而拋出維度崩潰例外。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射
@@ -181,6 +209,17 @@ def compare_spatial_robustness():
 
 if __name__ == "__main__":
     compare_spatial_robustness()
+    # 驗證 Inception 1x1 逐點卷積瓶頸之參數量壓縮比 (192 -> 16 -> 32, k=5)
+    direct_conv5x5 = nn.Conv2d(192, 32, kernel_size=5, padding=2, bias=False)
+    bottleneck_conv5x5 = nn.Sequential(
+        nn.Conv2d(192, 16, kernel_size=1, bias=False),
+        nn.Conv2d(16, 32, kernel_size=5, padding=2, bias=False)
+    )
+    params_direct = sum(p.numel() for p in direct_conv5x5.parameters())
+    params_bn = sum(p.numel() for p in bottleneck_conv5x5.parameters())
+    compression_ratio = params_direct / params_bn
+    print(f"5x5 卷積參數量: 直接={params_direct} vs 1x1瓶頸={params_bn} (壓縮比={compression_ratio:.2f}x)")
+    assert compression_ratio > 9.5, "Inception 1x1 瓶頸壓縮比驗證失敗！"
 ```
 
 ---
@@ -216,6 +255,18 @@ assert not isinstance(first_layer, torch.nn.Linear), "空間網格輸入嚴禁�
 - **量化決策邊界 (Decision Thresholds)**:
   - 對於保持解析度之卷積層（步幅 $s = 1$），必須嚴格配置奇數卷積核 $k \in \{3, 5, 7\}$ 且對稱填充 $p = \lfloor k/2 \rfloor$（即 `padding='same'`）。
 - **執行保證**: 杜絕特徵圖邊界像素權重退化與空間座標漂移。
+
+### [RULE-401-04] 逐點卷積瓶頸、全域平均池化與多層序列張量秩守恆合約 (Bottleneck, GAP & Sequence Rank Invariant)
+- **合約等級**: `PERFORMANCE_CRITICAL`
+- **前置條件 (Pre-conditions)**: 設計深層視覺卷積骨幹網路（如 Inception/ResNet）或多層堆疊循環序列模型（Stacked RNN/LSTM）。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **$1 \times 1$ 瓶頸壓縮**：當輸入通道數 $C_{\text{in}} \ge 128$ 且空間卷積核 $k \ge 5$ 時，必須強制前置 $1 \times 1$ 逐點卷積降維瓶頸（使 $C_{\text{mid}} \le C_{\text{in}} / 4$），確保單層 MACs 壓縮比 $\ge 4.0\times$。
+  - **全域平均池化 (`GlobalAvgPool2D`) 替代展平全連結**：當終端特徵圖展平維度 $H \times W \times C > 4096$ 時，嚴禁直接執行 `Flatten()` 接入高維 `Dense(4096)`；必須強制採用 `AdaptiveAvgPool2d((1, 1))` / `GlobalAvgPool2D()` 將空間維度收斂為 $[B, C]$。
+  - **多層序列張量秩守恆 (`return_sequences=True`)**：在堆疊 $L \ge 2$ 層循環算子時，所有非終端層 $l \in \{1, \dots, L-1\}$ 輸出必須維持三階時序張量形狀 $[B, T, D_h]$（強制開啟 `return_sequences=True`）。
+- **可執行斷言**:
+```python
+assert feat_gap.ndim == 2 and seq_hidden_l1.ndim == 3, "GAP 輸出必須為 2D [B, C]，且非終端序列層必須維持 3D [B, T, D]！"
+```
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -232,3 +283,9 @@ assert not isinstance(first_layer, torch.nn.Linear), "空間網格輸入嚴禁�
 4. **幾何深度學習 (Geometric Deep Learning) 權威著作**
    - *Book*: Bronstein, M. M., Bruna, J., Cohen, T., & Veličković, P. (2021). *Geometric Deep Learning: Grids, Groups, Graphs, Geodesics, and Gauges*. arXiv: [2104.13478](https://arxiv.org/abs/2104.13478).
    - *Core Contribution*: 以李群 (Lie Groups) 與對稱性為統一語言，從數學上證明卷積運算為歐幾里得網格上平移變換之唯一線性等變算子 (Translation Equivariant Operator)。
+5. **VGG 小卷積核階層深度網路經典 (ICLR 2015)**
+   - *Paper*: Simonyan, K., & Zisserman, A. (2015). "Very Deep Convolutional Networks for Large-Scale Image Recognition." *International Conference on Learning Representations (ICLR 2015)*. arXiv: [1409.1556](https://arxiv.org/abs/1409.1556).
+   - *Core Contribution*: 證明以連續 $3 \times 3$ 小卷積核堆疊取代 $5 \times 5$ 與 $7 \times 7$ 大卷積核，可在維持相同有效感受野下大幅削減參數量並強化非線性表徵能力。
+6. **GoogLeNet 與 Inception $1 \times 1$ 瓶頸架構奠基作 (CVPR 2015)**
+   - *Paper*: Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., Erhan, D., Vanhoucke, V., & Rabinovich, A. (2015). "Going deeper with convolutions." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2015)*, pp. 1-9. DOI: [10.1109/CVPR.2015.7298594](https://doi.org/10.1109/CVPR.2015.7298594).
+   - *Core Contribution*: 提出多尺度平行分支 Inception 模組、$1 \times 1$ 逐點卷積通道降維瓶頸與末端全域平均池化 (Global Average Pooling)，大幅壓縮參數量與計算複雜度。

@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-101_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-102_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
 
 <p align="center">
   <b>Technical Notes on Mathematical Foundations, GPU Systems, and Production Deep Learning</b>

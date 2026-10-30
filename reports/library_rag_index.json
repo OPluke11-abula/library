@@ -3,11 +3,11 @@
     "volumes_indexed": 28,
     "bilingual_files_indexed": 56,
     "parent_sections_count": 454,
-    "child_chunks_count": 898,
-    "rules_indexed_zh": 101,
-    "rules_indexed_en": 101,
-    "avg_chunk_tokens": 335.9,
-    "build_latency_ms": 1386.02
+    "child_chunks_count": 902,
+    "rules_indexed_zh": 102,
+    "rules_indexed_en": 102,
+    "avg_chunk_tokens": 338.0,
+    "build_latency_ms": 2605.81
   },
   "dag_prerequisites": {
     "LIB-000": [],
@@ -1312,6 +1312,20 @@
       "evidence_tags": [],
       "epistemic_weight": 0.75
     },
+    "LIB-203:zh:S04:C05": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射",
+      "section_h3": "5. 主機端記憶體階層：Python 及早求值 (`[]` List) vs. 惰性求值 (`()` Generator) 之 CPython 實證解剖 `[FACT]` `[EMPIRICAL_RESULT]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:zh:S05:C00": {
       "call_number": "LIB-203",
       "lang": "zh",
@@ -1390,6 +1404,21 @@
         "HEURISTIC"
       ],
       "epistemic_weight": 0.75
+    },
+    "LIB-203:zh:S06:C05": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-203-05] 惰性求值產生器與串流資料管線防耗盡合約 (Lazy Generator Streaming & Re-Entrant Iterable Guardrail)",
+      "rule_ids": [
+        "RULE-203-05"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-203:zh:S07:C00": {
       "call_number": "LIB-203",
@@ -6186,6 +6215,20 @@
       "evidence_tags": [],
       "epistemic_weight": 0.75
     },
+    "LIB-203:en:S04:C04": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "3. GPU Microarchitecture & CUDA Execution Model",
+      "section_h3": "4. Host Memory Hierarchy: Eager Evaluation (`[]` List) vs. Lazy Evaluation (`()` Generator) in CPython `[FACT]` `[EMPIRICAL_RESULT]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:en:S05:C00": {
       "call_number": "LIB-203",
       "lang": "en",
@@ -6246,6 +6289,21 @@
         "HEURISTIC"
       ],
       "epistemic_weight": 0.75
+    },
+    "LIB-203:en:S06:C05": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "5. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-203-05] Lazy Generator Streaming & Re-Entrant Iterable Guardrail",
+      "rule_ids": [
+        "RULE-203-05"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-203:en:S07:C00": {
       "call_number": "LIB-203",

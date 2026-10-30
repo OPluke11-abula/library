@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
 > **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），100 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），101 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 100 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 101 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -61,7 +61,7 @@
 | **LIB-505** | 開放詞彙 3DGS 與語意場景圖 | Open-Vocabulary 3DGS & Semantic Retrieval | 2D 語意蒸餾、跨視角共識、場景圖查詢 |
 | **LIB-506** | LLM 驅動之 3DGS 導航與問答 | LLM-Grounded 3D Scene QA & Navigation | ConceptGraphs、空間 ReAct 推論迴圈、具身導覽 |
 | **LIB-602** | 現代大語言模型架構解剖與縮放定律 | Modern LLM Architecture & Scaling Laws | Chinchilla 定律、Decoder-Only、RMSNorm、SwiGLU、GQA、稀疏 MoE |
-| **LIB-603** | 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 | Dense Retrieval, RAG & Cache-Augmented Generation Architecture | InfoNCE 互資訊下界、Bi-Encoder vs Cross-Encoder、Metadata 解耦、RAG vs CAG、LLM Wiki |
+| **LIB-603** | 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 | Dense Retrieval, RAG & Cache-Augmented Generation Architecture | InfoNCE 互資訊下界、Bi-Encoder vs Cross-Encoder、BM25+RRF、ColBERT MaxSim、GraphRAG 拓樸展開、RAG vs CAG |
 | **LIB-703** | 大模型代理人認知架構與推論協議 | LLM Agent Cognitive Architecture & Protocols | ReAct 思考迴圈、結構化工具模式、動態規劃 |
 | **LIB-704** | 雙進程神經代理人 (Jev & CUA-S1) | Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 | S1 非自迴歸型態決策引擎、位元組級反射模型、信心門控 |
 | **LIB-801** | 模型校準、不確定性估計與過度自信 | Model Calibration & Uncertainty Estimation | ECE、溫度縮放 (Temperature Scaling)、共形預測、可靠度圖 |
@@ -196,6 +196,13 @@
   - 嚴密證明非零中心化激活輸出 $a_i > 0$ 如何迫使下游權重梯度 $\frac{\partial \mathcal{L}}{\partial w_i} = \delta \cdot a_i$ 全同號並受限於全正/全負象限（Zig-Zagging Dynamics）；勘誤「單調激活函數保證網路損失為凸函數」之入門迷思；補充 `from_logits=True` 融合 Log-Sum-Exp 防下溢公式與 ROC 曲線門檻掃描 / Wilcoxon-Mann-Whitney AUC 統計等價性。
 - **P0: 方案 D — 擴充 `LIB-301` 與 `LIB-501`（$L_1/L_2$ 權重衰減、`EarlyStopping` 狀態回滾與單張影像防除零標準化，`RULE-301-04`）**：
   - 在 `LIB-301` 推導網路深度容量對雙月流形決策邊界曲率之影響、$L_2$ 比例收縮 $(1-\eta\alpha)W$ vs. $L_1$ 次梯度 $\text{sign}(W)$ 稀疏化，並建立 `EarlyStopping(restore_best_weights=True)` 狀態回滾不變量；在 `LIB-501` 增補 `per_image_standardization` 分母防除零安全下界 $\sigma_{\text{adj}} = \max(\sigma_I, 1/\sqrt{N})$ 與兩階段過採樣隨機裁切（`Resize 247` $\to$ `RandomCrop 227`）。全庫正式達成 **28 卷雙語典籍、100 條決策合約不變量**里程碑。
+
+### 16. 混合檢索倒數排名融合 (Hybrid BM25+RRF)、ColBERT 多向量延遲交互與 DAG 拓樸感知圖檢索升級（101 條不變量）
+- **P0: 擴充 `LIB-603`（Okapi BM25、RRF 倒數排名融合、ColBERT MaxSim 與 DAG 拓樸子圖展開，`RULE-603-04`）**：
+  - 推導稀疏詞彙檢索（Okapi BM25 飽和詞頻與長度正規化）與密集向量之無參數倒數排名融合（Reciprocal Rank Fusion, RRF, $k_0 = 60$，Cormack et al., SIGIR 2009），解決精確索書號與規則代號漏召回問題。
+  - 推導 ColBERT 多向量延遲交互（Late Interaction MaxSim 算子 $S(q,d) = \sum_{i} \max_{j} \langle \mathbf{e}_{q,i}, \mathbf{e}_{d,j} \rangle$，Khattab & Zaharia, SIGIR 2020）、父子階層切塊與 1-Hop DAG 先修不變量展開，以及 RAGAS 三元評估體系（Es et al., EACL 2024），並新增 `[RULE-603-04]`（`PERFORMANCE_CRITICAL`）。
+- **P0: 擴充 `LIB-703` 與 `LIB-906`（Agentic GraphRAG 路由與檢索證據分類學門控）**：
+  - 於 `LIB-703` 建立三階段 Agentic GraphRAG 檢索協議（Child-Chunk RRF $\to$ Parent Section & 1-Hop DAG 先修展開 $\to$ CAG 拓樸子圖預載入）；於 `LIB-906` 將全庫 10 種標準證據標籤綁定至 `Claim Ledger` 證據仲裁器之抗諂媚認知優先序權重。
 
 ---
 

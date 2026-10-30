@@ -1,7 +1,7 @@
 ---
 call_number: LIB-603
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent Edition)
 module: NLP-Large-Language-Models
 category: Retrieval-Augmented-Systems
@@ -13,6 +13,8 @@ math_foundations:
   - InfoNCE Contrastive Loss & Mutual Information Variational Lower Bound
   - Asymmetric Bi-Encoder MIPS vs Cross-Encoder Quadratic Attention Complexity
   - Marginalized Retrieval-Augmented Generation (RAG) vs Precomputed KV-Cache (CAG)
+  - Okapi BM25 Lexical Saturation, Reciprocal Rank Fusion (RRF) & ColBERT MaxSim Late Interaction
+  - DAG-Aware Topological Subgraph Expansion (GraphRAG) & Epistemic Provenance Gating
 hardware_target:
   - Tensor Core Batched Inner-Product & HNSW Graph Traversal
   - PagedAttention Prefix KV-Cache Pinning in GPU HBM
@@ -75,6 +77,24 @@ $$I(Q; K^+) \ge \log(N) - \mathcal{L}_{\mathrm{InfoNCE}}(\theta)$$
   $$P_{\mathrm{RAG}}(y \mid q) \approx \sum_{p \in \mathcal{Z}_K(q)} P_\eta(p \mid q) \prod_{t=1}^{T} P_\theta(y_t \mid q, p, y_{<t})$$
 - **CAG Formulation (Chan et al., 2024)**:
   For a static corpus $\mathcal{D}$ of length $S_{\mathcal{D}} \le S_{\max}$, CAG precomputes and pins the key-value tensors $\mathcal{K}\mathcal{V}_{\mathcal{D}} = \{(K_\ell(\mathcal{D}), V_\ell(\mathcal{D}))\}_{\ell=1}^L$ across all $L$ layers. Upon receiving query $q$ of length $S_q$, online prefill complexity drops from quadratic $O((S_{\mathcal{D}} + S_q)^2)$ to linear cross-attention $O(S_q \cdot S_{\mathcal{D}} + S_q^2)$ with zero retrieval recall loss `[DERIVATION]`.
+
+### 4. Sparse Lexical Retrieval (Okapi BM25) & Reciprocal Rank Fusion (RRF) `[DERIVATION]` `[LITERATURE_RESULT]`
+Pure dense embeddings project passages onto a smooth manifold $\mathbb{S}^{d-1}$, often suffering recall collapse on exact symbolic identifiers (`LIB-502`, `RULE-401-04`, LaTeX operators, or API tokens). Production pipelines pair dense retrieval with **Okapi BM25** (Robertson & Zaragoza, 2009):
+$$\mathrm{BM25}(q, d) = \sum_{t \in q \cap d} \mathrm{IDF}(t) \cdot \frac{\mathrm{tf}(t, d) \cdot (k_1 + 1)}{\mathrm{tf}(t, d) + k_1 \cdot \left(1 - b + b \cdot \frac{|d|}{\mathrm{avgdl}}\right)}, \quad \mathrm{IDF}(t) = \log\left(1 + \frac{M - n(t) + 0.5}{n(t) + 0.5}\right)$$
+where $k_1 \in [1.2, 2.0]$ bounds term-frequency saturation and $b \in [0.5, 0.8]$ (typically $b = 0.75$) normalizes document length `[FACT]`. Because unbounded BM25 log-odds and cosine similarities $\mathrm{sim}(q, d) \in [-1, 1]$ exhibit incompatible score distributions, **Reciprocal Rank Fusion (RRF, Cormack et al., SIGIR 2009)** combines ordinal ranks $\mathrm{rank}_m(q, d) \in \{1, 2, \dots\}$ without parametric calibration `[LITERATURE_RESULT]`:
+$$\mathrm{Score}_{\mathrm{RRF}}(q, d) = \sum_{m \in \{\mathrm{BM25}, \mathrm{Dense}\}} \frac{1}{k_0 + \mathrm{rank}_m(q, d)}, \quad k_0 = 60$$
+The damping constant $k_0 = 60$ prevents outlier dominance at rank $1$ while rewarding consensus passages retrieved by both lexical and semantic modalities `[DERIVATION]`.
+
+### 5. Multi-Vector Late Interaction (ColBERT MaxSim Operator) `[DERIVATION]` `[LITERATURE_RESULT]`
+To bridge the single-vector bottleneck of Bi-Encoders without incurring the $O((|q|+|d|)^2)$ online latency of Cross-Encoders, **ColBERT** (Khattab & Zaharia, SIGIR 2020) retains normalized token-level matrices $E_q(q) \in \mathbb{R}^{|q| \times d_{\mathrm{sub}}}$ and $E_d(d) \in \mathbb{R}^{|d| \times d_{\mathrm{sub}}}$ ($d_{\mathrm{sub}} = 32$) and computes the **MaxSim Operator** `[FACT]`:
+$$S_{\mathrm{MaxSim}}(q, d) = \sum_{i=1}^{|q|} \max_{j \in \{1, \dots, |d|\}} \langle \mathbf{e}_{q, i}, \mathbf{e}_{d, j} \rangle$$
+This reduces online scoring to batched GEMM and row-wise max-reduction $O(|q| \cdot |d| \cdot d_{\mathrm{sub}})$ on Tensor Cores while preserving fine-grained token alignment `[DERIVATION]`.
+
+### 6. DAG-Aware Topological GraphRAG & RAGAS Evaluation Triad `[DERIVATION]` `[DESIGN_DECISION]`
+For axiomatic knowledge graphs $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ (such as `LIB-000`), retrieving an isolated passage omits upstream mathematical definitions and safety bounds:
+1. **Parent-Child Hierarchy & 1-Hop Prerequisite Expansion**: Given retrieved nodes $\mathcal{V}_{\mathrm{hit}} \subset \mathcal{V}$, the retriever expands fine-grained child chunks to their parent sections and traverses reverse DAG edges $(u \to v) \in \mathcal{E}$ to inject upstream prerequisite invariants `[DESIGN_DECISION]`:
+   $$\mathcal{C}_{\mathrm{expanded}}(q) = \mathrm{Parent}(\mathcal{V}_{\mathrm{hit}}) \cup \bigcup_{v \in \mathcal{V}_{\mathrm{hit}}} \left\{ \mathrm{Invariants}(u) \;\middle|\; (u \to v) \in \mathcal{E} \right\}$$
+2. **RAGAS Evaluation Triad (Es et al., EACL 2024)** `[LITERATURE_RESULT]`: Evaluates pipelines across **Context Precision/Recall**, **Faithfulness** ($\frac{|\{c \in \mathcal{C}_{\mathrm{ans}} : \mathcal{C}_{\mathrm{expanded}}(q) \models c\}|}{|\mathcal{C}_{\mathrm{ans}}|}$, coupled with `LIB-906` atomic claim verification), and **Answer Relevance**.
 
 ---
 
@@ -227,6 +247,53 @@ class HybridRAGAndCAGRouter:
         return results
 
 
+class ColBERTLateInteractionScorer(nn.Module):
+    """
+    ColBERT multi-vector Late Interaction MaxSim operator (Khattab & Zaharia, SIGIR 2020).
+    Input Contract:  q_tokens [B, L_q, D_sub], d_tokens [B, L_d, D_sub]
+    Output Contract: MaxSim scores [B]
+    """
+    def __init__(self, hidden_dim: int = 64, sub_dim: int = 32):
+        super().__init__()
+        self.proj = nn.Linear(hidden_dim, sub_dim, bias=False)
+
+    def forward(self, q_tokens: torch.Tensor, d_tokens: torch.Tensor) -> torch.Tensor:
+        q_norm = F.normalize(self.proj(q_tokens), p=2, dim=-1)
+        d_norm = F.normalize(self.proj(d_tokens), p=2, dim=-1)
+        sim_matrix = torch.bmm(q_norm, d_norm.transpose(1, 2))
+        return sim_matrix.max(dim=-1).values.sum(dim=-1)
+
+
+def reciprocal_rank_fusion(
+    ranked_lists: List[List[str]],
+    k0: int = 60
+) -> List[Tuple[str, float]]:
+    """
+    Reciprocal Rank Fusion (RRF, Cormack et al., SIGIR 2009) merging BM25 and Dense rankings.
+    """
+    assert k0 >= 1, "RRF constant k0 must be positive!"
+    rrf_scores: Dict[str, float] = {}
+    for rank_list in ranked_lists:
+        for rank_idx, doc_id in enumerate(rank_list, start=1):
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + 1.0 / (k0 + rank_idx)
+    return sorted(rrf_scores.items(), key=lambda item: (-item[1], item[0]))
+
+
+def expand_dag_prerequisites(
+    hit_call_numbers: List[str],
+    dag_prereqs: Dict[str, List[str]],
+    volume_invariants: Dict[str, List[str]]
+) -> Dict[str, List[str]]:
+    """
+    DAG-aware 1-Hop prerequisite invariant expansion enforcing RULE-000-01 at retrieval time.
+    """
+    expanded_rules: Dict[str, List[str]] = {}
+    for call_num in hit_call_numbers:
+        for prereq in dag_prereqs.get(call_num, []):
+            expanded_rules[prereq] = volume_invariants.get(prereq, [])
+    return expanded_rules
+
+
 if __name__ == "__main__":
     torch.manual_seed(42)
     dim = 64
@@ -276,6 +343,17 @@ if __name__ == "__main__":
     cag_mem = router.compute_cag_kv_cache_gb(corpus_tokens=32768)
     print(f"Retrieved Chunk: {hits[0]['chunk_id']} | 32K CAG KV-Cache: {cag_mem:.2f} GB")
     assert len(hits) == 1 and len(hits[0]["expanded_content"]) > 0
+
+    fused = reciprocal_rank_fusion([["MOL-02", "MOL-01"], ["MOL-01", "MOL-02"]], k0=60)
+    colbert = ColBERTLateInteractionScorer(hidden_dim=dim, sub_dim=32)
+    maxsim_score = colbert(torch.randn(2, 6, dim), torch.randn(2, 16, dim))
+    dag_rules = expand_dag_prerequisites(
+        hit_call_numbers=["LIB-603"],
+        dag_prereqs={"LIB-603": ["LIB-102", "LIB-602"]},
+        volume_invariants={"LIB-102": ["RULE-102-01"], "LIB-602": ["RULE-602-03"]}
+    )
+    print(f"RRF Top-1: {fused[0][0]} ({fused[0][1]:.4f}) | ColBERT MaxSim: {maxsim_score[0].item():.2f} | DAG Prereqs: {list(dag_rules.keys())}")
+    assert len(fused) == 2 and maxsim_score.shape == (2,) and "LIB-102" in dag_rules
 ```
 
 ---
@@ -297,6 +375,11 @@ if __name__ == "__main__":
 - **Specification**: Knowledge-grounded systems MUST route architectures by corpus scale and mutability: (1) Static corpora with $S_{\mathcal{D}} \le 32\text{K}$ tokens and high query reuse MUST use **CAG** (precomputed PagedAttention Prefix KV-Cache); (2) Medium-scale structured domains ($\sim 10^2$ docs, $\sim 400\text{K}$ tokens) with topological dependencies MUST use **LLM Wiki** (`raw/` $\to$ `wiki/` + `index.md` + automated linter); (3) Dynamic or massive corpora ($>10^5$ tokens) MUST deploy **Two-Stage Hybrid RAG** (Bi-Encoder Top-$K_{\mathrm{init}}$ + Cross-Encoder Reranker Top-$K_{\mathrm{final}}$).
 - **Violation Consequence**: Applying naive chunked RAG to axiomatic knowledge bases severs multi-paragraph derivations, whereas stuffing megabyte corpora into uncached prompts causes HBM OOM and Lost-in-the-Middle degradation.
 
+### [RULE-603-04] Hybrid RRF & DAG Topological Expansion Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: For corpora containing exact symbolic identifiers (`LIB-xxx`, `RULE-xxx-xx`, mathematical operators, or API symbols) and DAG dependencies, Stage-1 retrieval MUST execute parallel **Okapi BM25 lexical search** ($k_1 \in [1.2, 2.0], b \in [0.5, 0.8]$) and **Dense / ColBERT MaxSim retrieval**, merging candidate rankings via **Reciprocal Rank Fusion (RRF)** with damping constant $k_0 = 60$ `[DESIGN_DECISION]`. Retrieving any node $v \in \mathcal{V}_{\mathrm{hit}}$ MUST trigger parent section expansion and 1-Hop prerequisite invariant injection ($\{ \mathrm{Invariants}(u) \mid (u \to v) \in \mathcal{E} \}$), with generated claims gated by RAGAS Faithfulness verification `[SAFETY_BOUND]`.
+- **Violation Consequence**: Pure dense retrieval suffers severe recall collapse on exact identifiers, while omitting DAG prerequisite expansion violates `RULE-000-01` by stripping upstream numerical stability and hardware alignment bounds.
+
 ---
 
 ## 6. Canonical & Peer-Reviewed References
@@ -307,3 +390,7 @@ if __name__ == "__main__":
 4. **Nogueira, R., & Cho, K.** (2019). "Passage Re-ranking with BERT." [arXiv:1901.04085](https://arxiv.org/abs/1901.04085).
 5. **Malkov, Y. A., & Yashunin, D. A.** (2020). "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs." *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*, 42(4), 824–836. DOI: [10.1109/TPAMI.2018.2889473](https://doi.org/10.1109/TPAMI.2018.2889473).
 6. **Chan, B. J., Chen, C.-T., Cheng, J.-H., & Huang, H.-H.** (2024). "Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks." [arXiv:2412.15605](https://arxiv.org/abs/2412.15605).
+7. **Cormack, G. V., Clarke, C. L., & Buettcher, S.** (2009). "Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods." *Proceedings of the 32nd International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR 2009)*, pp. 758–759. DOI: [10.1145/1571941.1572114](https://doi.org/10.1145/1571941.1572114).
+8. **Khattab, O., & Zaharia, M.** (2020). "ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT." *Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR 2020)*, pp. 39–48. [arXiv:2004.12832](https://arxiv.org/abs/2004.12832).
+9. **Robertson, S., & Zaragoza, H.** (2009). "The Probabilistic Relevance Framework: BM25 and Beyond." *Foundations and Trends in Information Retrieval*, 3(4), 333–389. DOI: [10.1561/1500000019](https://doi.org/10.1561/1500000019).
+10. **Es, S., James, J., Espinosa-Anke, L., & Schockaert, S.** (2024). "RAGAs: Automated Evaluation of Retrieval Augmented Generation." *Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics: System Demonstrations (EACL 2024)*, pp. 150–158. [arXiv:2309.15217](https://arxiv.org/abs/2309.15217).

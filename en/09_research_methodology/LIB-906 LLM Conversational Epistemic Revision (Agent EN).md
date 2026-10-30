@@ -151,7 +151,7 @@ $$
 **Provenance Tracking**: Distinguish Model self-generated claims, User-provided premises, External retrieved evidence, Contextual assumptions, and Temporal snapshots. Context Axioms must never be conflated with Real-world Ground Truth. For external retrieved evidence (see `LIB-603`), the `evidence` field encapsulates structured provenance metadata $\mathcal{M}_{\mathrm{evid}} = (\texttt{title}, \texttt{doc\_type}, \texttt{authority}, \texttt{source\_url}, \texttt{snapshot\_date}, \texttt{disclaimer})$, explicitly distinguishing binding primary texts from simplified pedagogical summaries `[DESIGN_DECISION]`.
 
 ### 4.3 Evidence Arbitration
-Compares Prior Claim, User Evidence, Retrieved Evidence, and Temporal Context. Categorization: **Support / Contradict / Insufficient**. Conflicting evidence must record provenance without artificial flattening.
+Compares Prior Claim, User Evidence, Retrieved Evidence, and Temporal Context. Categorization: **Support / Contradict / Insufficient**. Conflicting evidence must record provenance without artificial flattening. When external hybrid retrieval (`LIB-603` `RULE-603-04`) returns knowledge chunks, the arbitrator conditions revision thresholds on canonical evidence taxonomy tags: chunks anchored by `[FACT]`, `[DERIVATION]`, `[LITERATURE_RESULT]`, or `[SAFETY_BOUND]` carry high epistemic resistance against unsubstantiated user pushback (routing to `Maintain`), whereas chunks tagged `[HYPOTHESIS]`, `[OPEN_QUESTION]`, or `[HEURISTIC]` remain open to `Revise` or `Verify` under valid empirical counter-evidence `[DESIGN_DECISION]`.
 
 ### 4.4 Epistemic Action Selection
 Routes to Maintain / Revise / Verify / Clarify based on arbitration and tool availability.

@@ -264,6 +264,10 @@ def test(測試編號):
 ```
 
 * `np.argmax(..., axis=-1)`：從 10 個 Softmax 機率中，抓出數值最大的那個索引（0 到 9），這就是模型的最終判決。
+* **模型持久化與部署序列化三層光譜（Model Serialization Spectrum）** `[FACT]` `[DESIGN_DECISION]`：
+  1. **純權重張量儲存（`model.save_weights()` / PyTorch `state_dict`）**：僅序列化各層參數張量 $\{W_l, b_l\}$，不包含網路拓樸與優化器狀態。檔案最輕量且無任意程式碼執行風險，但載入前必須先於程式中重建完全同構之模型骨架（`new_model = Sequential(...)`）。
+  2. **完整模型與狀態封裝（`model.save('model.h5')` / `.keras`）**：連同網路拓樸、權重與優化器動量一併打包。若僅用於線上推論服務，載入時指定 `load_model(path, compile=False)` 可省略優化器狀態與損失計算圖重建，減少約 $50\%$ 優化器狀態記憶體開銷 `[DESIGN_DECISION]`。
+  3. **跨語言計算圖匯出（`tf.saved_model.save()` / ONNX / TorchScript）**：將前向計算圖與權重編譯為脫離 Python 直譯器之標準協定目錄，直接對接 C++ 推論伺服器或 TensorRT 算子融合引擎 `[FACT]`。
 
 ---
 

@@ -172,6 +172,19 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
    - **陷阱二：直譯器分派開銷 vs. SIMD 向量化（惰性求值不減省算術 CPU 週期）**：`()` 僅將空間複雜度由 $O(N)$ 降至 $O(1)$，但走訪 100 萬次 `next(g)` 仍需執行 100 萬次 CPython 堆疊框切換與 `PyLongObject` 裝箱/拆箱（實測 `sum(g)` 仍耗時 $\sim 770\text{ ms}$）。若目標為純數值張量運算（如百萬維向量加 1），應直接採用連續無裝箱（Unboxed）之 C/SIMD 陣列或 PyTorch/NumPy 向量化算子（$10^6$ 個 `int64` 僅佔 $8.0\text{ MB}$ 連續緩衝區，耗時 $< 2\text{ ms}$，且具備 Cache Line 合併存取優勢） `[DESIGN_DECISION]`。
    - **陷阱三：隨機存取與全局洗牌限制**：產生器不支援 `len(g)` 與 `g[i]` 下標隨機存取，無法直接執行全局 `shuffle=True`，在大型語料串流（如 `IterableDataset`）中必須搭配固定容量 $B_{\mathrm{buf}} \ll N$ 之蓄水池洗牌緩衝區（Reservoir Shuffle Buffer） `[DESIGN_DECISION]`。
 
+### 6. 張量廣播步幅視圖 (`stride = 0`)、軸向拼接/拆分階數代數與低位元整數溢位防護 `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
+在張量前處理與特徵工程（對應 NumPy / PyTorch / TensorFlow 基礎算子）中，記憶體步幅（Strides）、階數（Rank）變換與資料型別表示範圍決定了底層管線的正確性與顯存效率：
+1. **零拷貝廣播機制（Zero-Copy Broadcasting via `stride = 0`）** `[FACT]` `[DERIVATION]`：
+   當兩個形狀不同但滿足後綴維度相容規則（如特徵張量 $A \in \mathbb{R}^{B \times N \times D}$ 與偏置向量 $b \in \mathbb{R}^{1 \times 1 \times D}$）的張量進行逐元素運算時，底層張量引擎**不會**在 DRAM/HBM 中複製 $B \times N$ 份實體記憶體，而是透過修改張量標頭（Tensor Metadata Header）將被廣播維度的步幅設為 $\mathrm{stride}_0 = 0, \mathrm{stride}_1 = 0$。對邏輯座標 $(i, j, k)$ 的線性記憶體位址映射為：
+   $$\mathrm{Addr}(i, j, k) = \mathrm{BaseAddr} + i \cdot \mathrm{stride}_0 + j \cdot \mathrm{stride}_1 + k \cdot \mathrm{stride}_2$$
+   當 $\mathrm{stride}_0 = \mathrm{stride}_1 = 0$ 時，所有 $(i, j)$ 座標皆無分支映射至同一實體位址 $\mathrm{BaseAddr} + k \cdot \mathrm{stride}_2$（在 GPU 上直接命中 L1 / Constant Cache 廣播通道，額外顯存分配為 **$0\text{ Bytes}$**）。
+2. **張量拼接、分割與拆解之階數（Rank）代數守恆** `[FACT]`：
+   - **保階算子（`concat` / `split` — Rank $R \to R$）**：沿既有軸 $a \in [0, R-1]$ 拼接或按比例切分（例如將形狀為 $[5, 20, 4]$ 之三階張量沿 `axis=0` 按 $[2, 2, 1]$ 切分為三個子張量 $[2, 20, 4], [2, 20, 4], [1, 20, 4]$），輸入與輸出之張量階數恆保持 $R$ 不變。
+   - **升降階算子（`stack` / `unstack` / `expand_dims` / `squeeze` — Rank $R \to R \pm 1$）**：`stack` 創建新軸使階數升為 $R + 1$；反之，`unstack(x, axis=a)` 將長度為 $L_a$ 之指定軸完全拆解（消去該維度），返回包含 $L_a$ 個階數為 **$R - 1$** 之張量列表（如 $[5, 20, 4] \xrightarrow{\mathrm{unstack}(\mathrm{axis}=0)} 5 \times [20, 4]$）。
+3. **低位元定點整數溢位（Integer Overflow）與算術前向上轉型防護** `[FACT]` `[SAFETY_BOUND]`：
+   - 有號 16 位元整數（`int16`）之二補數表示範圍僅為 $[-2^{15}, 2^{15}-1] = [-32768, 32767]$，無號 8 位元影像像素（`uint8`）僅為 $[0, 255]$。
+   - 若將超出表示上限之數值（例如 $123,456,789 > 32,767$）存入或強制轉型為 `int16`，或直接對 `uint8` 影像張量執行累加/平方運算，底層硬體將執行模 $2^b$ 二補數高位截斷（Modulo-$2^{16}$ Wrap-around：$123456789 \equiv -13035 \pmod{65536}$），引發無報錯之靜默數值崩潰 `[SAFETY_BOUND]`。任何影像或類別索引在執行算術與正規化前，必須強制轉型（Upcast）為 `float32` 或 `int32`/`int64`。
+
 ---
 
 ## 四、💻 工業級工程實作：4 層 2^n 金字塔 DNN 參數量解析與維度對齊基準

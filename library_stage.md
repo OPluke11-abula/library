@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
 > **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），101 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），102 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 101 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 102 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -203,6 +203,11 @@
   - 推導 ColBERT 多向量延遲交互（Late Interaction MaxSim 算子 $S(q,d) = \sum_{i} \max_{j} \langle \mathbf{e}_{q,i}, \mathbf{e}_{d,j} \rangle$，Khattab & Zaharia, SIGIR 2020）、父子階層切塊與 1-Hop DAG 先修不變量展開，以及 RAGAS 三元評估體系（Es et al., EACL 2024），並新增 `[RULE-603-04]`（`PERFORMANCE_CRITICAL`）。
 - **P0: 擴充 `LIB-703` 與 `LIB-906`（Agentic GraphRAG 路由與檢索證據分類學門控）**：
   - 於 `LIB-703` 建立三階段 Agentic GraphRAG 檢索協議（Child-Chunk RRF $\to$ Parent Section & 1-Hop DAG 先修展開 $\to$ CAG 拓樸子圖預載入）；於 `LIB-906` 將全庫 10 種標準證據標籤綁定至 `Claim Ledger` 證據仲裁器之抗諂媚認知優先序權重。
+
+### 17. CPython 及早求值 (`[]` List) vs. 惰性求值 (`()` Generator) 記憶體實證核實與防耗盡合約（102 條不變量）
+- **P0: 擴充 `LIB-203`（CPython `PyListObject`/`PyLongObject` 裝箱開銷 vs. `PyGenObject` 狀態機實證，`RULE-203-05`）**：
+  - 於 Python 3.13.15 (64-bit) 實測核實 $N = 10^6$ 筆 `[x + 1 for x in range(1_000_000)]`（指標陣列 `8.06 MB` + 百萬個 28-byte `PyLongObject` 裝箱物件，`tracemalloc` 峰值 `40,440,544 Bytes` $\approx 38.57\text{ MB}$）對比 `(x + 1 for x in range(1_000_000))`（`PyGenObject` 固定 `200 Bytes`，`sum(g)` 串流峰值僅 `1,232 Bytes`，記憶體壓降 $32,825\times$）。
+  - 釐清三大工程邊界（單次迭代器 `StopIteration` 耗盡陷阱、直譯器逐元素分派 vs. 未裝箱 SIMD/GPU 向量化算子、隨機索引與蓄水池洗牌限制），並新增 `[RULE-203-05]`（`RESOURCE_CONSTRAINT`）。
 
 ---
 

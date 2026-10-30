@@ -31,7 +31,7 @@
     "LIB-906",
     "LIB-905"
   ],
-  "invariants_total": 101,
+  "invariants_total": 102,
   "checks_enabled": 11,
   "error_count": 0,
   "errors": [],

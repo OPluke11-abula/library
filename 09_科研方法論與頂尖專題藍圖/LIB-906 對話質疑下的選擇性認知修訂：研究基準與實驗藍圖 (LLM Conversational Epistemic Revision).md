@@ -176,7 +176,7 @@ $$
 
 在 Pushback 後比較 Prior Claim、User Evidence、Retrieved Evidence 與 Timestamp / Temporal Context。最小分類：**Support / Contradict / Insufficient**。Conflicting Evidence（相互衝突證據）應記錄衝突來源與可信度，不可強行壓成單一真值。
 
-此步驟需區分資料來源是否可靠、是否直接指向目標 Claim、時間是否匹配，以及是否僅支持部分敘述。User assertion 不自動等於 Ground Truth。
+此步驟需區分資料來源是否可靠、是否直接指向目標 Claim、時間是否匹配，以及是否僅支持部分敘述。User assertion 不自動等於 Ground Truth。當外部檢索器（參見 `LIB-603` `RULE-603-04`）召回知識庫段落時，證據仲裁器進一步依據標準證據標籤賦予認知優先序權重：`[FACT]` / `[DERIVATION]` / `[LITERATURE_RESULT]` / `[SAFETY_BOUND]` 具備高優先度抗推翻保護（無同等級反證時強制路由至 `Maintain`），而標記為 `[HYPOTHESIS]` / `[OPEN_QUESTION]` / `[HEURISTIC]` 之檢索段落則允許在有效實證反例下觸發 `Revise` 或 `Verify` `[DESIGN_DECISION]`。
 
 ### 4.4 Epistemic Action Selection（認知動作選擇）
 

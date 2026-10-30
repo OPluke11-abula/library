@@ -1,7 +1,7 @@
 ---
 call_number: LIB-603
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)
 module: NLP-Large-Language-Models
 category: Retrieval-Augmented-Systems
@@ -13,6 +13,8 @@ math_foundations:
   - InfoNCE Contrastive Loss & Mutual Information Variational Lower Bound
   - Asymmetric Bi-Encoder MIPS vs Cross-Encoder Quadratic Attention Complexity
   - Marginalized Retrieval-Augmented Generation (RAG) vs Precomputed KV-Cache (CAG)
+  - Okapi BM25 Lexical Saturation, Reciprocal Rank Fusion (RRF) & ColBERT MaxSim Late Interaction
+  - DAG-Aware Topological Subgraph Expansion (GraphRAG) & Epistemic Provenance Gating
 hardware_target:
   - Tensor Core Batched Inner-Product & HNSW Graph Traversal
   - PagedAttention Prefix KV-Cache Pinning in GPU HBM
@@ -98,6 +100,32 @@ $$I(Q; K^+) \ge \log(N) - \mathcal{L}_{\mathrm{InfoNCE}}(\theta)$$
   當線上查詢 $q$（長度 $S_q$）到達時，無需執行任何向量檢索，亦無需重新計算知識庫的 Prefill 階段 $O(S_{\mathcal{D}}^2)$，僅需將 $q$ 附加於快取後端，計算增量注意力：
   $$\mathrm{Attention}(Q_q, [K_{\mathcal{D}}; K_q], [V_{\mathcal{D}}; V_q])$$
   其線上 Prefill 計算複雜度由 $O((S_{\mathcal{D}} + S_q)^2)$ 驟降至線性交叉項 $O(S_q \cdot S_{\mathcal{D}} + S_q^2)$ `[DERIVATION]`！
+
+### 4. 稀疏詞彙檢索 (Okapi BM25) 與倒數排名融合 (Reciprocal Rank Fusion, RRF) `[DERIVATION]` `[LITERATURE_RESULT]`
+純密集向量檢索（Dense Retrieval）將序列壓縮至平滑連續流形 $\mathbb{S}^{d-1}$，在面對精確符號識別碼（如索書號 `LIB-502`、合約代號 `RULE-401-04`、LaTeX 算子或罕見專有名詞）時容易發生語意漂移。生產級系統必須結合**稀疏詞彙檢索（Okapi BM25，Robertson & Zaragoza, 2009）**：
+$$\mathrm{BM25}(q, d) = \sum_{t \in q \cap d} \mathrm{IDF}(t) \cdot \frac{\mathrm{tf}(t, d) \cdot (k_1 + 1)}{\mathrm{tf}(t, d) + k_1 \cdot \left(1 - b + b \cdot \frac{|d|}{\mathrm{avgdl}}\right)}, \quad \mathrm{IDF}(t) = \log\left(1 + \frac{M - n(t) + 0.5}{n(t) + 0.5}\right)$$
+其中 $k_1 \in [1.2, 2.0]$ 控制詞頻飽和速率（防止長文重複詞無限刷高分數），$b \in [0.5, 0.8]$（常取 $b = 0.75$）執行文檔長度正規化 `[FACT]`。
+由於 BM25 無界對數奇異分數與密集向量餘弦相似度 $\mathrm{sim}(q, d) \in [-1, 1]$ 處於不同尺度分佈，直接線性加權對離群值極度敏感。**倒數排名融合（Reciprocal Rank Fusion, RRF，Cormack et al., SIGIR 2009）**改以序數排名 $\mathrm{rank}_m(d) \in \{1, 2, \dots\}$ 進行無參數非線性融合 `[LITERATURE_RESULT]`：
+$$\mathrm{Score}_{\mathrm{RRF}}(q, d) = \sum_{m \in \{\mathrm{BM25}, \mathrm{Dense}\}} \frac{1}{k_0 + \mathrm{rank}_m(q, d)}, \quad k_0 = 60$$
+- **數學性質**：平滑常數 $k_0 = 60$ 抑制了單一檢索器偶然排在第 1 名（$1/(60+1) \approx 0.0164$）對第 2 名（$1/(60+2) \approx 0.0161$）的極端支配，而同時被稀疏與密集檢索器排入前列的共識文檔則獲得雙倍分數疊加，無需任何驗證集校準即可穩定超越單一模態檢索 `[DERIVATION]`。
+
+### 5. 多向量延遲交互機制 (ColBERT Late Interaction & MaxSim Operator) `[DERIVATION]` `[LITERATURE_RESULT]`
+為同時克服 Bi-Encoder 單一向量資訊瓶頸與 Cross-Encoder 線上 $O((|q|+|d|)^2)$ 巨額延遲，Khattab & Zaharia (SIGIR 2020) 提出 **ColBERT 延遲交互架構（Late Interaction）**：
+1. 離線階段保留文檔每個 Token 的上下文化嵌入矩陣 $E_d(d) = [\mathbf{e}_{d,1}, \dots, \mathbf{e}_{d,|d|}]^\top \in \mathbb{R}^{|d| \times d_{\mathrm{sub}}}$（經 $L_2$ 正規化與降維量化，如 $d_{\mathrm{sub}} = 32$）。
+2. 線上查詢僅需獨立編碼 $E_q(q) = [\mathbf{e}_{q,1}, \dots, \mathbf{e}_{q,|q|}]^\top \in \mathbb{R}^{|q| \times d_{\mathrm{sub}}}$，並透過無參數之**最大相似度算子（MaxSim Operator）**執行跨序列對齊 `[FACT]`：
+   $$S_{\mathrm{MaxSim}}(q, d) = \sum_{i=1}^{|q|} \max_{j \in \{1, \dots, |d|\}} \langle \mathbf{e}_{q, i}, \mathbf{e}_{d, j} \rangle$$
+- **計算優勢**：將線上交互複雜度由 Transformer 跨層自注意力降至單次輕量級矩陣內積與逐列歸約 $O(|q| \cdot |d| \cdot d_{\mathrm{sub}})$，完美適配 GPU Tensor Core 批次化執行，同時保留細粒度數學符號與程式碼 Token 的一對一精準匹配 `[DERIVATION]`。
+
+### 6. DAG 拓樸感知圖檢索 (Topological GraphRAG) 與 RAGAS 評估體系 `[DERIVATION]` `[DESIGN_DECISION]`
+針對具備嚴格公理依賴的科學知識庫（如本館由 `LIB-000` 定義的有向無環圖 $\mathcal{G} = (\mathcal{V}, \mathcal{E})$），單純召回目標段落會遺漏上游先修定義與安全邊界：
+1. **父子階層切塊與 1-Hop 先修拓樸展開（Parent-Child & DAG Subgraph Expansion）**：
+   設檢索命中節點集合為 $\mathcal{V}_{\mathrm{hit}} \subset \mathcal{V}$。系統首先將命中的細粒度子塊（Child Chunk，如單一公式或 `RULE`）回溯展開至所屬完整母章節（Parent Section），接著沿 DAG 反向邊自動提取一階與傳遞先修節點之核心決策不變量集合 `[DESIGN_DECISION]`：
+   $$\mathcal{C}_{\mathrm{expanded}}(q) = \mathrm{Parent}(\mathcal{V}_{\mathrm{hit}}) \cup \bigcup_{v \in \mathcal{V}_{\mathrm{hit}}} \left\{ \mathrm{Invariants}(u) \;\middle|\; (u \to v) \in \mathcal{E} \right\}$$
+   此機制在檢索層硬性落實 `LIB-000` 的 `RULE-000-01`（先修依賴強制攔截），確保 LLM 生成跨領域推導時，上游數值穩定界與硬體對齊約束同步駐留於上下文視窗。
+2. **RAGAS 檢索生成三元評估體系 (Es et al., EACL 2024)** `[LITERATURE_RESULT]`：
+   - **上下文精確率與召回率 (Context Precision@K & Recall@K)**：衡量黃金證據是否被排入 Top-$K$ 前列。
+   - **忠實度 (Faithfulness / Groundedness)**：將模型回答拆解為原子主張集合 $\mathcal{C}_{\mathrm{ans}}$（銜接 [[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]），計算可由檢索上下文 $\mathcal{C}_{\mathrm{expanded}}(q)$ 邏輯蘊含之比例 $\mathrm{Faithfulness} = \frac{|\{c \in \mathcal{C}_{\mathrm{ans}} : \mathcal{C}_{\mathrm{expanded}}(q) \models c\}|}{|\mathcal{C}_{\mathrm{ans}}|}$。
+   - **回答相關性 (Answer Relevance)**：衡量生成回應對原始問題意圖之直接覆蓋度。
 
 ---
 
@@ -275,6 +303,55 @@ class HybridRAGAndCAGRouter:
         return results
 
 
+class ColBERTLateInteractionScorer(nn.Module):
+    """
+    ColBERT 多向量延遲交互 MaxSim 算子 (Khattab & Zaharia, SIGIR 2020)
+    Input Contract:  q_tokens [B, L_q, D_sub], d_tokens [B, L_d, D_sub]
+    Output Contract: MaxSim scores [B]
+    """
+    def __init__(self, hidden_dim: int = 64, sub_dim: int = 32):
+        super().__init__()
+        self.proj = nn.Linear(hidden_dim, sub_dim, bias=False)
+
+    def forward(self, q_tokens: torch.Tensor, d_tokens: torch.Tensor) -> torch.Tensor:
+        q_norm = F.normalize(self.proj(q_tokens), p=2, dim=-1)  # [B, L_q, D_sub]
+        d_norm = F.normalize(self.proj(d_tokens), p=2, dim=-1)  # [B, L_d, D_sub]
+        # Token-level similarity matrix: [B, L_q, L_d]
+        sim_matrix = torch.bmm(q_norm, d_norm.transpose(1, 2))
+        # MaxSim operator: sum over query tokens of max over document tokens
+        return sim_matrix.max(dim=-1).values.sum(dim=-1)
+
+
+def reciprocal_rank_fusion(
+    ranked_lists: List[List[str]],
+    k0: int = 60
+) -> List[Tuple[str, float]]:
+    """
+    倒數排名融合 (RRF, Cormack et al., SIGIR 2009): 結合 BM25 稀疏檢索與密集向量排名
+    """
+    assert k0 >= 1, "RRF constant k0 must be positive!"
+    rrf_scores: Dict[str, float] = {}
+    for rank_list in ranked_lists:
+        for rank_idx, doc_id in enumerate(rank_list, start=1):
+            rrf_scores[doc_id] = rrf_scores.get(doc_id, 0.0) + 1.0 / (k0 + rank_idx)
+    return sorted(rrf_scores.items(), key=lambda item: (-item[1], item[0]))
+
+
+def expand_dag_prerequisites(
+    hit_call_numbers: List[str],
+    dag_prereqs: Dict[str, List[str]],
+    volume_invariants: Dict[str, List[str]]
+) -> Dict[str, List[str]]:
+    """
+    DAG 拓樸感知 1-Hop 先修不變量展開：確保檢索時強制帶入上游先修卷之核心 RULE 合約
+    """
+    expanded_rules: Dict[str, List[str]] = {}
+    for call_num in hit_call_numbers:
+        for prereq in dag_prereqs.get(call_num, []):
+            expanded_rules[prereq] = volume_invariants.get(prereq, [])
+    return expanded_rules
+
+
 if __name__ == "__main__":
     torch.manual_seed(42)
     dim = 64
@@ -324,6 +401,18 @@ if __name__ == "__main__":
     cag_mem = router.compute_cag_kv_cache_gb(corpus_tokens=32768)
     print(f"Retrieved Chunk: {hits[0]['chunk_id']} | 32K CAG KV-Cache: {cag_mem:.2f} GB")
     assert len(hits) == 1 and "部分工時休假規範" not in hits[0]["chunk_id"] or len(hits[0]["expanded_content"]) > 0
+
+    # 驗證 RRF 混合融合、ColBERT MaxSim 與 DAG 先修展開
+    fused = reciprocal_rank_fusion([["MOL-02", "MOL-01"], ["MOL-01", "MOL-02"]], k0=60)
+    colbert = ColBERTLateInteractionScorer(hidden_dim=dim, sub_dim=32)
+    maxsim_score = colbert(torch.randn(2, 6, dim), torch.randn(2, 16, dim))
+    dag_rules = expand_dag_prerequisites(
+        hit_call_numbers=["LIB-603"],
+        dag_prereqs={"LIB-603": ["LIB-102", "LIB-602"]},
+        volume_invariants={"LIB-102": ["RULE-102-01"], "LIB-602": ["RULE-602-03"]}
+    )
+    print(f"RRF Top-1: {fused[0][0]} ({fused[0][1]:.4f}) | ColBERT MaxSim: {maxsim_score[0].item():.2f} | DAG Prereqs: {list(dag_rules.keys())}")
+    assert len(fused) == 2 and maxsim_score.shape == (2,) and "LIB-102" in dag_rules
 ```
 
 ---
@@ -355,6 +444,14 @@ if __name__ == "__main__":
   - **兩階段混合 RAG 路由條件**：當知識庫規模龐大（$S_{\mathcal{D}} > 10^5$ Tokens）或高頻動態變動時，必須採用 **Bi-Encoder Top-$K_{\mathrm{init}}$ 召回 + Cross-Encoder Top-$K_{\mathrm{final}}$ 重排序** 之兩階段管線。
 - **違規後果 (Violation Consequence)**: 對高密度公理體系盲目套用碎塊化 Naive RAG 會切斷跨段落數學推導鏈；反之對百萬級動態語料強行塞入單一 Prompt 則會引發顯存 OOM 與長上下文注意力退化（Lost-in-the-Middle）。
 
+### [RULE-603-04] 混合檢索倒數排名融合 (RRF) 與 DAG 先修拓樸展開合約 (Hybrid RRF & DAG Topological Expansion Invariant)
+- **合約等級**: `PERFORMANCE_CRITICAL`
+- **前置條件 (Pre-conditions)**: 在包含精確技術識別碼（索書號 `LIB-xxx`、不變量代號 `RULE-xxx-xx`、數學符號或程式碼 API）與跨卷先修依賴之知識庫上執行檢索增強生成。
+- **量化決策邊界 (Decision Thresholds)**:
+  - 階段一召回嚴禁單獨依賴密集向量餘弦相似度；必須並行執行 **稀疏詞彙檢索（Okapi BM25，$k_1 \in [1.2, 2.0], b \in [0.5, 0.8]$）** 與 **密集向量檢索（Dense Bi-Encoder / ColBERT MaxSim）**，並透過平滑常數 $k_0 = 60$ 之 **倒數排名融合（Reciprocal Rank Fusion, RRF）** 合併候選清單 `[DESIGN_DECISION]`。
+  - 當檢索命中具備 DAG 拓樸依賴之知識節點 $v \in \mathcal{V}_{\mathrm{hit}}$ 時，檢索器必須自動執行 **父章節展開（Parent Section Expansion）** 與 **1-Hop 先修不變量注入（提取所有 $(u \to v) \in \mathcal{E}$ 之核心 `RULE` 合約）**，且生成回答之 RAGAS 忠實度（Faithfulness）必須受結構化證據標籤門控核驗 `[SAFETY_BOUND]`。
+- **違規後果 (Violation Consequence)**: 純密集檢索在精確代號與罕見術語上會發生嚴重漏召回（Recall Collapse）；省略 DAG 先修展開則會導致下游推導遺漏上游數值穩定界與硬體對齊約束，違反 `RULE-000-01`。
+
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -377,3 +474,15 @@ if __name__ == "__main__":
 6. **緩存增強生成 CAG 與預計算 KV-Cache 基準對比**
    - *Paper*: Chan, B. J., Chen, C.-T., Cheng, J.-H., & Huang, H.-H. (2024). "Don't Do RAG: When Cache-Augmented Generation is All You Need for Knowledge Tasks." *arXiv:2412.15605*. URL: [https://arxiv.org/abs/2412.15605](https://arxiv.org/abs/2412.15605).
    - *Core Contribution*: 系統性論證當知識庫可容納於長上下文視窗時，預先計算並緩存 KV-Cache（CAG）能徹底消除檢索誤差並顯著降低推論延遲。
+7. **倒數排名融合演算法 RRF (ACM SIGIR 頂會)**
+   - *Paper*: Cormack, G. V., Clarke, C. L., & Buettcher, S. (2009). "Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods." *Proceedings of the 32nd International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR 2009)*, pp. 758–759. DOI: [10.1145/1571941.1572114](https://doi.org/10.1145/1571941.1572114).
+   - *Core Contribution*: 提出無需分數分佈校準之 $\sum \frac{1}{k_0 + r(d)}$（$k_0=60$）序數融合公式，成為現代稀疏與密集混合檢索（Hybrid Search）之工業標準。
+8. **ColBERT 多向量延遲交互檢索架構 (ACM SIGIR 頂會)**
+   - *Paper*: Khattab, O., & Zaharia, M. (2020). "ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT." *Proceedings of the 43rd International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR 2020)*, pp. 39–48. arXiv: [2004.12832](https://arxiv.org/abs/2004.12832).
+   - *Core Contribution*: 提出 Token 級別之 MaxSim 延遲交互算子，在維持接近 Cross-Encoder 精度的同時將線上檢索延遲降低兩個數量級。
+9. **Okapi BM25 機率檢索框架奠基綜述**
+   - *Paper*: Robertson, S., & Zaragoza, H. (2009). "The Probabilistic Relevance Framework: BM25 and Beyond." *Foundations and Trends in Information Retrieval*, 3(4), 333–389. DOI: [10.1561/1500000019](https://doi.org/10.1561/1500000019).
+   - *Core Contribution*: 嚴密推導詞頻飽和（TF Saturation）與文檔長度正規化之機率檢索模型。
+10. **RAGAS 自動化檢索增強生成評估框架 (EACL 頂會)**
+    - *Paper*: Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2024). "RAGAs: Automated Evaluation of Retrieval Augmented Generation." *Proceedings of the 18th Conference of the European Chapter of the Association for Computational Linguistics: System Demonstrations (EACL 2024)*, pp. 150–158. arXiv: [2309.15217](https://arxiv.org/abs/2309.15217).
+    - *Core Contribution*: 建立無需人工參考答案之 Context Precision、Faithfulness 與 Answer Relevance 三維度評估標準。

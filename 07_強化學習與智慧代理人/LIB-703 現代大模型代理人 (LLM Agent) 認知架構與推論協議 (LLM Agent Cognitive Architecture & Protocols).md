@@ -126,6 +126,9 @@ AI Agent 的運算受制於底層計算機資源限制：
 - 更嚴重的是**「大海撈針效應 (Lost in the Middle)」**：當 Context 超過 32k 時，LLM 對中間區域系統指令的注意力加權顯著下降。
 - **最佳實踐**：Agent 必須定期將關鍵事實總結寫入 `scratch/` 或持久化筆記，並對歷史上下文進行有界截斷（Context Compaction）。
 
+### 2. Agentic GraphRAG 與拓樸子圖動態編譯路由 `[DESIGN_DECISION]`
+當 Agent 在本知識庫執行跨卷深度推理時，遵循 [[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]] 之 `RULE-603-04`，將檢索動作封裝為三階段認知協議：(1) **小塊精準定位（Child Chunk Hybrid RRF）**：以 BM25 + Dense RRF 鎖定目標公式、代碼塊或 `RULE-xxx-xx`；(2) **母段落與 1-Hop DAG 先修展開**：自動回溯母章節並提取 `prerequisites` 前置卷之全數核心合約；(3) **CAG 子圖預載入編譯**：針對特定專題子圖（$\le 32\text{K}$ Tokens），離線拓樸排序所有上游先修卷並一次性鎖定於 PagedAttention Prefix KV-Cache，使多輪 ReAct 迴圈零檢索延遲存取完整公理鏈 `[DESIGN_DECISION]`。
+
 ---
 
 ## 四、💻 工業級工程實作：強健型 Agent 執行迴圈與錯誤恢復引擎

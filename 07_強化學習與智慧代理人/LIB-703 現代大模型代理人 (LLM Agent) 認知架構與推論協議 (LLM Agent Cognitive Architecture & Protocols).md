@@ -1,7 +1,7 @@
 ---
 call_number: LIB-703
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: 現代大模型代理人 (LLM Agent) 認知架構與推論協議 (LLM Agent Cognitive Architecture & Protocols)
 module: Reinforcement-Learning-Agents
 category: Agent-Cognition
@@ -72,6 +72,16 @@ successors:
 - **三元角色狀態空間與多供應商統一路由 (`provider:model`)** `[FACT]` `[DESIGN_DECISION]`：
   - 現代對話與代理人 API 嚴格區分 `system`（全局人設、行為約束與領域知識基準 $s_{\mathrm{sys}}$）、`user`（環境或人類輸入 $u_t$）與 `assistant`（模型動作與回應 $a_t$），條件生成分佈形式化為 $P_\theta(a_t \mid s_{\mathrm{sys}}, u_1, a_1, \dots, u_t)$。透過統一抽象層（如吳恩達 `aisuite` 之 `provider:model` 路由協議），Agent 可在單一狀態機內無縫切換雲端前沿推理模型與本地端低延遲模型。
 
+### 3. AI Agent 系統方程式與五大工程演進階梯 (`AI Agent = AI Model + Harness`) `[FACT]` `[DESIGN_DECISION]`
+傳統單輪提示（Zero-Shot Prompt $\to$ LLM $\to$ Output）猶如強迫人類作家「不准按退格鍵、不准查資料、不准修改草稿，從第一個字一路寫到交稿」。在真實工程中，將被動語言模型轉化為可靠代理人的核心公式為：
+$$\text{AI Agent} = \text{AI Model (機率推論核心)} + \text{Harness (工具執行框架、記憶與驗證護欄)}$$
+其系統設計隨任務複雜度呈現五大工程演進階梯 `[DESIGN_DECISION]`：
+1. **Prompt Engineering（提示工程）**：單輪指令措辭與輸出格式約束最佳化。
+2. **Context Engineering（上下文工程）**：動態檢索並結構化注入背景知識（RAG）、規定條文、範例與受眾條件。
+3. **Harness Engineering（框架與護欄工程）**：封裝外部確定性工具（計算機、資料庫、編譯器）、JSON Schema 型別契約與沙盒權限邊界。
+4. **Loop Engineering（迴圈工程）**：建立生成、執行、測試、反思（Reflection）與錯誤自動重試之閉環控制流。
+5. **Graph Engineering（圖譜與多代理編排工程）**：以有向無環圖（DAG）或有限狀態機編排跨角色多代理人（PM 規劃者、執行者、審稿者）與結構化知識圖譜（GraphRAG）。
+
 ---
 
 ## 二、🎓 博士級數學形式化推導：POMDP 形式化、ReAct 迴圈與樹狀思考 (ToT)
@@ -99,6 +109,27 @@ $$o_t = \text{Environment}(a_t) \quad \text{[觀察：執行結果回饋]}$$
 - 每個節點代表一個部分思考狀態 $s = [x, z_{1 \dots i}]$。
 - 狀態評估函數 $V(s)$ 評估當前路徑的可行性（Sure / Likely / Impossible）。
 - 結合廣度優先搜尋 (BFS) 或深度優先搜尋 (DFS) 與回溯機制（Backtracking），實現自適應錯誤剪枝。
+
+### 4. 吳恩達 (Andrew Ng) 四大 Agentic Design Patterns、兩階段工具路由與 MCP / A2A 雙層協定拓樸 `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]`
+現代代理人工作流（Agentic Workflows，Ng 2024）可歸納為四大正交設計模式與雙層通訊協定：
+1. **Reflection（自我反思與異構雙模型審稿迴圈）**：
+   將單次開迴路生成 $y^{(0)} \sim P_{\theta_{\mathrm{gen}}}(y \mid x)$ 改為「作者模型 $\theta_{\mathrm{gen}}$」與「評論員模型 $\theta_{\mathrm{critic}}$（可配置異構推理模型或單元測試驗證器）」之交替修正算子：
+   $$c^{(k)} \sim P_{\theta_{\mathrm{critic}}}\left(c \mid x, y^{(k)}\right), \quad y^{(k+1)} \sim P_{\theta_{\mathrm{gen}}}\left(y \mid x, y^{(k)}, c^{(k)}\right)$$
+2. **Tool Use（兩階段確定性工具路由與 JSON Schema 接地）** `[DERIVATION]` `[DESIGN_DECISION]`：
+   自迴歸語言模型本質上不擅長精確算術、即時庫存查詢或外部狀態變更。標準工具調用必須嚴格拆解為**兩階段 LLM 參與閉環（Two-Stage Tool Routing）**：
+   - **第一階段（意圖解析与函數參數生成）**：向 LLM 宣告可用工具簽章集合 $\mathcal{F} = \{\texttt{get\_menu}(), \texttt{quote\_order}(\texttt{item\_name}, \texttt{quantity})\}$。當使用者輸入 $u = \text{「我想訂 20 杯麥茶」}$ 時，LLM 不直接心算價格，而是輸出結構化呼叫指令 $a_1 = \texttt{quote\_order("麥茶", 20)}$。
+   - **第二階段（宿主確定性執行與 JSON 表單接地合成）**：宿主框架（Harness）攔截並執行真實 Python/資料庫函數，回傳具嚴格欄位名稱之 JSON 資料表單：
+     $$o_1 = \texttt{\{"ok": true, "item\_name": "麥茶", "quantity": 20, "unit\_price": 30, "total": 600, "stock": 30, "currency": "TWD", "ordered": false\}}$$
+     再將 $(u, a_1, o_1)$ 一併餵回 LLM 生成最終自然語言回覆 $a_2 \sim P_\theta(a \mid u, a_1, o_1)$，確保金額與庫存 $100\%$ 零幻覺。
+3. **Planning（先驗任務規劃與 `<think>` 思維鏈拆解）** 與 **Multiagent Collaboration（多代理協作與 PM 分工）**：
+   在執行前先由規劃模型（或具備 `<think>...</think>` 顯式推論標籤之推理模型，如 DeepSeek-R1）將複合需求拆解為子任務序列 $\{g_1, g_2, \dots, g_m\}$，並由 PM（Project Manager）代理依專長分派予對應之計算、檢索或審計子代理協同完成。
+4. **雙層標準化通訊協定正交解耦：Anthropic MCP vs. Google A2A** `[FACT]` `[DESIGN_DECISION]`：
+   - **垂直層 — MCP (Model Context Protocol, Anthropic)**：定義**單一 Agent 如何規劃與調用外部工具、本地檔案或資料來源**之標準化 JSON-RPC 2.0 介面（Agent $\leftrightarrow$ Tools/Data）。
+   - **水平層 — A2A (Agent-to-Agent Protocol, Google)**：定義**多個自主 Agent 之間如何交換狀態、探索彼此能力（Agent Card）與協同指派任務**之跨代理通訊協定（Agent $\leftrightarrow$ Agent）。
+
+### 5. AI 時代三種開發模式與「Vibe Coding」之生產工程邊界 `[FACT]` `[SAFETY_BOUND]`
+Andrej Karpathy (2025) 將當代軟體工程劃分為三種範式：(1) **純手工編碼**（完全不用 LLM，已不符算力槓桿效益）；(2) **人類主導 + AI 輔助工程（AI-Assisted Engineering）**（人類負責系統架構、審查每一處 Diff 並執行嚴格驗證測試）；(3) **Vibe Coding（直覺流/隨興式編碼）**（完全以自然語言描述需求、不閱讀程式碼、一律點擊 `Accept All`、遇到報錯僅複製貼上 Error Log 讓 AI 盲目修改）。
+- **生產級工程安全邊界** `[SAFETY_BOUND]`：Vibe Coding 僅適用於**週末拋棄式玩具專案（Throwaway Weekend Projects）、個人低風險小工具或早期 UI 原型探索**；在**正式上線之生產環境、安全關鍵系統或本知識庫（CS & DL Library）之維護**中，嚴禁採用不看 Diff、不跑驗證的 Vibe Coding 模式，任何變更均須通過 AST 語法、拓樸不變量與單元測試之強制檢驗。
 
 ---
 
@@ -191,6 +222,27 @@ if __name__ == "__main__":
     }
     agent = ProductionAgentLoop(demo_tools)
     agent.execute_step("驗證並升級深度學習圖書館")
+
+    # 示範兩階段確定性工具路由 (Two-Stage Tool Routing: quote_order JSON Grounding)
+    menu_db = {"麥茶": {"unit_price": 30, "stock": 30}}
+    def quote_order(item_name: str, quantity: int) -> str:
+        item = menu_db.get(item_name)
+        if not item:
+            return json.dumps({"ok": False, "error": "Item not found"}, ensure_ascii=False)
+        total = item["unit_price"] * quantity
+        return json.dumps({
+            "ok": quantity <= item["stock"],
+            "item_name": item_name,
+            "quantity": quantity,
+            "unit_price": item["unit_price"],
+            "total": total,
+            "stock": item["stock"],
+            "currency": "TWD",
+            "ordered": False
+        }, ensure_ascii=False)
+
+    tool_json = json.loads(quote_order("麥茶", 20))
+    assert tool_json["ok"] is True and tool_json["total"] == 600
 ```
 
 ---
@@ -226,6 +278,14 @@ if __name__ == "__main__":
 - **量化決策邊界 (Decision Thresholds)**:
   - 單一工具或路徑之連續重試上限嚴格為 **3 次**。
   - 若連續失敗 2 次，必須啟動自我反思（Reflexion），分析失敗根因並切換至備選演算法或回滾，禁止陷入同錯誤無休止死循環。
+
+### [RULE-703-05] 兩階段確定性工具路由、MCP/A2A 協定解耦與生產級反 Vibe Coding 驗證合約 (Two-Stage Tool Grounding, MCP/A2A & Anti-Vibe-Coding Guardrail)
+- **合約等級**: `BOUNDARY_GUARD`
+- **前置條件 (Pre-conditions)**: Agent 處理涉及精確算術、即時狀態查詢（如報價、庫存、系統指標）或提交生產級程式碼與知識庫變更。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **兩階段確定性工具剝離**：凡涉及算術計價、資料庫狀態或環境查詢，嚴禁由 LLM 直接心算生成數值；必須強制執行兩階段路由（Stage 1: 生成結構化函數呼叫 $\to$ Stage 2: 宿主執行並回傳 JSON Schema 狀態表單供 LLM 接地回覆） `[DESIGN_DECISION]`。
+  - **MCP 與 A2A 正交邊界**：單一代理對外部工具/資料源之垂直存取採用 **MCP** JSON-RPC 介面；跨代理人之水平任務分派與狀態協商採用 **A2A** 雙向訊息協議 `[FACT]`。
+  - **生產環境禁止盲目 Vibe Coding**：在生產級代碼庫與核心知識庫分支中，嚴禁在未審查 Diff 與未執行自動化驗證腳本（Exit Code $= 0$）前直接合併 AI 生成內容 `[SAFETY_BOUND]`。
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -245,3 +305,6 @@ if __name__ == "__main__":
 5. **人工智慧經典聖經**
    - *Book*: Russell, S., & Norvig, P. (2020). *Artificial Intelligence: A Modern Approach* (4th ed.). Pearson. ISBN: 978-0134610993.
    - *Core Contribution*: 部分可觀察馬可夫決策過程 (POMDP)、效用理論與理性代理人形式化定義。
+6. **Agentic Design Patterns 與模型上下文協定 (MCP / A2A)**
+   - *Reference*: Ng, A. (2024). "Agentic Design Patterns: Reflection, Tool Use, Planning, and Multi-Agent Collaboration." *DeepLearning.AI*; Anthropic (2024). *Model Context Protocol (MCP) Specification*; Google (2025). *Agent2Agent (A2A) Open Protocol*.
+   - *Core Contribution*: 確立現代 AI Agent 四大設計模式，以及垂直工具呼叫（MCP）與水平跨代理協作（A2A）之雙層開放協定標準。

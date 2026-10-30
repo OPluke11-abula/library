@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-17  
 > **當前交接基準 HEAD**: `12fb584c248bce1714d0ff2605fed3548f6349d3`（PR #15 / PR #16 / PR #17: `12fb584` 正式交接點）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），102 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），103 條決策合約不變量（100% 合約等級對稱），拓樸 DAG 與內文導覽 100% 閉環驗證通過（11 項自動化檢驗全數通過）。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 102 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 103 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -208,6 +208,13 @@
 - **P0: 擴充 `LIB-203`（CPython `PyListObject`/`PyLongObject` 裝箱開銷 vs. `PyGenObject` 狀態機實證，`RULE-203-05`）**：
   - 於 Python 3.13.15 (64-bit) 實測核實 $N = 10^6$ 筆 `[x + 1 for x in range(1_000_000)]`（指標陣列 `8.06 MB` + 百萬個 28-byte `PyLongObject` 裝箱物件，`tracemalloc` 峰值 `40,440,544 Bytes` $\approx 38.57\text{ MB}$）對比 `(x + 1 for x in range(1_000_000))`（`PyGenObject` 固定 `200 Bytes`，`sum(g)` 串流峰值僅 `1,232 Bytes`，記憶體壓降 $32,825\times$）。
   - 釐清三大工程邊界（單次迭代器 `StopIteration` 耗盡陷阱、直譯器逐元素分派 vs. 未裝箱 SIMD/GPU 向量化算子、隨機索引與蓄水池洗牌限制），並新增 `[RULE-203-05]`（`RESOURCE_CONSTRAINT`）。
+
+### 18. Agentic Design Patterns、兩階段工具接地、MCP/A2A 雙層協定與張量廣播/序列化工程閉環（103 條不變量）
+- **P0: 擴充 `LIB-703` 與 `LIB-602`（整合 `08教AI做事的方法.pdf` 核心工程與理論，`RULE-703-05`）**：
+  - 於 `LIB-703` 建立 `AI Agent = AI Model + Harness` 五階工程演進（Prompt $\to$ Context $\to$ Harness $\to$ Loop $\to$ Graph Engineering）、Andrew Ng 四大 Agentic Design Patterns（Reflection 異構雙模型審稿、Tool Use 兩階段確定性函數呼叫與 JSON Schema 接地、Planning、Multiagent PM 協作）、Anthropic **MCP**（垂直 Agent-to-Tool）vs. Google **A2A**（水平 Agent-to-Agent）正交協定拓樸，以及 Karpathy Vibe Coding 與生產級工程護欄邊界，並新增 `RULE-703-05`（`BOUNDARY_GUARD`）。
+  - 於 `LIB-602` 補入 Pre-train $\to$ SFT $\to$ Post-train RL 三階段訓練目標函數、DeepSeek-R1 `<think>...</think>` 推論時計算（Test-Time Compute）動態分配與垂直領域思維蒸餾，以及預訓練「知識壓縮障礙」對比 RL 長程稀疏獎勵信用分配瓶頸。
+- **P0: 擴充 `LIB-203` 與 `LIB-901`（整合莊啟宏教授 CV 教材 Ch3–Ch5 張量廣播、階數代數與模型序列化三層光譜）**：
+  - 於 `LIB-203` 推導零拷貝廣播視圖（`stride = 0` 記憶體位址映射）、保階（`concat`/`split`）vs. 升降階（`stack`/`unstack`）張量代數，以及 `int16`/`uint8` 二補數溢位截斷防護；於 `LIB-901` 補入模型持久化三層光譜（`save_weights`/`state_dict` vs. `.h5` `compile=False` vs. 跨語言 `SavedModel`/ONNX）。
 
 ---
 

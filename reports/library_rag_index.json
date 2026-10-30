@@ -3,11 +3,11 @@
     "volumes_indexed": 28,
     "bilingual_files_indexed": 56,
     "parent_sections_count": 454,
-    "child_chunks_count": 902,
-    "rules_indexed_zh": 102,
-    "rules_indexed_en": 102,
-    "avg_chunk_tokens": 338.0,
-    "build_latency_ms": 2605.81
+    "child_chunks_count": 911,
+    "rules_indexed_zh": 103,
+    "rules_indexed_en": 103,
+    "avg_chunk_tokens": 343.4,
+    "build_latency_ms": 1620.68
   },
   "dag_prerequisites": {
     "LIB-000": [],
@@ -1321,6 +1321,19 @@
       "evidence_tags": [
         "DESIGN_DECISION",
         "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-203:zh:S04:C06": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射",
+      "section_h3": "6. 張量廣播步幅視圖 (`stride = 0`)、軸向拼接/拆分階數代數與低位元整數溢位防護 `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DERIVATION",
         "FACT",
         "SAFETY_BOUND"
       ],
@@ -3298,6 +3311,21 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-602:zh:S03:C07": {
+      "call_number": "LIB-602",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：計算最優邊界與架構閉式解",
+      "section_h3": "7. 大語言模型訓練三階段對齊、`<think>` 推論時計算 (Test-Time Compute) 與知識壓縮瓶頸 `[FACT]` `[DERIVATION]` `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "FACT",
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-602:zh:S04:C00": {
       "call_number": "LIB-602",
       "lang": "zh",
@@ -3626,6 +3654,18 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-703:zh:S02:C03": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：從「鸚鵡學舌」到「具備手腳與筆記本的科學家」",
+      "section_h3": "3. AI Agent 系統方程式與五大工程演進階梯 (`AI Agent = AI Model + Harness`) `[FACT]` `[DESIGN_DECISION]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-703:zh:S03:C01": {
       "call_number": "LIB-703",
       "lang": "zh",
@@ -3656,6 +3696,31 @@
       "rule_ids": [],
       "evidence_tags": [],
       "epistemic_weight": 0.75
+    },
+    "LIB-703:zh:S03:C04": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：POMDP 形式化、ReAct 迴圈與樹狀思考 (ToT)",
+      "section_h3": "4. 吳恩達 (Andrew Ng) 四大 Agentic Design Patterns、兩階段工具路由與 MCP / A2A 雙層協定拓樸 `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-703:zh:S03:C05": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：POMDP 形式化、ReAct 迴圈與樹狀思考 (ToT)",
+      "section_h3": "5. AI 時代三種開發模式與「Vibe Coding」之生產工程邊界 `[FACT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-703:zh:S04:C00": {
       "call_number": "LIB-703",
@@ -3740,6 +3805,21 @@
       ],
       "evidence_tags": [],
       "epistemic_weight": 0.75
+    },
+    "LIB-703:zh:S06:C05": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-703-05] 兩階段確定性工具路由、MCP/A2A 協定解耦與生產級反 Vibe Coding 驗證合約 (Two-Stage Tool Grounding, MCP/A2A & Anti-Vibe-Coding Guardrail)",
+      "rule_ids": [
+        "RULE-703-05"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-703:zh:S07:C00": {
       "call_number": "LIB-703",
@@ -4325,8 +4405,11 @@
       "section_h2": "第二階段：我們做的專案與程式碼徹底教學",
       "section_h3": "第五部分：測試集整體評估與單筆互動",
       "rule_ids": [],
-      "evidence_tags": [],
-      "epistemic_weight": 0.75
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-901:zh:S03:C06": {
       "call_number": "LIB-901",
@@ -6229,6 +6312,19 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-203:en:S04:C05": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "3. GPU Microarchitecture & CUDA Execution Model",
+      "section_h3": "5. Zero-Copy Broadcasting Stride Views (`stride = 0`), Rank Algebra & Low-Bit Integer Overflow Guardrails `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:en:S05:C00": {
       "call_number": "LIB-203",
       "lang": "en",
@@ -7756,6 +7852,7 @@
         "DERIVATION",
         "DESIGN_DECISION",
         "FACT",
+        "HYPOTHESIS",
         "LITERATURE_RESULT"
       ],
       "epistemic_weight": 1.0
@@ -8040,8 +8137,11 @@
       "section_h2": "1. Conceptual Mental Model",
       "section_h3": "Section Overview",
       "rule_ids": [],
-      "evidence_tags": [],
-      "epistemic_weight": 0.75
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-703:en:S03:C01": {
       "call_number": "LIB-703",
@@ -8075,6 +8175,20 @@
         "DESIGN_DECISION",
         "FACT",
         "HEURISTIC"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-703:en:S03:C04": {
+      "call_number": "LIB-703",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "4. Andrew Ng's Four Agentic Design Patterns, Two-Stage Tool Grounding & MCP vs. A2A Protocol Topology `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]`",
+      "rule_ids": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
       ],
       "epistemic_weight": 1.0
     },
@@ -8132,6 +8246,21 @@
       ],
       "evidence_tags": [],
       "epistemic_weight": 0.75
+    },
+    "LIB-703:en:S05:C05": {
+      "call_number": "LIB-703",
+      "lang": "en",
+      "section_h2": "4. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-703-05] Two-Stage Deterministic Tool Grounding, MCP/A2A Decoupling & Anti-Vibe-Coding Guardrail",
+      "rule_ids": [
+        "RULE-703-05"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-703:en:S06:C00": {
       "call_number": "LIB-703",
@@ -8609,8 +8738,11 @@
       "section_h2": "2. The Six Evolutionary Stages of the System",
       "section_h3": "Stage 5: ONNX Export & TensorRT Acceleration",
       "rule_ids": [],
-      "evidence_tags": [],
-      "epistemic_weight": 0.75
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-901:en:S03:C06": {
       "call_number": "LIB-901",

@@ -81,6 +81,10 @@ Most university machine learning courses end with `model.fit(X_train, y_train)` 
 ### Stage 5: ONNX Export & TensorRT Acceleration
 - Export model graph to ONNX (`opset_version=17`).
 - **TensorRT Optimization**: Compiling inference graphs into TensorRT engines with FP16 precision fuses vertical layers and horizontal GEMMs, substantially reducing memory bandwidth overhead and latency relative to eager-mode execution for high-throughput serving.
+- **Three-Tier Model Serialization & Deployment Spectrum** `[FACT]` `[DESIGN_DECISION]`:
+  1. **Weights-Only Checkpointing (`save_weights` / PyTorch `state_dict`)**: Serializes raw parameter tensors $\{W_l, b_l\}$ without graph metadata or optimizer states, minimizing disk footprint and requiring explicit host architecture instantiation prior to loading.
+  2. **Bundled Architecture + Optimizer Checkpoints (`.h5` / `.keras`)**: Captures topology, weights, and optimizer momentum; production inference endpoints invoke `load_model(path, compile=False)` to bypass optimizer state allocation and loss graph compilation `[DESIGN_DECISION]`.
+  3. **Language-Agnostic Computation Graphs (`tf.saved_model.save` / ONNX / TorchScript)**: Exports static computational graphs decoupled from the Python runtime for direct C++, ONNX Runtime, or TensorRT engine ingestion `[FACT]`.
 
 ### Stage 6: Full-Stack Interactive Web Serving
 - Implement real-time Gradio sketchpad frontend with bidirectional REST API.

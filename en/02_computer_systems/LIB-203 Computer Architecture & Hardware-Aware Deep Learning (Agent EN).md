@@ -121,6 +121,17 @@ In host-side data ingestion and preprocessing pipelines, list comprehensions (`[
    - **Interpreter Dispatch & Boxing vs. SIMD Vectorization**: Lazy evaluation reduces space complexity to $O(1)$ but still executes $N$ CPython frame dispatches and `PyLongObject` boxing steps ($\sim 770\text{ ms}$ for $10^6$ items). Pure numerical array arithmetic (`x + 1`) must use contiguous unboxed SIMD/GPU tensors (`np.arange(N, dtype=np.int64) + 1`, $8.0\text{ MB}$ flat buffer, $< 2\text{ ms}$) rather than Python scalar generators `[DESIGN_DECISION]`.
    - **Random-Access & Global Shuffle Constraint**: Generators lack `__len__()` and `__getitem__(i)` indexing, requiring bounded reservoir shuffle buffers ($B_{\mathrm{buf}} \ll N$) when streaming out-of-core datasets `[DESIGN_DECISION]`.
 
+### 5. Zero-Copy Broadcasting Stride Views (`stride = 0`), Rank Algebra & Low-Bit Integer Overflow Guardrails `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
+1. **Zero-Copy Broadcasting via `stride = 0` Metadata Views** `[FACT]` `[DERIVATION]`:
+   When evaluating element-wise operations between tensors of compatible trailing shapes (e.g., activation $A \in \mathbb{R}^{B \times N \times D}$ and bias $b \in \mathbb{R}^{1 \times 1 \times D}$), tensor engines (NumPy, PyTorch, TensorFlow) do not duplicate $b$ across DRAM/HBM. Instead, they construct a virtual view with $\mathrm{stride}_0 = 0, \mathrm{stride}_1 = 0$ in the tensor descriptor:
+   $$\mathrm{Addr}(i, j, k) = \mathrm{BaseAddr} + i \cdot \mathrm{stride}_0 + j \cdot \mathrm{stride}_1 + k \cdot \mathrm{stride}_2$$
+   Setting broadcasted axis strides to $0$ maps all $(i, j)$ indices to the exact same physical address $\mathrm{BaseAddr} + k \cdot \mathrm{stride}_2$, hitting GPU L1/Constant Cache broadcast lanes with **$0\text{ Bytes}$** of additional memory allocation.
+2. **Rank-Preserving (`concat`/`split`) vs. Rank-Changing (`stack`/`unstack`) Tensor Algebra** `[FACT]`:
+   - **Rank-Preserving ($R \to R$)**: Concatenating (`concat`) or partitioning (`split`, e.g., slicing shape $[5, 20, 4]$ along `axis=0` into proportions $[2, 2, 1]$) preserves tensor rank $\mathrm{ndim} = R$.
+   - **Rank-Changing ($R \to R \pm 1$)**: `stack` inserts a new axis ($R + 1$), whereas `unstack(x, axis=a)` collapses axis $a$ of length $L_a$ into a sequence of $L_a$ tensors each of reduced rank **$R - 1$** (e.g., $[5, 20, 4] \xrightarrow{\mathrm{unstack}(\mathrm{axis}=0)} 5 \times [20, 4]$).
+3. **Two's-Complement Integer Overflow & Pre-Arithmetic Upcasting** `[FACT]` `[SAFETY_BOUND]`:
+   Signed 16-bit integers (`int16`) span $[-32768, 32767]$ and unsigned 8-bit pixels (`uint8`) span $[0, 255]$. Assigning or downcasting out-of-range values (e.g., storing $123,456,789$ in `int16`) or accumulating directly in `uint8` triggers silent modulo-$2^b$ wrap-around truncation ($123456789 \equiv -13035 \pmod{2^{16}}$). Raw `uint8` / `int16` tensors must be explicitly upcast to `float32` or `int32`/`int64` prior to arithmetic reduction or normalization `[SAFETY_BOUND]`.
+
 ---
 
 ## 4. Production PyTorch Pin-Memory & CUDA Benchmark Contract

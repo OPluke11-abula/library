@@ -1,0 +1,31 @@
+{
+  "benchmark_timestamp": "2026-10-30",
+  "corpus_volumes": 28,
+  "corpus_chunks": 898,
+  "ablation_results": {
+    "dense_only": {
+      "queries_evaluated": 16,
+      "volume_recall_at_1": 0.8125,
+      "volume_recall_at_5": 1.0,
+      "mrr_at_5": 0.9062,
+      "exact_rule_recall_at_5": 0.5625,
+      "mean_latency_ms": 17.58
+    },
+    "bm25_only": {
+      "queries_evaluated": 16,
+      "volume_recall_at_1": 1.0,
+      "volume_recall_at_5": 1.0,
+      "mrr_at_5": 1.0,
+      "exact_rule_recall_at_5": 0.75,
+      "mean_latency_ms": 18.22
+    },
+    "hybrid_rrf": {
+      "queries_evaluated": 16,
+      "volume_recall_at_1": 0.9375,
+      "volume_recall_at_5": 1.0,
+      "mrr_at_5": 0.9688,
+      "exact_rule_recall_at_5": 1.0,
+      "mean_latency_ms": 31.23
+    }
+  }
+}

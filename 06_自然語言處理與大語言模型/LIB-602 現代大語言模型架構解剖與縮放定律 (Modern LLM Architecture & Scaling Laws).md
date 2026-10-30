@@ -145,6 +145,21 @@ $$y = \sum_{e \in \mathcal{T}_k(x)} G(x)_e \cdot \mathrm{FFN}_e(x), \quad G(x) =
 - **總容量 $N_{\mathrm{total}}$ 與單步活躍參數 $N_{\mathrm{active}}$ 解耦**：模型知識儲量由總參數 $N_{\mathrm{total}}$ 決定（決定所需 VRAM 容量），但單一 Token 的浮點運算量（FLOPs）與**每步必須從顯存讀取的權重位元組數**僅由活躍參數 $N_{\mathrm{active}} \approx N_{\mathrm{attn}} + \frac{k}{E} N_{\mathrm{FFN}}$ 決定 `[DERIVATION]`。
 - **為何同規模 MoE 生成速度遠快於稠密模型**：在自迴歸解碼階段（Autoregressive Decode, Batch Size $B=1$），算術強度 $\mathcal{I} \approx 1\text{ OP/Byte}$ 處於極端**記憶體頻寬受限（Memory-Bandwidth Bound）**區域。由於 MoE 每步僅需從 HBM 串流讀取 $N_{\mathrm{active}}$ 的權重分塊，在相同總參數量下，其理論 Token 生成速度較稠密模型提升約 $\frac{N_{\mathrm{total}}}{N_{\mathrm{active}}}$ 倍 `[DERIVATION]`。
 
+### 7. 大語言模型訓練三階段對齊、`<think>` 推論時計算 (Test-Time Compute) 與知識壓縮瓶頸 `[FACT]` `[DERIVATION]` `[LITERATURE_RESULT]`
+現代前沿大語言模型（如 DeepSeek-R1、OpenAI o1/o3、Claude 3.7+）之能力湧現，仰賴**訓練期三階段最佳化**與**推論期思考 Token 動態分配**之協同：
+1. **三階段訓練目標函數演化（Pre-training $\to$ SFT $\to$ Post-training RL）** `[FACT]`：
+   - **Stage 1 — Pre-training（無監督網際網路語料預訓練）**：在大規模文件庫 $\mathcal{D}_{\mathrm{pre}}$ 上最小化下一字元交叉熵 $\mathcal{L}_{\mathrm{PT}}(\theta) = -\mathbb{E}_{x \sim \mathcal{D}_{\mathrm{pre}}} \sum_{t} \log P_\theta(x_t \mid x_{<t})$，建構廣泛世界知識之基礎模型（Base Model）。
+   - **Stage 2 — Supervised Fine-Tuning (SFT，監督式指令微調)**：於高品質指令—回應對 $(x, y) \sim \mathcal{D}_{\mathrm{SFT}}$ 上對齊對話格式與任務服從性。
+   - **Stage 3 — Post-training Alignment & RL（後訓練強化學習與對齊）**：透過基於人類回饋或可驗證獎勵之強化學習（RLHF / RLVR，如 GRPO，Guo et al., 2025, arXiv:2501.12948），最大化期望獎勵並以 KL 散度錨定參考分佈：
+     $$\max_\theta \; \mathbb{E}_{(q, o) \sim \pi_\theta} \left[ R(q, o) - \beta \, \mathbb{D}_{\mathrm{KL}}\left(\pi_\theta(o \mid q) \parallel \pi_{\mathrm{ref}}(o \mid q)\right) \right]$$
+2. **`<think>...</think>` 結構化推論時計算（Test-Time Compute Scaling）與垂直領域思維蒸餾** `[DERIVATION]` `[DESIGN_DECISION]`：
+   - 傳統自迴歸模型對每個輸出 Token 僅消耗固定前向算力 $O(N_{\mathrm{active}})$；而推理模型（如 DeepSeek-R1）在給出最終答案 $y$ 之前，先於 `<think>...</think>` 標籤內生成長度為 $M$ 之內部思維鏈序列 $z_{1:M}$（涵蓋假說拆解、自我驗證與回溯修正）：
+     $$P_\theta(y \mid x) = \sum_{z_{1:M}} P_\theta(y \mid x, z_{1:M}) P_\theta(z_{1:M} \mid x)$$
+   - 這將單次推論算力預算由固定常數擴展為可隨問題難度彈性縮放之 $O((M + |y|) \cdot N_{\mathrm{active}})$。此外，通用大模型（如 DeepSeek-R1）旨在對任意開放領域問題產生通用思維鏈；在特定單一垂直任務中，工程上可針對該領域邏輯結構精煉專屬思維模板或進行推理軌跡蒸餾（Reasoning Distillation），以更短的 $M$ 達成更高之領域推論準確率 `[DESIGN_DECISION]`。
+3. **Karpathy 論「預訓練知識壓縮障礙」與「強化學習稀疏信號瓶頸」** `[FACT]` `[HYPOTHESIS]`：
+   - **知識壓縮障礙（Knowledge Compression Barrier）**：預訓練階段強迫模型在模仿巨量高雜訊網路文本時，將表面事實記憶（Memorization）與演算法泛化電路（Cognitive Circuits）混雜壓縮於同一組權重參數中，導致模型雖能背誦百科卻缺乏如人類實習生般的持續在線概念重組能力。
+   - **強化學習（RL）之稀疏信用分配限制（Credit Assignment Bottleneck）**：在長達數千個 Token 的推理軌跡 $z_{1:M}$ 中，終端二元結果獎勵 $R \in \{0, 1\}$ 僅提供極度稀疏之純量信號（$\sim 1\text{ bit}$），將該單一標量均勻回傳以強化或懲罰數千個中間步驟，極易強化偶然猜對的虛假推理路徑（Spurious Reasoning Steps） `[HYPOTHESIS]`。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：PagedAttention 與虛擬記憶體分頁
@@ -332,3 +347,6 @@ assert token_param_ratio >= 18.0, f"Token 與參數比例 {token_param_ratio:.1f
 8. **Switch Transformers 與稀疏混合專家模型 (JMLR 頂刊)**
    - *Paper*: Fedus, W., Zoph, B., & Shazeer, N. (2022). "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." *Journal of Machine Learning Research (JMLR)*, 23(120), 1–39. arXiv: [2101.03961](https://arxiv.org/abs/2101.03961).
    - *Core Contribution*: 建立稀疏激活路由機制，將模型總參數容量 $N_{\mathrm{total}}$ 與單 Token 活躍計算量 $N_{\mathrm{active}}$ 解耦，實現萬億參數規模下的次線性推論延遲。
+9. **DeepSeek-R1 強化學習激發大語言模型推理能力 (arXiv 2025)**
+   - *Paper*: DeepSeek-AI, Guo, D., Yang, D., Zhang, H., Song, J., Zhang, R., ... & He, Y. (2025). "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." *arXiv:2501.12948*.
+   - *Core Contribution*: 證明透過大規模群組相對策略最佳化（GRPO）強化學習與 `<think>...</think>` 結構化推論時計算（Test-Time Compute），可湧現自我反思、長程CoT驗證與跨領域推理蒸餾能力。

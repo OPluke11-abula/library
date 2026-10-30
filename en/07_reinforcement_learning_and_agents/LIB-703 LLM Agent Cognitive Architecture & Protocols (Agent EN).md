@@ -1,7 +1,7 @@
 ---
 call_number: LIB-703
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: LLM Agent Cognitive Architecture & Protocols (Agent Edition)
 module: Agent-Cognition
 category: Systems-Frontiers
@@ -43,6 +43,7 @@ successors:
 ## 1. Conceptual Mental Model
 
 A standard LLM is a static probabilistic auto-regressive function: given prefix $x$, it computes next-token distribution $P(w | x)$. An **Autonomous Agent** transforms this passive predictor into an active cybernetic controller operating inside an environment: perceiving state $s_t$, planning trajectories through internal reasoning chains, executing external tools $a_t \sim \pi(s_t)$, receiving environmental feedback $o_{t+1}$, and updating memory.
+- **The Agent Systems Equation & Five-Stage Engineering Ladder (`AI Agent = AI Model + Harness`)** `[FACT]` `[DESIGN_DECISION]`: Single-turn zero-shot generation (`Prompt -> LLM -> Output`) is analogous to forcing a human writer to draft an entire document or codebase without pressing backspace, consulting references, or running a compiler. An operational agent couples the probabilistic model with an execution harness ($\text{AI Agent} = \text{AI Model} + \text{Harness}$), progressing across five engineering tiers: **Prompt Engineering** (single-turn instruction phrasing) $\to$ **Context Engineering** (structured injection of domain rules, RAG evidence, and constraints) $\to$ **Harness Engineering** (deterministic tool bindings, JSON Schema contracts, and execution sandboxes) $\to$ **Loop Engineering** (closed-loop ReAct/Reflection verification and iterative error recovery) $\to$ **Graph Engineering** (DAG/state-machine orchestration of specialized multi-agent workflows and topological knowledge graphs) `[DESIGN_DECISION]`.
 
 ---
 
@@ -74,6 +75,19 @@ To operate over infinite time horizons within finite token contexts:
 - **LLM Wiki Compilation vs. Naive Chunked RAG**: Rather than slicing axiomatic documents into arbitrary fixed-length chunks that sever cross-section derivations, agents compile raw sources (`raw/`) into a hierarchically indexed, bidirectionally linked Markdown knowledge graph (`wiki/` + `index.md` + automated consistency linting, LIB-603), enabling exact topological traversal across $\sim 10^2$ volumes ($\sim 400\text{K}$ words) `[DESIGN_DECISION]`.
 - **Role-Conditioned State Space & Unified Multi-Provider Routing (`provider:model`)**: Agent APIs formalize dialogue state via `system` ($s_{\mathrm{sys}}$ persona/constraints), `user` ($u_t$), and `assistant` ($a_t$) roles, sampling $P_\theta(a_t \mid s_{\mathrm{sys}}, u_1, a_1, \dots, u_t)$ across interchangeable cloud and local backends via unified `provider:model` routing interfaces `[FACT]` `[DESIGN_DECISION]`.
 - **Agentic GraphRAG & Topological Subgraph Compilation (`RULE-603-04`)**: When reasoning across axiomatic knowledge graphs (LIB-603), agents execute a three-stage retrieval protocol: (1) **Child-Chunk Hybrid RRF** (BM25 + Dense/ColBERT MaxSim with $k_0 = 60$) to pinpoint exact formulas or `RULE-xxx-xx` invariants; (2) **Parent Section & 1-Hop DAG Prerequisite Expansion** to inject upstream invariants $\{ \mathrm{Invariants}(u) \mid (u \to v) \in \mathcal{E} \}$; and (3) **Topological CAG Subgraph Pinning**, compiling topologically sorted prerequisite chains ($\le 32\text{K}$ tokens) into PagedAttention prefix blocks for zero-latency multi-turn ReAct execution `[DESIGN_DECISION]`.
+
+### 4. Andrew Ng's Four Agentic Design Patterns, Two-Stage Tool Grounding & MCP vs. A2A Protocol Topology `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]`
+1. **Reflection (Heterogeneous Actor-Critic Iterative Refinement)**: Replaces single-pass open-loop generation $y^{(0)} \sim P_{\theta_{\mathrm{gen}}}(y \mid x)$ with alternating evaluation by a critic model $\theta_{\mathrm{critic}}$ (or deterministic verifier) and revision by the generator $\theta_{\mathrm{gen}}$:
+   $$c^{(k)} \sim P_{\theta_{\mathrm{critic}}}\left(c \mid x, y^{(k)}\right), \quad y^{(k+1)} \sim P_{\theta_{\mathrm{gen}}}\left(y \mid x, y^{(k)}, c^{(k)}\right)$$
+2. **Tool Use (Two-Stage Deterministic Routing & JSON Schema Grounding)** `[DERIVATION]` `[DESIGN_DECISION]`: Because autoregressive LLMs are probabilistic sequence predictors rather than exact arithmetic ALUs or live transactional databases, tool invocations execute in **two distinct stages**:
+   - **Stage 1 (Intent Parsing & Structured Call Generation)**: Given declared tool signatures $\mathcal{F} = \{\texttt{get\_menu}(), \texttt{quote\_order}(\texttt{item\_name}, \texttt{quantity})\}$, the LLM maps user intent $u$ into a typed call $a_1 = \texttt{quote\_order("Barley Tea", 20)}$ rather than hallucinating arithmetic.
+   - **Stage 2 (Host Deterministic Execution & JSON Grounded Synthesis)**: The host harness executes the function and returns a schema-validated JSON payload $o_1 = \texttt{\{"ok": true, "item\_name": "Barley Tea", "quantity": 20, "unit\_price": 30, "total": 600, "stock": 30, "currency": "TWD", "ordered": false\}}$, conditioning the final synthesis $a_2 \sim P_\theta(a \mid u, a_1, o_1)$ on exact ground-truth figures.
+3. **Planning (`<think>` Reasoning Decomposition)** & **Multiagent Collaboration (PM Orchestration)**: A planning or Project Manager (PM) agent decomposes composite objectives $G$ into a task DAG $\{g_1, \dots, g_m\}$ and dispatches specialized sub-agents (computation, retrieval, auditing) in parallel or topological order.
+4. **Orthogonal Two-Layer Protocol Stack — Anthropic MCP vs. Google A2A** `[FACT]` `[DESIGN_DECISION]`:
+   - **Vertical Layer — MCP (Model Context Protocol, Anthropic)**: Standardizes how a **single agent** discovers, plans, and invokes external tools, local filesystems, and data resources via JSON-RPC 2.0 (`Agent <-> Tools/Data`).
+   - **Horizontal Layer — A2A (Agent-to-Agent Protocol, Google)**: Standardizes how **multiple autonomous agents** discover peer capabilities (Agent Cards), negotiate task delegation, and synchronize state across agent boundaries (`Agent <-> Agent`).
+5. **The Three Coding Paradigms & Production Boundaries of "Vibe Coding"** `[FACT]` `[SAFETY_BOUND]`:
+   Karpathy (2025) contrasts manual coding (no LLM), human-led AI-assisted engineering (human architectural control + strict diff review + automated test verification), and **Vibe Coding** (pure natural-language prompting, blindly clicking `Accept All` without reading diffs, and pasting raw error logs until symptoms disappear). While Vibe Coding accelerates throwaway weekend prototypes, it is strictly forbidden in production systems, safety-critical infrastructure, and axiomatic knowledge repositories, where every diff must pass syntactic AST parsing and deterministic invariant checks `[SAFETY_BOUND]`.
 
 ---
 
@@ -129,6 +143,24 @@ class ProductionAgentLoop:
                     obs = f"Tool execution exception: {str(e)}\n{traceback.format_exc()}"
             self.trajectory.append({"role": "environment", "observation": obs})
         return None
+
+
+def quote_order_deterministic(item_name: str, quantity: int) -> Dict[str, Any]:
+    """Two-stage deterministic tool execution returning schema-validated JSON state."""
+    menu_db = {"Barley Tea": {"unit_price": 30, "stock": 30}}
+    item = menu_db.get(item_name)
+    if not item:
+        return {"ok": False, "error": "Item not found"}
+    return {
+        "ok": quantity <= item["stock"],
+        "item_name": item_name,
+        "quantity": quantity,
+        "unit_price": item["unit_price"],
+        "total": item["unit_price"] * quantity,
+        "stock": item["stock"],
+        "currency": "TWD",
+        "ordered": False,
+    }
 ```
 
 ---
@@ -155,6 +187,11 @@ class ProductionAgentLoop:
 - **Specification**: When tool execution fails, agents MUST limit automated retry attempts to a maximum of 3 consecutive iterations. After 2 consecutive identical failures, the agent MUST trigger internal reflection to modify strategy or escalate to human fallback.
 - **Violation Consequence**: Unbounded retries without strategy revision cause infinite loops and rapid API token exhaustion.
 
+### [RULE-703-05] Two-Stage Deterministic Tool Grounding, MCP/A2A Decoupling & Anti-Vibe-Coding Guardrail
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: (1) Agents handling arithmetic pricing, inventory, or live system queries MUST enforce two-stage tool routing (Stage 1: structured function call generation $\to$ Stage 2: host execution returning a schema-validated JSON payload for grounded synthesis) rather than mental LLM arithmetic `[DESIGN_DECISION]`; (2) vertical agent-to-tool integration MUST follow **MCP** JSON-RPC schemas while horizontal inter-agent delegation follows **A2A** protocols `[FACT]`; and (3) in production repositories and verified knowledge bases, blind Vibe Coding (`Accept All` without diff inspection and automated validator exit code `0`) is strictly prohibited `[SAFETY_BOUND]`.
+- **Violation Consequence**: Direct LLM arithmetic hallucinates transactional figures, conflating tool and peer protocols breaks modularity, and unreviewed Vibe Coding silently introduces structural regressions.
+
 ---
 
 ## 5. Canonical & Peer-Reviewed References
@@ -163,3 +200,4 @@ class ProductionAgentLoop:
 2. **Yao, S., Yu, D., Zhao, J., Shafran, I., Narasimhan, K., & Cao, Y.** (2023). "Tree of Thoughts: Deliberate Problem Solving with Large Language Models." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
 3. **Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K., & Yao, S.** (2023). "Reflexion: Language Agents with Verbal Reinforcement Learning." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
 4. **Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., Cancedda, N., & Scialom, T.** (2023). "Toolformer: Language Models Can Teach Themselves to Use Tools." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
+5. **Ng, A.** (2024). "Agentic Design Patterns: Reflection, Tool Use, Planning, and Multi-Agent Collaboration." *DeepLearning.AI*; **Anthropic** (2024). *Model Context Protocol (MCP) Specification*; **Google** (2025). *Agent2Agent (A2A) Open Protocol*.

@@ -1,0 +1,232 @@
+{
+  "suite_name": "independent_holdout_benchmark_v1",
+  "description": "Zero-leakage independent evaluation suite covering natural language, synonym paraphrase, multi-hop DAG reasoning, false-premise correction, unanswerable abstention, and cross-lingual retrieval. Zero queries contain LIB-xxx or RULE-xxx-xx identifiers.",
+  "query_leakage_count": 0,
+  "total_queries": 24,
+  "queries": [
+    {
+      "id": "H01",
+      "category": "natural_language",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "為什麼在訓練深層神經網路時，不能把所有隱藏層的權重矩陣都初始化為相同的常數或全零？對稱性破缺是什麼？",
+      "expected_vol": "LIB-001",
+      "expected_rule": "RULE-001-03"
+    },
+    {
+      "id": "H02",
+      "category": "natural_language",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "當提示詞工程與單次上下文檢索已經無法解決領域語氣與結構問題時，應該根據什麼邊界條件決定採用 RAG 還是 LoRA 微調？",
+      "expected_vol": "LIB-602",
+      "expected_rule": "RULE-602-03"
+    },
+    {
+      "id": "H03",
+      "category": "natural_language",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "Why does standard Softmax cross-entropy loss suffer from severe overconfidence on out-of-distribution inputs, and how does temperature scaling calibrate Expected Calibration Error?",
+      "expected_vol": "LIB-801",
+      "expected_rule": "RULE-801-01"
+    },
+    {
+      "id": "H04",
+      "category": "natural_language",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "How should an autonomous coding agent structure its six-component prompt blueprint and tool feedback verification loop to prevent hallucinated actions?",
+      "expected_vol": "LIB-703",
+      "expected_rule": "RULE-703-05"
+    },
+    {
+      "id": "H05",
+      "category": "synonym_paraphrase",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "在低秩矩陣適應微調中，如何設定旁路升降維投影矩陣的初始權重，才能保證訓練第零步完美恆等映射而不破壞預訓練知識？",
+      "expected_vol": "LIB-101",
+      "expected_rule": "RULE-101-03"
+    },
+    {
+      "id": "H06",
+      "category": "synonym_paraphrase",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "使用無分類器引導生成影像時，若把條件推進倍率調得過高造成色彩過飽和與破圖，該如何透過動態分位數截斷與重新縮放抑制失真？",
+      "expected_vol": "LIB-406",
+      "expected_rule": "RULE-406-02"
+    },
+    {
+      "id": "H07",
+      "category": "synonym_paraphrase",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "When compressing large language model weights to 4-bit integers, why do a tiny fraction of activation channels exhibit extreme magnitude spikes and how does equivalent channel-wise scaling protect them?",
+      "expected_vol": "LIB-802",
+      "expected_rule": "RULE-802-01"
+    },
+    {
+      "id": "H08",
+      "category": "synonym_paraphrase",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "In 3D Gaussian Splatting real-time rendering, what camera-space near-plane depth guard and covariance spectral clamping prevent singular matrix inversion explosions?",
+      "expected_vol": "LIB-504",
+      "expected_rule": "RULE-504-01"
+    },
+    {
+      "id": "H09",
+      "category": "multi_hop",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "從 GPU 算術強度 Roofline 記憶體頻寬牆出發，解釋為何長序列標準自注意力受限於 HBM 讀寫，以及 FlashAttention 如何利用 SRAM 分塊與線上正規化突破瓶頸？",
+      "expected_vol": "LIB-405",
+      "secondary_vol": "LIB-203",
+      "expected_rule": "RULE-405-03"
+    },
+    {
+      "id": "H10",
+      "category": "multi_hop",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "結合奇異值分解秩-2 流形投影與雙視角對極幾何，說明為何八點法估算基礎矩陣前必須執行 Hartley 座標平移縮放正規化與 RANSAC 離群剔除？",
+      "expected_vol": "LIB-502",
+      "secondary_vol": "LIB-101",
+      "expected_rule": "RULE-502-01"
+    },
+    {
+      "id": "H11",
+      "category": "multi_hop",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "Connecting KL divergence variational bounds to policy gradient reinforcement learning, how does Group Relative Policy Optimization eliminate the value critic memory overhead while bounding policy drift?",
+      "expected_vol": "LIB-702",
+      "secondary_vol": "LIB-102",
+      "expected_rule": "RULE-702-01"
+    },
+    {
+      "id": "H12",
+      "category": "multi_hop",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "How do dense retrieval reciprocal rank fusion and parent-child hierarchical chunking prevent context fragmentation when an LLM agent synthesizes multi-volume evidence?",
+      "expected_vol": "LIB-603",
+      "secondary_vol": "LIB-703",
+      "expected_rule": "RULE-603-04"
+    },
+    {
+      "id": "H13",
+      "category": "false_premise",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "既然在驗證集評估與推論階段，忘記切換 model.eval() 與 torch.no_grad() 只會稍微增加記憶體消耗而完全不會改變 BatchNorm 統計量與輸出結果，為什麼還需要寫這兩行？",
+      "expected_vol": "LIB-602",
+      "expected_rule": "RULE-602-04"
+    },
+    {
+      "id": "H14",
+      "category": "false_premise",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "在多輪對話中，當使用者沒有提供任何新證據卻強烈質疑 AI 的正確答案時，模型是不是應該立刻順從迎合使用者的立場以維持禮貌（Sycophancy）？",
+      "expected_vol": "LIB-906",
+      "expected_rule": "RULE-906-01"
+    },
+    {
+      "id": "H15",
+      "category": "false_premise",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "Why is it completely safe to compute global mean and standard deviation normalization across the combined train and test dataset splits before cross-validation?",
+      "expected_vol": "LIB-901",
+      "expected_rule": "RULE-901-01"
+    },
+    {
+      "id": "H16",
+      "category": "false_premise",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "Since Post-LN Transformer blocks have unimpeded identity gradient paths at initialization and never need learning rate warmup at 100+ layers, why would anyone use Pre-LN with RMSNorm?",
+      "expected_vol": "LIB-405",
+      "expected_rule": "RULE-405-02"
+    },
+    {
+      "id": "H17",
+      "category": "unanswerable",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "如何在生產環境設定 PostgreSQL 16 的邏輯複製槽、Patroni 自動故障轉移與 PgBouncer 連線池參數？",
+      "expected_vol": null,
+      "expected_rule": null,
+      "expect_abstain": true
+    },
+    {
+      "id": "H18",
+      "category": "unanswerable",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "請說明以太坊 Solidity 智慧合約中 ERC-4337 帳戶抽象化 Bundler 的 Gas 估算漏洞與重入攻擊防護實作。",
+      "expected_vol": null,
+      "expected_rule": null,
+      "expect_abstain": true
+    },
+    {
+      "id": "H19",
+      "category": "unanswerable",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "How do I configure BGP route reflectors in Cilium eBPF CNI across multi-region Kubernetes worker nodes with WireGuard encryption?",
+      "expected_vol": null,
+      "expected_rule": null,
+      "expect_abstain": true
+    },
+    {
+      "id": "H20",
+      "category": "unanswerable",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "What is the optimal heat treatment tempering temperature curve for martensitic 440C stainless steel knife blades to reach 60 HRC?",
+      "expected_vol": null,
+      "expected_rule": null,
+      "expect_abstain": true
+    },
+    {
+      "id": "H21",
+      "category": "cross_lingual",
+      "lang": "zh",
+      "target_lang": "en",
+      "query": "計算機體系結構中 GPU Tensor Core 矩陣乘累加與硬體維度對齊倍數限制",
+      "expected_vol": "LIB-203",
+      "expected_rule": "RULE-203-01"
+    },
+    {
+      "id": "H22",
+      "category": "cross_lingual",
+      "lang": "zh",
+      "target_lang": "en",
+      "query": "卷積神經網路平移等變性與全連結層空間拓樸破壞及影像二維離散卷積",
+      "expected_vol": "LIB-401",
+      "expected_rule": "RULE-401-01"
+    },
+    {
+      "id": "H23",
+      "category": "cross_lingual",
+      "lang": "en",
+      "target_lang": "zh",
+      "query": "Singular Value Decomposition condition number spectral rank collapse regularization guardrail",
+      "expected_vol": "LIB-101",
+      "expected_rule": "RULE-101-02"
+    },
+    {
+      "id": "H24",
+      "category": "cross_lingual",
+      "lang": "en",
+      "target_lang": "zh",
+      "query": "Epipolar geometry fundamental matrix estimation eight-point coordinate normalization",
+      "expected_vol": "LIB-502",
+      "expected_rule": "RULE-502-01"
+    }
+  ]
+}

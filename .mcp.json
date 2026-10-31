@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "cs-dl-library-graphrag": {
+      "command": "python",
+      "args": [
+        "scripts/library_rag.py",
+        "--mcp"
+      ],
+      "description": "CS & Deep Learning Library (28 Bilingual Volumes, 103 Invariants) Hybrid GraphRAG & CAG Engine"
+    }
+  }
+}

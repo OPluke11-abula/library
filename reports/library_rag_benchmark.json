@@ -1,6 +1,6 @@
 {
-  "benchmark_timestamp": "2026-10-31T02:49:06Z",
-  "git_commit_sha": "907c9a017ca581933e08ab302b5d7c72228fe235",
+  "benchmark_timestamp": "2026-10-31T02:52:45Z",
+  "git_commit_sha": "cb0ce0295f532e035a722db6aa2092652754b080",
   "corpus_sha256": "292af83affb3cf2a0532009f0c681d44b9e14f2fac3adf40448948fe59f2371c",
   "corpus_volumes": 28,
   "corpus_chunks": 911,
@@ -29,8 +29,8 @@
       "exact_rule_recall_at_5": 0.5625,
       "chunk_rule_mrr_at_5": 0.5312,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 20.38,
-      "p95_latency_ms": 40.39
+      "mean_latency_ms": 18.27,
+      "p95_latency_ms": 29.8
     },
     "bm25_only": {
       "queries_evaluated": 16,
@@ -42,8 +42,8 @@
       "exact_rule_recall_at_5": 0.75,
       "chunk_rule_mrr_at_5": 0.6875,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 19.11,
-      "p95_latency_ms": 29.81
+      "mean_latency_ms": 18.16,
+      "p95_latency_ms": 28.71
     },
     "hybrid_rrf": {
       "queries_evaluated": 16,
@@ -55,8 +55,8 @@
       "exact_rule_recall_at_5": 0.75,
       "chunk_rule_mrr_at_5": 0.6875,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 31.36,
-      "p95_latency_ms": 45.21
+      "mean_latency_ms": 31.09,
+      "p95_latency_ms": 46.44
     }
   },
   "golden_non_leaked_subset_q8_q16": {
@@ -70,8 +70,8 @@
       "exact_rule_recall_at_5": 0.2222,
       "chunk_rule_mrr_at_5": 0.2222,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 18.28,
-      "p95_latency_ms": 28.15
+      "mean_latency_ms": 17.24,
+      "p95_latency_ms": 26.51
     },
     "bm25_only": {
       "queries_evaluated": 9,
@@ -83,8 +83,8 @@
       "exact_rule_recall_at_5": 0.5556,
       "chunk_rule_mrr_at_5": 0.5,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 17.9,
-      "p95_latency_ms": 27.2
+      "mean_latency_ms": 17.35,
+      "p95_latency_ms": 26.73
     },
     "hybrid_rrf": {
       "queries_evaluated": 9,
@@ -96,8 +96,8 @@
       "exact_rule_recall_at_5": 0.5556,
       "chunk_rule_mrr_at_5": 0.5,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 30.42,
-      "p95_latency_ms": 41.12
+      "mean_latency_ms": 29.55,
+      "p95_latency_ms": 38.27
     }
   },
   "independent_holdout_results": {
@@ -114,8 +114,8 @@
         "exact_rule_recall_at_5": 0.35,
         "chunk_rule_mrr_at_5": 0.35,
         "volume_invariant_recall_at_5": 0.65,
-        "mean_latency_ms": 21.46,
-        "p95_latency_ms": 32.7,
+        "mean_latency_ms": 21.38,
+        "p95_latency_ms": 31.54,
         "multi_hop_subgraph_recall_at_5": 0.5,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -129,8 +129,8 @@
         "exact_rule_recall_at_5": 0.55,
         "chunk_rule_mrr_at_5": 0.4542,
         "volume_invariant_recall_at_5": 0.85,
-        "mean_latency_ms": 25.71,
-        "p95_latency_ms": 48.28,
+        "mean_latency_ms": 20.11,
+        "p95_latency_ms": 29.95,
         "multi_hop_subgraph_recall_at_5": 0.5,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -144,8 +144,8 @@
         "exact_rule_recall_at_5": 0.55,
         "chunk_rule_mrr_at_5": 0.4875,
         "volume_invariant_recall_at_5": 0.85,
-        "mean_latency_ms": 38.19,
-        "p95_latency_ms": 44.85,
+        "mean_latency_ms": 37.59,
+        "p95_latency_ms": 44.35,
         "multi_hop_subgraph_recall_at_5": 0.5,
         "unanswerable_abstain_accuracy": 1.0
       }
@@ -162,8 +162,8 @@
           "exact_rule_recall_at_5": 0.5,
           "chunk_rule_mrr_at_5": 0.375,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 21.73,
-          "p95_latency_ms": 31.98
+          "mean_latency_ms": 20.11,
+          "p95_latency_ms": 28.59
         },
         "hybrid_rrf": {
           "queries_evaluated": 4,
@@ -175,8 +175,8 @@
           "exact_rule_recall_at_5": 0.5,
           "chunk_rule_mrr_at_5": 0.5,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 37.84,
-          "p95_latency_ms": 39.09
+          "mean_latency_ms": 36.33,
+          "p95_latency_ms": 39.85
         }
       },
       "synonym_paraphrase": {
@@ -190,8 +190,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.5833,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 20.93,
-          "p95_latency_ms": 30.13
+          "mean_latency_ms": 20.77,
+          "p95_latency_ms": 29.54
         },
         "hybrid_rrf": {
           "queries_evaluated": 4,
@@ -203,8 +203,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.625,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 39.17,
-          "p95_latency_ms": 44.32
+          "mean_latency_ms": 36.91,
+          "p95_latency_ms": 41.7
         }
       },
       "multi_hop": {
@@ -218,8 +218,8 @@
           "exact_rule_recall_at_5": 0.5,
           "chunk_rule_mrr_at_5": 0.3125,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 22.1,
-          "p95_latency_ms": 31.59,
+          "mean_latency_ms": 20.68,
+          "p95_latency_ms": 29.92,
           "multi_hop_subgraph_recall_at_5": 0.5
         },
         "hybrid_rrf": {
@@ -232,8 +232,8 @@
           "exact_rule_recall_at_5": 0.5,
           "chunk_rule_mrr_at_5": 0.3125,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 40.74,
-          "p95_latency_ms": 42.06,
+          "mean_latency_ms": 39.97,
+          "p95_latency_ms": 41.87,
           "multi_hop_subgraph_recall_at_5": 0.5
         }
       },
@@ -248,8 +248,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 21.76,
-          "p95_latency_ms": 31.37
+          "mean_latency_ms": 21.33,
+          "p95_latency_ms": 30.07
         },
         "hybrid_rrf": {
           "queries_evaluated": 4,
@@ -261,8 +261,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.75,
-          "mean_latency_ms": 39.04,
-          "p95_latency_ms": 46.21
+          "mean_latency_ms": 37.29,
+          "p95_latency_ms": 43.81
         }
       },
       "unanswerable": {
@@ -276,8 +276,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 19.97,
-          "p95_latency_ms": 28.24,
+          "mean_latency_ms": 20.52,
+          "p95_latency_ms": 29.87,
           "unanswerable_abstain_accuracy": 1.0
         },
         "hybrid_rrf": {
@@ -290,8 +290,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 35.49,
-          "p95_latency_ms": 40.78,
+          "mean_latency_ms": 35.3,
+          "p95_latency_ms": 39.16,
           "unanswerable_abstain_accuracy": 1.0
         }
       },
@@ -306,8 +306,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 20.04,
-          "p95_latency_ms": 27.34
+          "mean_latency_ms": 20.11,
+          "p95_latency_ms": 27.06
         },
         "hybrid_rrf": {
           "queries_evaluated": 4,
@@ -319,8 +319,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 39.13,
-          "p95_latency_ms": 47.27
+          "mean_latency_ms": 33.98,
+          "p95_latency_ms": 41.59
         }
       }
     }

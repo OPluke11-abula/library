@@ -3,7 +3,7 @@ tags:
   - index
   - navigator
 created: 2026-09-17
-updated: 2026-09-22
+updated: 2026-10-31
 author: Luke
 ---
 
@@ -42,8 +42,9 @@ Primary Navigator:
   - [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]
   - [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]
   - [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]
-- **06 Natural Language Processing & Large Language Models**:
-  - [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]
+- **06 Natural Language Processing & Large Language Models**:
+  - [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]
+  - [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]
 - **07 Reinforcement Learning & Intelligent Agents**:
   - [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]
   - [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]

@@ -11,7 +11,7 @@ Validates:
   5. Internal Wikilinks and relative Markdown link integrity.
   6. Detection of stale repository claims.
   7. Illegal C0 control characters and forbidden legacy status tokens.
-  8. Rule contract level presence and ZH/EN contract level parity across all 84 rules.
+  8. Rule contract level presence and ZH/EN contract level parity across all 103 rules.
   9. Inline body topological navigation vs. YAML frontmatter DAG parity.
   10. Canonical 10-tag Evidence Taxonomy enforcement (no compound slash tags or non-canonical tags).
   11. Python code block AST syntax verification and ZH/EN code block parity.
@@ -23,7 +23,7 @@ import sys
 import os
 import re
 import ast
-import json
+import json, hashlib, subprocess
 import textwrap
 import urllib.parse
 from pathlib import Path
@@ -512,12 +512,31 @@ def validate_all():
         if not re.search(r'(?:References|Literature)', en_docs[cid]['body']):
             errors.append(f"[EN {cid}] Missing References / Literature section")
 
+    # Compute deterministic Corpus SHA-256 and Git Commit SHA for reproducibility provenance
+    corpus_hasher = hashlib.sha256()
+    for cid in sorted(all_call_numbers):
+        for docs_map in (zh_docs, en_docs):
+            if cid in docs_map:
+                rel_p = docs_map[cid]['path'].relative_to(ROOT).as_posix()
+                corpus_hasher.update((rel_p + chr(10)).encode('utf-8'))
+                corpus_hasher.update(docs_map[cid]['path'].read_bytes())
+    corpus_sha256 = corpus_hasher.hexdigest()
+    try:
+        git_sha = subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'], cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
+        ).strip()
+    except Exception:
+        git_sha = 'UNKNOWN'
+
     # Output report
     rep_dir = ROOT / 'reports'
     rep_dir.mkdir(exist_ok=True)
     report_data = {
         'status': 'PASS' if not errors else 'FAIL',
+        'git_commit_sha': git_sha,
+        'corpus_sha256': corpus_sha256,
         'volume_count': len(all_call_numbers),
+        'bilingual_file_count': len(zh_docs) + len(en_docs),
         'topological_order': topo_order,
         'invariants_total': total_invariants,
         'checks_enabled': 11,

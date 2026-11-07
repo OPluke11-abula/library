@@ -1,7 +1,7 @@
 ---
 call_number: LIB-203
 status: source-verified
-invariants_count: 5
+invariants_count: 6
 title: Computer Architecture & Hardware-Aware Deep Learning (Agent Edition)
 module: Systems-Hardware
 category: Engineering-Core
@@ -132,6 +132,24 @@ In host-side data ingestion and preprocessing pipelines, list comprehensions (`[
 3. **Two's-Complement Integer Overflow & Pre-Arithmetic Upcasting** `[FACT]` `[SAFETY_BOUND]`:
    Signed 16-bit integers (`int16`) span $[-32768, 32767]$ and unsigned 8-bit pixels (`uint8`) span $[0, 255]$. Assigning or downcasting out-of-range values (e.g., storing $123,456,789$ in `int16`) or accumulating directly in `uint8` triggers silent modulo-$2^b$ wrap-around truncation ($123456789 \equiv -13035 \pmod{2^{16}}$). Raw `uint8` / `int16` tensors must be explicitly upcast to `float32` or `int32`/`int64` prior to arithmetic reduction or normalization `[SAFETY_BOUND]`.
 
+### 6. Host I/O Buffering Hierarchy: User-Space `io.BufferedWriter`, `isatty()` Line vs. Block Buffering & `flush=True` Syscall Mechanics `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+In interactive terminal progress bars (`print(i, end='')` or `\r` carriage returns), background cluster training logs (`nohup`, SLURM, Docker stdout redirection), and subprocess stdio IPC (such as JSON-RPC 2.0 MCP Stdio Servers), frozen output or IPC deadlocks arise from the boundary between **Python's user-space I/O buffers** and **OS kernel system calls**:
+1. **First-Principles Distinction: `flush=True` Drains Python's User-Space Buffer via `write()`, NOT the OS Kernel Page Cache** `[FACT]`:
+   - **Amortizing Context-Switch Overhead**: Every `write(fd, buf, count)` system call incurs a **User Mode (Ring 3) $\to$ Kernel Mode (Ring 0)** privilege transition and CPU pipeline flush (hundreds to thousands of clock cycles). Issuing a syscall per single printed character severely degrades host CPU throughput.
+   - **CPython Three-Layer Stdio Stack (PEP 3116)**: Python 3 structures `sys.stdout` as a three-tier hierarchy:
+     $$\text{Text Layer (\texttt{io.TextIOWrapper})} \longrightarrow \text{User-Space Buffer (\texttt{io.BufferedWriter}, } 4\text{--}8\text{ KB)} \longrightarrow \text{Raw OS FD (\texttt{io.FileIO}, \texttt{fd=1})}$$
+   - **Exact Physical Action of `flush=True`**: Invoking `print(..., flush=True)` or `sys.stdout.flush()` forces Python to drain bytes held in **user-space virtual memory** (`io.TextIOWrapper` / `io.BufferedWriter`) into the **OS kernel TTY buffer, pipe ring buffer, or Page Cache** via the `write(1, buf, n)` syscall `[FACT]`. It does *not* bypass the OS kernel buffer; forcing OS kernel Page Cache pages onto physical non-volatile disk (NVMe/SSD) requires an explicit `os.fsync(fd)` `[FACT]` `[SAFETY_BOUND]`.
+2. **Interactive TTY (`isatty() == True`) Line-Buffering vs. Non-TTY Pipe/File (`isatty() == False`) Block-Buffering Trap** `[FACT]` `[SAFETY_BOUND]`:
+   - **Interactive Terminal Mode (`Line-Buffered`, `isatty() == True`)**: When attached to a terminal, `io.TextIOWrapper` enables `line_buffering=True`. Output remains trapped in user-space RAM until a newline `\n` is encountered (or the buffer fills); omitting `\n` via `print(i, end='')` or `\r` progress bars causes output to stall until `flush=True` is passed or the loop terminates `[FACT]`.
+   - **Non-Interactive Background Training & Subprocess Pipe Mode (`Block-Buffered`, $4\text{--}8\text{ KB}$, `isatty() == False`)**: When `sys.stdout` is redirected to a file, pipe, or background job (`python train.py > train.log`, `nohup`, SLURM, Docker logs, or `subprocess.Popen(..., stdout=PIPE)`), `sys.stdout.isatty()` evaluates to `False`, and CPython automatically switches `sys.stdout` to **Block-Buffered mode (`line_buffering=False`, typically $4096\text{--}8192\text{ Bytes}$)** `[FACT]`. Under block buffering, **even `print("Epoch 1 Loss: 0.12\n")` containing a newline `\n` is held in user space** until $4\text{--}8\text{ KB}$ accumulates, causing:
+     - **Silent Log Starvation & Crash Loss**: Training logs appear frozen for minutes or hours, and any un-flushed user-space bytes are permanently lost if the process is terminated via `SIGKILL` (OOM killer) `[SAFETY_BOUND]`.
+     - **Subprocess / MCP Stdio IPC Deadlock**: In bidirectional `stdin`/`stdout` JSON-RPC 2.0 servers (e.g., `library_rag.py --mcp`), omitting `sys.stdout.flush()` after writing a $< 8\text{ KB}$ response leaves the payload trapped in the child's user-space `io.BufferedWriter`, deadlocking both parent and child processes indefinitely `[SAFETY_BOUND]`.
+3. **Production Engineering Controls & Anti-Patterns** `[DESIGN_DECISION]`:
+   - **Per-Call Immediate Drain**: `print(..., end='', flush=True)` or `sys.stdout.flush()` (mandatory for `\r` progress bars and MCP/JSON-RPC stdio message framing).
+   - **Stream-Level Reconfiguration (Python 3.7+)**: `sys.stdout.reconfigure(line_buffering=True)` at process startup to restore newline-triggered flushing even when redirected to non-TTY files/pipes.
+   - **Process-Wide Unbuffered Mode**: `PYTHONUNBUFFERED=1` or `python -u` for containerized or SLURM training jobs.
+   - **High-Frequency Syscall Thrashing Guardrail**: Never invoke `flush=True` inside tight inner loops emitting $> 10^3$ lines/sec, which saturates host CPU cores with Ring 3 $\leftrightarrow$ Ring 0 syscall overhead `[SAFETY_BOUND]`.
+
 ---
 
 ## 4. Production PyTorch Pin-Memory & CUDA Benchmark Contract
@@ -200,6 +218,35 @@ def verify_eager_vs_lazy_generator(n_items: int = 100_000):
     assert gen_sizeof < 512 and peak_eager > peak_lazy * 100
     assert first_pass_sum == n_items * (n_items + 1) // 2 and second_pass_sum == 0
     return {"eager_peak_bytes": peak_eager, "lazy_peak_bytes": peak_lazy, "gen_sizeof": gen_sizeof}
+
+
+def verify_stdio_buffering_and_flush():
+    """
+    Empirically verifies Python io.BufferedWriter / io.TextIOWrapper retention under
+    non-TTY block buffering vs. interactive line buffering, and immediate draining via flush=True.
+    """
+    import io
+
+    raw_sink = io.BytesIO()
+    buffered_writer = io.BufferedWriter(raw_sink, buffer_size=8192)
+
+    # 1. Non-TTY Block-Buffered mode (line_buffering=False, e.g., redirected file or pipe)
+    block_stream = io.TextIOWrapper(buffered_writer, encoding="utf-8", line_buffering=False)
+    print("step_0", end="", file=block_stream, flush=False)
+    print("step_1\n", end="", file=block_stream, flush=False)
+    assert len(raw_sink.getvalue()) == 0  # Retained in 8 KB user-space buffer despite newline
+
+    print("step_2", end="", file=block_stream, flush=True)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2"  # Drained to sink upon flush=True
+
+    # 2. Interactive TTY Line-Buffered mode (line_buffering=True)
+    line_stream = io.TextIOWrapper(buffered_writer, encoding="utf-8", line_buffering=True)
+    print("|no_newline", end="", file=line_stream, flush=False)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2"  # Trapped without \n or flush=True
+    print("|with_newline\n", end="", file=line_stream, flush=False)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2|no_newline|with_newline\n"
+    line_stream.detach()
+    return {"flushed_bytes": len(raw_sink.getvalue())}
 ```
 
 ---
@@ -230,6 +277,11 @@ def verify_eager_vs_lazy_generator(n_items: int = 100_000):
 - **Contract Level**: `RESOURCE_CONSTRAINT`
 - **Specification**: For sequential single-pass streaming over large collections ($N \ge 10^5$, e.g., JSONL parsing, I/O filtering, or `sum`/`any`/`all` reductions), pipelines MUST replace eager list comprehensions `[f(x) for x in stream]` ($O(N)$ boxed heap allocation, $\approx 38.6\text{ MB}$ peak per $10^6$ ints) with lazy generator expressions `(f(x) for x in stream)` ($O(1)$ auxiliary state, $200\text{ Bytes}$ `PyGenObject`) `[EMPIRICAL_RESULT]`. One-shot generator instances MUST NOT be passed directly to multi-epoch training loops without wrapping in a re-entrant `Iterable` (`__iter__()`) `[SAFETY_BOUND]`, and dense numerical array arithmetic MUST use contiguous unboxed SIMD/GPU tensor operators rather than Python scalar iteration `[DESIGN_DECISION]`.
 - **Violation Consequence**: Eager list allocation over out-of-core streams triggers host RAM OOM; reusing a raw generator across epochs silently yields 0 samples after Epoch 1; and scalar Python generator loops over numerical arrays incur severe interpreter dispatch and boxing overhead.
+
+### [RULE-203-06] Stdio Buffering Hierarchy & Non-TTY Pipe Flush Guardrail
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: Interactive terminal status updates omitting `\n` (`print(i, end='', flush=True)` or `\r` progress bars) MUST explicitly pass `flush=True` or invoke `sys.stdout.flush()` to drain Python's user-space `io.BufferedWriter` ($4\text{--}8\text{ KB}$) into the OS kernel buffer via `write()` `[FACT]` `[SAFETY_BOUND]`. When `sys.stdout` is redirected to a non-TTY pipe or file (`isatty() == False`, e.g., SLURM/Docker training logs or JSON-RPC 2.0 MCP Stdio servers), CPython switches to $4\text{--}8\text{ KB}$ block buffering where `\n` alone does NOT flush `[FACT]`; stdio IPC servers MUST call `sys.stdout.flush()` after every protocol frame, and background training scripts MUST enable `sys.stdout.reconfigure(line_buffering=True)`, `PYTHONUNBUFFERED=1` (`python -u`), or explicit epoch-level `flush=True` `[SAFETY_BOUND]`. Durability onto physical disk beyond the OS kernel Page Cache requires `os.fsync(fd)` `[FACT]` `[SAFETY_BOUND]`, whereas tight loops ($> 10^3$ calls/sec) MUST NOT invoke per-iteration `flush=True` to avoid syscall thrashing `[DESIGN_DECISION]`.
+- **Violation Consequence**: Omitting `flush=True` stalls terminal progress displays, loses up to $8\text{ KB}$ of trailing crash diagnostics upon `SIGKILL`, or induces permanent bidirectional IPC deadlocks in Agent/MCP stdio servers.
 
 ---
 

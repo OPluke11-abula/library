@@ -3,7 +3,7 @@
 > **文檔名稱**: `library_stage.md`  
 > **更新時間**: 2026-10-31  
 > **當前交接基準 HEAD**: 最新 `main` 分支權威提交（詳見 `reports/library_integrity.json` 之 `git_commit_sha` 與 `corpus_sha256`）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件、911 個階層式 Chunks），103 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件、915 個階層式 Chunks），104 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`12fb584c248bce1714d0ff2605fed3548f6349d3`
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 103 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 104 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -216,7 +216,7 @@
 - **P0: 擴充 `LIB-203` 與 `LIB-901`（整合莊啟宏教授 CV 教材 Ch3–Ch5 張量廣播、階數代數與模型序列化三層光譜）**：
   - 於 `LIB-203` 推導零拷貝廣播視圖（`stride = 0` 記憶體位址映射）、保階（`concat`/`split`）vs. 升降階（`stack`/`unstack`）張量代數，以及 `int16`/`uint8` 二補數溢位截斷防護；於 `LIB-901` 補入模型持久化三層光譜（`save_weights`/`state_dict` vs. `.h5` `compile=False` vs. 跨語言 `SavedModel`/ONNX）。
 
-### 18. Engineering & RAG Quality Audit 全面加固（演算法正名、公平消融實驗、24 題零洩漏 Holdout 測試集、決定性溯源與 MCP 協定容錯）
+### 19. Engineering & RAG Quality Audit 全面加固（演算法正名、公平消融實驗、24 題零洩漏 Holdout 測試集、決定性溯源與 MCP 協定容錯）
 - **P0.1 演算法描述對齊與切塊/合約映射修復 (`scripts/library_rag.py`)**：
   - 明確區分非神經網路之輕量近似演算法（256 維 MD5 特徵雜湊 Signed Random Projection、字元 2/3-gram MaxSim 重排序）與預訓練神經網路模型，移除死變數 `prefix_salt`，放寬 MaxSim 截斷上限至 512 tokens。
   - 新增 `split_markdown_preserving_fences` 保護程式碼區塊不被 `##`/`###` 註解截斷，並以 `ast.parse` 實質提取 Python 區塊之類別與函式符號（`ast_symbols`）。
@@ -226,7 +226,12 @@
   - 建立 `tests/holdout_rag_benchmark.json`（24 題，0% Rule/Volume ID 洩漏，涵蓋自然語言、同義改寫、跨館多跳、錯誤前提糾正、庫外拒答 `low_confidence_abstain` 與中英跨語言檢索 6 大維度）。
 - **P0.3 & P2 版本溯源與 MCP Stdio Server 協定加固 (`scripts/validate_library.py`, `scripts/library_rag.py`)**：
   - 於 `reports/library_integrity.json`、`reports/library_rag_index.json` 與 `reports/library_rag_benchmark.json` 統一記錄 `git_commit_sha` 與決定性 `corpus_sha256`，並將動態 `build_latency_ms` 自索引檔移除以避免弄髒工作區。
-  - 加固 `run_mcp_stdio_server()`，完整支援 JSON-RPC 2.0 錯誤碼（`-32700`, `-32600`, `-32601`, `-32602`）、參數邊界驗證、`isError: true` 例外捕捉與新增 `library_lookup_rule` 工具。
+  - 加固 `run_mcp_stdio_server()`，完整支援 JSON-RPC 2.0 錯誤碼（`-32700`, `-32600`, `-32601`, `-32602`）、參數邊界驗證、`isError: true` 例外捕捉與新增 `library_lookup_rule` 工具。
+
+### 20. 主機端 I/O 緩衝階層（User-Space `io.BufferedWriter` vs. OS Kernel Syscall、`isatty()` 行緩衝/區塊緩衝切換與 `flush=True` 合約，`104` 條不變量）
+- **P0: 擴充 `LIB-203`（CPython 三層標準輸出堆疊、`isatty()` 非互動管線區塊緩衝與 `RULE-203-06`）**：
+  - 嚴格釐清 `print(..., flush=True)` / `sys.stdout.flush()` 排空的是 **Python 使用者空間緩衝區**（`io.TextIOWrapper` $\to$ `io.BufferedWriter`，透過 `write()` 系統呼叫送入 OS Kernel TTY/Pipe 緩衝區），而非繞過作業系統核心緩衝（持久化至實體磁碟需 `os.fsync(fd)`）。
+  - 剖析互動式終端機（`isatty() == True`，預設行緩衝 Line-Buffered，省略 `\n` 之進度條需 `flush=True`）與非互動背景訓練/子進程管線（`isatty() == False`，自動切換為 $4\text{--}8\text{ KB}$ 區塊緩衝 Block-Buffered，連 `\n` 亦被滯留而引發訓練日誌空白或 JSON-RPC/MCP Stdio 雙向管線死鎖）之底層機制，新增實證函式 `verify_stdio_buffering_and_flush()` 與 `[RULE-203-06]`（`SAFETY_CRITICAL`）。
 
 ---
 

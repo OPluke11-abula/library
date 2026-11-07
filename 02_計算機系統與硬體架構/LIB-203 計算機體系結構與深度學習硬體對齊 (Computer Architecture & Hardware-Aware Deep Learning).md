@@ -1,7 +1,7 @@
 ---
 call_number: LIB-203
 status: source-verified
-invariants_count: 5
+invariants_count: 6
 title: 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)
 module: Computer-Systems-Architecture
 category: Hardware-Alignment
@@ -185,6 +185,24 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
    - 有號 16 位元整數（`int16`）之二補數表示範圍僅為 $[-2^{15}, 2^{15}-1] = [-32768, 32767]$，無號 8 位元影像像素（`uint8`）僅為 $[0, 255]$。
    - 若將超出表示上限之數值（例如 $123,456,789 > 32,767$）存入或強制轉型為 `int16`，或直接對 `uint8` 影像張量執行累加/平方運算，底層硬體將執行模 $2^b$ 二補數高位截斷（Modulo-$2^{16}$ Wrap-around：$123456789 \equiv -13035 \pmod{65536}$），引發無報錯之靜默數值崩潰 `[SAFETY_BOUND]`。任何影像或類別索引在執行算術與正規化前，必須強制轉型（Upcast）為 `float32` 或 `int32`/`int64`。
 
+### 7. 主機端 I/O 緩衝階層：使用者空間緩衝 (`io.BufferedWriter`)、`isatty()` 行緩衝 vs. 區塊緩衝切換與 `flush=True` 系統呼叫剖析 `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+在終端機動態訓練進度條（`print(i, end='')` 或 `\r` 覆寫）、背景叢集任務日誌（`nohup` / SLURM / Docker 管線重導向）與跨進程通訊（如 JSON-RPC 2.0 MCP Stdio 伺服器）中，「畫面定格數秒才一次蹦出」或「子進程管線死鎖」並非 Python `time.sleep()` 失靈，而是由 **使用者空間（User-Space）I/O 緩衝區** 與 **作業系統核心（OS Kernel）系統呼叫邊界** 共同決定：
+1. **第一性原理勘誤：`flush=True` 排空的是「Python 使用者空間緩衝區」，而非「繞過作業系統核心緩衝」** `[FACT]`：
+   - 為什麼需要緩衝？每次執行作業系統 `write(fd, buf, count)` 系統呼叫（Syscall）皆須經歷 **User Mode (Ring 3) $\to$ Kernel Mode (Ring 0)** 特權級上下文切換與硬體中斷（耗時數百至數千個 CPU 時鐘週期）。若每印出 1 個字元就觸發一次 Syscall，I/O 吞吐量將嚴重崩潰。
+   - **CPython 三層標準輸出堆疊（PEP 3116）**：在 Python 3 中，`sys.stdout` 由外而內封裝為三層結構：
+     $$\text{Text Layer (\texttt{io.TextIOWrapper})} \longrightarrow \text{User-Space Buffer (\texttt{io.BufferedWriter}, 預設 } 4\text{--}8\text{ KB)} \longrightarrow \text{Raw OS FD (\texttt{io.FileIO}, \texttt{fd=1})}$$
+   - **`flush=True` 的真實物理動作**：呼叫 `print(..., flush=True)` 或 `sys.stdout.flush()` 時，Python 將滯留於**使用者空間虛擬記憶體**（`io.TextIOWrapper` / `io.BufferedWriter`）中的位元組，立即透過 `write(1, buf, n)` 系統呼叫推送至 **作業系統核心的 TTY 緩衝區、Pipe 環形緩衝區或 Page Cache** `[FACT]`。它**並未繞過**作業系統核心緩衝；若目標為實體磁碟檔案且需強制將 OS Kernel Page Cache 刷入非揮發性儲存媒體（NVMe/SSD），則必須額外呼叫 `os.fsync(fd)` `[FACT]` `[SAFETY_BOUND]`。
+2. **互動式終端機（TTY，`isatty() == True`）vs. 非互動管線/檔案重導向（Non-TTY，`isatty() == False`）的自動切換陷阱** `[FACT]` `[SAFETY_BOUND]`：
+   - **互動模式（Line-Buffered，行緩衝）**：當標準輸出連接至互動式終端機（`sys.stdout.isatty() == True`）時，`io.TextIOWrapper` 預設啟用 `line_buffering=True`。此時僅當字串包含換行符號 `\n`（或緩衝區滿）時才會觸發 `write()` 系統呼叫；若使用 `print(i, end='')` 或 `print(f"\rEpoch {e}", end='')` 省略了 `\n`，字元將全數滯留於 Python 使用者空間緩衝區中，直到程式結束或緩衝區填滿才一次性湧出 `[FACT]`。
+   - **非互動背景訓練與 IPC 管線模式（Block-Buffered，區塊緩衝 $4\text{--}8\text{ KB}$）**：當標準輸出被重導向至檔案、背景日誌或子進程管線時（如 `python train.py > train.log`、`nohup`、SLURM 批次作業、Docker 容器日誌或 `subprocess.Popen(..., stdout=PIPE)`），`sys.stdout.isatty()` 返回 `False`，CPython 啟動時會自動將 `sys.stdout` 降級為 **區塊緩衝（Block-Buffered，`line_buffering=False`，典型容量 $4096\text{--}8192\text{ Bytes}$）** `[FACT]`！此時**即使 `print("Loss: 0.123\n")` 帶有換行符號 `\n` 也不會觸發輸出**，必須累積滿 $4\text{--}8\text{ KB}$ 才會寫入核心，導致：
+     - **訓練監控失明**：長時間 Epoch 訓練日誌在數十分鐘內完全空白（且若進程遭 `SIGKILL` 強制終止，未 flush 之使用者空間緩衝區日誌將永久遺失） `[SAFETY_BOUND]`。
+     - **Agent / MCP Stdio 雙向管線死鎖（IPC Deadlock）**：在基於 `stdin`/`stdout` 的 JSON-RPC 2.0 伺服器（如本知識庫之 `library_rag.py --mcp`）中，若回應訊息小於 $8\text{ KB}$ 且未執行 `sys.stdout.flush()`，父進程（Client）將無限期阻塞於 `read()` 等待回應，而子進程（Server）亦阻塞於等待下一條請求，形成經典雙向 I/O 死鎖 `[SAFETY_BOUND]`。
+3. **四種工程級緩衝控制策略與適用邊界** `[DESIGN_DECISION]`：
+   - **單點即時排空**：`print(..., end='', flush=True)` 或 `sys.stdout.write(...); sys.stdout.flush()`（適用於終端機 `\r` 單行進度條與 MCP Stdio 協議精確幀控制）。
+   - **流級動態重配置（Python 3.7+）**：`sys.stdout.reconfigure(line_buffering=True)`（在程式入口處強制將非 TTY 重導向流恢復為遇 `\n` 即排空的行緩衝模式）。
+   - **進程級無緩衝啟動**：設定環境變數 `PYTHONUNBUFFERED=1` 或命令列參數 `python -u`（強制 `stdout`/`stderr` 二進位與文字層完全停用緩衝，適用於容器化訓練與 SLURM 作業）。
+   - **吞吐量反模式警告**：在每秒輸出數萬行之高頻迴圈中，嚴禁無差別濫用逐字元 `flush=True`，否則高頻率 Ring 3 $\leftrightarrow$ Ring 0 系統呼叫將使主機 CPU 陷入 I/O 阻塞（I/O-Bound Syscall Thrashing） `[SAFETY_BOUND]`。
+
 ---
 
 ## 四、💻 工業級工程實作：4 層 2^n 金字塔 DNN 參數量解析與維度對齊基準
@@ -282,9 +300,42 @@ def verify_eager_vs_lazy_generator(n_items: int = 100_000):
     assert first_pass_sum == n_items * (n_items + 1) // 2 and second_pass_sum == 0
     print(f"Eager Peak: {peak_eager:,} B (Container: {list_sizeof:,} B) | Lazy Peak: {peak_lazy:,} B (GenObj: {gen_sizeof} B)")
 
+
+def verify_stdio_buffering_and_flush():
+    """
+    實證驗證 Python io.BufferedWriter / io.TextIOWrapper 之行緩衝 (Line-Buffered)
+    與非互動區塊緩衝 (Block-Buffered) 滯留行為，以及 flush=True 的即時排空機制
+    """
+    import io
+
+    # 模擬底層 OS 接收端 (Sink) 與 8 KB 使用者空間緩衝區 (io.BufferedWriter)
+    raw_sink = io.BytesIO()
+    buffered_writer = io.BufferedWriter(raw_sink, buffer_size=8192)
+
+    # 1. 非互動區塊緩衝模式 (line_buffering=False, 對應 pipe / 檔案重導向 isatty()==False)
+    block_stream = io.TextIOWrapper(buffered_writer, encoding="utf-8", line_buffering=False)
+    print("step_0", end="", file=block_stream, flush=False)
+    print("step_1\n", end="", file=block_stream, flush=False)
+    # 即使包含 \n，在區塊緩衝且未滿 8 KB 時，底層 OS Sink 收到的位元組仍為 0
+    assert len(raw_sink.getvalue()) == 0
+
+    # 顯式觸發 flush=True：立即將使用者空間緩衝區透過 write() 排空至底層 Sink
+    print("step_2", end="", file=block_stream, flush=True)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2"
+
+    # 2. 互動式行緩衝模式 (line_buffering=True, 對應終端機 TTY isatty()==True)
+    line_stream = io.TextIOWrapper(buffered_writer, encoding="utf-8", line_buffering=True)
+    print("|no_newline", end="", file=line_stream, flush=False)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2"  # 無換行符號且未 flush，仍卡在緩衝區
+    print("|with_newline\n", end="", file=line_stream, flush=False)
+    assert raw_sink.getvalue() == b"step_0step_1\nstep_2|no_newline|with_newline\n"  # 遇 \n 自動觸發 flush
+    line_stream.detach()
+
+
 if __name__ == "__main__":
     benchmark_dimension_alignment()
     verify_eager_vs_lazy_generator()
+    verify_stdio_buffering_and_flush()
 ```
 
 ---
@@ -331,6 +382,15 @@ if __name__ == "__main__":
   - **多 Epoch 可重入保護**：嚴禁將單次產生器實例（One-Shot Generator Iterator）直接綁定至跨 Epoch 訓練迴圈；必須封裝為實作 `__iter__()` 每次返回全新產生器之可重入 `Iterable`（如 `torch.utils.data.IterableDataset`） `[SAFETY_BOUND]`。
   - **數值向量化分流**：若目標為純數值陣列算術（如百萬維度張量加減乘除），嚴禁使用 Python 迴圈或產生器逐元素 `next()` 迭代，必須交由連續未裝箱（Unboxed）之 NumPy/PyTorch SIMD/GPU 張量算子執行 `[DESIGN_DECISION]`。
 - **違規後果**: 對超大規模資料集誤用 `[]` 及早求值將瞬間耗盡主機實體 RAM 觸發 OOM；對多輪訓練誤傳單次產生器將導致第 2 個 Epoch 起資料靜默歸零；對密集數值運算誤用 Python 產生器則會因百萬次直譯器分派與裝箱開銷導致吞吐量崩潰。
+
+### [RULE-203-06] 標準輸出緩衝階層與非互動管線強制排空合約 (Stdio Buffering Hierarchy & Non-TTY Pipe Flush Guardrail)
+- **合約等級**: `SAFETY_CRITICAL`
+- **前置條件**: 撰寫終端機無換行進度條（`end=''` 或 `\r`）、背景長時訓練日誌（重導向至檔案、SLURM、Docker 容器），或基於 `stdin`/`stdout` 之跨進程通訊伺服器（如 JSON-RPC 2.0 MCP Stdio Server）。
+- **量化決策邊界**:
+  - **無換行即時狀態輸出**：在互動式終端機（`isatty() == True`，預設行緩衝 Line-Buffered）中，任何省略 `\n` 之狀態更新（如 `print(i, end='', flush=True)` 或 `\r` 進度條）必須顯式附加 `flush=True` 或呼叫 `sys.stdout.flush()`，將滯留於 Python 使用者空間 `io.BufferedWriter`（預設 $4\text{--}8\text{ KB}$）之位元組透過 `write()` 系統呼叫排空至作業系統核心緩衝區 `[FACT]` `[SAFETY_BOUND]`。
+  - **非 TTY 背景訓練與 IPC 管線防死鎖**：當標準輸出重導向至非互動管線或檔案（`isatty() == False`）時，CPython 自動切換為 $4\text{--}8\text{ KB}$ 區塊緩衝（Block-Buffered），此時單靠 `\n` **不會**觸發排空 `[FACT]`。在 Stdio IPC 伺服器（如 MCP Server）中，每次寫出協議幀後**必須**立即呼叫 `sys.stdout.flush()`；在背景訓練作業中，必須於入口設定 `sys.stdout.reconfigure(line_buffering=True)`、環境變數 `PYTHONUNBUFFERED=1`（`python -u`）或關鍵 Epoch 節點顯式 `flush=True` `[SAFETY_BOUND]`。
+  - **實體磁碟持久化邊界與高頻保護**：`flush=True` 僅排空 Python 使用者空間緩衝區至 OS Kernel Page Cache；若檢查點或關鍵審計日誌需防範斷電/崩潰遺失，必須額外執行 `os.fsync(fd)` `[FACT]` `[SAFETY_BOUND]`。反之，在每秒 $> 10^3$ 次之緊密數值迴圈內嚴禁逐次呼叫 `flush=True`，以避免高頻 Ring 3 $\leftrightarrow$ Ring 0 系統呼叫退化為 I/O 瓶頸 `[DESIGN_DECISION]`。
+- **違規後果**: 未執行 `flush=True` 將導致終端機進度條定格卡死、背景訓練崩潰時遺失最後 $8\text{ KB}$ 關鍵錯誤日誌，或在 Agent/MCP 子進程雙向管線通訊中引發永久性 I/O 死鎖（Deadlock）。
 
 ---
 

@@ -8,7 +8,7 @@ scripts/library_rag.py
 
 Executable DAG-Aware Hybrid RAG, Lexical Subword MaxSim Reranking, and CAG Compiler Engine
 
-for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 103 invariants).
+for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 104 invariants).
 
 
 
@@ -848,7 +848,7 @@ class LibraryGraphRAGEngine:
 
     """
 
-    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 103 invariants).
+    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 104 invariants).
 
     """
 
@@ -2664,7 +2664,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
 
                             "name": "library_hybrid_search",
 
-                            "description": "Search the 28-volume CS/DL Library (103 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + 1-Hop DAG Prerequisite Expansion.",
+                            "description": "Search the 28-volume CS/DL Library (104 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + 1-Hop DAG Prerequisite Expansion.",
 
                             "inputSchema": {
 

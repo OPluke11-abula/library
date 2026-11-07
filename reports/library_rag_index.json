@@ -1,14 +1,14 @@
 {
   "summary": {
     "git_commit_sha": "cb0ce0295f532e035a722db6aa2092652754b080",
-    "corpus_sha256": "292af83affb3cf2a0532009f0c681d44b9e14f2fac3adf40448948fe59f2371c",
+    "corpus_sha256": "19b5c89506b119ab62fccd7d2a8c583acc7e0b7f2a9ac11b8a0db6251d840838",
     "volumes_indexed": 28,
     "bilingual_files_indexed": 56,
     "parent_sections_count": 454,
-    "child_chunks_count": 911,
-    "rules_indexed_zh": 103,
-    "rules_indexed_en": 103,
-    "avg_chunk_tokens": 385.0
+    "child_chunks_count": 915,
+    "rules_indexed_zh": 104,
+    "rules_indexed_en": 104,
+    "avg_chunk_tokens": 388.4
   },
   "dag_prerequisites": {
     "LIB-000": [],
@@ -2575,6 +2575,22 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-203:zh:S04:C07": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射",
+      "section_h3": "7. 主機端 I/O 緩衝階層：使用者空間緩衝 (`io.BufferedWriter`)、`isatty()` 行緩衝 vs. 區塊緩衝切換與 `flush=True` 系統呼叫剖析 `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:zh:S05:C00": {
       "call_number": "LIB-203",
       "lang": "zh",
@@ -2704,6 +2720,27 @@
         "SAFETY_BOUND"
       ],
       "epistemic_weight": 0.98
+    },
+    "LIB-203:zh:S06:C06": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-203-06] 標準輸出緩衝階層與非互動管線強制排空合約 (Stdio Buffering Hierarchy & Non-TTY Pipe Flush Guardrail)",
+      "rule_ids": [
+        "RULE-203-06"
+      ],
+      "defined_rule_ids": [
+        "RULE-203-06"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-203:zh:S07:C00": {
       "call_number": "LIB-203",
@@ -2851,6 +2888,22 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-203:en:S04:C06": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "3. GPU Microarchitecture & CUDA Execution Model",
+      "section_h3": "6. Host I/O Buffering Hierarchy: User-Space `io.BufferedWriter`, `isatty()` Line vs. Block Buffering & `flush=True` Syscall Mechanics `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:en:S05:C00": {
       "call_number": "LIB-203",
       "lang": "en",
@@ -2958,6 +3011,27 @@
         "SAFETY_BOUND"
       ],
       "epistemic_weight": 0.98
+    },
+    "LIB-203:en:S06:C06": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "5. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-203-06] Stdio Buffering Hierarchy & Non-TTY Pipe Flush Guardrail",
+      "rule_ids": [
+        "RULE-203-06"
+      ],
+      "defined_rule_ids": [
+        "RULE-203-06"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-203:en:S07:C00": {
       "call_number": "LIB-203",

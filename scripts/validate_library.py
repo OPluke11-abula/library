@@ -24,7 +24,7 @@ Validates:
 
   7. Illegal C0 control characters and forbidden legacy status tokens.
 
-  8. Rule contract level presence and ZH/EN contract level parity across all 103 rules.
+  8. Rule contract level presence and ZH/EN contract level parity across all 104 rules.
 
   9. Inline body topological navigation vs. YAML frontmatter DAG parity.
 

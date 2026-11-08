@@ -9,18 +9,18 @@
       "category": "natural_language",
       "lang": "zh",
       "target_lang": "zh",
-      "query": "為什麼在訓練深層神經網路時，不能把所有隱藏層的權重矩陣都初始化為相同的常數或全零？對稱性破缺是什麼？",
+      "query": "為什麼在深層神經網路的隱藏層不能單獨使用非零中心化的 Sigmoid 激活函數？為什麼計算交叉熵時必須直接傳入未正規化的 Logits？",
       "expected_vol": "LIB-001",
-      "expected_rule": "RULE-001-03"
+      "expected_rule": "RULE-001-05"
     },
     {
       "id": "H02",
       "category": "natural_language",
       "lang": "zh",
       "target_lang": "zh",
-      "query": "當提示詞工程與單次上下文檢索已經無法解決領域語氣與結構問題時，應該根據什麼邊界條件決定採用 RAG 還是 LoRA 微調？",
-      "expected_vol": "LIB-602",
-      "expected_rule": "RULE-602-03"
+      "query": "為特定領域知識任務選擇外部知識注入架構時，應該根據什麼權杖總量與更新頻率邊界條件，決定採用靜態緩存增強生成（CAG）還是動態混合檢索（RAG）？",
+      "expected_vol": "LIB-603",
+      "expected_rule": "RULE-603-03"
     },
     {
       "id": "H03",
@@ -54,7 +54,7 @@
       "category": "synonym_paraphrase",
       "lang": "zh",
       "target_lang": "zh",
-      "query": "使用無分類器引導生成影像時，若把條件推進倍率調得過高造成色彩過飽和與破圖，該如何透過動態分位數截斷與重新縮放抑制失真？",
+      "query": "在初始化深層擴散 Transformer（DiT）神經架構時，如何透過自適應層正規化殘差門控的零初始化策略，確保訓練初始狀態等效於恆等映射？",
       "expected_vol": "LIB-406",
       "expected_rule": "RULE-406-02"
     },
@@ -72,7 +72,7 @@
       "category": "synonym_paraphrase",
       "lang": "en",
       "target_lang": "en",
-      "query": "In 3D Gaussian Splatting real-time rendering, what camera-space near-plane depth guard and covariance spectral clamping prevent singular matrix inversion explosions?",
+      "query": "In 3D Gaussian Splatting rasterization, how does decomposing the 3D covariance matrix into rotation quaternions and exponential scaling guarantee positive semi-definiteness during gradient descent?",
       "expected_vol": "LIB-504",
       "expected_rule": "RULE-504-01"
     },
@@ -84,7 +84,7 @@
       "query": "從 GPU 算術強度 Roofline 記憶體頻寬牆出發，解釋為何長序列標準自注意力受限於 HBM 讀寫，以及 FlashAttention 如何利用 SRAM 分塊與線上正規化突破瓶頸？",
       "expected_vol": "LIB-405",
       "secondary_vol": "LIB-203",
-      "expected_rule": "RULE-405-03"
+      "expected_rule": "RULE-405-02"
     },
     {
       "id": "H10",
@@ -101,10 +101,10 @@
       "category": "multi_hop",
       "lang": "en",
       "target_lang": "en",
-      "query": "Connecting KL divergence variational bounds to policy gradient reinforcement learning, how does Group Relative Policy Optimization eliminate the value critic memory overhead while bounding policy drift?",
-      "expected_vol": "LIB-702",
+      "query": "Connecting KL divergence regularization to post-training reinforcement learning and test-time compute scaling, how do modern large language models align reasoning trajectories while respecting KV cache memory budgets?",
+      "expected_vol": "LIB-602",
       "secondary_vol": "LIB-102",
-      "expected_rule": "RULE-702-01"
+      "expected_rule": "RULE-602-02"
     },
     {
       "id": "H12",
@@ -121,9 +121,9 @@
       "category": "false_premise",
       "lang": "zh",
       "target_lang": "zh",
-      "query": "既然在驗證集評估與推論階段，忘記切換 model.eval() 與 torch.no_grad() 只會稍微增加記憶體消耗而完全不會改變 BatchNorm 統計量與輸出結果，為什麼還需要寫這兩行？",
+      "query": "既然在執行 RMSNorm 前向正規化運算時，半精度浮點數永遠不會發生平方累加溢位或除零問題，為什麼還需要先轉型為單精度並加上極小值平滑項？",
       "expected_vol": "LIB-602",
-      "expected_rule": "RULE-602-04"
+      "expected_rule": "RULE-602-03"
     },
     {
       "id": "H14",
@@ -139,18 +139,18 @@
       "category": "false_premise",
       "lang": "en",
       "target_lang": "en",
-      "query": "Why is it completely safe to compute global mean and standard deviation normalization across the combined train and test dataset splits before cross-validation?",
+      "query": "Why is it completely safe to feed raw 8-bit grayscale pixel intensities [0, 255] directly into a multi-layer neural network without dividing by 255.0 first?",
       "expected_vol": "LIB-901",
-      "expected_rule": "RULE-901-01"
+      "expected_rule": "RULE-901-02"
     },
     {
       "id": "H16",
       "category": "false_premise",
       "lang": "en",
       "target_lang": "en",
-      "query": "Since Post-LN Transformer blocks have unimpeded identity gradient paths at initialization and never need learning rate warmup at 100+ layers, why would anyone use Pre-LN with RMSNorm?",
+      "query": "Since standard unscaled dot-product attention QK^T never saturates the Softmax function into vanishing-gradient regions even when head dimension d_k is large, why divide by sqrt(d_k)?",
       "expected_vol": "LIB-405",
-      "expected_rule": "RULE-405-02"
+      "expected_rule": "RULE-405-01"
     },
     {
       "id": "H17",

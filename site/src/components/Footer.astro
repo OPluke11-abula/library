@@ -1,4 +1,6 @@
 ---
+import Icon from './Icon.astro';
+
 interface Props {
   lang: 'zh' | 'en';
 }
@@ -11,7 +13,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 <footer class="site-footer">
   <div class="container footer-content">
     <div class="footer-brand">
-      <div class="footer-title">Grand Library — CS & AI Knowledge Atlas</div>
+      <div class="footer-brand-header">
+        <Icon name="atlas" size={18} />
+        <span class="footer-title">Grand Library — CS & AI Knowledge Atlas</span>
+      </div>
       <p class="footer-desc">
         {lang === 'zh' 
           ? '嚴謹的資訊工程、深度學習與電腦視覺自學與研究知識庫。結合第一性原理、GPU 硬體對齊與生產級工程規範。'
@@ -21,38 +26,60 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
     <div class="footer-links-group">
       <div class="footer-section">
-        <div class="footer-heading">{lang === 'zh' ? '導航快速入口' : 'Navigation'}</div>
+        <div class="footer-heading">{lang === 'zh' ? '導航入口' : 'Navigation'}</div>
         <ul class="footer-link-list">
           <li><a href={`${base}/${lang}/`}>{lang === 'zh' ? '首頁' : 'Home'}</a></li>
           <li><a href={`${base}/${lang}/library/`}>{lang === 'zh' ? '典籍目錄 (28 篇)' : 'Catalog (28 Volumes)'}</a></li>
           <li><a href={`${base}/${lang}/paths/`}>{lang === 'zh' ? '學習路徑拓樸' : 'Learning Paths'}</a></li>
-          <li><a href={`${base}/${lang}/about/`}>{lang === 'zh' ? '關於圖書館' : 'About'}</a></li>
+          <li><a href={`${base}/${lang}/about/`}>{lang === 'zh' ? '關於分館' : 'About'}</a></li>
         </ul>
       </div>
 
       <div class="footer-section">
-        <div class="footer-heading">{lang === 'zh' ? '外部連結與真理' : 'Repository & Gates'}</div>
+        <div class="footer-heading">{lang === 'zh' ? '專案與守則' : 'Repository & Gates'}</div>
         <ul class="footer-link-list">
-          <li><a href="https://github.com/OPluke11-abula/library" target="_blank" rel="noopener">GitHub Repository</a></li>
-          <li><a href="https://github.com/OPluke11-abula/library/blob/main/AGENTS.md" target="_blank" rel="noopener">AGENTS.md (Rules)</a></li>
-          <li><span class="badge-status status-source-verified">11 Invariants Passing</span></li>
+          <li>
+            <a href="https://github.com/OPluke11-abula/library" target="_blank" rel="noopener" class="footer-ext-link">
+              <span>GitHub Repository</span>
+              <Icon name="external-link" size={12} />
+            </a>
+          </li>
+          <li>
+            <a href="https://github.com/OPluke11-abula/library/blob/main/AGENTS.md" target="_blank" rel="noopener" class="footer-ext-link">
+              <span>AGENTS.md (Rules)</span>
+              <Icon name="external-link" size={12} />
+            </a>
+          </li>
+          <li>
+            <span class="badge-status status-source-verified">
+              <Icon name="check" size={12} />
+              <span>11 Invariants Passing</span>
+            </span>
+          </li>
         </ul>
       </div>
     </div>
   </div>
 
   <div class="container footer-bottom">
-    <p>© {currentYear} Grand Library. Curated by Luke. All mathematical & architectural derivations preserved.</p>
-    <p class="built-with">Built with Astro & TypeScript. Rendered via KaTeX.</p>
+    <p>© {currentYear} Grand Library. Curated by Luke. Mathematical derivations & systems contracts preserved.</p>
+    <p class="built-with">Built with Astro & TypeScript. Statically rendered via KaTeX.</p>
   </div>
 </footer>
 
 <style>
+  .site-footer {
+    margin-top: auto;
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    padding: 3rem 0 2rem;
+    color: var(--text-muted);
+  }
   .footer-content {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    padding-bottom: 2rem;
+    gap: 2.5rem;
+    padding-bottom: 2.5rem;
     border-bottom: 1px solid var(--border-subtle);
   }
   @media (min-width: 768px) {
@@ -65,29 +92,34 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   .footer-brand {
     max-width: 480px;
   }
+  .footer-brand-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+  }
   .footer-title {
     font-family: var(--font-serif);
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 0.5rem;
   }
   .footer-desc {
     font-size: 0.88rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
   }
   .footer-links-group {
     display: flex;
-    gap: 3rem;
+    gap: 3.5rem;
   }
   .footer-heading {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--accent-gold);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
   }
   .footer-link-list {
     list-style: none;
@@ -95,20 +127,27 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
     font-size: 0.88rem;
   }
   .footer-link-list a {
     color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s ease;
   }
   .footer-link-list a:hover {
-    color: var(--accent-cyan);
+    color: #ffffff;
+  }
+  .footer-ext-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
   }
   .footer-bottom {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding-top: 1.5rem;
+    padding-top: 1.75rem;
     font-size: 0.8rem;
     color: var(--text-muted);
   }
@@ -116,7 +155,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     .footer-bottom {
       flex-direction: row;
       justify-content: space-between;
-      align-items: center;
     }
+  }
+  .built-with {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
   }
 </style>

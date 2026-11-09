@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '../../../components/Icon.astro';
 import { loadLibraryArticles, getTopologicalArticles, type ArticleData } from '../../../lib/library';
 
 export async function getStaticPaths() {
@@ -29,11 +30,15 @@ const prevArticle = currIdx > 0 ? topoArticles[currIdx - 1] : null;
 const nextArticle = currIdx >= 0 && currIdx < topoArticles.length - 1 ? topoArticles[currIdx + 1] : null;
 
 const alternateUrl = `${base}/en/notes/${article.slug}/`;
+
+// Rough reading time estimate (approx 300 words per minute for technical prose)
+const wordCount = (article.rawMarkdown || '').length;
+const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
 ---
 
 <BaseLayout title={`${article.callNumber} ${article.title}`} lang="zh" alternateUrl={alternateUrl}>
   <div class="reader-container">
-    <!-- Top Meta Banner -->
+    <!-- Top Reader Header -->
     <header class="reader-header">
       <div class="container">
         <nav class="reader-breadcrumbs" aria-label="Breadcrumb">
@@ -53,106 +58,156 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
               {article.status}
             </span>
             <span class="hall-badge-head">
-              <span>{article.hall.icon}</span>
-              <span>{article.hall.nameZh}</span>
+              <Icon name={article.hall.iconName} size={14} />
+              <span>{article.hall.code} {article.hall.nameZh}</span>
             </span>
             <span class="invariants-badge">
-              <span>⚖️</span>
+              <Icon name="shield-check" size={14} />
               <span>{article.invariantsCount} 條形式化合約</span>
             </span>
           </div>
 
           <h1 class="reader-title">{article.title}</h1>
 
-          <div class="meta-specs-grid">
-            <div class="spec-item">
-              <span class="spec-label">目標讀者 (Audience):</span>
-              <span class="spec-value">{article.audience.join(', ') || '資工系學生 / AI 代理人'}</span>
+          <!-- Executive Reading Guide (Context Brief) -->
+          <div class="executive-brief">
+            <div class="brief-grid">
+              <div class="brief-item">
+                <span class="brief-label">預估閱讀時間</span>
+                <span class="brief-value">
+                  <Icon name="clock" size={13} />
+                  <span>約 {readMinutes} 分鐘 ({wordCount} 字)</span>
+                </span>
+              </div>
+              <div class="brief-item">
+                <span class="brief-label">目標讀者 (Audience)</span>
+                <span class="brief-value">{article.audience.join(', ') || '資工系學生 / AI 代理人'}</span>
+              </div>
+              {article.mathFoundations.length > 0 && (
+                <div class="brief-item">
+                  <span class="brief-label">數學基石</span>
+                  <span class="brief-value">{article.mathFoundations.join(', ')}</span>
+                </div>
+              )}
+              {article.hardwareTarget.length > 0 && (
+                <div class="brief-item">
+                  <span class="brief-label">硬體對齊</span>
+                  <span class="brief-value">{article.hardwareTarget.join(', ')}</span>
+                </div>
+              )}
             </div>
-            {article.mathFoundations.length > 0 && (
-              <div class="spec-item">
-                <span class="spec-label">數學基石 (Math Foundations):</span>
-                <span class="spec-value">{article.mathFoundations.join(', ')}</span>
-              </div>
-            )}
-            {article.hardwareTarget.length > 0 && (
-              <div class="spec-item">
-                <span class="spec-label">硬體對齊 (Hardware Targets):</span>
-                <span class="spec-value">{article.hardwareTarget.join(', ')}</span>
-              </div>
-            )}
-            <div class="spec-item">
-              <span class="spec-label">典籍作者 / 撰寫日:</span>
-              <span class="spec-value">{article.author} • {article.created}</span>
+            <div class="brief-meta-author">
+              <span>典籍作者：{article.author}</span>
+              <span class="meta-dot">•</span>
+              <span>撰寫維護日：{article.created}</span>
             </div>
           </div>
 
           <!-- Bilingual Toggle Switcher Banner -->
           <div class="bilingual-switch-bar">
-            <span class="bilingual-notice">🌐 本典籍具備鏡像英文科研版 (English Research Edition)：</span>
+            <div class="bilingual-left">
+              <Icon name="globe" size={15} />
+              <span class="bilingual-notice">本篇具備鏡像英文科研版 (English Research Edition)：</span>
+            </div>
             <a href={alternateUrl} class="bilingual-btn">
-              <span>閱讀英文版 (Read in English) →</span>
+              <span>閱讀英文版 (Read in English)</span>
+              <Icon name="arrow-right" size={13} />
             </a>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Topological Navigation Banner -->
+    <!-- Progressive Disclosure: Metadata & Topological Dependencies Drawer -->
     <section class="topo-nav-section">
       <div class="container">
-        <div class="topo-card">
-          <div class="topo-header">
-            <span class="topo-icon">🧭</span>
-            <span class="topo-title">概念拓樸座標與知識相依關係 (DAG Coordinates)</span>
-          </div>
+        <details class="metadata-drawer">
+          <summary class="metadata-drawer-summary">
+            <div class="drawer-summary-left">
+              <Icon name="layers" size={16} />
+              <span class="drawer-title">拓樸座標、依賴關係與系統規範 (DAG Coordinates & Contracts)</span>
+              <span class="drawer-hint">點擊展開前置依賴、後續延伸與形式化合約</span>
+            </div>
+            <Icon name="chevron-down" size={16} class="drawer-arrow" />
+          </summary>
 
-          <div class="topo-nodes-grid">
-            <!-- Prerequisites -->
-            <div class="topo-column">
-              <span class="topo-col-label">⬅️ 前置依賴 (Prerequisites)</span>
-              {prereqArticles.length === 0 ? (
-                <div class="topo-empty">此典籍為本領域根節點 (Root Knowledge Node)</div>
-              ) : (
-                <ul class="topo-list">
-                  {prereqArticles.map(pre => (
-                    <li>
-                      <a href={`${base}/zh/notes/${pre.slug}/`} class="topo-link">
-                        <span class="topo-code">{pre.callNumber}</span>
-                        <span class="topo-text">{pre.title}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              )}
+          <div class="drawer-content">
+            <div class="topo-card">
+              <div class="topo-nodes-grid">
+                <!-- Prerequisites -->
+                <div class="topo-column">
+                  <div class="topo-col-header">
+                    <Icon name="arrow-left" size={14} />
+                    <span class="topo-col-label">前置依賴 (Prerequisites)</span>
+                  </div>
+                  {prereqArticles.length === 0 ? (
+                    <div class="topo-empty">此典籍為本領域根節點 (Root Knowledge Node)</div>
+                  ) : (
+                    <ul class="topo-list">
+                      {prereqArticles.map(pre => (
+                        <li>
+                          <a href={`${base}/zh/notes/${pre.slug}/`} class="topo-link">
+                            <span class="topo-code">{pre.callNumber}</span>
+                            <span class="topo-text">{pre.title}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <!-- Successors -->
+                <div class="topo-column">
+                  <div class="topo-col-header">
+                    <span class="topo-col-label">後續節點 (Successors)</span>
+                    <Icon name="arrow-right" size={14} />
+                  </div>
+                  {successorArticles.length === 0 ? (
+                    <div class="topo-empty">此典籍為本領域終端節點 (Frontier Node)</div>
+                  ) : (
+                    <ul class="topo-list">
+                      {successorArticles.map(suc => (
+                        <li>
+                          <a href={`${base}/zh/notes/${suc.slug}/`} class="topo-link">
+                            <span class="topo-code">{suc.callNumber}</span>
+                            <span class="topo-text">{suc.title}</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <!-- Successors -->
-            <div class="topo-column">
-              <span class="topo-col-label">➡️ 後續節點 (Successors)</span>
-              {successorArticles.length === 0 ? (
-                <div class="topo-empty">此典籍為本領域終端節點 (Frontier Node)</div>
-              ) : (
-                <ul class="topo-list">
-                  {successorArticles.map(suc => (
-                    <li>
-                      <a href={`${base}/zh/notes/${suc.slug}/`} class="topo-link">
-                        <span class="topo-code">{suc.callNumber}</span>
-                        <span class="topo-text">{suc.title}</span>
-                      </a>
-                    </li>
+            <!-- Invariants Contract Pills -->
+            {article.rules.length > 0 && (
+              <div class="drawer-rules-section">
+                <div class="drawer-rules-title">
+                  <Icon name="shield-check" size={14} />
+                  <span>本篇已形式化驗證之系統規範與不變量 (Formally Verified System Invariants)</span>
+                </div>
+                <div class="drawer-rules-grid">
+                  {article.rules.map(rule => (
+                    <div class="rule-contract-card">
+                      <div class="rule-card-top">
+                        <span class="rule-pill">{rule.id}</span>
+                        {rule.level && <span class="rule-lvl-tag">{rule.level}</span>}
+                      </div>
+                      <div class="rule-title-text">{rule.title}</div>
+                    </div>
                   ))}
-                </ul>
-              )}
-            </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </details>
       </div>
     </section>
 
     <!-- Main Content & Sidebar TOC -->
     <div class="container reader-body-layout">
-      <!-- Article Content -->
+      <!-- Article Reading Column -->
       <article class="article-body">
         <div class="rendered-markdown" set:html={article.htmlContent} />
 
@@ -160,14 +215,20 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
         <nav class="reader-pagination" aria-label="Topological Sequence Navigation">
           {prevArticle ? (
             <a href={`${base}/zh/notes/${prevArticle.slug}/`} class="page-nav prev">
-              <span class="page-dir">← 上一節點 (Previous)</span>
+              <span class="page-dir">
+                <Icon name="arrow-left" size={13} />
+                <span>上一篇 (Previous)</span>
+              </span>
               <span class="page-nav-title">{prevArticle.callNumber} {prevArticle.title}</span>
             </a>
           ) : <div class="page-nav-placeholder"></div>}
 
           {nextArticle ? (
             <a href={`${base}/zh/notes/${nextArticle.slug}/`} class="page-nav next">
-              <span class="page-dir">下一節點 (Next) →</span>
+              <span class="page-dir">
+                <span>下一篇 (Next)</span>
+                <Icon name="arrow-right" size={13} />
+              </span>
               <span class="page-nav-title">{nextArticle.callNumber} {nextArticle.title}</span>
             </a>
           ) : <div class="page-nav-placeholder"></div>}
@@ -178,7 +239,10 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
       <aside class="reader-sidebar">
         {article.toc.length > 0 && (
           <div class="sidebar-widget toc-widget">
-            <h3 class="widget-title">章節目錄 (Outline)</h3>
+            <div class="widget-header">
+              <Icon name="list-tree" size={14} />
+              <h3 class="widget-title">章節目錄 (Outline)</h3>
+            </div>
             <nav class="toc-nav" aria-label="Table of Contents">
               <ul>
                 {article.toc.map(item => (
@@ -193,12 +257,14 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
 
         {article.rules.length > 0 && (
           <div class="sidebar-widget rules-widget">
-            <h3 class="widget-title">形式化合約 ({article.rules.length})</h3>
+            <div class="widget-header">
+              <Icon name="shield-check" size={14} />
+              <h3 class="widget-title">合約規範 ({article.rules.length})</h3>
+            </div>
             <ul class="sidebar-rules-list">
               {article.rules.map(rule => (
                 <li>
                   <span class="rule-id-tag">{rule.id}</span>
-                  {rule.level && <span class="rule-lvl-tag">{rule.level}</span>}
                   <span class="rule-title-text">{rule.title}</span>
                 </li>
               ))}
@@ -207,7 +273,10 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
         )}
 
         <div class="sidebar-widget tags-widget">
-          <h3 class="widget-title">文章標籤</h3>
+          <div class="widget-header">
+            <Icon name="tag" size={14} />
+            <h3 class="widget-title">典籍標籤</h3>
+          </div>
           <div class="sidebar-tags-cloud">
             {article.tags.map(tag => (
               <span class="sidebar-tag-item">#{tag}</span>
@@ -239,15 +308,16 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
   }
   .reader-breadcrumbs a {
     color: var(--text-secondary);
+    text-decoration: none;
   }
   .reader-breadcrumbs a:hover {
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
   }
   .bc-sep {
     color: var(--border-accent);
   }
   .bc-current {
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
     font-family: var(--font-mono);
     font-weight: 600;
   }
@@ -261,134 +331,203 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
   }
   .callno-badge {
     font-family: var(--font-mono);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.15);
-    border: 1px solid var(--accent-gold);
-    padding: 0.2rem 0.65rem;
+    color: var(--accent-cyan);
+    background-color: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 0.2rem 0.6rem;
     border-radius: 4px;
     letter-spacing: 0.05em;
   }
   .hall-badge-head {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    font-size: 0.82rem;
-    color: var(--text-secondary);
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
   }
   .invariants-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    background-color: rgba(168, 85, 247, 0.12);
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    gap: 0.4rem;
     font-size: 0.8rem;
-    color: #d8b4fe;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
-    font-weight: 600;
+    font-family: var(--font-mono);
   }
 
   .reader-title {
-    font-size: 1.85rem;
+    font-size: 2.25rem;
     font-weight: 700;
-    line-height: 1.3;
-    margin-bottom: 1.25rem;
+    line-height: 1.25;
     color: #ffffff;
-    border: none;
-    padding: 0;
-  }
-  @media (min-width: 768px) {
-    .reader-title { font-size: 2.3rem; }
+    margin-bottom: 1.5rem;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
-  .meta-specs-grid {
+  /* Executive Brief */
+  .executive-brief {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .brief-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.6rem;
-    background-color: rgba(18, 24, 38, 0.6);
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.25rem;
-    font-size: 0.85rem;
+    gap: 0.85rem;
   }
-  @media (min-width: 768px) {
-    .meta-specs-grid { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 640px) {
+    .brief-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
-  .spec-item {
+  @media (min-width: 1024px) {
+    .brief-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .brief-item {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.25rem;
   }
-  .spec-label {
+  .brief-label {
+    font-size: 0.72rem;
+    font-weight: 700;
     color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.78rem;
     text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  .spec-value {
-    color: var(--text-primary);
+  .brief-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  .brief-meta-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    padding-top: 0.85rem;
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .meta-dot {
+    color: var(--border-accent);
   }
 
+  /* Bilingual Switch Bar */
   .bilingual-switch-bar {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 0.75rem;
-    background-color: rgba(56, 189, 248, 0.08);
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 0.85rem 1.25rem;
+    background-color: rgba(56, 189, 248, 0.05);
+    border: 1px solid rgba(56, 189, 248, 0.2);
     border-radius: 6px;
-    padding: 0.65rem 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .bilingual-switch-bar {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+  .bilingual-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
   }
   .bilingual-notice {
-    font-size: 0.85rem;
-    color: #bae6fd;
+    font-weight: 500;
   }
   .bilingual-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background-color: rgba(56, 189, 248, 0.2);
-    color: #ffffff !important;
-    padding: 0.35rem 0.85rem;
-    border-radius: 4px;
     font-size: 0.82rem;
     font-weight: 600;
+    color: var(--accent-cyan);
     text-decoration: none;
+    padding: 0.3rem 0.75rem;
+    border-radius: 4px;
+    background-color: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    white-space: nowrap;
     transition: all 0.15s ease;
   }
   .bilingual-btn:hover {
-    background-color: var(--accent-cyan);
-    color: #0b0f19 !important;
+    background-color: rgba(56, 189, 248, 0.2);
+    color: #ffffff;
+    text-decoration: none;
   }
 
-  /* Topological DAG Section */
+  /* Progressive Disclosure Drawer */
   .topo-nav-section {
-    padding: 1.5rem 0;
+    padding: 1.25rem 0 2rem;
   }
-  .topo-card {
+  .metadata-drawer {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
-    padding: 1.25rem;
+    overflow: hidden;
   }
-  .topo-header {
+  .metadata-drawer-summary {
+    padding: 1rem 1.25rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .metadata-drawer-summary::-webkit-details-marker {
+    display: none;
+  }
+  .drawer-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--accent-cyan);
+    flex-wrap: wrap;
+  }
+  .drawer-title {
     font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-subtle);
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .drawer-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .drawer-arrow {
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+  .metadata-drawer[open] .drawer-arrow {
+    transform: rotate(180deg);
+  }
+  .drawer-content {
+    padding: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+    background-color: rgba(11, 15, 25, 0.4);
   }
   .topo-nodes-grid {
     display: grid;
@@ -396,18 +535,35 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     gap: 1.25rem;
   }
   @media (min-width: 768px) {
-    .topo-nodes-grid { grid-template-columns: repeat(2, 1fr); }
+    .topo-nodes-grid {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   .topo-column {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  .topo-col-header {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent-cyan);
   }
   .topo-col-label {
     font-size: 0.78rem;
     font-weight: 700;
-    color: var(--text-secondary);
     text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+  }
+  .topo-empty {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 0.5rem 0;
   }
   .topo-list {
     list-style: none;
@@ -415,77 +571,168 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
   .topo-link {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.65rem;
-    background-color: var(--bg-elevated);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.35rem 0.5rem;
+    background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 4px;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    text-decoration: none;
     transition: all 0.15s ease;
   }
   .topo-link:hover {
     border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
+    color: #ffffff;
   }
   .topo-code {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
+    color: var(--accent-cyan);
   }
   .topo-text {
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .topo-empty {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-style: italic;
-    padding: 0.4rem 0;
+    white-space: nowrap;
   }
 
-  /* Main Layout */
+  /* Drawer Rules */
+  .drawer-rules-section {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .drawer-rules-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 0.75rem;
+  }
+  .drawer-rules-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+  @media (min-width: 640px) {
+    .drawer-rules-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .rule-contract-card {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 0.65rem 0.85rem;
+  }
+  .rule-card-top {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.25rem;
+  }
+  .rule-lvl-tag {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .rule-title-text {
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    line-height: 1.4;
+  }
+
+  /* Body Layout */
   .reader-body-layout {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
-    margin-top: 2rem;
+    gap: 3rem;
   }
   @media (min-width: 1024px) {
     .reader-body-layout {
       flex-direction: row;
+      justify-content: space-between;
       align-items: flex-start;
     }
-    .article-body {
-      flex: 1;
-      min-width: 0;
-    }
-    .reader-sidebar {
-      width: 320px;
-      flex-shrink: 0;
-      position: sticky;
-      top: 5rem;
-      max-height: calc(100vh - 6rem);
-      overflow-y: auto;
-    }
+  }
+  .article-body {
+    flex-grow: 1;
+    max-width: 760px;
+    min-width: 0;
+  }
+  .rendered-markdown {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #cbd5e1;
+  }
+
+  /* Pagination */
+  .reader-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .page-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.25rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .page-nav:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+  .page-nav.next {
+    text-align: right;
+  }
+  .page-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .page-nav.next .page-dir {
+    justify-content: flex-end;
+  }
+  .page-nav-title {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: #ffffff;
+    font-weight: 600;
+    line-height: 1.4;
   }
 
   /* Sidebar */
   .reader-sidebar {
+    width: 100%;
+    max-width: 300px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    position: sticky;
+    top: 80px;
   }
   .sidebar-widget {
     background-color: var(--bg-surface);
@@ -493,13 +740,23 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     border-radius: 8px;
     padding: 1.25rem;
   }
-  .widget-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-    border-bottom: 1px solid var(--border-subtle);
+  .widget-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent-cyan);
+    margin-bottom: 0.85rem;
     padding-bottom: 0.5rem;
-    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .widget-title {
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    border: none;
+    padding: 0;
   }
   .toc-nav ul {
     list-style: none;
@@ -507,26 +764,26 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    max-height: 380px;
+    overflow-y: auto;
   }
   .toc-nav a {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.4;
     display: block;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
     text-decoration: none;
+    line-height: 1.4;
     transition: color 0.15s ease;
   }
   .toc-nav a:hover {
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
   }
   .toc-level-3 {
-    padding-left: 1rem;
-    font-size: 0.8rem;
+    padding-left: 0.85rem;
   }
   .toc-level-4 {
-    padding-left: 1.75rem;
-    font-size: 0.75rem;
+    padding-left: 1.5rem;
   }
   .sidebar-rules-list {
     list-style: none;
@@ -534,36 +791,25 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    max-height: 260px;
+    overflow-y: auto;
   }
   .sidebar-rules-list li {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-    padding-bottom: 0.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
   }
   .rule-id-tag {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: var(--accent-gold);
-    display: inline-block;
-    margin-right: 0.3rem;
-  }
-  .rule-lvl-tag {
-    font-size: 0.68rem;
-    font-weight: 600;
-    background-color: rgba(168, 85, 247, 0.15);
-    color: #c084fc;
-    padding: 0.05rem 0.35rem;
-    border-radius: 3px;
-    margin-right: 0.3rem;
   }
   .sidebar-tags-cloud {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.4rem;
   }
   .sidebar-tag-item {
     font-size: 0.75rem;
@@ -571,45 +817,5 @@ const alternateUrl = `${base}/en/notes/${article.slug}/`;
     background-color: var(--bg-elevated);
     padding: 0.15rem 0.45rem;
     border-radius: 4px;
-  }
-
-  /* Pagination */
-  .reader-pagination {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 3.5rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-subtle);
-  }
-  .page-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    padding: 1rem;
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    text-decoration: none;
-    max-width: 48%;
-    transition: all 0.15s ease;
-  }
-  .page-nav:hover {
-    border-color: var(--accent-gold);
-  }
-  .page-nav.next {
-    text-align: right;
-    margin-left: auto;
-  }
-  .page-dir {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-    text-transform: uppercase;
-  }
-  .page-nav-title {
-    font-size: 0.88rem;
-    color: var(--text-primary);
-    font-weight: 600;
   }
 </style>

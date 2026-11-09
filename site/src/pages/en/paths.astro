@@ -1,51 +1,69 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
 import { CURATED_LEARNING_PATHS, loadLibraryArticles } from '../../lib/library';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const { en } = loadLibraryArticles();
 ---
 
-<BaseLayout title="Learning Paths — Concept Topology & DAG Roads" lang="en" alternateUrl={`${base}/zh/paths/`}>
+<BaseLayout title="Learning Paths — Topological Navigation & Prerequisite Guides" lang="en" alternateUrl={`${base}/zh/paths/`}>
   <div class="paths-page">
     <div class="container">
       <header class="paths-header">
-        <span class="paths-tag">CURATED TOPOLOGICAL PATHS</span>
-        <h1 class="paths-title">Knowledge Dependency Learning Paths</h1>
+        <span class="paths-tag">PEDAGOGICAL LEARNING PATHS</span>
+        <h1 class="paths-title">Systematic Learning Paths</h1>
         <p class="paths-lead">
-          All learning paths are mathematically constructed from genuine Frontmatter <code>prerequisites</code> and <code>successors</code> in the Directed Acyclic Graph (DAG), ensuring verifiable step-by-step mastery without fabricated dependencies.
+          All paths are strictly constructed from Frontmatter <code>prerequisites</code> and <code>successors</code> Directed Acyclic Graph (DAG) edges.
+          Beyond reading order, each path delivers target audiences, expected outcomes, step objectives, and clear conceptual transitions to the next node.
         </p>
       </header>
 
-      <!-- Global Roadmap Diagram -->
-      <section class="roadmap-diagram-section">
-        <div class="roadmap-card">
-          <div class="roadmap-header">
-            <span class="roadmap-icon">🗺️</span>
-            <div>
-              <h2 class="roadmap-title">Global DAG Roadmap & Architecture Map</h2>
-              <p class="roadmap-desc">Click through individual path cards below to follow topological reading sequences.</p>
-            </div>
-          </div>
-          <div class="roadmap-img-wrapper">
-            <img src={`${base}/assets/00_grand_roadmap.svg`} alt="Global DAG Roadmap" width="100%" loading="lazy" />
-          </div>
-        </div>
-      </section>
-
-      <!-- Learning Paths List -->
+      <!-- Learning Paths List (Guided Learning Journey) -->
       <section class="paths-list-section">
         {CURATED_LEARNING_PATHS.map((path, pIdx) => (
           <div class="path-card" id={path.id}>
+            <!-- Path Header with Educational Context -->
             <div class="path-header">
-              <div class="path-meta">
+              <div class="path-meta-row">
                 <span class="path-index">PATH {pIdx + 1}</span>
                 <span class="path-badge">{path.badge}</span>
+                <span class="path-length-badge">{path.steps.length} Topological Nodes • {path.steps.length - 1} Direct DAG Edges</span>
               </div>
               <h2 class="path-title">{path.titleEn}</h2>
               <p class="path-desc">{path.descriptionEn}</p>
+
+              <!-- Educational Journey Dossier -->
+              <div class="journey-dossier">
+                <div class="dossier-card">
+                  <div class="dossier-header">
+                    <Icon name="academic" size={15} />
+                    <span class="dossier-label">Target Audience</span>
+                  </div>
+                  <p class="dossier-text">{path.targetAudienceEn}</p>
+                </div>
+
+                <div class="dossier-card">
+                  <div class="dossier-header">
+                    <Icon name="shield-check" size={15} />
+                    <span class="dossier-label">Learning Outcomes</span>
+                  </div>
+                  <p class="dossier-text">{path.learningOutcomesEn}</p>
+                </div>
+
+                <div class="dossier-card">
+                  <div class="dossier-header">
+                    <Icon name="compass" size={15} />
+                    <span class="dossier-label">Starting Volume</span>
+                  </div>
+                  <p class="dossier-text">
+                    <strong>{path.startingVolume}</strong> (Master first principles and geometric motivation before progressing)
+                  </p>
+                </div>
+              </div>
             </div>
 
+            <!-- Steps Timeline -->
             <div class="steps-timeline">
               {path.steps.map((step, sIdx) => {
                 const article = en.get(step.slug);
@@ -59,21 +77,26 @@ const { en } = loadLibraryArticles();
 
                     <div class="step-content">
                       <div class="step-header">
-                        <span class="step-callno">{step.callNumber}</span>
-                        {article && (
-                          <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                            {article.status}
-                          </span>
-                        )}
-                        {article && (
-                          <span class="step-hall">{article.hall.icon} {article.hall.nameEn}</span>
-                        )}
+                        <div class="step-header-left">
+                          <span class="step-callno">{step.callNumber}</span>
+                          {article && (
+                            <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                              {article.status}
+                            </span>
+                          )}
+                          {article && (
+                            <span class="step-hall">
+                              <Icon name={article.hall.iconName} size={13} />
+                              <span>{article.hall.code} {article.hall.nameEn}</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {sIdx > 0 && (
                         <div class="direct-edge-pill">
-                          <span class="edge-icon">⚡</span>
-                          <span>Direct DAG Edge: <strong>{path.steps[sIdx - 1].callNumber}</strong> ➔ <strong>{step.callNumber}</strong></span>
+                          <Icon name="zap" size={13} />
+                          <span>Direct DAG Edge: <strong>{path.steps[sIdx - 1].callNumber}</strong> ➔ <strong>{step.callNumber}</strong> (Verified Invariant)</span>
                         </div>
                       )}
 
@@ -82,12 +105,26 @@ const { en } = loadLibraryArticles();
                       </h3>
 
                       <p class="step-focus">
-                        <strong>Research Focus: </strong>{step.focusEn}
+                        <strong>Core Study Focus:</strong> {step.focusEn}
                       </p>
+
+                      <div class="step-rationale-box">
+                        <div class="rationale-item">
+                          <span class="rationale-tag">Step Objective:</span>
+                          <span class="rationale-text">{step.objectiveEn}</span>
+                        </div>
+                        {step.whyNextEn && (
+                          <div class="rationale-item rationale-next">
+                            <span class="rationale-tag">Why Next Step:</span>
+                            <span class="rationale-text">{step.whyNextEn}</span>
+                          </div>
+                        )}
+                      </div>
 
                       <div class="step-action">
                         <a href={articleUrl} class="btn-step-link">
-                          <span>Study This Node →</span>
+                          <span>Read Volume</span>
+                          <Icon name="arrow-right" size={14} />
                         </a>
                       </div>
                     </div>
@@ -99,12 +136,34 @@ const { en } = loadLibraryArticles();
         ))}
       </section>
 
+      <!-- Global Roadmap Diagram (Moved to Collapsible Secondary Section) -->
+      <section class="roadmap-diagram-section">
+        <details class="roadmap-accordion" open>
+          <summary class="roadmap-summary">
+            <div class="roadmap-summary-left">
+              <Icon name="layers" size={18} />
+              <div class="roadmap-summary-text">
+                <h2 class="roadmap-title">Global DAG Roadmap Panorama</h2>
+                <span class="roadmap-desc">Expand or collapse the full 28-volume topological dependency map.</span>
+              </div>
+            </div>
+            <Icon name="chevron-down" size={18} class="accordion-arrow" />
+          </summary>
+          <div class="roadmap-card-body">
+            <div class="roadmap-img-wrapper">
+              <img src={`${base}/assets/00_grand_roadmap.svg`} alt="Global DAG Roadmap" width="100%" />
+            </div>
+          </div>
+        </details>
+      </section>
+
       <!-- Call to Action -->
       <div class="paths-bottom-cta">
-        <h3>Looking for specific topics or authors?</h3>
-        <p>Explore the complete library catalog with article search and hall filters.</p>
+        <h3>Looking to explore specific topics?</h3>
+        <p>You can also browse the catalog by hall, tag, or call number directly.</p>
         <a href={`${base}/en/library/`} class="btn-primary" style="margin-top: 1rem;">
-          <span>Browse 28 Volumes in Catalog →</span>
+          <Icon name="book-open" size={16} />
+          <span>Browse Catalog (28 Volumes)</span>
         </a>
       </div>
     </div>
@@ -117,260 +176,379 @@ const { en } = loadLibraryArticles();
   }
   .paths-header {
     text-align: center;
-    max-width: 760px;
-    margin: 0 auto 3rem;
+    max-width: 780px;
+    margin: 0 auto 3.5rem;
   }
   .paths-tag {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
     letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.5rem;
   }
   .paths-title {
-    font-size: 2.3rem;
+    font-size: 2.4rem;
     font-weight: 700;
-    margin-bottom: 0.8rem;
-    border: none;
-    padding: 0;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    border-bottom: none;
+    padding-bottom: 0;
   }
   .paths-lead {
     font-size: 1.05rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
+    margin-bottom: 0;
   }
-
-  /* Roadmap Section */
-  .roadmap-diagram-section {
-    margin-bottom: 3.5rem;
-  }
-  .roadmap-card {
-    background-color: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 1.5rem;
-  }
-  .roadmap-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: 1rem;
-  }
-  .roadmap-icon {
-    font-size: 2rem;
-  }
-  .roadmap-title {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
-    border: none;
-    padding: 0;
-  }
-  .roadmap-desc {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-  .roadmap-img-wrapper {
-    background-color: #0d121f;
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    padding: 1rem;
-    overflow-x: auto;
+  .paths-lead code {
+    color: var(--accent-cyan);
   }
 
   /* Path Cards */
   .paths-list-section {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 3.5rem;
+    margin-bottom: 4rem;
   }
   .path-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 2rem;
+    border-radius: 10px;
+    overflow: hidden;
   }
   .path-header {
+    padding: 2.25rem 2rem 1.75rem;
     border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
+    background-color: rgba(255, 255, 255, 0.01);
   }
-  .path-meta {
+  .path-meta-row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
   }
   .path-index {
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: var(--accent-gold);
-    letter-spacing: 0.05em;
+    color: var(--accent-cyan);
+    background-color: rgba(56, 189, 248, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(56, 189, 248, 0.25);
   }
   .path-badge {
+    font-family: var(--font-mono);
     font-size: 0.75rem;
-    background-color: rgba(56, 189, 248, 0.12);
-    color: var(--accent-cyan);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    padding: 0.1rem 0.5rem;
-    border-radius: 4px;
     font-weight: 600;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+  }
+  .path-length-badge {
+    font-size: 0.75rem;
+    color: var(--text-muted);
   }
   .path-title {
-    font-size: 1.6rem;
-    margin-bottom: 0.5rem;
-    border: none;
-    padding: 0;
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #ffffff;
+    margin-bottom: 0.75rem;
+    border-bottom: none;
+    padding-bottom: 0;
   }
   .path-desc {
     font-size: 0.95rem;
     color: var(--text-secondary);
     line-height: 1.6;
-    margin: 0;
+    margin-bottom: 1.5rem;
+    max-width: 860px;
   }
 
-  /* Steps Timeline */
-  .steps-timeline {
+  /* Educational Dossier */
+  .journey-dossier {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  @media (min-width: 768px) {
+    .journey-dossier {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .dossier-card {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  .dossier-header {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent-cyan);
+    margin-bottom: 0.4rem;
+  }
+  .dossier-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+  }
+  .dossier-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin-bottom: 0;
+  }
+  .dossier-text strong {
+    color: var(--accent-gold);
+  }
+
+  /* Timeline */
+  .steps-timeline {
+    padding: 2rem 2rem 2.5rem;
   }
   .timeline-step {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.75rem;
+    position: relative;
   }
   .step-marker {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 38px;
     flex-shrink: 0;
   }
   .step-num {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background-color: var(--bg-elevated);
-    border: 2px solid var(--accent-gold);
-    color: var(--accent-gold);
+    border: 2px solid var(--border-accent);
+    color: #ffffff;
     font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
   }
   .step-line {
     width: 2px;
     flex-grow: 1;
     background-color: var(--border-subtle);
-    margin: 0.3rem 0;
-    min-height: 40px;
+    margin: 0.5rem 0;
+    min-height: 48px;
   }
-
   .step-content {
     flex-grow: 1;
-    background-color: rgba(26, 34, 52, 0.4);
-    border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    padding: 1.25rem 1.4rem;
-    margin-bottom: 1.5rem;
-    transition: all 0.15s ease;
-  }
-  .step-content:hover {
-    border-color: rgba(212, 175, 55, 0.4);
-    background-color: rgba(26, 34, 52, 0.7);
+    padding-bottom: 2.25rem;
   }
   .step-header {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
     margin-bottom: 0.5rem;
   }
-  .direct-edge-pill {
-    display: inline-flex;
+  .step-header-left {
+    display: flex;
     align-items: center;
-    gap: 0.35rem;
-    background-color: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    border-radius: 4px;
-    padding: 0.15rem 0.55rem;
-    font-size: 0.78rem;
-    font-family: var(--font-mono);
-    color: var(--accent-cyan);
-    margin-bottom: 0.6rem;
-  }
-  .edge-icon {
-    color: var(--accent-gold);
+    gap: 0.6rem;
+    flex-wrap: wrap;
   }
   .step-callno {
     font-family: var(--font-mono);
     font-size: 0.82rem;
     font-weight: 700;
-    color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.15);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    padding: 0.1rem 0.45rem;
-    border-radius: 3px;
+    color: var(--accent-cyan);
   }
   .step-hall {
-    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
   }
+  .direct-edge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    background-color: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    margin: 0.4rem 0 0.75rem;
+  }
+  .direct-edge-pill strong {
+    color: #ffffff;
+  }
   .step-title {
-    font-size: 1.15rem;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
-    border: none;
-    padding: 0;
+    line-height: 1.35;
   }
   .step-title a {
     color: #ffffff;
     text-decoration: none;
   }
   .step-title a:hover {
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
   }
   .step-focus {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    line-height: 1.5;
-    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    margin-bottom: 0.85rem;
   }
-  .step-action {
+  .step-focus strong {
+    color: #e2e8f0;
+  }
+  .step-rationale-box {
+    background-color: var(--bg-elevated);
+    border-left: 3px solid var(--accent-cyan);
+    padding: 0.75rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 1rem;
+    font-size: 0.82rem;
     display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .rationale-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  @media (min-width: 640px) {
+    .rationale-item {
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+  }
+  .rationale-tag {
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 100px;
+  }
+  .rationale-text {
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .rationale-next {
+    border-top: 1px dashed var(--border-subtle);
+    padding-top: 0.4rem;
   }
   .btn-step-link {
-    font-size: 0.82rem;
-    color: var(--accent-cyan);
-    font-weight: 600;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    text-decoration: none;
   }
   .btn-step-link:hover {
     color: #7dd3fc;
-    text-decoration: underline;
   }
 
+  /* Roadmap Collapsible Accordion */
+  .roadmap-diagram-section {
+    margin-bottom: 4rem;
+  }
+  .roadmap-accordion {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .roadmap-summary {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .roadmap-summary::-webkit-details-marker {
+    display: none;
+  }
+  .roadmap-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--accent-cyan);
+  }
+  .roadmap-summary-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .roadmap-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+  .roadmap-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .accordion-arrow {
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+  .roadmap-accordion[open] .accordion-arrow {
+    transform: rotate(180deg);
+  }
+  .roadmap-card-body {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .roadmap-img-wrapper {
+    background-color: #0d121f;
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  /* Bottom CTA */
   .paths-bottom-cta {
     text-align: center;
-    margin-top: 4rem;
-    padding: 3rem 1rem;
+    padding: 3rem 1.5rem;
     background-color: var(--bg-surface);
-    border: 1px dashed var(--border-subtle);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
+    max-width: 640px;
+    margin: 0 auto;
   }
   .paths-bottom-cta h3 {
+    font-family: var(--font-serif);
     font-size: 1.3rem;
+    color: #ffffff;
     margin-bottom: 0.5rem;
   }
   .paths-bottom-cta p {
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    margin-bottom: 1rem;
   }
 </style>

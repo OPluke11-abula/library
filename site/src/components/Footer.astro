@@ -1,0 +1,122 @@
+---
+interface Props {
+  lang: 'zh' | 'en';
+}
+
+const { lang } = Astro.props;
+const currentYear = new Date().getFullYear();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <div class="footer-brand">
+      <div class="footer-title">Grand Library — CS & AI Knowledge Atlas</div>
+      <p class="footer-desc">
+        {lang === 'zh' 
+          ? '嚴謹的資訊工程、深度學習與電腦視覺自學與研究知識庫。結合第一性原理、GPU 硬體對齊與生產級工程規範。'
+          : 'A rigorous knowledge base for computer science, deep learning and computer vision. Aligning first principles, GPU architecture, and production standards.'}
+      </p>
+    </div>
+
+    <div class="footer-links-group">
+      <div class="footer-section">
+        <div class="footer-heading">{lang === 'zh' ? '導航快速入口' : 'Navigation'}</div>
+        <ul class="footer-link-list">
+          <li><a href={`${base}/${lang}/`}>{lang === 'zh' ? '首頁' : 'Home'}</a></li>
+          <li><a href={`${base}/${lang}/library/`}>{lang === 'zh' ? '典籍目錄 (28 篇)' : 'Catalog (28 Volumes)'}</a></li>
+          <li><a href={`${base}/${lang}/paths/`}>{lang === 'zh' ? '學習路徑拓樸' : 'Learning Paths'}</a></li>
+          <li><a href={`${base}/${lang}/about/`}>{lang === 'zh' ? '關於圖書館' : 'About'}</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <div class="footer-heading">{lang === 'zh' ? '外部連結與真理' : 'Repository & Gates'}</div>
+        <ul class="footer-link-list">
+          <li><a href="https://github.com/OPluke11-abula/library" target="_blank" rel="noopener">GitHub Repository</a></li>
+          <li><a href="https://github.com/OPluke11-abula/library/blob/main/AGENTS.md" target="_blank" rel="noopener">AGENTS.md (Rules)</a></li>
+          <li><span class="badge-status status-source-verified">11 Invariants Passing</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© {currentYear} Grand Library. Curated by Luke. All mathematical & architectural derivations preserved.</p>
+    <p class="built-with">Built with Astro & TypeScript. Rendered via KaTeX.</p>
+  </div>
+</footer>
+
+<style>
+  .footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  @media (min-width: 768px) {
+    .footer-content {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+  }
+  .footer-brand {
+    max-width: 480px;
+  }
+  .footer-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+  .footer-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .footer-links-group {
+    display: flex;
+    gap: 3rem;
+  }
+  .footer-heading {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent-gold);
+    margin-bottom: 0.75rem;
+  }
+  .footer-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+  }
+  .footer-link-list a {
+    color: var(--text-secondary);
+  }
+  .footer-link-list a:hover {
+    color: var(--accent-cyan);
+  }
+  .footer-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  @media (min-width: 768px) {
+    .footer-bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+</style>

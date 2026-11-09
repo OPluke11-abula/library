@@ -1,0 +1,615 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { loadLibraryArticles, getTopologicalArticles, type ArticleData } from '../../../lib/library';
+
+export async function getStaticPaths() {
+  const { en } = loadLibraryArticles();
+  return Array.from(en.values()).map(article => ({
+    params: { slug: article.slug },
+    props: { article }
+  }));
+}
+
+interface Props {
+  article: ArticleData;
+}
+
+const { article } = Astro.props;
+const { en } = loadLibraryArticles();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Get prerequisite and successor articles
+const prereqArticles = article.prerequisiteIds.map(id => en.get(id)).filter(Boolean) as ArticleData[];
+const successorArticles = article.successorIds.map(id => en.get(id)).filter(Boolean) as ArticleData[];
+
+// Topological sequence for prev/next
+const topoArticles = getTopologicalArticles('en');
+const currIdx = topoArticles.findIndex(a => a.slug === article.slug);
+const prevArticle = currIdx > 0 ? topoArticles[currIdx - 1] : null;
+const nextArticle = currIdx >= 0 && currIdx < topoArticles.length - 1 ? topoArticles[currIdx + 1] : null;
+
+const alternateUrl = `${base}/zh/notes/${article.slug}/`;
+---
+
+<BaseLayout title={`${article.callNumber} ${article.title}`} lang="en" alternateUrl={alternateUrl}>
+  <div class="reader-container">
+    <!-- Top Meta Banner -->
+    <header class="reader-header">
+      <div class="container">
+        <nav class="reader-breadcrumbs" aria-label="Breadcrumb">
+          <a href={`${base}/en/`}>Home</a>
+          <span class="bc-sep">/</span>
+          <a href={`${base}/en/library/`}>Catalog</a>
+          <span class="bc-sep">/</span>
+          <a href={`${base}/en/library/?hall=${article.hall.code}`}>{article.hall.code} {article.hall.nameEn}</a>
+          <span class="bc-sep">/</span>
+          <span class="bc-current">{article.callNumber}</span>
+        </nav>
+
+        <div class="header-main-meta">
+          <div class="meta-badges">
+            <span class="callno-badge">{article.callNumber}</span>
+            <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+              {article.status}
+            </span>
+            <span class="hall-badge-head">
+              <span>{article.hall.icon}</span>
+              <span>{article.hall.nameEn}</span>
+            </span>
+            <span class="invariants-badge">
+              <span>⚖️</span>
+              <span>{article.invariantsCount} Formal Contracts</span>
+            </span>
+          </div>
+
+          <h1 class="reader-title">{article.title}</h1>
+
+          <div class="meta-specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Audience:</span>
+              <span class="spec-value">{article.audience.join(', ') || 'Undergraduate CS / AI Agents'}</span>
+            </div>
+            {article.mathFoundations.length > 0 && (
+              <div class="spec-item">
+                <span class="spec-label">Math Foundations:</span>
+                <span class="spec-value">{article.mathFoundations.join(', ')}</span>
+              </div>
+            )}
+            {article.hardwareTarget.length > 0 && (
+              <div class="spec-item">
+                <span class="spec-label">Hardware Targets:</span>
+                <span class="spec-value">{article.hardwareTarget.join(', ')}</span>
+              </div>
+            )}
+            <div class="spec-item">
+              <span class="spec-label">Author / Date:</span>
+              <span class="spec-value">{article.author} • {article.created}</span>
+            </div>
+          </div>
+
+          <!-- Bilingual Toggle Switcher Banner -->
+          <div class="bilingual-switch-bar">
+            <span class="bilingual-notice">🌐 This volume is paired with the Traditional Chinese Edition (繁體中文版)：</span>
+            <a href={alternateUrl} class="bilingual-btn">
+              <span>閱讀繁體中文版 (Read Traditional Chinese) →</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Topological Navigation Banner -->
+    <section class="topo-nav-section">
+      <div class="container">
+        <div class="topo-card">
+          <div class="topo-header">
+            <span class="topo-icon">🧭</span>
+            <span class="topo-title">Concept Coordinates & DAG Topological Dependencies</span>
+          </div>
+
+          <div class="topo-nodes-grid">
+            <!-- Prerequisites -->
+            <div class="topo-column">
+              <span class="topo-col-label">⬅️ Prerequisites</span>
+              {prereqArticles.length === 0 ? (
+                <div class="topo-empty">Root Knowledge Node (No upstream prerequisites)</div>
+              ) : (
+                <ul class="topo-list">
+                  {prereqArticles.map(pre => (
+                    <li>
+                      <a href={`${base}/en/notes/${pre.slug}/`} class="topo-link">
+                        <span class="topo-code">{pre.callNumber}</span>
+                        <span class="topo-text">{pre.title}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <!-- Successors -->
+            <div class="topo-column">
+              <span class="topo-col-label">➡️ Successors</span>
+              {successorArticles.length === 0 ? (
+                <div class="topo-empty">Frontier Node (Terminal research boundary)</div>
+              ) : (
+                <ul class="topo-list">
+                  {successorArticles.map(suc => (
+                    <li>
+                      <a href={`${base}/en/notes/${suc.slug}/`} class="topo-link">
+                        <span class="topo-code">{suc.callNumber}</span>
+                        <span class="topo-text">{suc.title}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content & Sidebar TOC -->
+    <div class="container reader-body-layout">
+      <!-- Article Content -->
+      <article class="article-body">
+        <div class="rendered-markdown" set:html={article.htmlContent} />
+
+        <!-- Sequential prev/next footer -->
+        <nav class="reader-pagination" aria-label="Topological Sequence Navigation">
+          {prevArticle ? (
+            <a href={`${base}/en/notes/${prevArticle.slug}/`} class="page-nav prev">
+              <span class="page-dir">← Previous Node</span>
+              <span class="page-nav-title">{prevArticle.callNumber} {prevArticle.title}</span>
+            </a>
+          ) : <div class="page-nav-placeholder"></div>}
+
+          {nextArticle ? (
+            <a href={`${base}/en/notes/${nextArticle.slug}/`} class="page-nav next">
+              <span class="page-dir">Next Node →</span>
+              <span class="page-nav-title">{nextArticle.callNumber} {nextArticle.title}</span>
+            </a>
+          ) : <div class="page-nav-placeholder"></div>}
+        </nav>
+      </article>
+
+      <!-- Sidebar TOC & Invariants -->
+      <aside class="reader-sidebar">
+        {article.toc.length > 0 && (
+          <div class="sidebar-widget toc-widget">
+            <h3 class="widget-title">Outline</h3>
+            <nav class="toc-nav" aria-label="Table of Contents">
+              <ul>
+                {article.toc.map(item => (
+                  <li class={`toc-level-${item.level}`}>
+                    <a href={`#${item.id}`}>{item.text}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        )}
+
+        {article.rules.length > 0 && (
+          <div class="sidebar-widget rules-widget">
+            <h3 class="widget-title">Formal Rules ({article.rules.length})</h3>
+            <ul class="sidebar-rules-list">
+              {article.rules.map(rule => (
+                <li>
+                  <span class="rule-id-tag">{rule.id}</span>
+                  {rule.level && <span class="rule-lvl-tag">{rule.level}</span>}
+                  <span class="rule-title-text">{rule.title}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div class="sidebar-widget tags-widget">
+          <h3 class="widget-title">Tags</h3>
+          <div class="sidebar-tags-cloud">
+            {article.tags.map(tag => (
+              <span class="sidebar-tag-item">#{tag}</span>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .reader-container {
+    padding-bottom: 5rem;
+  }
+  .reader-header {
+    background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.4) 0%, rgba(11, 15, 25, 0.95) 70%);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 2.5rem 0 2rem;
+  }
+  .reader-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .reader-breadcrumbs a {
+    color: var(--text-secondary);
+  }
+  .reader-breadcrumbs a:hover {
+    color: var(--accent-gold);
+  }
+  .bc-sep {
+    color: var(--border-accent);
+  }
+  .bc-current {
+    color: var(--accent-gold);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .callno-badge {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.15);
+    border: 1px solid var(--accent-gold);
+    padding: 0.2rem 0.65rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .hall-badge-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+  }
+  .invariants-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: rgba(168, 85, 247, 0.12);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    font-size: 0.8rem;
+    color: #d8b4fe;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .reader-title {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 1.25rem;
+    color: #ffffff;
+    border: none;
+    padding: 0;
+  }
+  @media (min-width: 768px) {
+    .reader-title { font-size: 2.3rem; }
+  }
+
+  .meta-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    background-color: rgba(18, 24, 38, 0.6);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+  }
+  @media (min-width: 768px) {
+    .meta-specs-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .spec-label {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+  }
+  .spec-value {
+    color: var(--text-primary);
+  }
+
+  .bilingual-switch-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background-color: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 6px;
+    padding: 0.65rem 1.25rem;
+  }
+  .bilingual-notice {
+    font-size: 0.85rem;
+    color: #bae6fd;
+  }
+  .bilingual-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: rgba(56, 189, 248, 0.2);
+    color: #ffffff !important;
+    padding: 0.35rem 0.85rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .bilingual-btn:hover {
+    background-color: var(--accent-cyan);
+    color: #0b0f19 !important;
+  }
+
+  /* Topological DAG Section */
+  .topo-nav-section {
+    padding: 1.5rem 0;
+  }
+  .topo-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .topo-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .topo-nodes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .topo-nodes-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .topo-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .topo-col-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+  .topo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .topo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.65rem;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .topo-link:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+  .topo-code {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.1);
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+  }
+  .topo-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topo-empty {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 0.4rem 0;
+  }
+
+  /* Main Layout */
+  .reader-body-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .reader-body-layout {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+    .article-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .reader-sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 5rem;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+    }
+  }
+
+  /* Sidebar */
+  .reader-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .sidebar-widget {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .widget-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .toc-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .toc-nav a {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: block;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .toc-nav a:hover {
+    color: var(--accent-gold);
+  }
+  .toc-level-3 {
+    padding-left: 1rem;
+    font-size: 0.8rem;
+  }
+  .toc-level-4 {
+    padding-left: 1.75rem;
+    font-size: 0.75rem;
+  }
+  .sidebar-rules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .sidebar-rules-list li {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+    padding-bottom: 0.4rem;
+  }
+  .rule-id-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    display: inline-block;
+    margin-right: 0.3rem;
+  }
+  .rule-lvl-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    background-color: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    padding: 0.05rem 0.35rem;
+    border-radius: 3px;
+    margin-right: 0.3rem;
+  }
+  .sidebar-tags-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .sidebar-tag-item {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: var(--bg-elevated);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+  }
+
+  /* Pagination */
+  .reader-pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .page-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    text-decoration: none;
+    max-width: 48%;
+    transition: all 0.15s ease;
+  }
+  .page-nav:hover {
+    border-color: var(--accent-gold);
+  }
+  .page-nav.next {
+    text-align: right;
+    margin-left: auto;
+  }
+  .page-dir {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+  }
+  .page-nav-title {
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+</style>

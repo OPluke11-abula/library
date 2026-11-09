@@ -1,0 +1,367 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { KNOWLEDGE_HALLS, loadLibraryArticles } from '../../lib/library';
+
+const { zh } = loadLibraryArticles();
+const articles = Array.from(zh.values()).sort((a, b) => a.callNumber.localeCompare(b.callNumber));
+
+// Extract all unique tags
+const allTags = Array.from(new Set(articles.flatMap(a => a.tags))).sort();
+---
+
+<BaseLayout title="典籍目錄 — Grand Library Catalog" lang="zh">
+  <div class="catalog-page">
+    <div class="container">
+      <header class="catalog-header">
+        <span class="catalog-tag">CATALOG & INDEX</span>
+        <h1 class="catalog-title">圖書館典籍目錄</h1>
+        <p class="catalog-desc">
+          收錄全館 28 篇核心知識典籍，包含理論基石、計算機體系、深度神經網路與頂尖專題工程。
+        </p>
+      </header>
+
+      <!-- Filter & Search Controls -->
+      <div class="controls-container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            id="catalog-search"
+            placeholder="搜尋篇名、編號 (如 LIB-001)、標籤或核心關鍵字..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="filters-row">
+          <span class="filter-label">分館過濾：</span>
+          <div class="hall-pills" id="hall-filters">
+            <button class="pill-btn active" data-hall="all">全部分館 (28)</button>
+            {KNOWLEDGE_HALLS.map(hall => {
+              const count = articles.filter(a => a.hall.code === hall.code).length;
+              return (
+                <button class="pill-btn" data-hall={hall.code}>
+                  <span>{hall.icon}</span>
+                  <span>{hall.code} {hall.nameZh}</span>
+                  <span class="pill-count">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div class="meta-row">
+          <div id="results-count" class="results-count">顯示 28 篇典籍</div>
+          <div class="tag-shortcuts">
+            <span class="tag-label">熱門標籤：</span>
+            {allTags.slice(0, 8).map(tag => (
+              <button class="tag-quick-btn" data-tag={tag}>#{tag}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Articles Grid -->
+      <div class="articles-grid" id="catalog-grid">
+        {articles.map(art => (
+          <div class="grid-item" data-title={art.title.toLowerCase()} data-callno={art.callNumber.toLowerCase()} data-tags={art.tags.join(',').toLowerCase()} data-hall={art.hall.code} data-excerpt={art.excerpt.toLowerCase()}>
+            <ArticleCard article={art} lang="zh" />
+          </div>
+        ))}
+      </div>
+
+      <div id="empty-state" class="empty-state" hidden>
+        <div class="empty-icon">📜</div>
+        <h3>查無相符典籍</h3>
+        <p>請嘗試其他搜尋關鍵字或清除篩選條件。</p>
+        <button id="reset-filters" class="btn-secondary" style="margin-top: 1rem;">重設搜尋條件</button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .catalog-page {
+    padding: 3rem 0 5rem;
+  }
+  .catalog-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+  }
+  .catalog-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+  }
+  .catalog-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    border: none;
+    padding: 0;
+  }
+  .catalog-desc {
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  /* Controls */
+  .controls-container {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+  }
+  #catalog-search {
+    width: 100%;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 0.85rem 1rem 0.85rem 2.75rem;
+    font-size: 1rem;
+    color: #ffffff;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  #catalog-search:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+  }
+
+  .filters-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  @media (min-width: 768px) {
+    .filters-row {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+  .filter-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .hall-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.82rem;
+    border-radius: 9999px;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .pill-btn:hover {
+    border-color: var(--accent-gold);
+    color: #ffffff;
+  }
+  .pill-btn.active {
+    background-color: rgba(212, 175, 55, 0.15);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+  .pill-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.8rem;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 0.8rem;
+  }
+  @media (min-width: 768px) {
+    .meta-row {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+  .results-count {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+  .tag-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .tag-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .tag-quick-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tag-quick-btn:hover {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+  }
+
+  /* Grid */
+  .articles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .articles-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .articles-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    background-color: var(--bg-surface);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<script>
+  function setupCatalogFilters() {
+    const searchInput = document.getElementById('catalog-search') as HTMLInputElement | null;
+    const hallButtons = document.querySelectorAll<HTMLButtonElement>('#hall-filters .pill-btn');
+    const tagButtons = document.querySelectorAll<HTMLButtonElement>('.tag-quick-btn');
+    const items = document.querySelectorAll<HTMLElement>('.grid-item');
+    const resultsCount = document.getElementById('results-count');
+    const emptyState = document.getElementById('empty-state');
+    const resetBtn = document.getElementById('reset-filters');
+
+    let currentHall = 'all';
+    let currentQuery = '';
+
+    // Check URL parameters (e.g. ?hall=01)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialHall = urlParams.get('hall');
+    if (initialHall) {
+      currentHall = initialHall;
+      hallButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-hall') === initialHall);
+      });
+    }
+
+    function applyFilter() {
+      let visibleCount = 0;
+      const q = currentQuery.toLowerCase().trim();
+
+      items.forEach(item => {
+        const title = item.getAttribute('data-title') || '';
+        const callno = item.getAttribute('data-callno') || '';
+        const tags = item.getAttribute('data-tags') || '';
+        const hall = item.getAttribute('data-hall') || '';
+        const excerpt = item.getAttribute('data-excerpt') || '';
+
+        const matchesHall = (currentHall === 'all' || hall === currentHall);
+        const matchesQuery = (!q || title.includes(q) || callno.includes(q) || tags.includes(q) || excerpt.includes(q));
+
+        if (matchesHall && matchesQuery) {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      if (resultsCount) {
+        resultsCount.textContent = `顯示 ${visibleCount} 篇典籍`;
+      }
+      if (emptyState) {
+        emptyState.hidden = (visibleCount > 0);
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        currentQuery = searchInput.value;
+        applyFilter();
+      });
+    }
+
+    hallButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        hallButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentHall = btn.getAttribute('data-hall') || 'all';
+        applyFilter();
+      });
+    });
+
+    tagButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tag = btn.getAttribute('data-tag') || '';
+        if (searchInput) {
+          searchInput.value = tag;
+          currentQuery = tag;
+          applyFilter();
+        }
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        currentHall = 'all';
+        currentQuery = '';
+        if (searchInput) searchInput.value = '';
+        hallButtons.forEach(b => b.classList.toggle('active', b.getAttribute('data-hall') === 'all'));
+        applyFilter();
+      });
+    }
+
+    applyFilter();
+  }
+
+  // Run on mount
+  setupCatalogFilters();
+</script>

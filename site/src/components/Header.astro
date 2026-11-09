@@ -1,0 +1,198 @@
+---
+interface Props {
+  lang: 'zh' | 'en';
+  currentPath?: string;
+  alternateUrl?: string;
+}
+
+const { lang, currentPath = '', alternateUrl } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const nav = {
+  zh: [
+    { label: '首頁', href: `${base}/zh/` },
+    { label: '典籍目錄', href: `${base}/zh/library/` },
+    { label: '學習路徑', href: `${base}/zh/paths/` },
+    { label: '關於圖書館', href: `${base}/zh/about/` },
+  ],
+  en: [
+    { label: 'Home', href: `${base}/en/` },
+    { label: 'Library Catalog', href: `${base}/en/library/` },
+    { label: 'Learning Paths', href: `${base}/en/paths/` },
+    { label: 'About Atlas', href: `${base}/en/about/` },
+  ]
+};
+
+const links = nav[lang];
+
+// Compute default switch URL if not provided
+let switchHref = alternateUrl;
+if (!switchHref) {
+  if (lang === 'zh') {
+    switchHref = currentPath.replace(/\/zh(\/|$)/, '/en$1');
+    if (!switchHref.includes('/en/')) switchHref = `${base}/en/`;
+  } else {
+    switchHref = currentPath.replace(/\/en(\/|$)/, '/zh$1');
+    if (!switchHref.includes('/zh/')) switchHref = `${base}/zh/`;
+  }
+}
+---
+
+<header class="site-header">
+  <div class="container nav-container">
+    <a href={`${base}/${lang}/`} class="site-brand">
+      <span class="brand-emblem">🏛️</span>
+      <div class="brand-text">
+        <span class="brand-title">Grand Library</span>
+        <span class="brand-subtitle">{lang === 'zh' ? '資工與 AI 知識圖書館' : 'CS & AI Knowledge Atlas'}</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav" aria-label="Main Navigation">
+      <ul class="nav-links">
+        {links.map(link => {
+          const isActive = currentPath === link.href || (link.href !== `${base}/${lang}/` && currentPath.startsWith(link.href));
+          return (
+            <li>
+              <a href={link.href} class:list={['nav-link', { active: isActive }]}>
+                {link.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+
+    <!-- Language Switch & Mobile Toggle -->
+    <div class="nav-actions">
+      <a href={switchHref} class="lang-switch" title={lang === 'zh' ? 'Switch to English' : '切換至繁體中文'}>
+        <span class="lang-globe">🌐</span>
+        <span class="lang-text">{lang === 'zh' ? 'English' : '繁體中文'}</span>
+      </a>
+
+      <button id="mobile-menu-toggle" class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown -->
+  <div id="mobile-menu" class="mobile-menu" hidden>
+    <ul class="mobile-nav-links">
+      {links.map(link => (
+        <li>
+          <a href={link.href} class="mobile-nav-link">
+            {link.label}
+          </a>
+        </li>
+      ))}
+      <li class="mobile-lang-item">
+        <a href={switchHref} class="mobile-nav-link lang-mobile">
+          🌐 {lang === 'zh' ? 'Switch to English' : '切換至繁體中文'}
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<style>
+  .site-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+  }
+  .brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--accent-gold);
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .desktop-nav {
+    display: none;
+  }
+  @media (min-width: 820px) {
+    .desktop-nav {
+      display: block;
+    }
+    .mobile-toggle {
+      display: none !important;
+    }
+  }
+  .mobile-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+  }
+  .mobile-toggle .bar {
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-primary);
+    transition: all 0.2s ease;
+  }
+  .mobile-menu {
+    border-top: 1px solid var(--border-subtle);
+    background-color: var(--bg-surface);
+    padding: 1rem 1.25rem;
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  .mobile-nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .mobile-nav-link {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    display: block;
+    padding: 0.4rem 0;
+  }
+  .lang-mobile {
+    color: var(--accent-gold);
+    border-top: 1px dashed var(--border-subtle);
+    padding-top: 0.75rem;
+    margin-top: 0.4rem;
+  }
+</style>
+
+<script>
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  if (toggleBtn && mobileMenu) {
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', String(!isExpanded));
+      mobileMenu.hidden = isExpanded;
+    });
+  }
+</script>

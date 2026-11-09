@@ -1,0 +1,157 @@
+---
+import type { ArticleData } from '../lib/library';
+
+interface Props {
+  article: ArticleData;
+  lang: 'zh' | 'en';
+}
+
+const { article, lang } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const articleUrl = `${base}/${lang}/notes/${article.slug}/`;
+---
+
+<article class="article-card" data-tags={article.tags.join(',')} data-hall={article.hall.code} data-callno={article.callNumber}>
+  <div class="card-header">
+    <div class="card-meta-left">
+      <span class="callno-pill">{article.callNumber}</span>
+      <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+        {article.status}
+      </span>
+    </div>
+    <div class="hall-badge" title={lang === 'zh' ? article.hall.nameZh : article.hall.nameEn}>
+      <span>{article.hall.icon}</span>
+      <span class="hall-text">{lang === 'zh' ? article.hall.nameZh : article.hall.nameEn}</span>
+    </div>
+  </div>
+
+  <h3 class="card-title">
+    <a href={articleUrl}>{article.title}</a>
+  </h3>
+
+  <p class="card-excerpt">{article.excerpt}</p>
+
+  <div class="card-footer">
+    <div class="rules-counter" title="System Invariants Defined">
+      <span class="counter-icon">⚖️</span>
+      <span>{article.invariantsCount} Invariants</span>
+    </div>
+
+    <div class="tags-list">
+      {article.tags.slice(0, 3).map(tag => (
+        <span class="tag-pill">#{tag}</span>
+      ))}
+      {article.tags.length > 3 && (
+        <span class="tag-more">+{article.tags.length - 3}</span>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .article-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .article-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+  }
+  .card-meta-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .callno-pill {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .hall-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-elevated);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+  .hall-text {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 0.6rem;
+  }
+  .card-title a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .card-title a:hover {
+    color: var(--accent-gold);
+  }
+  .card-excerpt {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+  }
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 0.75rem;
+    font-size: 0.8rem;
+  }
+  .rules-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+  .tags-list {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+  }
+  .tag-pill {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: rgba(255, 255, 255, 0.04);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+  }
+  .tag-more {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+</style>

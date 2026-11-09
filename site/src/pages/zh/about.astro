@@ -1,0 +1,300 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { KNOWLEDGE_HALLS } from '../../lib/library';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title="關於圖書館 — Grand Library" lang="zh" alternateUrl={`${base}/en/about/`}>
+  <div class="about-page">
+    <div class="container about-container">
+      <header class="about-header">
+        <span class="about-tag">MISSION & SPECIFICATIONS</span>
+        <h1 class="about-title">關於 Grand Library 知識圖書館</h1>
+        <p class="about-lead">
+          一個兼具數學形式化推導、GPU 體系結構對齊與生產級工程規範的雙語資訊工程與深度學習知識地圖。
+        </p>
+      </header>
+
+      <!-- Vision & Principles -->
+      <section class="about-section">
+        <h2 class="section-heading">🏛️ 一、圖書館創立宗旨與核心動機</h2>
+        <p>
+          本知識庫由 <strong>Luke</strong> 整理與長期維護。針對當前資訊科學教材普遍存在的「偏向高階黑盒子套件而忽略物理與幾何本質」或「偏向理論推導而忽視現代 GPU 硬體協同」之痛點，Grand Library 堅持以**四層嚴格對齊**展開每一篇典籍：
+        </p>
+        <div class="quad-grid">
+          <div class="quad-card">
+            <div class="quad-num">01</div>
+            <h3 class="quad-title">概念與物理動機</h3>
+            <p>由空間幾何視角與第一性原理切入，先搞懂模型在物理直覺上「為什麼要這樣設計」，再進入公式推導。</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">02</div>
+            <h3 class="quad-title">數學形式化推導</h3>
+            <p>提供完整的定理陳述、目標函數閉式解證明與收斂性界限，引證 CVPR、NeurIPS、ICML、ICLR、MLSys 等同儕評審頂尖文獻。</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">03</div>
+            <h3 class="quad-title">計算機體系結構對齊</h3>
+            <p>嚴密分析記憶體階層、Cache Line 命中、NVIDIA CUDA Warp-32 執行緒排程、Tensor Core Tiling 與推論延遲瓶頸。</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">04</div>
+            <h3 class="quad-title">生產級工程防禦邊界</h3>
+            <p>標註張量維度形狀、數值穩定防溢出規範、安全限幅 <code>[SAFETY_BOUND]</code> 與形式化系統合約 <code>[RULE-###-##]</code>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture and SSOT -->
+      <section class="about-section">
+        <h2 class="section-heading">📜 二、唯一真理來源 (Single Source of Truth) 與網站架構</h2>
+        <p>
+          Grand Library 採用嚴格的關注點分離原則：
+        </p>
+        <ul class="principles-list">
+          <li>
+            <strong>原始 Markdown 筆記是唯一真理來源 (SSOT)</strong>：位於儲存庫根目錄的 10 個分館資料夾與 <code>en/</code> 鏡像資料夾，包含全館 28 篇繁中與 28 篇英文核心筆記。
+          </li>
+          <li>
+            <strong>網站為無狀態純靜態呈現層 (Presentation Layer)</strong>：網站原始碼完全封裝於 <code>site/</code> 目錄，以 Astro + TypeScript 建置，靜態產出純 HTML/CSS/JS，完全不依賴外部資料庫或即時後端。
+          </li>
+          <li>
+            <strong>內容零複製、零竄改</strong>：建置管線直接自根目錄即時讀取 Markdown、解析 YAML Frontmatter 並編譯 KaTeX 數學公式與 Obsidian WikiLinks，嚴禁在網頁原始碼內建立重複或修改過的筆記副本。
+          </li>
+        </ul>
+      </section>
+
+      <!-- Technology Stack -->
+      <section class="about-section">
+        <h2 class="section-heading">⚡ 三、網站技術棧 (Technology Stack)</h2>
+        <div class="tech-grid">
+          <div class="tech-card">
+            <span class="tech-icon">🚀</span>
+            <div class="tech-info">
+              <span class="tech-name">Astro 5.x</span>
+              <span class="tech-desc">現代靜態網站生成器 (Static Site Generation)，提供最極致的載入效能與零客戶端 JavaScript 預設負載。</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">📐</span>
+            <div class="tech-info">
+              <span class="tech-name">KaTeX</span>
+              <span class="tech-desc">編譯期靜態數學公式渲染引擎，無需客戶端二次渲染，公式無閃爍且支援本機完整離線字型。</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">🔗</span>
+            <div class="tech-info">
+              <span class="tech-name">Obsidian WikiLinks Engine</span>
+              <span class="tech-desc">自研雙括號連結解析器，將 <code>[[LIB-###]]</code> 動態轉換為具備型態安全的站內路由超連結。</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">🛡️</span>
+            <div class="tech-info">
+              <span class="tech-name">11 Invariants Validator</span>
+              <span class="tech-desc">由 <code>validate_library.py</code> 執行的完整性守門員，涵蓋 DAG 拓樸、雙語合約、Python AST 語法與無斷鏈保證。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AGENTS.md Extension Protocol -->
+      <section class="about-section">
+        <h2 class="section-heading">🤖 四、AI 協作與 AGENTS.md 擴充規範</h2>
+        <p>
+          本專案受大學第九週主題「建立 <code>AGENTS.md</code>，讓 AI 能依照專案規則持續新增網頁」之指導，在儲存庫根目錄制定了完整的 <code>AGENTS.md</code> 操作規範。
+        </p>
+        <p>
+          任何自主 AI 代理人在進入本專案時，均可依循「<strong>閱讀規範 → 確認真理來源 → 選用共用模板 → 實作頁面 → 更新導覽 → 執行驗證 → 回報證據</strong>」之七步標準流程，安全地為圖書館擴充新功能與視圖，例如本次成功新增的「學習路徑 (Learning Paths)」拓樸頁面。
+        </p>
+      </section>
+
+      <div class="about-cta">
+        <a href={`${base}/zh/library/`} class="btn-primary">
+          <span>進入典籍目錄開始研讀 →</span>
+        </a>
+        <a href={`${base}/zh/paths/`} class="btn-secondary">
+          <span>檢視知識依賴學習路徑</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: 3.5rem 0 5rem;
+  }
+  .about-container {
+    max-width: 900px;
+  }
+  .about-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+  .about-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+  }
+  .about-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    border: none;
+    padding: 0;
+  }
+  .about-lead {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .about-section {
+    margin-bottom: 3.5rem;
+  }
+  .section-heading {
+    font-size: 1.45rem;
+    color: #ffffff;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.5rem;
+  }
+  .about-section p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+  }
+
+  /* Quad Grid */
+  .quad-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .quad-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .quad-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+    position: relative;
+  }
+  .quad-num {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 0.4rem;
+    opacity: 0.8;
+  }
+  .quad-title {
+    font-size: 1.05rem;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+  }
+  .quad-card p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Principles list */
+  .principles-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .principles-list li {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  /* Tech Grid */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .tech-card {
+    display: flex;
+    gap: 1rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .tech-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .tech-name {
+    display: block;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .tech-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .about-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background-color: var(--accent-gold);
+    color: #0b0f19 !important;
+  }
+  .btn-primary:hover {
+    background-color: var(--accent-gold-hover);
+  }
+  .btn-secondary {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary) !important;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent-gold);
+  }
+</style>

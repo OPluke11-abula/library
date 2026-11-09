@@ -20,6 +20,8 @@
 
 </div>
 
+> 🌐 **Grand Library Web Atlas 網站入口**：可透過瀏覽器閱讀的「資訊工程與人工智慧雙語知識圖書館」靜態網站原始碼與建置管線（位於 [`site/`](site/)），支援十大分館分類、文章搜尋、KaTeX 數學式渲染與 DAG 拓樸學習路徑。本地預覽與建置說明詳見 [`site/README.md`](site/README.md)。
+
 ---
 
 ## 關於本知識庫 (About This Repository)

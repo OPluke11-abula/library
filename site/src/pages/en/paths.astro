@@ -1,0 +1,376 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CURATED_LEARNING_PATHS, loadLibraryArticles } from '../../lib/library';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { en } = loadLibraryArticles();
+---
+
+<BaseLayout title="Learning Paths — Concept Topology & DAG Roads" lang="en" alternateUrl={`${base}/zh/paths/`}>
+  <div class="paths-page">
+    <div class="container">
+      <header class="paths-header">
+        <span class="paths-tag">CURATED TOPOLOGICAL PATHS</span>
+        <h1 class="paths-title">Knowledge Dependency Learning Paths</h1>
+        <p class="paths-lead">
+          All learning paths are mathematically constructed from genuine Frontmatter <code>prerequisites</code> and <code>successors</code> in the Directed Acyclic Graph (DAG), ensuring verifiable step-by-step mastery without fabricated dependencies.
+        </p>
+      </header>
+
+      <!-- Global Roadmap Diagram -->
+      <section class="roadmap-diagram-section">
+        <div class="roadmap-card">
+          <div class="roadmap-header">
+            <span class="roadmap-icon">🗺️</span>
+            <div>
+              <h2 class="roadmap-title">Global DAG Roadmap & Architecture Map</h2>
+              <p class="roadmap-desc">Click through individual path cards below to follow topological reading sequences.</p>
+            </div>
+          </div>
+          <div class="roadmap-img-wrapper">
+            <img src={`${base}/assets/00_grand_roadmap.svg`} alt="Global DAG Roadmap" width="100%" loading="lazy" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning Paths List -->
+      <section class="paths-list-section">
+        {CURATED_LEARNING_PATHS.map((path, pIdx) => (
+          <div class="path-card" id={path.id}>
+            <div class="path-header">
+              <div class="path-meta">
+                <span class="path-index">PATH {pIdx + 1}</span>
+                <span class="path-badge">{path.badge}</span>
+              </div>
+              <h2 class="path-title">{path.titleEn}</h2>
+              <p class="path-desc">{path.descriptionEn}</p>
+            </div>
+
+            <div class="steps-timeline">
+              {path.steps.map((step, sIdx) => {
+                const article = en.get(step.slug);
+                const articleUrl = `${base}/en/notes/${step.slug}/`;
+                return (
+                  <div class="timeline-step">
+                    <div class="step-marker">
+                      <span class="step-num">{String(sIdx + 1).padStart(2, '0')}</span>
+                      {sIdx < path.steps.length - 1 && <span class="step-line"></span>}
+                    </div>
+
+                    <div class="step-content">
+                      <div class="step-header">
+                        <span class="step-callno">{step.callNumber}</span>
+                        {article && (
+                          <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {article.status}
+                          </span>
+                        )}
+                        {article && (
+                          <span class="step-hall">{article.hall.icon} {article.hall.nameEn}</span>
+                        )}
+                      </div>
+
+                      {sIdx > 0 && (
+                        <div class="direct-edge-pill">
+                          <span class="edge-icon">⚡</span>
+                          <span>Direct DAG Edge: <strong>{path.steps[sIdx - 1].callNumber}</strong> ➔ <strong>{step.callNumber}</strong></span>
+                        </div>
+                      )}
+
+                      <h3 class="step-title">
+                        <a href={articleUrl}>{article ? article.title : step.callNumber}</a>
+                      </h3>
+
+                      <p class="step-focus">
+                        <strong>Research Focus: </strong>{step.focusEn}
+                      </p>
+
+                      <div class="step-action">
+                        <a href={articleUrl} class="btn-step-link">
+                          <span>Study This Node →</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <!-- Call to Action -->
+      <div class="paths-bottom-cta">
+        <h3>Looking for specific topics or authors?</h3>
+        <p>Explore the complete library catalog with article search and hall filters.</p>
+        <a href={`${base}/en/library/`} class="btn-primary" style="margin-top: 1rem;">
+          <span>Browse 28 Volumes in Catalog →</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .paths-page {
+    padding: 3.5rem 0 5rem;
+  }
+  .paths-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 3rem;
+  }
+  .paths-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+  }
+  .paths-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    border: none;
+    padding: 0;
+  }
+  .paths-lead {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Roadmap Section */
+  .roadmap-diagram-section {
+    margin-bottom: 3.5rem;
+  }
+  .roadmap-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  .roadmap-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 1rem;
+  }
+  .roadmap-icon {
+    font-size: 2rem;
+  }
+  .roadmap-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+    border: none;
+    padding: 0;
+  }
+  .roadmap-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .roadmap-img-wrapper {
+    background-color: #0d121f;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  /* Path Cards */
+  .paths-list-section {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .path-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 2rem;
+  }
+  .path-header {
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .path-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .path-index {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.05em;
+  }
+  .path-badge {
+    font-size: 0.75rem;
+    background-color: rgba(56, 189, 248, 0.12);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .path-title {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    padding: 0;
+    color: #ffffff;
+  }
+  .path-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Steps Timeline */
+  .steps-timeline {
+    display: flex;
+    flex-direction: column;
+  }
+  .timeline-step {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .step-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 38px;
+    flex-shrink: 0;
+  }
+  .step-num {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--bg-elevated);
+    border: 2px solid var(--accent-gold);
+    color: var(--accent-gold);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .step-line {
+    width: 2px;
+    flex-grow: 1;
+    background-color: var(--border-subtle);
+    margin: 0.3rem 0;
+    min-height: 40px;
+  }
+
+  .step-content {
+    flex-grow: 1;
+    background-color: rgba(26, 34, 52, 0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.15s ease;
+  }
+  .step-content:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    background-color: rgba(26, 34, 52, 0.7);
+  }
+  .step-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .direct-edge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 4px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    margin-bottom: 0.6rem;
+  }
+  .edge-icon {
+    color: var(--accent-gold);
+  }
+  .step-callno {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background-color: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+  }
+  .step-hall {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .step-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    border: none;
+    padding: 0;
+  }
+  .step-title a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .step-title a:hover {
+    color: var(--accent-gold);
+  }
+  .step-focus {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+  .step-action {
+    display: flex;
+  }
+  .btn-step-link {
+    font-size: 0.82rem;
+    color: var(--accent-cyan);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .btn-step-link:hover {
+    color: #7dd3fc;
+    text-decoration: underline;
+  }
+
+  .paths-bottom-cta {
+    text-align: center;
+    margin-top: 4rem;
+    padding: 3rem 1rem;
+    background-color: var(--bg-surface);
+    border: 1px dashed var(--border-subtle);
+    border-radius: 8px;
+  }
+  .paths-bottom-cta h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .paths-bottom-cta p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+</style>

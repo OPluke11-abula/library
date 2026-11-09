@@ -1,0 +1,58 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang?: 'zh' | 'en';
+  alternateUrl?: string;
+}
+
+const {
+  title,
+  description = 'Grand Library — Computer Science & Deep Learning Knowledge Atlas. Rigorous mathematical derivations, GPU architecture alignment, and production-grade engineering.',
+  lang = 'zh',
+  alternateUrl
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentPath = Astro.url.pathname;
+const siteTitle = `${title} | Grand Library`;
+---
+
+<!doctype html>
+<html lang={lang === 'zh' ? 'zh-TW' : 'en'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏛️</text></svg>" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{siteTitle}</title>
+    <meta name="description" content={description} />
+
+    <!-- Google Fonts for Academic Elegance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- KaTeX Stylesheet (Local offline synced) -->
+    <link rel="stylesheet" href={`${base}/katex/katex.min.css`} />
+  </head>
+  <body>
+    <Header lang={lang} currentPath={currentPath} alternateUrl={alternateUrl} />
+    <main class="site-main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>
+
+<style>
+  .site-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+</style>

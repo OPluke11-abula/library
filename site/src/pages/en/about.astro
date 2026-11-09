@@ -1,0 +1,300 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { KNOWLEDGE_HALLS } from '../../lib/library';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout title="About Grand Library" lang="en" alternateUrl={`${base}/zh/about/`}>
+  <div class="about-page">
+    <div class="container about-container">
+      <header class="about-header">
+        <span class="about-tag">MISSION & SPECIFICATIONS</span>
+        <h1 class="about-title">About Grand Library Atlas</h1>
+        <p class="about-lead">
+          A bilingual computer science and deep learning knowledge atlas synthesizing mathematical formalization, GPU hardware alignment, and production engineering invariants.
+        </p>
+      </header>
+
+      <!-- Vision & Principles -->
+      <section class="about-section">
+        <h2 class="section-heading">🏛️ 1. Library Purpose & Foundational Motivation</h2>
+        <p>
+          Curated and maintained by <strong>Luke</strong>. In contrast to common CS learning materials that either remain at high-level abstractions or ignore modern GPU hardware coordination, Grand Library adheres to a <strong>four-tier rigorous alignment</strong> across all volumes:
+        </p>
+        <div class="quad-grid">
+          <div class="quad-card">
+            <div class="quad-num">01</div>
+            <h3 class="quad-title">Conceptual & Physical Intuition</h3>
+            <p>Analyzing architectures from high-dimensional geometric maps and first principles to establish physical intuition before formulas.</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">02</div>
+            <h3 class="quad-title">Formal Mathematical Derivations</h3>
+            <p>Complete theorem statements, closed-form objective derivations, and convergence guarantees citing peer-reviewed papers from CVPR, NeurIPS, ICML, ICLR, and MLSys.</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">03</div>
+            <h3 class="quad-title">Hardware Architecture Alignment</h3>
+            <p>In-depth analysis of memory hierarchies, cache-line hits, NVIDIA CUDA Warp-32 scheduling, Tensor Core MMA tiling, and latency bottlenecks.</p>
+          </div>
+          <div class="quad-card">
+            <div class="quad-num">04</div>
+            <h3 class="quad-title">Production Engineering Defense</h3>
+            <p>Annotating tensor shapes, numerical stability safeguards, safety bounds <code>[SAFETY_BOUND]</code>, and formal system rule contracts <code>[RULE-###-##]</code>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Architecture and SSOT -->
+      <section class="about-section">
+        <h2 class="section-heading">📜 2. Single Source of Truth & Architecture</h2>
+        <p>
+          The Grand Library repository strictly enforces separation of concerns:
+        </p>
+        <ul class="principles-list">
+          <li>
+            <strong>Original Markdown Notes are the Single Source of Truth (SSOT)</strong>: Preserved across the 10 Knowledge Halls and <code>en/</code> mirrored directories, totaling 28 Traditional Chinese and 28 English core volumes.
+          </li>
+          <li>
+            <strong>Website is a Stateless Static Presentation Layer</strong>: Fully isolated inside <code>site/</code>, built with Astro and TypeScript, generating zero-backend static HTML/CSS/JS.
+          </li>
+          <li>
+            <strong>Zero Note Duplication or Mutation</strong>: The Astro build pipeline reads the root Markdown files in-place, parsing YAML Frontmatter, KaTeX math, and Obsidian WikiLinks dynamically without duplicating markdown files.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Technology Stack -->
+      <section class="about-section">
+        <h2 class="section-heading">⚡ 3. Technology Stack</h2>
+        <div class="tech-grid">
+          <div class="tech-card">
+            <span class="tech-icon">🚀</span>
+            <div class="tech-info">
+              <span class="tech-name">Astro 5.x</span>
+              <span class="tech-desc">Modern static site generator delivering optimal performance with zero default client runtime JavaScript overhead.</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">📐</span>
+            <div class="tech-info">
+              <span class="tech-name">KaTeX</span>
+              <span class="tech-desc">Compile-time static LaTeX math renderer. Zero layout shift and full local offline font packaging.</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">🔗</span>
+            <div class="tech-info">
+              <span class="tech-name">Obsidian WikiLinks Engine</span>
+              <span class="tech-desc">Custom bidirectional link parser translating <code>[[LIB-###]]</code> tokens into type-safe static site navigation links.</span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <span class="tech-icon">🛡️</span>
+            <div class="tech-info">
+              <span class="tech-name">11 Invariants Validator</span>
+              <span class="tech-desc">Automated gatekeeper script verifying DAG acyclicity, bilingual contract parity, Python AST syntax, and link integrity.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AGENTS.md Extension Protocol -->
+      <section class="about-section">
+        <h2 class="section-heading">🤖 4. AI Collaboration via AGENTS.md</h2>
+        <p>
+          Guided by the university Week 9 curriculum on "establishing <code>AGENTS.md</code> so AI can continuously add web pages following project rules", this repository features a comprehensive <code>AGENTS.md</code> contract.
+        </p>
+        <p>
+          Any autonomous AI agent joining this codebase can follow the standard 7-step workflow: <strong>Read rules → Verify SSOT → Select shared template → Implement page → Update navigation → Run verification → Report execution evidence</strong>, safely expanding the knowledge atlas without breaking existing history or invariants.
+        </p>
+      </section>
+
+      <div class="about-cta">
+        <a href={`${base}/en/library/`} class="btn-primary">
+          <span>Explore Catalog Volumes →</span>
+        </a>
+        <a href={`${base}/en/paths/`} class="btn-secondary">
+          <span>View Learning Paths</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: 3.5rem 0 5rem;
+  }
+  .about-container {
+    max-width: 900px;
+  }
+  .about-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+  }
+  .about-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+  }
+  .about-title {
+    font-size: 2.3rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    border: none;
+    padding: 0;
+  }
+  .about-lead {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .about-section {
+    margin-bottom: 3.5rem;
+  }
+  .section-heading {
+    font-size: 1.45rem;
+    color: #ffffff;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.5rem;
+  }
+  .about-section p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+  }
+
+  /* Quad Grid */
+  .quad-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .quad-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .quad-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+    position: relative;
+  }
+  .quad-num {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 0.4rem;
+    opacity: 0.8;
+  }
+  .quad-title {
+    font-size: 1.05rem;
+    color: #ffffff;
+    margin-bottom: 0.4rem;
+  }
+  .quad-card p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Principles list */
+  .principles-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .principles-list li {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 0 6px 6px 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  /* Tech Grid */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .tech-card {
+    display: flex;
+    gap: 1rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .tech-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .tech-name {
+    display: block;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .tech-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .about-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background-color: var(--accent-gold);
+    color: #0b0f19 !important;
+  }
+  .btn-primary:hover {
+    background-color: var(--accent-gold-hover);
+  }
+  .btn-secondary {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary) !important;
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent-gold);
+  }
+</style>

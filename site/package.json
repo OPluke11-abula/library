@@ -1,0 +1,29 @@
+{
+  "name": "grand-library-site",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Grand Library — CS & AI Knowledge Atlas (Astro Static Site)",
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.js",
+    "verify-paths": "node --experimental-strip-types scripts/verify-learning-paths.mjs",
+    "predev": "node scripts/sync-assets.js",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "prebuild": "node scripts/sync-assets.js && node --experimental-strip-types scripts/verify-learning-paths.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node --experimental-strip-types scripts/verify-learning-paths.mjs && node scripts/run-browser-tests.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.4.1",
+    "gray-matter": "^4.0.3",
+    "katex": "^0.16.21",
+    "marked": "^15.0.7"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/node": "^22.13.8",
+    "typescript": "^5.7.3"
+  }
+}

@@ -16,6 +16,8 @@
 - **Framework**: Astro 5.x (SSG 靜態網站生成模式)
 - **Language**: TypeScript 5.x
 - **Mathematics**: KaTeX（編譯期靜態預渲染，零版面跳動，本機離線字型支援）
+- **Icon System**: 專屬 SVG Line Icon 元件（`src/components/Icon.astro`，UI 全面零 Emoji 規範）
+- **Markdown Pipeline**: Marked 15.x + 自研 CJK 粗體標點語彙分析器 (`cjkStrong`) + Custom Heading Renderer
 - **Link Resolution**: Obsidian WikiLinks 動態解析轉換為型態安全站內路由
 - **Design System**: 深色學術研究風格（Dark Academic Research Library Theme），繁體中文優先雙語介面
 - **Target Deployment**: GitHub Pages (Base Path: `/library`)
@@ -55,51 +57,47 @@ npm run preview
 
 ---
 
-## 4. AI 頁面擴充實證指南 (Evidence of AGENTS.md Reusability)
+## 4. Editorial UX Redesign v2 設計與實證指南
 
-本專案遵循根目錄 `AGENTS.md` 之「Page Extension Workflow（新增頁面標準作業流程）」。  
-以下以修復與落地的 **Learning Paths（學習路徑）** 頁面為真實案例，展示 AI 如何在不破壞任何既有規則下擴充網站，並落實**數學級嚴謹的拓樸依賴**：
+本專案遵循根目錄 `AGENTS.md` 之最新設計系統規範，落實 **Editorial UX Redesign v2**：
 
-### 擴充實證歷程：
+### 核心成果亮點：
 
-1. **Step 1: 閱讀與遵循規範 (Read AGENTS.md)**
-   - 參照 `AGENTS.md` 第 4 節命名規範，確定路由為對稱之 `/library/zh/paths/` 與 `/library/en/paths/`。
-   - 遵循第 3 節 Design System，套用 Dark Academic Research 風格與響應式排版。
+1. **UI 介面全面禁用 Emoji (UI No-Emoji Rule)**
+   - 全站 Header、Footer、分館卡片、標籤、按鈕、搜尋列與狀態徽章，全面移除所有未經統一的 Emoji。
+   - 採用純向量 SVG Line Icon 系統 (`src/components/Icon.astro`)，風格沉穩一致。
 
-2. **Step 2: 確認真實資料來源與嚴格 DAG 依賴 (Verify SSOT & Strict DAG Invariant)**
-   - 嚴格拒絕「主題閱讀概念跳躍」，所有相鄰節點 `A ──► B` 必須具備雙向對稱直接依賴邊：
-     - 條件一：節點 B 的 Frontmatter `prerequisites` 明確宣告 A。
-     - 條件二：節點 A 的 Frontmatter `successors` 明確宣告 B。
-     - 條件三：節點 A 與 B 的 `LIB-###` ID 與雙語 Markdown 來源檔均真實存在。
-   - 經自動化掃描真實 Markdown Frontmatter，精確建立 3 條 100% 符合直接 DAG 拓樸的研讀路線（共 23 個時序節點、20 條雙向驗證之直接有向邊）：
-     - **路線 1：深度學習核心理論與架構演進 (Deep Learning Foundations to Diffusion)**  
-       `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-602`  
-       （6 個節點，5 條直接拓樸邊）
-     - **路線 2：高維空間幾何與現代電腦視覺 (Computer Vision & High-Dimensional Geometry)**  
-       `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-401` ➔ `LIB-501` ➔ `LIB-502` ➔ `LIB-504` ➔ `LIB-505` ➔ `LIB-506`  
-       （10 個節點，9 條直接拓樸邊）
-     - **路線 3：智慧代理人認知架構與推論系統 (AI Agents, Cognition & System Inference)**  
-       `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-703` ➔ `LIB-704`  
-       （7 個節點，6 條直接拓樸邊）
+2. **讀者第一導向閱讀體驗 (Reader-First Editorial Layout)**
+   - **導讀摘要 (Executive Context Brief)**：文章開頭提供預估閱讀時間、目標讀者、數學基石與硬體對齊指引。
+   - **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的拓樸座標、前後依賴與 104 條形式化系統合約收合於 `<details class="metadata-drawer">` 中，讓讀者第一眼即專注於文章內容。
+   - **舒適閱讀排版**：閱讀欄寬限制於 68–76 字元（760px），行高 1.8，字級 1.05rem；表格、程式碼與公式具備橫向滾動保護。
+   - **常駐章節目錄 (Sticky TOC)**：桌面端右側懸浮目錄，平滑捲動跳轉。
 
-3. **Step 3: 選用共用模板與元件 (Select Layout & Components)**
-   - 引用 `src/layouts/BaseLayout.astro`，自動套用全站 Header、Footer 與 Dark Academic 主題變數。
-   - 在路徑節點間加入 `.direct-edge-pill` 視覺徽章，明確標註真實 DAG 連線（`直接拓樸邊: LIB-xxx ➔ LIB-yyy`）。
+3. **零星號洩漏與完美 Markdown / LaTeX 渲染 (Zero Leaked Asterisks)**
+   - 針對 CommonMark 規範中 CJK 標點與粗體（如 `是**「...」**`）之衝突，引入自研 `cjkStrong` 語彙分析器，使裸露星號降為 **0**。
+   - 以 Marked Custom Heading Renderer 取代字串正則替換，杜絕區塊層級被誤當成 raw HTML 的解析失效問題。
+   - KaTeX 數學公式於編譯期靜態解析，與 Markdown 語意徹底隔離。
 
-4. **Step 4: 建立對稱頁面 (Create Symmetric Pages)**
-   - 建立繁中頁面 `src/pages/zh/paths.astro`。
-   - 建立英文鏡像頁面 `src/pages/en/paths.astro`。
+4. **教學引導旅程學習路徑 (Guided Learning Journey)**
+   - 學習路徑提供適用對象（Target Audience）、學習收穫（Learning Outcomes）、起始推薦（Starting Volume）、步驟目的（Step Objective）與為何下一步（Why Next Step）。
+   - 100% 嚴格驗證全館 3 條路徑、23 個時序節點與 20 條直接 DAG 拓樸邊。
+   - 全館巨型 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（Collapsible Accordion）。
 
-5. **Step 5: 更新全域導覽列 (Update Navigation)**
-   - 在 `src/components/Header.astro` 與 `src/components/Footer.astro` 的導覽陣列中加入「學習路徑 (Learning Paths)」，保持中英文選單原位切換一致。
+5. **搜尋範圍誠實命名 (Article Search Transparency)**
+   - 目錄檢索文案統一標明為「文章搜尋」，明確說明搜尋涵蓋篇名、編號、標籤與摘要。
 
-6. **Step 6: 自動化守門員與多層驗證 (Automated Verification Gate)**
-   - **拓樸守門**：新增 `scripts/verify-learning-paths.mjs` 並整合至 `src/lib/library.ts` 之 `verifyLearningPathsStrictly()`。任何一條邊不對稱或節點不存在，立即拋出 `[FATAL_DAG_VIOLATION]` 中斷 Build。
-   - **靜態建置**：`npm run build`，56 篇核心文章與所有系統頁面 100% 產出（共 65 頁靜態 HTML）。
-   - **原始不變量**：`python scripts/validate_library.py`，保持 11 項知識完整性不變量全部通過。
-   - **端對端瀏覽器測試**：Playwright 桌面端與行動端實測，驗證 23 個時序節點與 20 個直接拓樸邊徽章均正確渲染，無任何 404 或樣式破版。
+6. **內容密度與介面清晰度 (Content Density & Interface Clarity)**
+   - 避免不必要的次要標籤與重複說明，優先透過版面結構、視覺層級與間距傳達資訊。
+   - 保留關鍵操作標籤、導航上下文、無障礙標籤與教學推導細節，維持版面簡潔而不犧牲精確度。
 
-7. **Step 7: 交付真實證據 (Report with Real Evidence)**
-   - 依據實際執行日誌回報各項指標，數據完全來自最新建置結果。
+---
 
-未來任何 AI 或工程師欲新增更多頁面（例如「術語表 Glossary」、「研究論文文獻索引」），皆須嚴格重現上述步驟。
+## 5. 驗收截圖清單 (Verification Screenshots)
+
+Playwright 端對端測試已自動產出 6 大驗收截圖於 `tests/screenshots/`：
+- `homepage-zh-desktop-1440.png` (1440x900 桌面版首頁)
+- `homepage-zh-mobile-390.png` (390x844 手機版首頁)
+- `paths-zh-desktop-1440.png` (1440x900 桌面版教學路徑)
+- `paths-zh-mobile-390.png` (390x844 手機版教學路徑)
+- `reader-lib405-zh-desktop-1440.png` (1440x900 桌面版 LIB-405 閱讀頁)
+- `reader-lib405-zh-mobile-390.png` (390x844 手機版 LIB-405 閱讀頁)

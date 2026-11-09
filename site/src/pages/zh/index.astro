@@ -1,34 +1,35 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
+import Icon from '../../components/Icon.astro';
 import { KNOWLEDGE_HALLS, loadLibraryArticles } from '../../lib/library';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const { zh } = loadLibraryArticles();
 
-const featuredSlugs = ['lib-000', 'lib-001', 'lib-101', 'lib-501', 'lib-703', 'lib-901'];
+const featuredSlugs = ['lib-000', 'lib-001', 'lib-101', 'lib-405', 'lib-501', 'lib-703'];
 const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean);
 ---
 
-<BaseLayout title="首頁 — 資訊工程與人工智慧雙語知識圖書館" lang="zh">
+<BaseLayout title="首頁 — 資訊工程與人工智慧雙語知識圖書館" lang="zh" alternateUrl={`${base}/en/`}>
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="container hero-container">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        <span>RESEARCH KNOWLEDGE BASE • 104 SYSTEM INVARIANTS</span>
+      <div class="hero-status-pill">
+        <Icon name="shield-check" size={14} />
+        <span>學術級資訊工程與人工智慧雙語知識庫 • 形式化合約驗證</span>
       </div>
 
       <h1 class="hero-title">
         Grand Library<br />
-        <span class="hero-subtitle">資訊工程與人工智慧雙語知識圖書館</span>
+        <span class="hero-subtitle">資訊工程與人工智慧知識圖書館</span>
       </h1>
 
       <p class="hero-description">
-        結合概念與物理動機、數學形式化嚴格推導、GPU 體系結構與硬體對齊，以及生產級工程邊界規範的深度學習知識地圖。專為資工系大學生、專題研究者與自主 AI 代理人打造。
+        融合第一性原理空間幾何、嚴格數學推導、GPU 體系結構與現代 AI 代理人協議。專為大學生、專題研究者與高階工程師打造的 reader-first 科技教材。
       </p>
 
-      <!-- Key Metrics -->
+      <!-- Academic Metadata Strip (Retains .metric-card for verified invariants) -->
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-value">28</div>
@@ -36,33 +37,105 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
         </div>
         <div class="metric-card">
           <div class="metric-value">56</div>
-          <div class="metric-label">中英雙語鏡像對稱頁面</div>
+          <div class="metric-label">雙語鏡像研讀篇章</div>
         </div>
         <div class="metric-card">
           <div class="metric-value">104</div>
-          <div class="metric-label">形式化合約規範 (Invariants)</div>
+          <div class="metric-label">系統合約防禦規範</div>
         </div>
         <div class="metric-card">
           <div class="metric-value">10</div>
-          <div class="metric-label">跨領域知識分館 (Halls)</div>
+          <div class="metric-label">專業知識分館 (Halls)</div>
         </div>
         <div class="metric-card">
-          <div class="metric-value">100%</div>
-          <div class="metric-label">有向無環拓樸 (DAG Verified)</div>
+          <div class="metric-value">20</div>
+          <div class="metric-label">直連拓樸相依邊 (DAG)</div>
         </div>
       </div>
 
       <!-- Quick Action Buttons -->
       <div class="hero-actions">
         <a href={`${base}/zh/library/`} class="btn-primary">
-          <span>📚 探索典籍目錄</span>
+          <Icon name="book-open" size={16} />
+          <span>開始探索知識庫</span>
         </a>
         <a href={`${base}/zh/paths/`} class="btn-secondary">
-          <span>🧭 進入學習路徑</span>
+          <Icon name="layers" size={16} />
+          <span>瀏覽系統化學習路徑</span>
         </a>
         <a href={`${base}/zh/notes/lib-001/`} class="btn-outline">
-          <span>⚡ 第一性原理先修 (LIB-001)</span>
+          <Icon name="compass" size={16} />
+          <span>第一性原理先修 (LIB-001)</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curated Reading Entry Showcase -->
+  <section class="curated-showcase-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">GUIDED ENTRY</span>
+        <h2 class="section-title">基石篇目導讀建議 (Curated Entry Points)</h2>
+        <p class="section-desc">若初次研讀，建議由以下四大基石篇目切入，循序建立理論直覺與工程邊界概念。</p>
+      </div>
+
+      <div class="showcase-grid">
+        <div class="showcase-card">
+          <div class="showcase-hall">HALL 00 • 總綱導覽</div>
+          <h3 class="showcase-title">
+            <a href={`${base}/zh/notes/lib-001/`}>LIB-001 深度學習第一性原理先修精要</a>
+          </h3>
+          <p class="showcase-rationale">
+            <strong>推薦理由：</strong>全館核心必修。從微積分高維幾何出發，建立梯度流動直覺，並給出神經元反向傳播的嚴格收斂性證明。
+          </p>
+          <a href={`${base}/zh/notes/lib-001/`} class="showcase-link">
+            <span>開始研讀</span>
+            <Icon name="arrow-right" size={14} />
+          </a>
+        </div>
+
+        <div class="showcase-card">
+          <div class="showcase-hall">HALL 01 • 理論基石</div>
+          <h3 class="showcase-title">
+            <a href={`${base}/zh/notes/lib-101/`}>LIB-101 高維向量幾何與奇異值分解 (SVD)</a>
+          </h3>
+          <p class="showcase-rationale">
+            <strong>推薦理由：</strong>現代特徵降維與低秩分解的數理本質，直接串接注意力機制運算與 LoRA 權重微調理論。
+          </p>
+          <a href={`${base}/zh/notes/lib-101/`} class="showcase-link">
+            <span>開始研讀</span>
+            <Icon name="arrow-right" size={14} />
+          </a>
+        </div>
+
+        <div class="showcase-card">
+          <div class="showcase-hall">HALL 04 • 架構機制</div>
+          <h3 class="showcase-title">
+            <a href={`${base}/zh/notes/lib-405/`}>LIB-405 Transformer 注意力機制之數學演進</a>
+          </h3>
+          <p class="showcase-rationale">
+            <strong>推薦理由：</strong>深入剖析 Scaled Dot-Product Attention、Softmax 數值防溢出、張量維度對齊與 FlashAttention GPU 運算瓶頸。
+          </p>
+          <a href={`${base}/zh/notes/lib-405/`} class="showcase-link">
+            <span>開始研讀</span>
+            <Icon name="arrow-right" size={14} />
+          </a>
+        </div>
+
+        <div class="showcase-card">
+          <div class="showcase-hall">HALL 05 • 空間感知</div>
+          <h3 class="showcase-title">
+            <a href={`${base}/zh/notes/lib-504/`}>LIB-504 空間變換網絡 (STN) 幾何映射</a>
+          </h3>
+          <p class="showcase-rationale">
+            <strong>推薦理由：</strong>電腦視覺在仿射變換下的可微分採樣理論，兼顧雙線性插值與網格生成器反向傳播梯度計算。
+          </p>
+          <a href={`${base}/zh/notes/lib-504/`} class="showcase-link">
+            <span>開始研讀</span>
+            <Icon name="arrow-right" size={14} />
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -71,37 +144,33 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   <section class="halls-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">CLASSIFICATION</span>
+        <span class="section-tag">TAXONOMY</span>
         <h2 class="section-title">十大知識分館 (Ten Knowledge Halls)</h2>
-        <p class="section-desc">涵蓋由理論數學基石、計算機體系底層，延伸至現代神經網路架構與頂尖專題研究之知識體系。</p>
+        <p class="section-desc">全館按學科內在拓樸結構劃分為十個分館，涵蓋理論、系統、模型、視覺、語言至智慧代理人。</p>
       </div>
 
       <div class="halls-grid">
-        {KNOWLEDGE_HALLS.map(hall => (
-          <a href={`${base}/zh/library/?hall=${hall.code}`} class="hall-card">
-            <div class="hall-icon">{hall.icon}</div>
-            <div class="hall-meta">
-              <span class="hall-code">HALL {hall.code}</span>
-              <h3 class="hall-name">{hall.nameZh}</h3>
-              <p class="hall-desc">{hall.descriptionZh}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Architecture Visual Blueprint -->
-  <section class="blueprint-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">FOUNDATIONAL BLUEPRINT</span>
-        <h2 class="section-title">深度學習第一性原理導覽地圖</h2>
-        <p class="section-desc">從高維幾何變換、前向傳播、損失度量到反向傳播連鎖律與硬體對齊之動態管線。</p>
-      </div>
-
-      <div class="blueprint-viewer">
-        <img src={`${base}/assets/01_principles_navigator.svg`} alt="深度學習核心原理導覽" width="100%" loading="lazy" />
+        {KNOWLEDGE_HALLS.map(hall => {
+          const hallArticles = Array.from(zh.values()).filter(a => a.hall.code === hall.code);
+          return (
+            <a href={`${base}/zh/library/?hall=${hall.code}`} class="hall-card">
+              <div class="hall-card-top">
+                <div class="hall-icon-wrapper">
+                  <Icon name={hall.iconName} size={20} strokeWidth={2} />
+                </div>
+                <div class="hall-badge-meta">
+                  <span class="hall-code">HALL {hall.code}</span>
+                  <span class="hall-count">{hallArticles.length} 篇典籍</span>
+                </div>
+              </div>
+              <div class="hall-meta">
+                <h3 class="hall-name">{hall.nameZh}</h3>
+                <span class="hall-name-en">{hall.nameEn}</span>
+                <p class="hall-desc">{hall.descriptionZh}</p>
+              </div>
+            </a>
+          );
+        })}
       </div>
     </div>
   </section>
@@ -110,9 +179,9 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   <section class="featured-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">CORE CURATION</span>
+        <span class="section-tag">CURATED REPOSITORY</span>
         <h2 class="section-title">精選核心典籍 (Featured Articles)</h2>
-        <p class="section-desc">圖書館推薦之必讀篇目，每篇均具備嚴格數學形式化推導與真實工程防禦規則。</p>
+        <p class="section-desc">嚴謹推導與工程實證兼備的代表性篇目，展示全館知識架構之厚度。</p>
       </div>
 
       <div class="articles-grid">
@@ -121,9 +190,10 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
         ))}
       </div>
 
-      <div class="section-cta">
-        <a href={`${base}/zh/library/`} class="btn-primary">
-          <span>查看全部 28 篇核心典籍 →</span>
+      <div class="featured-all-cta">
+        <a href={`${base}/zh/library/`} class="btn-outline">
+          <span>查看全部 28 篇典籍</span>
+          <Icon name="arrow-right" size={14} />
         </a>
       </div>
     </div>
@@ -131,74 +201,67 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
 </BaseLayout>
 
 <style>
-  /* Hero */
   .hero-section {
     padding: 4.5rem 0 3.5rem;
-    background: radial-gradient(circle at 50% 20%, rgba(30, 41, 59, 0.4) 0%, rgba(11, 15, 25, 0.95) 70%);
     border-bottom: 1px solid var(--border-subtle);
+    background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.05) 0%, transparent 60%);
   }
   .hero-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    max-width: 860px;
+    margin: 0 auto;
     text-align: center;
   }
-  .hero-badge {
+  .hero-status-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.3rem 0.85rem;
-    font-size: 0.75rem;
-    font-weight: 700;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
     font-family: var(--font-mono);
-    color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: var(--accent-cyan);
+    background-color: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
     border-radius: 9999px;
     margin-bottom: 1.5rem;
-    letter-spacing: 0.08em;
-  }
-  .badge-dot {
-    width: 6px;
-    height: 6px;
-    background-color: var(--accent-gold);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--accent-gold);
   }
   .hero-title {
     font-size: 2.8rem;
     font-weight: 700;
     line-height: 1.15;
+    letter-spacing: -0.02em;
     margin-bottom: 1.25rem;
     color: #ffffff;
-    border: none;
-    padding: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
   .hero-subtitle {
-    font-size: 1.6rem;
-    color: var(--accent-gold);
-    font-weight: 600;
     display: block;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text-secondary);
     margin-top: 0.5rem;
-  }
-  @media (min-width: 768px) {
-    .hero-title { font-size: 3.5rem; }
-    .hero-subtitle { font-size: 1.9rem; }
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
   }
   .hero-description {
-    max-width: 780px;
     font-size: 1.05rem;
     color: var(--text-secondary);
     line-height: 1.7;
     margin-bottom: 2.5rem;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-    width: 100%;
-    max-width: 900px;
     margin-bottom: 2.5rem;
+    padding: 1.25rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
   }
   @media (min-width: 640px) {
     .metrics-grid {
@@ -206,168 +269,266 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
     }
   }
   .metric-card {
-    background-color: rgba(18, 24, 38, 0.7);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 1rem 0.75rem;
+    text-align: center;
+    padding: 0.5rem 0.25rem;
   }
   .metric-value {
     font-family: var(--font-mono);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #ffffff;
+    line-height: 1.2;
     margin-bottom: 0.25rem;
   }
   .metric-label {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     color: var(--text-muted);
     line-height: 1.3;
   }
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
     justify-content: center;
+    gap: 1rem;
   }
   .btn-primary, .btn-secondary, .btn-outline {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.4rem;
+    padding: 0.65rem 1.25rem;
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.15s ease;
   }
   .btn-primary {
-    background-color: var(--accent-gold);
-    color: #0b0f19 !important;
+    background-color: var(--accent-cyan);
+    color: #0b0f19;
   }
   .btn-primary:hover {
-    background-color: var(--accent-gold-hover);
-    transform: translateY(-1px);
+    background-color: #7dd3fc;
+    color: #0b0f19;
+    text-decoration: none;
   }
   .btn-secondary {
     background-color: var(--bg-surface);
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    border: 1px solid var(--border-accent);
   }
   .btn-secondary:hover {
-    border-color: var(--accent-gold);
-    color: var(--accent-gold) !important;
+    background-color: var(--bg-elevated);
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+    text-decoration: none;
   }
   .btn-outline {
-    background: transparent;
-    color: var(--accent-cyan) !important;
-    border: 1px solid rgba(56, 189, 248, 0.4);
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
   }
   .btn-outline:hover {
-    background-color: rgba(56, 189, 248, 0.1);
+    color: #ffffff;
+    border-color: var(--text-secondary);
+    text-decoration: none;
   }
 
-  /* Section Common */
+  /* Curated Showcase */
+  .curated-showcase-section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
   .section-header {
     text-align: center;
     max-width: 680px;
-    margin: 0 auto 2.5rem;
+    margin: 0 auto 3rem;
   }
   .section-tag {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: var(--accent-gold);
+    color: var(--accent-cyan);
     letter-spacing: 0.1em;
     display: block;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
   }
   .section-title {
     font-size: 1.85rem;
     font-weight: 700;
     color: #ffffff;
-    margin-bottom: 0.6rem;
-    border: none;
-    padding: 0;
+    margin-bottom: 0.75rem;
+    border-bottom: none;
+    padding-bottom: 0;
   }
   .section-desc {
     font-size: 0.95rem;
     color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .showcase-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .showcase-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  }
+  .showcase-card:hover {
+    border-color: var(--border-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  .showcase-hall {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .showcase-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  .showcase-title a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .showcase-title a:hover {
+    color: var(--accent-cyan);
+  }
+  .showcase-rationale {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+  }
+  .showcase-rationale strong {
+    color: #e2e8f0;
+  }
+  .showcase-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  .showcase-link:hover {
+    color: #7dd3fc;
   }
 
-  /* Halls */
+  /* Knowledge Halls */
   .halls-section {
-    padding: 4.5rem 0;
+    padding: 4rem 0;
     border-bottom: 1px solid var(--border-subtle);
   }
   .halls-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.25rem;
   }
   @media (min-width: 640px) {
-    .halls-grid { grid-template-columns: repeat(2, 1fr); }
+    .halls-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   @media (min-width: 1024px) {
-    .halls-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .halls-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
   .hall-card {
-    display: flex;
-    gap: 1.25rem;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
-    padding: 1.4rem;
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
     text-decoration: none;
     transition: all 0.15s ease;
   }
   .hall-card:hover {
-    border-color: var(--accent-gold);
+    border-color: var(--accent-cyan);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   }
-  .hall-icon {
-    font-size: 2rem;
-    line-height: 1;
-    flex-shrink: 0;
+  .hall-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .hall-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--accent-cyan);
+  }
+  .hall-badge-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
   .hall-code {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     font-weight: 700;
     color: var(--accent-gold);
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 0.2rem;
+    background-color: rgba(212, 175, 55, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+  }
+  .hall-count {
+    font-size: 0.72rem;
+    color: var(--text-muted);
   }
   .hall-name {
-    font-size: 1.15rem;
+    font-family: var(--font-serif);
+    font-size: 1.05rem;
+    font-weight: 600;
     color: #ffffff;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.2rem;
+  }
+  .hall-name-en {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
   }
   .hall-desc {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
     line-height: 1.5;
-    margin: 0;
+    margin-bottom: 0;
   }
 
-  /* Blueprint */
-  .blueprint-section {
-    padding: 4.5rem 0;
-    background-color: rgba(18, 24, 38, 0.4);
-    border-bottom: 1px solid var(--border-subtle);
-  }
-  .blueprint-viewer {
-    background-color: #0d121f;
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 1.5rem;
-    overflow-x: auto;
-  }
-
-  /* Featured */
+  /* Featured Section */
   .featured-section {
-    padding: 4.5rem 0;
+    padding: 4rem 0 5rem;
   }
   .articles-grid {
     display: grid;
@@ -376,12 +537,16 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
     margin-bottom: 2.5rem;
   }
   @media (min-width: 768px) {
-    .articles-grid { grid-template-columns: repeat(2, 1fr); }
+    .articles-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   @media (min-width: 1024px) {
-    .articles-grid { grid-template-columns: repeat(3, 1fr); }
+    .articles-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
-  .section-cta {
+  .featured-all-cta {
     text-align: center;
   }
 </style>

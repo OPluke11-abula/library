@@ -81,15 +81,15 @@ async function runTests() {
 
   try {
     // ----------------------------------------------------
-    // TEST SUITE 1: DESKTOP (1280 x 800)
+    // TEST SUITE 1: DESKTOP (1440 x 900)
     // ----------------------------------------------------
-    console.log('\n=== Executing Desktop Browser Tests (1280x800) ===');
-    const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-    const page = await context.newPage();
+    console.log('\n=== Executing Desktop Browser Tests (1440x900) ===');
+    const desktopContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await desktopContext.newPage();
 
     // 1. Root redirect
     await page.goto('http://localhost:4321/library/');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(400);
     assert('Root redirect to /library/zh/', page.url().includes('/library/zh/'), page.url());
 
     // 2. Home Page (ZH)
@@ -107,6 +107,9 @@ async function runTests() {
     const featuredCount = await page.locator('.featured-section .article-card').count();
     assert('Home: 6 Featured articles displayed', featuredCount === 6, `Found: ${featuredCount}`);
 
+    // Required Screenshot 1: homepage-zh-desktop-1440.png
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'homepage-zh-desktop-1440.png'), fullPage: true });
+    // Also save legacy screenshot name
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-01-home-zh.png'), fullPage: true });
 
     // 3. Catalog Page (ZH)
@@ -186,9 +189,14 @@ async function runTests() {
     const edgePillsCount = await page.locator('.direct-edge-pill').count();
     assert('Learning Paths: 20 Direct DAG edge badges displayed', edgePillsCount === 20, `Edge badges: ${edgePillsCount}`);
 
-    const roadmapImg = await page.locator('.roadmap-img-wrapper img').isVisible();
+    const roadmapLocator = page.locator('.roadmap-img-wrapper img');
+    await roadmapLocator.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const roadmapImg = await roadmapLocator.isVisible();
     assert('Learning Paths: Global Roadmap SVG displayed', roadmapImg);
 
+    // Required Screenshot 3: paths-zh-desktop-1440.png
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'paths-zh-desktop-1440.png'), fullPage: true });
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-05-paths-zh.png') });
 
     // 6b. Learning Paths (EN)
@@ -203,7 +211,21 @@ async function runTests() {
 
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-05-paths-en.png') });
 
-    // 7. About Page (ZH)
+    // 7. Reader Page (ZH: LIB-405) - Verification & Screenshot
+    await page.goto('http://localhost:4321/library/zh/notes/lib-405/');
+    await page.waitForLoadState('networkidle');
+    const lib405Title = await page.textContent('.reader-title');
+    assert('Reader LIB-405: Title rendered', lib405Title?.includes('注意力機制'));
+
+    // Check that there are NO leaked asterisks in paragraph prose
+    const proseHtml = await page.locator('.rendered-markdown').innerHTML();
+    const leakedDoubleAsterisks = (proseHtml.match(/\*\*[^\*<>]+\*\*/g) || []).length;
+    assert('Reader LIB-405: Zero leaked asterisks in rendered prose', leakedDoubleAsterisks === 0, `Count: ${leakedDoubleAsterisks}`);
+
+    // Required Screenshot 5: reader-lib405-zh-desktop-1440.png
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'reader-lib405-zh-desktop-1440.png'), fullPage: true });
+
+    // 8. About Page (ZH)
     await page.goto('http://localhost:4321/library/zh/about/');
     await page.waitForLoadState('networkidle');
 
@@ -215,20 +237,23 @@ async function runTests() {
 
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-06-about-zh.png') });
 
-    await context.close();
+    await desktopContext.close();
 
     // ----------------------------------------------------
-    // TEST SUITE 2: MOBILE (375 x 667, iPhone SE / Mobile Viewport)
+    // TEST SUITE 2: MOBILE (390 x 844, iPhone 12/13/14 Standard)
     // ----------------------------------------------------
-    console.log('\n=== Executing Mobile Browser Tests (375x667) ===');
-    const mobileContext = await browser.newContext({ viewport: { width: 375, height: 667 }, isMobile: true });
+    console.log('\n=== Executing Mobile Browser Tests (390x844) ===');
+    const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
     const mPage = await mobileContext.newPage();
 
-    // Mobile Home
+    // Mobile Home (ZH)
     await mPage.goto('http://localhost:4321/library/zh/');
     await mPage.waitForLoadState('networkidle');
     const mHeroVisible = await mPage.locator('.hero-title').isVisible();
     assert('Mobile Home: Hero title visible on mobile', mHeroVisible);
+
+    // Required Screenshot 2: homepage-zh-mobile-390.png
+    await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'homepage-zh-mobile-390.png'), fullPage: true });
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'mobile-01-home-zh.png') });
 
     // Mobile Navigation Menu Toggle
@@ -242,11 +267,23 @@ async function runTests() {
     assert('Mobile Nav: Dropdown menu opens on toggle click', menuVisible);
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'mobile-02-menu-open.png') });
 
-    // Mobile Reader
-    await mPage.goto('http://localhost:4321/library/zh/notes/lib-001/');
+    // Mobile Learning Paths (ZH)
+    await mPage.goto('http://localhost:4321/library/zh/paths/');
+    await mPage.waitForLoadState('networkidle');
+    const mPathsVisible = await mPage.locator('.path-title').first().isVisible();
+    assert('Mobile Paths: Path cards rendered cleanly on mobile', mPathsVisible);
+
+    // Required Screenshot 4: paths-zh-mobile-390.png
+    await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'paths-zh-mobile-390.png'), fullPage: true });
+
+    // Mobile Reader (ZH: LIB-405)
+    await mPage.goto('http://localhost:4321/library/zh/notes/lib-405/');
     await mPage.waitForLoadState('networkidle');
     const mKatexVisible = await mPage.locator('.katex').first().isVisible();
     assert('Mobile Reader: KaTeX math rendered correctly on mobile', mKatexVisible);
+
+    // Required Screenshot 6: reader-lib405-zh-mobile-390.png
+    await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'reader-lib405-zh-mobile-390.png'), fullPage: true });
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'mobile-03-reader-zh.png') });
 
     await mobileContext.close();

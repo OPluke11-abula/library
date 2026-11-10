@@ -1,0 +1,1122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import {
+  formatConciseWikiLabel,
+  getTopologicalArticles,
+  loadLibraryArticles,
+  type ArticleData,
+  type PedagogyStage,
+  type TocItem,
+} from '../lib/library';
+
+interface Props {
+  article: ArticleData;
+  lang: 'zh' | 'en';
+}
+
+const { article, lang } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isZh = lang === 'zh';
+
+const { zh, en } = loadLibraryArticles();
+const langMap = isZh ? zh : en;
+
+const prereqArticles = article.prerequisiteIds.map(id => langMap.get(id)).filter(Boolean) as ArticleData[];
+const successorArticles = article.successorIds.map(id => langMap.get(id)).filter(Boolean) as ArticleData[];
+
+const topoArticles = getTopologicalArticles(lang);
+const currIdx = topoArticles.findIndex(a => a.slug === article.slug);
+const prevArticle = currIdx > 0 ? topoArticles[currIdx - 1] : null;
+const nextArticle = currIdx >= 0 && currIdx < topoArticles.length - 1 ? topoArticles[currIdx + 1] : null;
+
+const otherLang = isZh ? 'en' : 'zh';
+const alternateUrl = `${base}/${otherLang}/notes/${article.slug}/`;
+
+const stageLabels: Record<PedagogyStage, { zh: string; en: string }> = {
+  understand: { zh: '01 · 觀念入門 Concept Introduction', en: '01 · Concept Introduction' },
+  explore: { zh: '02 · 核心脈絡 Core Concepts', en: '02 · Core Concepts' },
+  technical: { zh: '03 · 技術深化與推導實作 Technical Deep Dive', en: '03 · Technical Deep Dive' },
+  research: { zh: '04 · 研究背景、合約與參考文獻 Research Details', en: '04 · Research Details & References' },
+};
+
+// Build hierarchical TOC groups separated cleanly into Lesson vs Research Appendix
+interface TocGroup {
+  h2: TocItem;
+  children: TocItem[];
+  stage: PedagogyStage;
+}
+
+function buildTocGroups(items: TocItem[]): { lessonGroups: TocGroup[]; researchGroups: TocGroup[] } {
+  const lessonGroups: TocGroup[] = [];
+  const researchGroups: TocGroup[] = [];
+  let currentGroup: TocGroup | null = null;
+
+  for (const item of items) {
+    if (item.level === 2) {
+      currentGroup = { h2: item, children: [], stage: item.stage };
+      if (item.stage === 'research') researchGroups.push(currentGroup);
+      else lessonGroups.push(currentGroup);
+    } else if (item.level >= 3 && currentGroup) {
+      currentGroup.children.push(item);
+    }
+  }
+
+  return { lessonGroups, researchGroups };
+}
+
+const { lessonGroups, researchGroups } = buildTocGroups(article.toc);
+const diagramSection = article.lessonSections.find(s => s.html.includes('mermaid-figure') && s.id);
+
+const researchSummaryParts = [
+  prereqArticles.length + successorArticles.length > 0
+    ? (isZh ? `相依脈絡 (${prereqArticles.length}/${successorArticles.length})` : `Dependencies (${prereqArticles.length}/${successorArticles.length})`)
+    : '',
+  article.rules.length > 0
+    ? (isZh ? `${article.rules.length} 條系統合約` : `${article.rules.length} Contracts`)
+    : '',
+  isZh ? '文獻與技術附錄' : 'References & Notes',
+].filter(Boolean).join(' · ');
+---
+
+<BaseLayout title={`${article.callNumber} ${article.title}`} lang={lang} alternateUrl={alternateUrl}>
+  <div class="reader-container">
+    <!-- First-Screen Pedagogical Header -->
+    <header class="reader-header">
+      <div class="container reader-header-inner">
+        <nav class="reader-breadcrumbs" aria-label="Breadcrumb">
+          <a href={`${base}/${lang}/`}>{isZh ? '首頁' : 'Home'}</a>
+          <span class="bc-sep">/</span>
+          <a href={`${base}/${lang}/library/`}>{isZh ? '典籍目錄' : 'Catalog'}</a>
+          <span class="bc-sep">/</span>
+          <a href={`${base}/${lang}/library/?hall=${article.hall.code}`}>
+            {article.hall.code} {isZh ? article.hall.nameZh : article.hall.nameEn}
+          </a>
+          <span class="bc-sep">/</span>
+          <span class="bc-current">{article.callNumber}</span>
+        </nav>
+
+        <div class="header-main-meta">
+          <div class="meta-badges">
+            <span class="callno-badge">{article.callNumber}</span>
+            <span class="hall-badge-head">
+              <Icon name={article.hall.iconName} size={14} />
+              <span>{article.hall.code} {isZh ? article.hall.nameZh : article.hall.nameEn}</span>
+            </span>
+          </div>
+
+          <h1 class="reader-title">{article.title}</h1>
+
+          <!-- Reader-First Orientation Box -->
+          <div class="reader-executive-guide">
+            <p class="reader-guide-lead">
+              <strong>{isZh ? '核心主題：' : 'Core Subject:'}</strong> {article.coreFocus}
+            </p>
+
+            {article.takeaways.length > 0 && (
+              <div class="reader-takeaways">
+                <span class="takeaways-label">{isZh ? '你將在本文理解：' : 'What this lesson covers:'}</span>
+                <ul class="takeaways-list">
+                  {article.takeaways.map(point => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div class="reader-guide-actions">
+              <a href="#lesson-start" class="btn-start-reading">
+                <Icon name="book-open" size={15} />
+                <span>{isZh ? '開始學習' : 'Start Learning'}</span>
+              </a>
+              {diagramSection && (
+                <a href={`#${diagramSection.id}`} class="btn-diagram-jump">
+                  <Icon name="compass" size={14} />
+                  <span>{isZh ? '檢視知識拓樸圖' : 'View Knowledge Graph'}</span>
+                </a>
+              )}
+              <a href={alternateUrl} class="btn-mirror-link">
+                <Icon name="globe" size={14} />
+                <span>{isZh ? 'English Edition' : '繁體中文版'}</span>
+              </a>
+              <a href="#research-details" class="btn-research-jump">
+                <span>{isZh ? '研究背景與文獻 ↓' : 'Research Details ↓'}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content & Collapsible Sidebar Outline -->
+    <div class="container reader-body-layout">
+      <article class="article-body">
+        <!-- Mobile-only Collapsible Chapter Outline -->
+        {lessonGroups.length > 0 && (
+          <details class="mobile-toc-drawer">
+            <summary class="mobile-toc-summary">
+              <span class="mobile-toc-title">
+                <Icon name="list-tree" size={15} />
+                <span>{isZh ? `章節大綱（${lessonGroups.length} 章）` : `Lesson Outline (${lessonGroups.length} sections)`}</span>
+              </span>
+              <Icon name="chevron-down" size={15} class="mobile-toc-chevron" />
+            </summary>
+            <nav class="toc-nav mobile-toc-nav" aria-label={isZh ? '行動端章節目錄' : 'Mobile Table of Contents'} data-toc-root="mobile">
+              <ul class="toc-root-list">
+                {lessonGroups.map(group => (
+                  <li class="toc-group">
+                    <div class="toc-h2-row">
+                      <a href={`#${group.h2.id}`} title={group.h2.text}>{group.h2.shortText}</a>
+                    </div>
+                  </li>
+                ))}
+                {researchGroups.length > 0 && (
+                  <li class="toc-group toc-research-entry">
+                    <div class="toc-h2-row">
+                      <a href="#research-details">{isZh ? '研究背景、合約與參考文獻' : 'Research Details & References'}</a>
+                    </div>
+                  </li>
+                )}
+              </ul>
+            </nav>
+          </details>
+        )}
+
+        <!-- Main Lesson Surface: Understand -> Explore -> Technical Deep Dive -->
+        <div id="article-content" class="rendered-markdown">
+          <div id="lesson-start" class="lesson-flow">
+            {article.leadContextHtml && (
+              <section class="lesson-lead-callout" aria-label={isZh ? '概念導覽' : 'Lesson Framing'}>
+                <div class="stage-eyebrow">{stageLabels.understand[lang]}</div>
+                <div set:html={article.leadContextHtml} />
+              </section>
+            )}
+
+            {article.lessonSections.map((sec, idx) => {
+              const prevStage = idx > 0 ? article.lessonSections[idx - 1].stage : (article.leadContextHtml ? 'understand' : null);
+              const showStageMarker = sec.stage !== prevStage;
+              return (
+                <section class={`lesson-stage-block stage-${sec.stage}`}>
+                  {showStageMarker && (
+                    <div class="stage-eyebrow" aria-hidden="true">{stageLabels[sec.stage][lang]}</div>
+                  )}
+                  <div set:html={sec.html} />
+                </section>
+              );
+            })}
+          </div>
+
+          <!-- Stage 4: Collapsible Research Details, Coordinates, Invariants & References -->
+          <details id="research-details" class="research-details-drawer">
+            <summary class="research-details-summary">
+              <div class="research-summary-left">
+                <Icon name="layers" size={16} />
+                <div class="research-summary-text">
+                  <span class="research-summary-title">
+                    {isZh ? '研究細節、系統合約與參考文獻' : 'Research Details, Contracts & References'}
+                  </span>
+                  <span class="research-summary-meta">{researchSummaryParts}</span>
+                </div>
+              </div>
+              <Icon name="chevron-down" size={16} class="research-chevron" />
+            </summary>
+
+            <div class="research-details-body">
+              <!-- Consolidated Metadata & Topological Coordinates (single non-duplicated location) -->
+              <div class="specs-dossier">
+                <div class="specs-grid">
+                  <div class="spec-item">
+                    <span class="spec-label">{isZh ? '典籍狀態' : 'Status'}</span>
+                    <div class="spec-value">
+                      <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                        {article.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-label">{isZh ? '作者與維護日' : 'Author & Date'}</span>
+                    <div class="spec-value author-date">
+                      <span>{article.author}</span>
+                      <span class="spec-dot">•</span>
+                      <span>{article.created}</span>
+                    </div>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-label">{isZh ? '目標讀者' : 'Target Audience'}</span>
+                    <div class="spec-value">{article.audience.join(', ') || (isZh ? '資工系學生 / 研究者' : 'CS Students / Researchers')}</div>
+                  </div>
+                  {article.mathFoundations.length > 0 && (
+                    <div class="spec-item">
+                      <span class="spec-label">{isZh ? '數學與理論基石' : 'Foundations'}</span>
+                      <div class="spec-value">{article.mathFoundations.join(', ')}</div>
+                    </div>
+                  )}
+                  {article.hardwareTarget.length > 0 && (
+                    <div class="spec-item">
+                      <span class="spec-label">{isZh ? '硬體對齊' : 'Hardware Target'}</span>
+                      <div class="spec-value">{article.hardwareTarget.join(', ')}</div>
+                    </div>
+                  )}
+                </div>
+
+                {(prereqArticles.length > 0 || successorArticles.length > 0) && (
+                  <div class="topo-nodes-grid">
+                    <div class="topo-column">
+                      <div class="topo-col-header">
+                        <Icon name="arrow-left" size={14} />
+                        <span class="topo-col-label">{isZh ? '前置先修' : 'Prerequisites'}</span>
+                      </div>
+                      {prereqArticles.length === 0 ? (
+                        <div class="topo-empty">{isZh ? '無前置依賴（領域起點）' : 'None (Root Node)'}</div>
+                      ) : (
+                        <ul class="topo-list">
+                          {prereqArticles.map(pre => {
+                            const short = formatConciseWikiLabel(pre.slug, `${pre.callNumber} ${pre.title}`, undefined, lang);
+                            return (
+                              <li>
+                                <a href={`${base}/${lang}/notes/${pre.slug}/`} class="topo-link" title={pre.title}>
+                                  <span class="topo-text">{short.display}</span>
+                                </a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div class="topo-column">
+                      <div class="topo-col-header">
+                        <span class="topo-col-label">{isZh ? '後續延伸' : 'Successors'}</span>
+                        <Icon name="arrow-right" size={14} />
+                      </div>
+                      {successorArticles.length === 0 ? (
+                        <div class="topo-empty">{isZh ? '終端專題篇目' : 'Frontier Volume'}</div>
+                      ) : (
+                        <ul class="topo-list">
+                          {successorArticles.map(suc => {
+                            const short = formatConciseWikiLabel(suc.slug, `${suc.callNumber} ${suc.title}`, undefined, lang);
+                            return (
+                              <li>
+                                <a href={`${base}/${lang}/notes/${suc.slug}/`} class="topo-link" title={suc.title}>
+                                  <span class="topo-text">{short.display}</span>
+                                </a>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <!-- Full Preserved Source Sections: Coordinates, Agent Contracts & References -->
+              {article.researchSections.map(sec => (
+                <section class="research-source-section" set:html={sec.html} />
+              ))}
+            </div>
+          </details>
+        </div>
+
+        <!-- Sequential Prev / Next Navigation -->
+        <nav class="reader-pagination" aria-label={isZh ? '拓樸序章上下篇導覽' : 'Topological Sequence Navigation'}>
+          {prevArticle ? (
+            <a href={`${base}/${lang}/notes/${prevArticle.slug}/`} class="page-nav prev">
+              <span class="page-dir">
+                <Icon name="arrow-left" size={13} />
+                <span>{isZh ? '上一篇' : 'Previous'}</span>
+              </span>
+              <span class="page-nav-title">{prevArticle.callNumber} {prevArticle.title}</span>
+            </a>
+          ) : <div class="page-nav-placeholder"></div>}
+
+          {nextArticle ? (
+            <a href={`${base}/${lang}/notes/${nextArticle.slug}/`} class="page-nav next">
+              <span class="page-dir">
+                <span>{isZh ? '下一篇' : 'Next'}</span>
+                <Icon name="arrow-right" size={13} />
+              </span>
+              <span class="page-nav-title">{nextArticle.callNumber} {nextArticle.title}</span>
+            </a>
+          ) : <div class="page-nav-placeholder"></div>}
+        </nav>
+      </article>
+
+      <!-- Desktop Sidebar: Collapsible Scannable Outline Only -->
+      <aside class="reader-sidebar" aria-label={isZh ? '閱讀目錄' : 'Reading Outline'}>
+        {article.toc.length > 0 && (
+          <div class="sidebar-widget toc-widget">
+            <div class="widget-header">
+              <Icon name="list-tree" size={14} />
+              <h2 class="widget-title">{isZh ? '閱讀大綱' : 'Lesson Outline'}</h2>
+            </div>
+
+            <nav class="toc-nav" aria-label={isZh ? '章節目錄' : 'Table of Contents'} data-toc-root="desktop">
+              <ul class="toc-root-list">
+                {lessonGroups.map((group, gIdx) => {
+                  const hasChildren = group.children.length > 0;
+                  const startOpen = gIdx === 0;
+                  return (
+                    <li class:list={['toc-group', { 'is-expanded': startOpen }]} data-toc-stage={group.stage}>
+                      <div class="toc-h2-row">
+                        <a href={`#${group.h2.id}`} title={group.h2.text} class="toc-h2-link">
+                          {group.h2.shortText}
+                        </a>
+                        {hasChildren && (
+                          <button
+                            type="button"
+                            class="toc-toggle-btn"
+                            aria-expanded={startOpen ? 'true' : 'false'}
+                            aria-controls={`toc-sub-${gIdx}`}
+                            aria-label={isZh ? `展開 ${group.h2.shortText} 子章節` : `Toggle subsections for ${group.h2.shortText}`}
+                          >
+                            <Icon name="chevron-down" size={13} />
+                          </button>
+                        )}
+                      </div>
+                      {hasChildren && (
+                        <ul id={`toc-sub-${gIdx}`} class="toc-sublist" hidden={!startOpen}>
+                          {group.children.map(sub => (
+                            <li class={`toc-level-${sub.level}`}>
+                              <a href={`#${sub.id}`} title={sub.text}>{sub.shortText}</a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {researchGroups.length > 0 && (
+                <div class="toc-research-section">
+                  <a href="#research-details" class="toc-research-header-link">
+                    <Icon name="layers" size={13} />
+                    <span>{isZh ? '研究細節與文獻附錄' : 'Research Details & Refs'}</span>
+                  </a>
+                  <ul class="toc-research-sublist">
+                    {researchGroups.map(rg => (
+                      <li>
+                        <a href={`#${rg.h2.id}`} title={rg.h2.text}>{rg.h2.shortText}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </nav>
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import '../scripts/reader-enhance';
+</script>
+
+<style>
+  .reader-container {
+    padding-bottom: 4.5rem;
+  }
+  .reader-header {
+    background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.38) 0%, rgba(11, 15, 25, 0.96) 72%);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 2rem 0 1.75rem;
+  }
+  .reader-breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .reader-breadcrumbs a {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .reader-breadcrumbs a:hover {
+    color: var(--accent-cyan);
+  }
+  .bc-sep {
+    color: var(--border-accent);
+  }
+  .bc-current {
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  .header-main-meta {
+    max-width: 820px;
+    min-width: 0;
+  }
+  .meta-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.75rem;
+  }
+  .callno-badge {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    background-color: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .hall-badge-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+  }
+
+  .reader-title {
+    font-size: 2.15rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-bottom: 1.25rem;
+    border-bottom: none;
+    padding-bottom: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Study Orientation Box */
+  .reader-executive-guide {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-cyan);
+    border-radius: 8px;
+    padding: 1.15rem 1.35rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .reader-guide-lead {
+    font-size: 0.96rem;
+    color: #e2e8f0;
+    line-height: 1.65;
+    margin-bottom: 0.85rem;
+  }
+  .reader-guide-lead strong {
+    color: var(--accent-cyan);
+  }
+  .reader-takeaways {
+    margin-bottom: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .takeaways-label {
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .takeaways-list {
+    margin: 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .takeaways-list li {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin-bottom: 0;
+  }
+  .reader-guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .btn-start-reading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.15rem;
+    background-color: var(--accent-cyan);
+    color: #0b0f19;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-start-reading:hover {
+    background-color: #7dd3fc;
+    color: #0b0f19;
+    text-decoration: none;
+  }
+  .btn-mirror-link,
+  .btn-diagram-jump {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.84rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-mirror-link:hover,
+  .btn-diagram-jump:hover {
+    color: #ffffff;
+    border-color: var(--border-accent);
+    background-color: rgba(255, 255, 255, 0.03);
+    text-decoration: none;
+  }
+  .btn-research-jump {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.35rem 0.4rem;
+    margin-left: auto;
+  }
+  .btn-research-jump:hover {
+    color: var(--accent-cyan);
+  }
+
+  /* Main Reading Column & Collapsible Sidebar */
+  .reader-body-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    padding-top: 2rem;
+  }
+  @media (min-width: 1024px) {
+    .reader-body-layout {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 3rem;
+    }
+  }
+  .article-body {
+    flex: 1 1 auto;
+    max-width: 760px;
+    min-width: 0;
+  }
+
+  /* Lesson Stages */
+  .lesson-flow {
+    scroll-margin-top: 84px;
+  }
+  .lesson-lead-callout {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.15rem 1.35rem;
+    margin-bottom: 1.75rem;
+  }
+  .lesson-stage-block {
+    margin-bottom: 1.5rem;
+  }
+  .stage-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    margin-bottom: 0.4rem;
+    margin-top: 1.25rem;
+  }
+  .lesson-stage-block:first-child .stage-eyebrow,
+  .lesson-lead-callout .stage-eyebrow {
+    margin-top: 0;
+  }
+  .lesson-stage-block :global(h2:first-of-type) {
+    margin-top: 0.25rem;
+  }
+
+  .rendered-markdown {
+    font-size: 1.04rem;
+    line-height: 1.78;
+    color: #cbd5e1;
+  }
+
+  /* Research Details (Stage 4 Collapsible Drawer) */
+  .research-details-drawer {
+    margin-top: 3rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    overflow: hidden;
+    scroll-margin-top: 84px;
+  }
+  .research-details-summary {
+    padding: 1.05rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .research-details-summary::-webkit-details-marker {
+    display: none;
+  }
+  .research-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--accent-cyan);
+    min-width: 0;
+  }
+  .research-summary-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .research-summary-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  .research-summary-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .research-chevron {
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .research-details-drawer[open] .research-chevron {
+    transform: rotate(180deg);
+  }
+  .research-details-body {
+    padding: 1.25rem 1.35rem 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    background-color: rgba(11, 15, 25, 0.35);
+  }
+  .research-source-section {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .research-source-section :global(h2) {
+    margin-top: 0;
+    font-size: 1.25rem;
+  }
+
+  .specs-dossier {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+  }
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 640px) {
+    .specs-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .spec-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .spec-value {
+    font-size: 0.84rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .author-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .spec-dot {
+    color: var(--text-muted);
+  }
+
+  .topo-nodes-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  @media (min-width: 640px) {
+    .topo-nodes-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .topo-column {
+    min-width: 0;
+  }
+  .topo-col-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.55rem;
+    color: var(--accent-cyan);
+  }
+  .topo-col-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #ffffff;
+  }
+  .topo-empty {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .topo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .topo-link {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding: 0.35rem 0.55rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .topo-link:hover {
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  /* Pagination */
+  .reader-pagination {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  @media (min-width: 640px) {
+    .reader-pagination {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+  }
+  .page-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.05rem 1.2rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .page-nav:hover {
+    border-color: var(--accent-cyan);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+  .page-nav.next {
+    text-align: right;
+  }
+  .page-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .page-nav.next .page-dir {
+    justify-content: flex-end;
+  }
+  .page-nav-title {
+    font-family: var(--font-serif);
+    font-size: 0.92rem;
+    color: #ffffff;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* Mobile Outline Drawer */
+  .mobile-toc-drawer {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+  @media (min-width: 1024px) {
+    .mobile-toc-drawer {
+      display: none;
+    }
+  }
+  .mobile-toc-summary {
+    padding: 0.7rem 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  .mobile-toc-summary::-webkit-details-marker {
+    display: none;
+  }
+  .mobile-toc-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--accent-cyan);
+  }
+  .mobile-toc-drawer[open] .mobile-toc-chevron {
+    transform: rotate(180deg);
+  }
+  .mobile-toc-nav {
+    padding: 0.5rem 0.95rem 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* Desktop Sticky Sidebar Outline */
+  .reader-sidebar {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .reader-sidebar {
+      display: block;
+      width: 280px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 84px;
+      max-height: calc(100vh - 108px);
+      overflow-y: auto;
+    }
+  }
+  .sidebar-widget {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.1rem 1.15rem;
+  }
+  .widget-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--accent-cyan);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .widget-title {
+    font-family: var(--font-serif);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+
+  .toc-root-list,
+  .toc-sublist,
+  .toc-research-sublist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .toc-root-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .toc-h2-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.3rem;
+  }
+  .toc-h2-link {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    padding: 0.25rem 0 0.25rem 0.5rem;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    line-height: 1.38;
+  }
+  .toc-h2-link:hover,
+  .toc-h2-link.active {
+    color: var(--accent-cyan);
+    border-left-color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  .toc-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.2rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .toc-toggle-btn:hover {
+    color: #ffffff;
+    background-color: var(--bg-elevated);
+  }
+  .toc-group.is-expanded .toc-toggle-btn {
+    transform: rotate(180deg);
+  }
+  .toc-sublist {
+    margin: 0.2rem 0 0.45rem 0.6rem;
+    padding-left: 0.65rem;
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .toc-sublist[hidden] {
+    display: none;
+  }
+  .toc-sublist a {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    padding: 0.15rem 0;
+    text-decoration: none;
+  }
+  .toc-sublist a:hover,
+  .toc-sublist a.active {
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  .toc-level-4 {
+    padding-left: 0.65rem;
+  }
+  .toc-research-section {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .toc-research-header-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 0.35rem;
+  }
+  .toc-research-header-link:hover {
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  .toc-research-sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-left: 0.5rem;
+  }
+  .toc-research-sublist a {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .toc-research-sublist a:hover {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 639px) {
+    .reader-header {
+      padding: 1.05rem 0 0.95rem;
+    }
+    .reader-breadcrumbs {
+      font-size: 0.74rem;
+      margin-bottom: 0.6rem;
+    }
+    .meta-badges {
+      margin-bottom: 0.5rem;
+    }
+    .reader-title {
+      font-size: 1.45rem;
+      line-height: 1.28;
+      margin-bottom: 0.8rem;
+    }
+    .reader-executive-guide {
+      padding: 0.85rem 0.95rem;
+    }
+    .reader-guide-lead {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin-bottom: 0.7rem;
+    }
+    .reader-takeaways {
+      margin-bottom: 0.75rem;
+      padding-top: 0.55rem;
+    }
+    .takeaways-list li {
+      font-size: 0.8rem;
+    }
+    .btn-research-jump {
+      margin-left: 0;
+    }
+    .reader-body-layout {
+      padding-top: 1.15rem;
+    }
+    .rendered-markdown {
+      font-size: 0.98rem;
+      line-height: 1.72;
+    }
+  }
+</style>

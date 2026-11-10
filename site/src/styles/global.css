@@ -232,11 +232,11 @@ img, svg {
 
 /* Obsidian WikiLinks */
 .wikilink-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.1rem 0.5rem;
-  font-size: 0.85em;
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.86em;
   background-color: rgba(56, 189, 248, 0.1);
   color: var(--accent-cyan) !important;
   border: 1px solid rgba(56, 189, 248, 0.28);
@@ -306,6 +306,8 @@ img, svg {
   font-weight: 600;
   border-radius: 9999px;
   text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-source-verified {
@@ -349,4 +351,175 @@ img, svg {
   .container {
     padding: 0 1.25rem;
   }
+}
+
+/* Keyboard Focus Ring */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Mermaid Diagram Presentation & Inspection Controls */
+.mermaid-figure {
+  margin: 1.75rem 0;
+  background-color: #0d1322;
+  border: 1px solid var(--border-accent);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.mermaid-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mermaid-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.mermaid-kind-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-cyan);
+  background-color: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.mermaid-title-text {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  overflow-wrap: anywhere;
+}
+
+.mermaid-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.mermaid-btn {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 5px;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.mermaid-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-cyan);
+  color: #ffffff;
+}
+
+.mermaid-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1.25rem;
+  background-color: #0d1322;
+}
+
+.mermaid-viewport.is-tall:not(.is-expanded) {
+  max-height: 70vh;
+}
+
+.mermaid-svg-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.mermaid-figure[data-zoomed="true"] .mermaid-svg-stage,
+.mermaid-figure[data-diagram-wide="true"] .mermaid-svg-stage {
+  min-width: fit-content;
+}
+
+.mermaid-svg-stage svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mermaid-figure[data-zoomed="true"] .mermaid-svg-stage svg,
+.mermaid-figure[data-diagram-wide="true"] .mermaid-svg-stage svg {
+  max-width: none;
+}
+
+.mermaid-loading-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 1rem 0;
+}
+
+.mermaid-error-box {
+  margin: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 6px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  color: #fca5a5;
+}
+
+.mermaid-error-box strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #fecaca;
+}
+
+.mermaid-error-box p {
+  font-size: 0.84rem;
+  margin-bottom: 0;
+  color: #fca5a5;
+}
+
+.mermaid-source-drawer {
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+}
+
+.mermaid-source-drawer summary {
+  padding: 0.55rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.mermaid-source-drawer summary:hover {
+  color: var(--accent-cyan);
+}
+
+.mermaid-raw-source {
+  margin: 0 !important;
+  border: none !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  border-radius: 0 !important;
+  font-size: 0.8rem !important;
 }

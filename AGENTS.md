@@ -95,18 +95,16 @@ library/
 - **統一線條圖標系統**：所有 UI 圖標必須使用純 SVG Line Icon 元件 `src/components/Icon.astro`（包含 `atlas`, `compass`, `math`, `cpu`, `chart`, `network`, `camera`, `text`, `bot`, `settings`, `academic`, `globe`, `search`, `book-open`, `layers`, `shield-check`, `clock` 等）。
 - 嚴禁依賴任何未被打包的外部圖標套件或網路 CDN 字型。
 
-### 3.4 讀者第一閱讀版面與手機首屏密度 (Reader-First & Mobile Density)
-- **第一屏研讀導引與行動端優先 (Study Orientation & Mobile Viewport)**: 文章頂部優先呈現篇名、基於原始敘述抽取之乾淨研讀導引（`Study Orientation` / `article.excerpt`）以及顯眼的「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。手機版（`390px`）必須收斂頂部留白、導覽列高度與過長篩選列（Catalog 分館/標籤採單列橫向捲動條、Reader 隱藏次要抽屜提示並維持單欄分頁），讓首屏無需長距離捲動即可觸及主要行動與實質內容。移除不精確、誤導性的技術文章「預估閱讀時間」。
-- **來源真實之研讀導引 (Source-Grounded Study Orientations)**：卡片摘要與 Reader 研讀導引僅得取自 Frontmatter 摘要或經淨化之開頭敘事段落；若原文開篇為表格、架構圖或研究契約而無獨立導讀段落，須平實退回至「分館 + 類別 + 篇名」之中立導覽，**嚴禁洩漏**縮排書目清單、ASCII 圖框、Markdown 表格、鍵值詮釋區塊、殘留 `\r` 或未編譯 LaTeX 指令（統一經 `texToReadablePlain` 轉換）。
-- **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（狀態、作者、嚴格 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴（Prerequisites / Successors），統一收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
-- **單一 H1 語意純淨性 (Strict Single H1 Invariant)**：Reader 頁面嚴格維持僅有一個主要的 `<h1>`（即版面 Header 的篇名）；原始 Markdown 中的文件大標題 `# 標題` 由渲染管線自語意層消除，避免重複顯示或污染 TOC，其餘內文層級（H2、H3 等）則 100% 完整保留。
-- **舒適閱讀欄寬與行高**：正文閱讀欄寬嚴格控制於 68–76 字元（`max-width: 760px`），行高 1.8，字級 1.05rem。
-- **右側常駐目錄 (Sticky TOC)**：桌面端右側懸浮章節目錄，平滑捲動跳轉。
-- **滾動防禦與零橫向溢出 (Zero Horizontal Scroll Overflow)**：程式碼區塊（`<pre>`）、表格（`<table>`）與 KaTeX 獨立顯示公式（`.katex-display-container`）均具備 `overflow-x: auto` 橫向滾動保護；全站桌面端（1440px）與手機端（390px）嚴格保證 `scrollWidth <= clientWidth`，Grid 容器必須搭配 `minmax(0, 1fr)` 與 `min-width: 0` 防止非預期撐破版面。
+### 3.4 讀者第一教學階層版面與手機首屏密度 (Reader-First Pedagogy & Mobile Density)
+- **第一屏教學導引 (First-Screen Pedagogy & Action)**：文章頂部呈現篇名、基於 Frontmatter `math_foundations` 與分館結構產出之非重複「核心主題 (`coreFocus`)」、自正文開放章節提取之「你將在本文理解 (`takeaways`)」，以及主要 CTA「開始學習 (Start Learning)」(`#lesson-start`，若本文含視覺圖表則附帶「檢視知識拓樸圖」直達錨點)。正文開篇即直接進入概念理解，**嚴禁**在正文前以先修條件、後續節點或系統合約牆阻擋閱讀。手機版（`390px`）收斂頂部留白與導覽列高度，不顯示失真「預估閱讀時間」。
+- **來源真實之導讀與摘要 (Source-Grounded Orientation)**：卡片摘要與標題導引不得洩漏縮排書目、ASCII 圖框、Markdown 表格、公式尾端推論句（如孤立定理量詞）或未編譯 LaTeX 指令；TOC 與標題輔助純文字使用 Unicode 上標轉換 (`texToReadablePlain`) 並去除多餘符號噪音。
+- **教學進程與漸進式研究附錄 (`#research-details`)**：閱讀體驗依循 **觀念入門 (Understand) -> 核心脈絡 (Explore) -> 技術深化與推導 (Technical Deep Dive) -> `#research-details`** 推進。作者/狀態/統一 `YYYY-MM-DD` 維護日、前後依賴（Prerequisites / Successors）、`[RULE-###-##]` 合約規範、AI Agent 協定與參考文獻統一收納於可搜尋／可由錨點自動展開之 `<details id="research-details" class="research-details-drawer">`（預設折疊）。
+- **階層式可收合目錄與捲動追蹤 (Collapsible H2/H3 TOC & Scroll-Spy)**：桌面端右側欄（及行動端頂部目錄抽屜）預設展示主要 H2 章節，子章節（H3/H4）透過 `IntersectionObserver` Scroll-Spy 或點擊按鈕展開，避免雙重嵌套捲軸框；點擊文內錨點跳轉至研究附錄章節時自動展開 `#research-details`。
+- **單一 H1 與閱讀尺度守則**：每頁僅保留版面 Header 唯一 `<h1>`（正文首行 `# 標題` 於語意層移除）。閱讀欄寬維持 68–76 字元（`max-width: 760px`），行高 1.8，字級 1.05rem；表格、`<pre>` 程式碼區塊與 `.katex-display-container` 公式皆具橫向滾動保護，桌機／手機嚴格 `scrollWidth <= clientWidth` (`minmax(0, 1fr)` / `min-width: 0`)。
 
 ### 3.5 杜絕 AI 模板感與浮誇裝飾 (Anti-Decorative Bloat)
-- 移除廉價 KPI 儀表板卡片、浮誇漸層或無實質價值的光暈動畫。
-- 分館卡片、導讀卡片以讀者導向簡介與編號為主，避免千篇一律的模板色塊。
+- 移除首頁 `.metric-card` KPI 儀表板方塊與浮誇光暈動畫，改以單行編輯資訊帶（`.atlas-meta-strip`）搭配明確「選擇學習路線」行動按鈕引導讀者出發。
+- 卡片徽章與分館標籤禁止無意義堆疊或換行折斷，維持緊湊單行清晰排版。
 
 ### 3.6 典籍簡介真實性與事實查核 (Content Fidelity & Fact-Checking)
 - **內容忠實性**：首頁精選、分館目錄與各處展示卡片之文章代號、篇名與推薦理由，必須 100% 忠實對齊原始 Markdown 內容與 Frontmatter。
@@ -172,8 +170,9 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - **KaTeX 嚴格原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保所有合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時允許以下兩項安全／明確稽核之顯示回復：
      1. 自動轉義 `\text{...}` 內部未跳脫之底線（例如 `LIB-506` 的 `\text{[SAFETY_BOUND]}` 修正為 `\text{[SAFETY\_BOUND]}`）。
      2. 嚴禁對未經查證的不平衡下標括號進行通用 Regex 猜測修復；僅對已核對筆誤來源之 `LIB-802` 原始公式設置精確字串匹配例外（`EXACT_KATEX_DISPLAY_EXCEPTIONS`：原始筆記保持唯讀不動，網站僅做顯示修復）。任何未知公式解析錯誤皆必須以 `console.error` 明確回報並透過 `.katex-error` 顯式呈現，不得靜默改寫或宣稱語意正確。
-   - **標題語意完整性**：嚴禁在 Markdown 解析前使用正規表示式字串粗暴替換 `<h2/h3>`，此舉會引發 CommonMark 區塊層級判定失效。標題生成與錨點計算必須透過 Marked Custom Heading Renderer 完成。
-   - **Obsidian WikiLinks**：支援雙括號語法（例如 `\[\[LIB-### ...\]\]` 與 `\[\[LIB-### ...|自訂標題\]\]`），自動轉換為站內對應頁面超連結（`.wikilink-badge`）。
+   - **多行數學區塊 (`$$...$$`) 與標題完整性**：嚴禁在 Markdown 解析前用單純 Regex 切割標題。分段切割函式（`splitMarkdownByH2`）必須同時追蹤程式碼圍欄與奇偶成對 `$$` 數學區塊，確保公式內部註解不誤判為章節；標題生成與錨點計算透過 Marked Custom Heading Renderer 完成，並濾除裝飾性 Unicode Emoji（保留 `[FACT]` / `[RULE-###-##]` 證據標記與數學內容）。
+   - **Mermaid 本地視覺圖表與明確失敗守則 (Local Mermaid SVG & Explicit Fallback)**：全館 ```` ```mermaid ```` 區塊必須渲染為真實視覺 SVG（禁顯未渲染原始碼或依賴外部 CDN）。建置階段透過 `site/scripts/render-mermaid.mjs` 預先產出靜態 SVG 快取至 `site/src/data/mermaid-cache/`（供應無瀏覽器環境之 CI 快速建置）；未知或新增語法由前端 `src/scripts/reader-enhance.ts` 動態載入本地打包之 `mermaid` 套件接手渲染。圖表外框具備縮放（`−`/`100%`/`+`/高度切換）、寬度自適應防裁切與次要 `<details>`「查看原始碼」；含 Mermaid 之章節保持於正文開放流程。若語法不支援或渲染失敗，必須顯式呈現 Accessible 錯誤區塊（`.mermaid-error-box`）並展開原始碼。
+   - **Obsidian WikiLinks 精簡可讀性**：支援雙括號語法（`[[LIB-### ...]]` 與 `[[LIB-### ...|自訂標題]]`），透過 `CONCISE_VOLUME_LABELS` 與 `formatConciseWikiLabel` 轉為無歧義簡短識別連結（完整篇名保留於 `title` 與 `aria-label`，作者自訂 `|別名` 優先保留），維持站內雙語路由 `.wikilink-badge` 樣式。
 
 ---
 
@@ -197,10 +196,11 @@ The interface should be concise without becoming ambiguous. Removing words is no
      - **路線 1 (Deep Learning)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-602` (5 邊)
      - **路線 2 (Computer Vision)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-401` ➔ `LIB-501` ➔ `LIB-502` ➔ `LIB-504` ➔ `LIB-505` ➔ `LIB-506` (9 邊)
      - **路線 3 (AI Agents)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-703` ➔ `LIB-704` (6 邊)
-3. **去除節點重複贅標 (Clean Learning Path Cards)**：
-   - 移除每個節點卡片上重複出現的「直接拓樸邊 (Direct Edge) ... Verified Invariant」重複性徽章，改由頂部路徑長度標章與節點內部的「為何進入下一步 (Why Next Step)」自然展現因果關係，貫徹 Content Density & Interface Clarity 原則。
+3. **首屏方向選擇矩陣與精簡卡片 (First-Screen Track Matrix & Clean Cards)**：
+   - 學習路徑頁面頂部於桌面首屏（1440x900）立即呈現三張具清晰定位、模組數量與直接「查看路線 / 直接開始第 1 步」按鈕的方向卡片（`.track-chooser-card`），確保第一次造訪之學生能在三秒內做出學習選擇。
+   - 移除每個節點卡片上重複出現的 `DIRECT EDGE`、`VERIFIED INVARIANT` 等重複性徽章，改以「我將學到什麼／從哪裡開始／為何下一步」之教學順序呈現，貫徹 Content Density & Interface Clarity 原則。
 4. **全景地圖次要收合 (Collapsible Panorama Section)**：
-   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊（不加 open 屬性）**，確保讀者進站時優先聚焦於教學步驟卡。
+   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊（不加 open 屬性）**，確保讀者進站時優先聚焦於路線選擇與步驟卡。
 
 ---
 
@@ -229,7 +229,7 @@ flowchart TD
 
 為證明依循 `AGENTS.md` 新增頁面規則可實際落地並通過完整自動化驗證，目前網站中**真正已實作、已對稱建置並通過測試**的可重複擴充頁面案例為學習路徑導覽頁：
 
-- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro`
+- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro` 皆透過薄路由包裝共用元件 `site/src/components/PathsPage.astro`（同樣模式亦應用於 `HomePage.astro` 與 `ReaderPage.astro`），確保雙語結構同步演進且零重複樣板。
 - **模板與圖標規範**：繼承 `BaseLayout.astro` 並互設 `alternateUrl`（`/library/zh/paths/` ↔ `/library/en/paths/`），介面圖標全面採用 `Icon.astro`（零 Emoji）。
 - **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 56 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
 - **品質與回歸保障**：單一 `<h1>`、CSS Grid 採 `minmax(0, 1fr)` 與 `min-width: 0`（Desktop 1440px / Mobile 390px 零橫向溢出），並受 `npm run verify-paths`、`npm run build` 與 Playwright `npm test` 持續守門。
@@ -303,25 +303,28 @@ const alternateUrl = `${base}/en/example/`;
    cd site && npm run verify-paths
    ```
    - 預期結果：20 條直接拓樸邊 100% 通過驗證。
-3. **Astro 靜態建置**：
+3. **Mermaid 本地靜態 SVG 快取同步（僅於新增或改動 Mermaid 圖表後重跑）**：
+   ```bash
+   cd site && npm run render-mermaid
+   ```
+   - 預期結果：更新 `site/src/data/mermaid-cache/` 之 SVG 與 `manifest.json`，確保無 Chromium 之 GitHub Actions 建置環境亦可直接輸出視覺圖表。
+4. **Astro 靜態建置**：
    ```bash
    cd site && npm run build
    ```
    - 預期結果：65 頁靜態 HTML 產出完畢，0 錯誤。
-4. **Markdown 渲染品質檢測**：
-   - 抽驗 `LIB-405`、`LIB-001` 等重要篇目，確認內文無殘留 `**`，KaTeX 數學式 100% 靜態解析。
-5. **端對端瀏覽器實測 (Playwright)**：
+5. **Markdown 與 KaTeX 渲染品質檢測**：
+   - 抽驗 `LIB-405`、`LIB-104`、`LIB-703`、`LIB-000` 等篇目，確認內文無殘留 `**`、無裝飾性 Emoji 噪音，KaTeX 數學式與 Mermaid 圖表均正確解析渲染。
+6. **端對端瀏覽器與靜態語料實測 (Playwright)**：
    ```bash
    cd site && npm test
    ```
-   - 預期結果：64 項靜態語料與桌機（1440x900）／手機（390x844）瀏覽器實測全數 PASS（涵蓋全 56 篇雙向語言切換與正文無衝突、56 篇研讀導引純淨度、零 Google Fonts 外部請求、WCAG AA 對比度 `>= 4.5:1`、`LIB-000` 路徑定位真實性、手機首屏密度、單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、`LIB-504` 真實性）。
-6. **六大視覺驗收截圖產出**：
-   - `homepage-zh-desktop-1440.png`
-   - `homepage-zh-mobile-390.png`
-   - `paths-zh-desktop-1440.png`
-   - `paths-zh-mobile-390.png`
-   - `reader-lib405-zh-desktop-1440.png`
-   - `reader-lib405-zh-mobile-390.png`
+   - 預期結果：53 項靜態語料與桌機（1440x900）／手機（390x844）瀏覽器實測全數 PASS（涵蓋全 56 篇雙向語言切換與正文無衝突、56 篇導引純淨度、Mermaid 視覺 SVG 與失敗警訊 Fallback、零 Google Fonts 外部請求、WCAG AA 對比度 `>= 4.5:1`、Learning Paths 3 路線首屏切換、Reader 漸進教學階層與 `#research-details`／可收合 TOC、手機首屏密度、單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、`LIB-504` 真實性）。
+7. **核心視覺驗收截圖產出（於 `site/tests/screenshots/`，不提交至 Git）**：
+   - `homepage-zh-desktop-1440-top.png` / `homepage-zh-mobile-390-top.png`
+   - `paths-zh-desktop-1440-top.png` / `paths-zh-mobile-390-top.png`
+   - `lib000-zh-desktop-1440-diagram.png` / `lib000-en-desktop-1440-diagram.png`
+   - `lib703-zh-desktop-1440-top.png` / `lib405-zh-desktop-1440-top.png` / `lib104-zh-desktop-1440-math.png`
 
 ---
 

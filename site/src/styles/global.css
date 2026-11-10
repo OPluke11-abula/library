@@ -204,12 +204,30 @@ img, svg {
   border-radius: 8px;
 }
 
-/* KaTeX Display Container */
+/* KaTeX Display Container & Inline Math Overflow Guard */
 .katex-display-container {
   overflow-x: auto;
+  overflow-y: clip;
+  max-width: 100%;
   margin: 1.5rem 0;
   padding: 0.85rem 0;
   text-align: center;
+}
+
+.rendered-markdown {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.rendered-markdown > .katex,
+.rendered-markdown :not(.katex-display) > .katex {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: clip;
+  padding: 0.25em 0;
+  margin: -0.25em 0;
+  vertical-align: middle;
 }
 
 /* Obsidian WikiLinks */

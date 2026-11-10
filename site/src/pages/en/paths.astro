@@ -28,7 +28,7 @@ const { en } = loadLibraryArticles();
               <div class="path-meta-row">
                 <span class="path-index">PATH {pIdx + 1}</span>
                 <span class="path-badge">{path.badge}</span>
-                <span class="path-length-badge">{path.steps.length} Topological Nodes • {path.steps.length - 1} Direct DAG Edges</span>
+                <span class="path-length-badge">{path.steps.length} Study Modules</span>
               </div>
               <h2 class="path-title">{path.titleEn}</h2>
               <p class="path-desc">{path.descriptionEn}</p>
@@ -93,13 +93,6 @@ const { en } = loadLibraryArticles();
                         </div>
                       </div>
 
-                      {sIdx > 0 && (
-                        <div class="direct-edge-pill">
-                          <Icon name="zap" size={13} />
-                          <span>Direct DAG Edge: <strong>{path.steps[sIdx - 1].callNumber}</strong> ➔ <strong>{step.callNumber}</strong> (Verified Invariant)</span>
-                        </div>
-                      )}
-
                       <h3 class="step-title">
                         <a href={articleUrl}>{article ? article.title : step.callNumber}</a>
                       </h3>
@@ -138,7 +131,7 @@ const { en } = loadLibraryArticles();
 
       <!-- Global Roadmap Diagram (Moved to Collapsible Secondary Section) -->
       <section class="roadmap-diagram-section">
-        <details class="roadmap-accordion" open>
+        <details class="roadmap-accordion">
           <summary class="roadmap-summary">
             <div class="roadmap-summary-left">
               <Icon name="layers" size={18} />
@@ -275,17 +268,18 @@ const { en } = loadLibraryArticles();
   /* Educational Dossier */
   .journey-dossier {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     padding-top: 1.25rem;
     border-top: 1px solid var(--border-subtle);
   }
   @media (min-width: 768px) {
     .journey-dossier {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .dossier-card {
+    min-width: 0;
     background-color: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: 6px;

@@ -187,7 +187,59 @@ export interface BilingualPair {
  * Isolates code blocks & math tokens before parsing, and utilizes Marked's native heading & inline tokenization
  * to prevent markdown clobbering, unescaped asterisks, or unparsed CJK emphasis.
  */
-export function renderArticleMarkdown(rawMarkdown: string, lang: 'zh' | 'en', base: string = '/library'): { html: string; toc: TocItem[] } {
+// Helper to format Date or date string to YYYY-MM-DD
+function formatDate(val: any): string {
+  if (!val) return '';
+  if (val instanceof Date) {
+    const y = val.getUTCFullYear();
+    const m = String(val.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(val.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  const str = String(val).trim();
+  const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) return match[1];
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return str;
+}
+
+/**
+ * Audited display-only exceptions for verified KaTeX typos in immutable SSOT notes.
+ * Original Markdown source files are strictly preserved untouched per SSOT rules.
+ */
+interface KatexExceptionEntry {
+  expectedSource: string;
+  replacement: string;
+}
+
+const EXACT_KATEX_DISPLAY_EXCEPTIONS: Readonly<Record<string, KatexExceptionEntry>> = {
+  // Source typo in LIB-802 (zh) line 87: 'X_{j, :]^2]' has ']' instead of '}' (Shift omitted).
+  // Displayed on website as 'X_{j, :}^2]' per AWQ diagonal second-moment approximation;
+  // row-slice squaring notation should still be checked against the original LIB-802 note.
+  '\\arg\\min_{\\hat{W}} \\|W X - \\hat{W} X\\|_F^2 \\approx \\sum_{j=1}^{C_{\\text{in}}} \\|W_{:, j} - \\hat{W}_{:, j}\\|_2^2 \\cdot \\mathbb{E}[X_{j, :]^2]': {
+    expectedSource: 'LIB-802 (zh)',
+    replacement:
+      '\\arg\\min_{\\hat{W}} \\|W X - \\hat{W} X\\|_F^2 \\approx \\sum_{j=1}^{C_{\\text{in}}} \\|W_{:, j} - \\hat{W}_{:, j}\\|_2^2 \\cdot \\mathbb{E}[X_{j, :}^2]',
+  },
+};
+
+function compileKatex(tex: string, isBlock: boolean, throwOnError: boolean): string {
+  const rendered = katex.renderToString(tex, { displayMode: isBlock, throwOnError });
+  return isBlock ? `<div class="katex-display-container">${rendered}</div>` : rendered;
+}
+
+export function renderArticleMarkdown(
+  rawMarkdown: string,
+  lang: 'zh' | 'en',
+  base: string = '/library',
+  sourceLabel: string = ''
+): { html: string; toc: TocItem[] } {
   const toc: TocItem[] = [];
 
   // Stage 1: Protect code blocks and inline code
@@ -199,24 +251,94 @@ export function renderArticleMarkdown(rawMarkdown: string, lang: 'zh' | 'en', ba
   }
 
   // Protect fenced code blocks (```...```)
-  let processed = rawMarkdown.replace(/```[\s\S]*?```/g, saveCode);
+  // Strip leading document title H1 (# Title) to guarantee exactly one H1 per page,
+  // matching the reader header H1 and preventing duplicated title rendering.
+  const contentWithoutLeadingH1 = rawMarkdown.replace(/^#\s+[^\r\n]+(?:\r?\n|$)/m, '');
+  let processed = contentWithoutLeadingH1.replace(/```[\s\S]*?```/g, saveCode);
   // Protect inline code blocks (`...`)
   processed = processed.replace(/`[^`\n]+`/g, saveCode);
 
   // Stage 2: Protect & Pre-render LaTeX math
   // Use alphanumeric token identifiers without underscores to prevent markdown emphasis interference
   const mathTokens: string[] = [];
+  const rawMathSources: string[] = [];
+  function texToReadablePlain(tex: string): string {
+    return tex
+      .replace(/\\to\b/g, '→')
+      .replace(/\\times\b/g, '×')
+      .replace(/\\nabla\b/g, '∇')
+      .replace(/\\eta\b/g, 'η')
+      .replace(/\\epsilon\b/g, 'ε')
+      .replace(/\\alpha\b/g, 'α')
+      .replace(/\\beta\b/g, 'β')
+      .replace(/\\theta\b/g, 'θ')
+      .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+      .replace(/\\(?:mathbb|mathcal|mathbf|mathrm|text|operatorname)\{([^}]+)\}/g, '$1')
+      .replace(/\\(ln|log|exp|sin|cos)\b/g, '$1')
+      .replace(/[{}]/g, '')
+      .replace(/\\/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function saveMath(math: string, isBlock: boolean): string {
     const idx = mathTokens.length;
-    try {
-      const rendered = isBlock
-        ? `<div class="katex-display-container">${katex.renderToString(math.trim(), { displayMode: true, throwOnError: false })}</div>`
-        : katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
-      mathTokens.push(rendered);
-    } catch {
-      mathTokens.push(isBlock ? `$$${math}$$` : `$${math}$`);
+    const extractedCodes: string[] = [];
+    // Separate any inline code tokens accidentally wrapped inside $...$ so KaTeX neither comments out %%% nor swallows them
+    const rawMath = math
+      .replace(/%%%CODEBLOCK_\d+%%%/g, (codeTok) => {
+        extractedCodes.push(codeTok);
+        return '';
+      })
+      .trim();
+    const suffix = extractedCodes.length > 0 ? ` ${extractedCodes.join(' ')}` : '';
+    rawMathSources.push(texToReadablePlain(rawMath));
+    if (!rawMath) {
+      mathTokens.push('');
+      return `KATEXX${idx}X${suffix}`;
     }
-    return `KATEXX${idx}X`;
+    try {
+      // 1. Verbatim-First: valid formulas must compile unmodified
+      mathTokens.push(compileKatex(rawMath, isBlock, true));
+      return `KATEXX${idx}X${suffix}`;
+    } catch (verbatimError) {
+      // 2. Permitted safe/audited recoveries when verbatim TeX fails KaTeX parsing:
+      //    a) Escape unescaped '_' inside \text{...} (e.g. LIB-506 \text{[SAFETY_BOUND]})
+      let candidate = rawMath.replace(/\\text\{([^}]+)\}/g, (_m, inner) => {
+        return `\\text{${inner.replace(/(?<!\\)_/g, '\\_')}}`;
+      });
+      //    b) Exact audited source-typo exception for LIB-802 only (display-only fix; raw Markdown unchanged)
+      if (Object.prototype.hasOwnProperty.call(EXACT_KATEX_DISPLAY_EXCEPTIONS, candidate)) {
+        const entry = EXACT_KATEX_DISPLAY_EXCEPTIONS[candidate];
+        if (!sourceLabel || sourceLabel === entry.expectedSource) {
+          candidate = entry.replacement;
+        }
+      }
+
+      if (candidate !== rawMath) {
+        try {
+          mathTokens.push(compileKatex(candidate, isBlock, true));
+          return `KATEXX${idx}X${suffix}`;
+        } catch (recoveryError) {
+          console.error(
+            `[KaTeX Parse Error]${sourceLabel ? ` [${sourceLabel}]` : ''} Permitted recovery failed:`,
+            rawMath,
+            recoveryError
+          );
+        }
+      } else {
+        console.error(
+          `[KaTeX Parse Error]${sourceLabel ? ` [${sourceLabel}]` : ''} Unrecognized formula parse failure (not rewritten):`,
+          rawMath,
+          verbatimError
+        );
+      }
+
+      // 3. Unknown parse errors: render visibly as KaTeX error span (.katex-error) without silent rewriting
+      mathTokens.push(compileKatex(rawMath, isBlock, false));
+      return `KATEXX${idx}X${suffix}`;
+    }
   }
 
   // Display math $$ ... $$
@@ -293,14 +415,27 @@ export function renderArticleMarkdown(rawMarkdown: string, lang: 'zh' | 'en', ba
     extensions: [cjkStrongExtension],
     renderer: {
       heading(this: any, { tokens, depth }: { tokens: any[]; depth: number }) {
+        if (depth === 1) {
+          // Suppress duplicate H1 from markdown body; reader header provides the canonical H1
+          return '';
+        }
         const text = this.parser.parseInline(tokens);
-        const cleanTitle = text.replace(/<[^>]+>/g, '').trim();
-        const slugId = cleanTitle
+        // Extract pure text for TOC and ID without HTML tags or double-escaped entities
+        const plainText = text
+          .replace(/KATEXX(\d+)X/g, (_m, i) => rawMathSources[parseInt(i, 10)] || '')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim();
+        const slugId = plainText
           .toLowerCase()
           .replace(/[^\w\u4e00-\u9fa5\-_]+/g, '-')
           .replace(/^-+|-+$/g, '') || `section-${toc.length + 1}`;
-
-        toc.push({ id: slugId, text: cleanTitle, level: depth });
+        toc.push({ id: slugId, text: plainText, level: depth });
         return `<h${depth} id="${slugId}">${text}</h${depth}>\n`;
       }
     }
@@ -366,7 +501,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
         if (!callNumber) continue;
 
         const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'zh');
+        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'zh', '/library', `${callNumber} (zh)`);
         const rules = parseRules(rawMarkdown);
 
         // Parse prerequisites and successors
@@ -408,7 +543,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
           audience: Array.isArray(frontmatter.audience) ? frontmatter.audience : [],
           mathFoundations: Array.isArray(frontmatter.math_foundations) ? frontmatter.math_foundations : [],
           hardwareTarget: Array.isArray(frontmatter.hardware_target) ? frontmatter.hardware_target : [],
-          created: frontmatter.created || '',
+          created: formatDate(frontmatter.created),
           author: frontmatter.author || 'Luke',
           tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
           prerequisitesRaw: prereqsRaw,
@@ -439,7 +574,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
         if (!callNumber) continue;
 
         const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'en');
+        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'en', '/library', `${callNumber} (en)`);
         const rules = parseRules(rawMarkdown);
 
         const prereqsRaw = Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [];
@@ -479,7 +614,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
           audience: Array.isArray(frontmatter.audience) ? frontmatter.audience : [],
           mathFoundations: Array.isArray(frontmatter.math_foundations) ? frontmatter.math_foundations : [],
           hardwareTarget: Array.isArray(frontmatter.hardware_target) ? frontmatter.hardware_target : [],
-          created: frontmatter.created || '',
+          created: formatDate(frontmatter.created),
           author: frontmatter.author || 'Luke',
           tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
           prerequisitesRaw: prereqsRaw,

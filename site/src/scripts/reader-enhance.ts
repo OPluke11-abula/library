@@ -242,6 +242,37 @@ function initTocInteraction(): void {
   activateHeading(headings[0].id);
 }
 
+function initReadingProgress(): void {
+  const bar = document.querySelector<HTMLElement>('.reading-progress-bar');
+  const articleBody = document.querySelector<HTMLElement>('#lesson-start');
+  if (!bar || !articleBody) return;
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const rect = articleBody.getBoundingClientRect();
+    const docTop = window.scrollY + rect.top;
+    const total = Math.max(1, articleBody.offsetHeight - window.innerHeight * 0.55);
+    const raw = (window.scrollY - docTop + window.innerHeight * 0.2) / total;
+    const clamped = Math.min(1, Math.max(0, raw));
+    bar.style.transform = `scaleX(${clamped.toFixed(4)})`;
+    bar.style.opacity = window.scrollY > 120 ? '1' : '0';
+  };
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(update);
+      }
+    },
+    { passive: true }
+  );
+  update();
+}
+
 initMermaidControls();
 renderPendingMermaidDiagrams();
 initTocInteraction();
+initReadingProgress();

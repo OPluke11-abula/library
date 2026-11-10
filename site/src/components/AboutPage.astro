@@ -1,0 +1,346 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: 'zh' | 'en';
+}
+
+const { lang } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isZh = lang === 'zh';
+const alternateUrl = isZh ? `${base}/en/about/` : `${base}/zh/about/`;
+
+const quadCards = isZh
+  ? [
+      { num: '01', title: '概念與物理動機', body: '由空間幾何視角與第一性原理切入，先搞懂模型在物理直覺上「為什麼要這樣設計」，再進入公式推導。' },
+      { num: '02', title: '數學形式化推導', body: '提供完整的定理陳述、目標函數閉式解證明與收斂性界限，引證 CVPR、NeurIPS、ICML、ICLR、MLSys 等同儕評審頂尖文獻。' },
+      { num: '03', title: '計算機體系結構對齊', body: '嚴密分析記憶體階層、Cache Line 命中、NVIDIA CUDA Warp-32 執行緒排程、Tensor Core Tiling 與推論延遲瓶頸。' },
+      { num: '04', title: '生產級工程防禦邊界', body: '標註張量維度形狀、數值穩定防溢出規範、安全限幅 [SAFETY_BOUND] 與形式化系統合約 [RULE-###-##]。', hasCode: true },
+    ]
+  : [
+      { num: '01', title: 'Conceptual & Physical Motivation', body: 'Grounding derivations in geometric intuition and first principles. Understanding physical design motivations before diving into equations.' },
+      { num: '02', title: 'Rigorous Mathematical Derivations', body: 'Complete theorem formulations, closed-form solutions, and convergence bounds citing peer-reviewed literature from CVPR, NeurIPS, ICML, and MLSys.' },
+      { num: '03', title: 'Computer Architecture Alignment', body: 'Hardware-level profiling: cache line hits, NVIDIA CUDA Warp-32 thread scheduling, Tensor Core tiling, and latency bottleneck mitigation.' },
+      { num: '04', title: 'Production Engineering Invariants', body: 'Tensor dimension contracts, numerical overflow boundaries, [SAFETY_BOUND] clamps, and formal system contracts [RULE-###-##].', hasCode: true },
+    ];
+---
+
+<BaseLayout
+  title={isZh ? '關於圖書館 — Grand Library' : 'About Atlas — Grand Library'}
+  lang={lang}
+  alternateUrl={alternateUrl}
+>
+  <div class="about-page">
+    <div class="container about-container">
+      <header class="about-header">
+        <div class="about-rule" aria-hidden="true"></div>
+        <h1 class="about-title">{isZh ? '關於 Grand Library 知識圖書館' : 'About Grand Library Knowledge Atlas'}</h1>
+        <p class="about-lead">
+          {isZh
+            ? '兼具數學形式化推導、GPU 體系結構對齊與生產級工程規範的雙語資訊工程與深度學習知識地圖。'
+            : 'A rigorous knowledge atlas for computer science, deep learning, and spatial computing, aligning mathematical derivations, GPU computer architecture, and production invariants.'}
+        </p>
+      </header>
+
+      <!-- Vision & Principles -->
+      <section class="about-section">
+        <div class="section-title-wrap">
+          <Icon name="compass" size={20} />
+          <h2 class="section-heading">{isZh ? '一、圖書館創立宗旨與核心動機' : '1. Mission & Core Motivation'}</h2>
+        </div>
+        <p>
+          {isZh ? (
+            <>
+              本知識庫由 <strong>Luke</strong> 整理與長期維護。針對當前資訊科學教材普遍存在的「偏向高階黑盒子套件而忽略物理與幾何本質」或「偏向理論推導而忽視現代 GPU 硬體協同」之痛點，Grand Library 堅持以<strong>四層嚴格對齊</strong>展開每一篇典籍：
+            </>
+          ) : (
+            <>
+              Curated and maintained by <strong>Luke</strong>. In response to contemporary technical tutorials either oversimplifying models as black-box packages or ignoring modern GPU hardware co-design, Grand Library develops every volume across <strong>four rigorous alignments</strong>:
+            </>
+          )}
+        </p>
+        <div class="quad-grid">
+          {quadCards.map((card) => (
+            <div class="quad-card">
+              <div class="quad-num">{card.num}</div>
+              <h3 class="quad-title">{card.title}</h3>
+              {card.hasCode ? (
+                <p>
+                  {isZh
+                    ? <>標註張量維度形狀、數值穩定防溢出規範、安全限幅 <code>[SAFETY_BOUND]</code> 與形式化系統合約 <code>[RULE-###-##]</code>。</>
+                    : <>Tensor dimension contracts, numerical overflow boundaries, <code>[SAFETY_BOUND]</code> clamps, and formal system contracts <code>[RULE-###-##]</code>.</>}
+                </p>
+              ) : (
+                <p>{card.body}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Architecture and SSOT -->
+      <section class="about-section">
+        <div class="section-title-wrap">
+          <Icon name="file-text" size={20} />
+          <h2 class="section-heading">{isZh ? '二、唯一真理來源 (Single Source of Truth) 與網站架構' : '2. Single Source of Truth (SSOT) Architecture'}</h2>
+        </div>
+        <p>
+          {isZh ? 'Grand Library 採用嚴格的關注點分離原則：' : 'Grand Library adheres strictly to separation of concerns:'}
+        </p>
+        <ul class="principles-list">
+          <li>
+            {isZh
+              ? <><strong>原始 Markdown 筆記是唯一真理來源 (SSOT)</strong>：位於儲存庫根目錄的 10 個分館資料夾與 <code>en/</code> 鏡像資料夾，包含全館 28 篇繁中與 28 篇英文核心筆記。</>
+              : <><strong>Original Markdown Notes are the Single Source of Truth (SSOT)</strong>: Preserved directly in the 10 root hall directories and <code>en/</code> mirrored directories.</>}
+          </li>
+          <li>
+            {isZh
+              ? <><strong>網站為無狀態純靜態呈現層 (Presentation Layer)</strong>：網站原始碼完全封裝於 <code>site/</code> 目錄，以 Astro + TypeScript 建置，靜態產出純 HTML/CSS/JS，完全不依賴外部資料庫或即時後端。</>
+              : <><strong>Stateless Static Presentation Layer</strong>: Fully encapsulated within the <code>site/</code> directory, powered by Astro + TypeScript for pure static HTML/CSS/JS delivery.</>}
+          </li>
+          <li>
+            {isZh
+              ? <><strong>內容零複製、零竄改</strong>：建置管線直接自根目錄即時讀取 Markdown、解析 YAML Frontmatter 並編譯 KaTeX 數學公式、Mermaid 圖表與 Obsidian WikiLinks，嚴禁在網頁原始碼內建立重複或修改過的筆記副本。</>
+              : <><strong>Zero Copying, Zero Modification</strong>: The build pipeline reads Markdown directly, parses Frontmatter in real-time, compiles KaTeX, Mermaid diagrams, and WikiLinks without duplicating source notes.</>}
+          </li>
+        </ul>
+      </section>
+
+      <!-- Technology Stack -->
+      <section class="about-section">
+        <div class="section-title-wrap">
+          <Icon name="cpu" size={20} />
+          <h2 class="section-heading">{isZh ? '三、網站技術棧 (Technology Stack)' : '3. Technology Stack'}</h2>
+        </div>
+        <div class="tech-grid">
+          <div class="tech-card">
+            <div class="tech-icon-box">
+              <Icon name="atlas" size={20} />
+            </div>
+            <div class="tech-info">
+              <span class="tech-name">Astro 5.x</span>
+              <span class="tech-desc">
+                {isZh
+                  ? '現代靜態網站生成器 (Static Site Generation)，提供最極致的載入效能與零客戶端 JavaScript 預設負載。'
+                  : 'Modern Static Site Generator (SSG) delivering minimal client-side JavaScript by default and fast static loads.'}
+              </span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon-box">
+              <Icon name="math" size={20} />
+            </div>
+            <div class="tech-info">
+              <span class="tech-name">KaTeX &amp; Local Mermaid</span>
+              <span class="tech-desc">
+                {isZh
+                  ? '編譯期靜態數學與知識拓樸圖表渲染引擎，無閃爍且完全依賴本機離線資產，無外部 CDN。'
+                  : 'Compile-time static math and local Mermaid SVG rendering with zero flicker and full offline asset bundling.'}
+              </span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon-box">
+              <Icon name="layers" size={20} />
+            </div>
+            <div class="tech-info">
+              <span class="tech-name">Obsidian WikiLinks Engine</span>
+              <span class="tech-desc">
+                {isZh
+                  ? <>雙括號連結解析器，將 <code>[[LIB-###]]</code> 動態轉換為精簡可讀、具備型態安全的站內路由超連結。</>
+                  : <>Converts double-bracket <code>[[LIB-###]]</code> tokens into concise, type-safe internal site routes.</>}
+              </span>
+            </div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-icon-box">
+              <Icon name="shield-check" size={20} />
+            </div>
+            <div class="tech-info">
+              <span class="tech-name">11 Invariants Validator</span>
+              <span class="tech-desc">
+                {isZh
+                  ? <>由 <code>validate_library.py</code> 執行的完整性守門員，涵蓋 DAG 拓樸、雙語合約、Python AST 語法與無斷鏈保證。</>
+                  : <>Automated validator ensuring DAG completeness, bilingual symmetry, Python AST syntax, and zero broken links.</>}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: 3rem 0 5rem;
+  }
+  .about-container {
+    max-width: 860px;
+  }
+  .about-header {
+    text-align: center;
+    margin-bottom: 3.25rem;
+  }
+  .about-rule {
+    width: 36px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
+    border-radius: 2px;
+    margin: 0 auto 0.85rem;
+  }
+  .about-title {
+    font-size: 2.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-top: 0;
+    margin-bottom: 0.9rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .about-lead {
+    font-size: 1.04rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 0;
+  }
+
+  .about-section {
+    margin-bottom: 3.25rem;
+  }
+  .section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.15rem;
+    color: var(--accent-cyan);
+  }
+  .section-heading {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    border: none;
+    padding: 0;
+  }
+  .about-section p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1.4rem;
+  }
+
+  .quad-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+    margin-top: 1.35rem;
+  }
+  @media (min-width: 640px) {
+    .quad-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .quad-card {
+    min-width: 0;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 10px;
+    padding: 1.35rem;
+  }
+  .quad-num {
+    font-family: var(--font-serif);
+    font-variant-numeric: tabular-nums;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 0.45rem;
+  }
+  .quad-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.55rem;
+  }
+  .quad-card p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.56;
+    margin-bottom: 0;
+  }
+
+  .principles-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.4rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .principles-list li {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--accent-cyan);
+    box-shadow: inset 0 1px 0 var(--specular-edge);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.62;
+    margin-bottom: 0;
+  }
+  .principles-list strong {
+    color: #ffffff;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .tech-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .tech-card {
+    min-width: 0;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .tech-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 7px;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-cyan);
+    flex-shrink: 0;
+  }
+  .tech-name {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+  }
+  .tech-desc {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    line-height: 1.52;
+  }
+</style>

@@ -46,7 +46,7 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     <div class="container">
       <!-- Concise Action-First Header -->
       <header class="paths-header">
-        <span class="paths-tag">{isZh ? 'GUIDED STUDY TRACKS' : 'GUIDED STUDY TRACKS'}</span>
+        <div class="paths-rule" aria-hidden="true"></div>
         <h1 class="paths-title">{isZh ? '選擇你的學習方向' : 'Choose a Learning Track'}</h1>
         <p class="paths-lead">
           {isZh
@@ -62,7 +62,7 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
             const meta = trackMeta[path.id] || { shortZh: path.badge, shortEn: path.badge, icon: 'compass', span: 'LIB-000 →' };
             const secondStep = path.steps[1];
             return (
-              <article class="track-chooser-card">
+              <article class="track-chooser-card" data-track={path.id}>
                 <div class="track-chooser-top">
                   <div class="track-icon-box">
                     <Icon name={meta.icon} size={18} strokeWidth={2} />
@@ -108,7 +108,7 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
           const meta = trackMeta[path.id] || { shortZh: path.badge, shortEn: path.badge, icon: 'compass', span: '' };
           const outcomes = isZh ? path.learningOutcomesZh : path.learningOutcomesEn;
           return (
-            <div class="path-card" id={path.id}>
+            <div class="path-card" id={path.id} data-track={path.id}>
               <div class="path-header">
                 <div class="path-meta-row">
                   <span class="path-index">{isZh ? `路線 ${pIdx + 1}` : `TRACK ${pIdx + 1}`}</span>
@@ -263,33 +263,33 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
   .paths-header {
     text-align: center;
     max-width: 720px;
-    margin: 0 auto 2.25rem;
+    margin: 0 auto 2.1rem;
   }
-  .paths-tag {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--accent-cyan);
-    letter-spacing: 0.1em;
-    display: block;
-    margin-bottom: 0.45rem;
+  .paths-rule {
+    width: 36px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
+    border-radius: 2px;
+    margin: 0 auto 0.8rem;
   }
   .paths-title {
-    font-size: 2.35rem;
+    font-size: 2.4rem;
     font-weight: 700;
+    letter-spacing: -0.02em;
     color: #ffffff;
-    margin-bottom: 0.75rem;
+    margin-top: 0;
+    margin-bottom: 0.7rem;
     border-bottom: none;
     padding-bottom: 0;
   }
   .paths-lead {
     font-size: 1rem;
     color: var(--text-secondary);
-    line-height: 1.65;
+    line-height: 1.68;
     margin-bottom: 0;
   }
 
-  /* 3-Direction Chooser Grid */
+  /* 3-Direction Chooser Grid with Domain-Keyed Top Accents */
   .track-chooser-section {
     margin-bottom: 3rem;
   }
@@ -304,18 +304,51 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     }
   }
   .track-chooser-card {
+    position: relative;
+    overflow: hidden;
     min-width: 0;
     background-color: var(--bg-surface);
-    border: 1px solid var(--border-accent);
+    border: 1px solid var(--border-subtle);
+    border-top: 2px solid var(--accent-cyan);
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
     border-radius: 10px;
-    padding: 1.35rem;
+    padding: 1.35rem 1.35rem 1.3rem;
     display: flex;
     flex-direction: column;
-    transition: border-color 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.22s var(--ease-out-expo), transform 0.22s var(--ease-out-expo), box-shadow 0.22s var(--ease-out-expo);
+  }
+  .track-chooser-card[data-track="deep-learning-foundations"] {
+    border-top-color: var(--accent-cyan);
+    background-image: radial-gradient(circle at 18% 0%, rgba(86, 204, 242, 0.08), transparent 62%);
+  }
+  .track-chooser-card[data-track="spatial-ai-and-3d-vision"] {
+    border-top-color: #34d399;
+    background-image: radial-gradient(circle at 18% 0%, rgba(52, 211, 153, 0.08), transparent 62%);
+  }
+  .track-chooser-card[data-track="intelligent-agents-and-systems"] {
+    border-top-color: var(--accent-gold);
+    background-image: radial-gradient(circle at 18% 0%, rgba(223, 192, 104, 0.09), transparent 62%);
   }
   .track-chooser-card:hover {
-    border-color: var(--accent-cyan);
+    border-color: rgba(255, 255, 255, 0.22);
     transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 16px 34px -16px rgba(2, 6, 23, 0.88);
+  }
+  .track-chooser-card[data-track="spatial-ai-and-3d-vision"] .track-icon-box {
+    color: #34d399;
+    background-color: rgba(52, 211, 153, 0.1);
+    border-color: rgba(52, 211, 153, 0.28);
+  }
+  .track-chooser-card[data-track="spatial-ai-and-3d-vision"] .track-chooser-heading {
+    color: #34d399;
+  }
+  .track-chooser-card[data-track="intelligent-agents-and-systems"] .track-icon-box {
+    color: var(--accent-gold);
+    background-color: rgba(223, 192, 104, 0.1);
+    border-color: rgba(223, 192, 104, 0.28);
+  }
+  .track-chooser-card[data-track="intelligent-agents-and-systems"] .track-chooser-heading {
+    color: var(--accent-gold);
   }
   .track-chooser-top {
     display: flex;
@@ -326,33 +359,33 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
   .track-icon-box {
     width: 34px;
     height: 34px;
-    border-radius: 7px;
-    background-color: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 8px;
+    background-color: rgba(86, 204, 242, 0.1);
+    border: 1px solid rgba(86, 204, 242, 0.28);
     color: var(--accent-cyan);
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .track-module-count {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     font-size: 0.76rem;
     font-weight: 700;
     color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    border: 1px solid rgba(212, 175, 55, 0.28);
-    padding: 0.15rem 0.5rem;
+    background-color: rgba(223, 192, 104, 0.1);
+    border: 1px solid rgba(223, 192, 104, 0.25);
+    padding: 0.16rem 0.55rem;
     border-radius: 9999px;
   }
   .track-chooser-heading {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--accent-cyan);
     margin: 0 0 0.35rem;
     padding: 0;
     border: none;
-    letter-spacing: 0.03em;
   }
   .track-chooser-sub {
     font-family: var(--font-serif);
@@ -365,22 +398,23 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
   .track-chooser-desc {
     font-size: 0.86rem;
     color: var(--text-secondary);
-    line-height: 1.55;
+    line-height: 1.56;
     margin-bottom: 0.9rem;
     flex-grow: 1;
   }
   .track-chooser-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.22rem;
     padding-top: 0.75rem;
     margin-bottom: 1rem;
     border-top: 1px solid var(--border-subtle);
   }
   .track-span {
     font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
     font-size: 0.75rem;
-    color: #e2e8f0;
+    color: #e6edf6;
     font-weight: 600;
   }
   .track-entry-note {
@@ -397,18 +431,20 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.52rem 1rem;
-    border-radius: 6px;
+    padding: 0.54rem 1.05rem;
+    border-radius: 7px;
     background-color: var(--accent-cyan);
-    color: #0b0f19;
+    color: #090d16;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
     font-size: 0.85rem;
     font-weight: 700;
     text-decoration: none;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.18s var(--ease-out-expo), transform 0.18s var(--ease-out-expo);
   }
   .btn-track-primary:hover {
-    background-color: #7dd3fc;
-    color: #0b0f19;
+    background-color: #8be0fa;
+    color: #090d16;
+    transform: translateY(-1px);
     text-decoration: none;
   }
   .btn-track-secondary {
@@ -416,13 +452,15 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     font-weight: 600;
     color: var(--text-secondary);
     text-decoration: none;
-    padding: 0.45rem 0.65rem;
+    padding: 0.46rem 0.7rem;
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: 7px;
+    transition: border-color 0.18s var(--ease-out-expo), color 0.18s var(--ease-out-expo), background-color 0.18s var(--ease-out-expo);
   }
   .btn-track-secondary:hover {
     color: #ffffff;
     border-color: var(--border-accent);
+    background-color: rgba(255, 255, 255, 0.03);
     text-decoration: none;
   }
 
@@ -436,14 +474,15 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
   .path-card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 10px;
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 12px;
     overflow: hidden;
     scroll-margin-top: 76px;
   }
   .path-header {
     padding: 2rem 2rem 1.5rem;
     border-bottom: 1px solid var(--border-subtle);
-    background-color: rgba(255, 255, 255, 0.015);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, transparent 100%);
   }
   .path-meta-row {
     display: flex;
@@ -453,33 +492,36 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     flex-wrap: wrap;
   }
   .path-index {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--accent-cyan);
-    background-color: rgba(56, 189, 248, 0.1);
-    padding: 0.18rem 0.5rem;
+    background-color: rgba(86, 204, 242, 0.1);
+    padding: 0.18rem 0.55rem;
     border-radius: 4px;
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    border: 1px solid rgba(86, 204, 242, 0.25);
   }
   .path-badge {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--accent-gold);
-    background-color: rgba(212, 175, 55, 0.1);
-    padding: 0.18rem 0.5rem;
+    background-color: rgba(223, 192, 104, 0.1);
+    padding: 0.18rem 0.55rem;
     border-radius: 4px;
-    border: 1px solid rgba(212, 175, 55, 0.25);
+    border: 1px solid rgba(223, 192, 104, 0.25);
   }
   .path-length-badge {
     font-size: 0.76rem;
+    font-variant-numeric: tabular-nums;
     color: var(--text-muted);
   }
   .path-title {
     font-family: var(--font-serif);
     font-size: 1.65rem;
     font-weight: 700;
+    letter-spacing: -0.015em;
     color: #ffffff;
     margin: 0 0 0.6rem;
     border: none;
@@ -488,7 +530,7 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
   .path-desc {
     font-size: 0.94rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.62;
     margin-bottom: 1.25rem;
     max-width: 820px;
   }
@@ -496,17 +538,16 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     background-color: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-left: 3px solid var(--accent-cyan);
-    border-radius: 6px;
+    box-shadow: inset 0 1px 0 var(--specular-edge);
+    border-radius: 8px;
     padding: 0.95rem 1.15rem;
     margin-bottom: 0.9rem;
   }
   .outcomes-heading {
     font-family: var(--font-sans);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
     color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
     margin: 0 0 0.45rem;
   }
   .dossier-list {
@@ -585,19 +626,27 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
     height: 34px;
     border-radius: 50%;
     background-color: var(--bg-elevated);
-    border: 2px solid var(--border-accent);
+    border: 1.5px solid var(--border-accent);
+    box-shadow: inset 0 1px 0 var(--specular-edge);
     color: #ffffff;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     font-size: 0.82rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: border-color 0.2s var(--ease-out-expo), color 0.2s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo);
+  }
+  .timeline-step:hover .step-num {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 0 4px rgba(86, 204, 242, 0.12);
   }
   .step-line {
     width: 2px;
     flex-grow: 1;
-    background-color: var(--border-subtle);
+    background: linear-gradient(180deg, rgba(86, 204, 242, 0.42) 0%, var(--border-subtle) 100%);
     margin: 0.45rem 0;
     min-height: 44px;
   }

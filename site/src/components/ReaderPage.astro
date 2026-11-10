@@ -34,10 +34,10 @@ const otherLang = isZh ? 'en' : 'zh';
 const alternateUrl = `${base}/${otherLang}/notes/${article.slug}/`;
 
 const stageLabels: Record<PedagogyStage, { zh: string; en: string }> = {
-  understand: { zh: '01 · 觀念入門 Concept Introduction', en: '01 · Concept Introduction' },
-  explore: { zh: '02 · 核心脈絡 Core Concepts', en: '02 · Core Concepts' },
-  technical: { zh: '03 · 技術深化與推導實作 Technical Deep Dive', en: '03 · Technical Deep Dive' },
-  research: { zh: '04 · 研究背景、合約與參考文獻 Research Details', en: '04 · Research Details & References' },
+  understand: { zh: '01 / 觀念入門', en: '01 / Concept Introduction' },
+  explore: { zh: '02 / 核心脈絡', en: '02 / Core Concepts' },
+  technical: { zh: '03 / 技術深化與推導實作', en: '03 / Technical Deep Dive' },
+  research: { zh: '04 / 研究背景、合約與參考文獻', en: '04 / Research Details & References' },
 };
 
 // Build hierarchical TOC groups separated cleanly into Lesson vs Research Appendix
@@ -80,6 +80,9 @@ const researchSummaryParts = [
 ---
 
 <BaseLayout title={`${article.callNumber} ${article.title}`} lang={lang} alternateUrl={alternateUrl}>
+  <div class="reading-progress-track" aria-hidden="true">
+    <div class="reading-progress-bar"></div>
+  </div>
   <div class="reader-container">
     <!-- First-Screen Pedagogical Header -->
     <header class="reader-header">
@@ -416,11 +419,38 @@ const researchSummaryParts = [
 </script>
 
 <style>
+  .reading-progress-track {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 99;
+    pointer-events: none;
+  }
+  @media (min-width: 640px) {
+    .reading-progress-track {
+      top: 64px;
+    }
+  }
+  .reading-progress-bar {
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    opacity: 0;
+    background: linear-gradient(90deg, var(--accent-cyan) 0%, var(--accent-gold) 100%);
+    transition: opacity 0.2s var(--ease-out-expo);
+  }
+
   .reader-container {
     padding-bottom: 4.5rem;
   }
   .reader-header {
-    background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.38) 0%, rgba(11, 15, 25, 0.96) 72%);
+    background:
+      radial-gradient(ellipse 72% 85% at 50% -15%, rgba(86, 204, 242, 0.09) 0%, transparent 72%),
+      radial-gradient(ellipse 40% 60% at 85% 100%, rgba(223, 192, 104, 0.05) 0%, transparent 70%),
+      var(--bg-primary);
     border-bottom: 1px solid var(--border-subtle);
     padding: 2rem 0 1.75rem;
   }
@@ -465,11 +495,11 @@ const researchSummaryParts = [
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--accent-cyan);
-    background-color: rgba(56, 189, 248, 0.12);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background-color: rgba(86, 204, 242, 0.12);
+    border: 1px solid rgba(86, 204, 242, 0.28);
     padding: 0.18rem 0.55rem;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
+    border-radius: 5px;
+    letter-spacing: 0.04em;
   }
   .hall-badge-head {
     display: inline-flex;
@@ -479,15 +509,17 @@ const researchSummaryParts = [
     color: var(--text-secondary);
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    padding: 0.18rem 0.55rem;
-    border-radius: 4px;
+    padding: 0.18rem 0.6rem;
+    border-radius: 5px;
   }
 
   .reader-title {
-    font-size: 2.15rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.24;
+    letter-spacing: -0.02em;
     color: #ffffff;
+    margin-top: 0;
     margin-bottom: 1.25rem;
     border-bottom: none;
     padding-bottom: 0;
@@ -496,17 +528,18 @@ const researchSummaryParts = [
 
   /* Study Orientation Box */
   .reader-executive-guide {
-    background-color: var(--bg-surface);
+    background: linear-gradient(120deg, rgba(86, 204, 242, 0.045) 0%, var(--bg-surface) 38%);
     border: 1px solid var(--border-subtle);
     border-left: 3px solid var(--accent-cyan);
-    border-radius: 8px;
-    padding: 1.15rem 1.35rem;
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 10px;
+    padding: 1.2rem 1.35rem;
     max-width: 100%;
     overflow-wrap: anywhere;
   }
   .reader-guide-lead {
     font-size: 0.96rem;
-    color: #e2e8f0;
+    color: #e6edf6;
     line-height: 1.65;
     margin-bottom: 0.85rem;
   }
@@ -520,10 +553,8 @@ const researchSummaryParts = [
   }
   .takeaways-label {
     display: block;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--text-muted);
     margin-bottom: 0.4rem;
   }
@@ -537,7 +568,7 @@ const researchSummaryParts = [
   .takeaways-list li {
     font-size: 0.86rem;
     color: var(--text-secondary);
-    line-height: 1.45;
+    line-height: 1.48;
     margin-bottom: 0;
   }
   .reader-guide-actions {
@@ -550,18 +581,20 @@ const researchSummaryParts = [
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.55rem 1.15rem;
+    padding: 0.56rem 1.18rem;
     background-color: var(--accent-cyan);
-    color: #0b0f19;
+    color: #090d16;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 18px -6px rgba(86, 204, 242, 0.4);
     font-size: 0.88rem;
     font-weight: 700;
-    border-radius: 6px;
+    border-radius: 7px;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: transform 0.18s var(--ease-out-expo), background-color 0.18s var(--ease-out-expo);
   }
   .btn-start-reading:hover {
-    background-color: #7dd3fc;
-    color: #0b0f19;
+    background-color: #8be0fa;
+    color: #090d16;
+    transform: translateY(-1px);
     text-decoration: none;
   }
   .btn-mirror-link,
@@ -570,20 +603,20 @@ const researchSummaryParts = [
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 0.9rem;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.02);
     color: var(--text-secondary);
     border: 1px solid var(--border-subtle);
     font-size: 0.84rem;
     font-weight: 500;
-    border-radius: 6px;
+    border-radius: 7px;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all 0.18s var(--ease-out-expo);
   }
   .btn-mirror-link:hover,
   .btn-diagram-jump:hover {
     color: #ffffff;
     border-color: var(--border-accent);
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--bg-elevated);
     text-decoration: none;
   }
   .btn-research-jump {
@@ -625,7 +658,8 @@ const researchSummaryParts = [
   .lesson-lead-callout {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    box-shadow: inset 0 1px 0 var(--specular-edge);
+    border-radius: 10px;
     padding: 1.15rem 1.35rem;
     margin-bottom: 1.75rem;
   }
@@ -633,14 +667,23 @@ const researchSummaryParts = [
     margin-bottom: 1.5rem;
   }
   .stage-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent-cyan);
+    color: var(--accent-gold);
     margin-bottom: 0.4rem;
-    margin-top: 1.25rem;
+    margin-top: 1.35rem;
+  }
+  .stage-eyebrow::before {
+    content: '';
+    width: 16px;
+    height: 1.5px;
+    background-color: var(--accent-gold);
+    border-radius: 1px;
   }
   .lesson-stage-block:first-child .stage-eyebrow,
   .lesson-lead-callout .stage-eyebrow {
@@ -745,15 +788,13 @@ const researchSummaryParts = [
     gap: 0.2rem;
   }
   .spec-label {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 700;
     color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
   .spec-value {
     font-size: 0.84rem;
-    color: #e2e8f0;
+    color: #e6edf6;
     font-weight: 500;
     line-height: 1.4;
   }
@@ -790,10 +831,8 @@ const researchSummaryParts = [
     color: var(--accent-cyan);
   }
   .topo-col-label {
-    font-size: 0.74rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: #ffffff;
   }
   .topo-empty {
@@ -812,11 +851,12 @@ const researchSummaryParts = [
     display: block;
     font-size: 0.82rem;
     color: var(--text-secondary);
-    padding: 0.35rem 0.55rem;
+    padding: 0.38rem 0.6rem;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 4px;
+    border-radius: 5px;
     text-decoration: none;
+    transition: border-color 0.18s var(--ease-out-expo), color 0.18s var(--ease-out-expo);
   }
   .topo-link:hover {
     border-color: var(--accent-cyan);
@@ -843,12 +883,13 @@ const researchSummaryParts = [
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    padding: 1.05rem 1.2rem;
+    padding: 1.1rem 1.25rem;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 10px;
     text-decoration: none;
-    transition: border-color 0.15s ease, transform 0.15s ease;
+    transition: border-color 0.2s var(--ease-out-expo), transform 0.2s var(--ease-out-expo);
   }
   .page-nav:hover {
     border-color: var(--accent-cyan);
@@ -862,11 +903,9 @@ const researchSummaryParts = [
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-size: 0.76rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: var(--accent-cyan);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
   .page-nav.next .page-dir {
     justify-content: flex-end;
@@ -938,8 +977,9 @@ const researchSummaryParts = [
   .sidebar-widget {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
-    border-radius: 8px;
-    padding: 1.1rem 1.15rem;
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 10px;
+    padding: 1.15rem 1.2rem;
   }
   .widget-header {
     display: flex;
@@ -952,7 +992,7 @@ const researchSummaryParts = [
   }
   .widget-title {
     font-family: var(--font-serif);
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 700;
     color: #ffffff;
     margin: 0;
@@ -970,7 +1010,7 @@ const researchSummaryParts = [
   .toc-root-list {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.3rem;
   }
   .toc-h2-row {
     display: flex;
@@ -984,16 +1024,19 @@ const researchSummaryParts = [
     min-width: 0;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #e2e8f0;
-    padding: 0.25rem 0 0.25rem 0.5rem;
+    color: #dbe4f0;
+    padding: 0.28rem 0.45rem 0.28rem 0.55rem;
     border-left: 2px solid transparent;
+    border-radius: 0 5px 5px 0;
     text-decoration: none;
     line-height: 1.38;
+    transition: background-color 0.18s var(--ease-out-expo), border-color 0.18s var(--ease-out-expo), color 0.18s var(--ease-out-expo);
   }
   .toc-h2-link:hover,
   .toc-h2-link.active {
     color: var(--accent-cyan);
     border-left-color: var(--accent-cyan);
+    background-color: rgba(86, 204, 242, 0.08);
     text-decoration: none;
   }
   .toc-toggle-btn {

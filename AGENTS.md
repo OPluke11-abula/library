@@ -44,12 +44,13 @@ library/
 │   ├── validate_library.py            # [核心守門員] 11 項知識完整性與 DAG 拓樸驗證器
 │   └── library_rag.py                 # 知識檢索輔助工具
 ├── site/                              # [網站原始碼] Astro + TypeScript 靜態網站
+│   ├── DESIGN.md                      # 視覺設計系統規範 (Midnight Archival Monograph SSOT)
 │   ├── package.json                   # 網站依賴與建置腳本
 │   ├── package-lock.json              # 鎖定依賴樹 (包含 playwright)
 │   ├── astro.config.mjs               # Astro 配置（GitHub Pages Base Path: /library）
 │   ├── src/
 │   │   ├── layouts/                   # BaseLayout 共同版面 (含 SVG Favicon)
-│   │   ├── components/                # Header, Footer, ArticleCard, Icon (SVG Line Icons)
+│   │   ├── components/                # Header, Footer, HomePage, PathsPage, CatalogPage, AboutPage, ReaderPage, ArticleCard, Icon
 │   │   ├── lib/                       # 知識庫解析器 (library.ts)、KaTeX、WikiLinks
 │   │   ├── pages/                     # Astro 靜態頁面路由 (zh/, en/, index.astro)
 │   │   └── styles/                    # 設計系統全域樣式與主題變數 (global.css)
@@ -76,17 +77,19 @@ library/
   - 數學式：由本地離線打包之 `/katex/` 樣式與字型渲染
 
 ### 3.2 色彩哲學與 WCAG AA 對比度（Color Palette & Accessibility）
+完整色彩語意變數、鏡面邊緣 (`--specular-edge`) 與版面層次契約定義於 `site/DESIGN.md`（Midnight Archival Monograph）及 `site/src/styles/global.css`：
+
 | 語意命名 | 色碼 / 描述 | 用途 |
 | :--- | :--- | :--- |
-| `bg-primary` | `#0b0f19` (極深群青藍黑) | 網站全域背景 |
-| `bg-surface` | `#121826` (深海軍藍) | 卡片、導覽列、側邊欄背景 |
-| `bg-elevated` | `#1a2234` (高階面板) | 浮動卡片、程式碼區塊、抽屜面板 |
-| `text-primary` | `#f8fafc` (白銀灰) | 主要標題、核心閱讀內文 |
-| `text-secondary` | `#94a3b8` (石板灰) | 次要敘述、詮釋資料標籤 |
-| `text-muted` | `#8a99ad` (靜謐岩灰) | 頁尾資訊、標籤徽章、時間戳記（全面通過 WCAG AA `>= 4.5:1` 對比度） |
-| `accent-gold` | `#d4af37` / `#f59e0b` (古雅典金) | 圖書館徽章、高亮強調、選中狀態 |
-| `accent-cyan` | `#38bdf8` (學術天藍) | 內部超連結、WikiLinks、數學常數 |
-| `border-subtle` | `#1e293b` (深邃幽藍) | 分隔線、卡片邊框 |
+| `bg-primary` | `#090d16` (深黑曜群青) | 網站全域背景 |
+| `bg-surface` | `#0f1624` (深海軍藍) | 卡片、導覽列、側邊欄背景 |
+| `bg-elevated` | `#172133` (高階面板) | 浮動卡片、程式碼區塊、抽屜面板 |
+| `text-primary` | `#f5f7fa` (白銀灰) | 主要標題、核心閱讀內文 |
+| `text-secondary` | `#a8b6ca` (石板灰) | 次要敘述、詮釋資料標籤 |
+| `text-muted` | `#8e9db2` (靜謐岩灰) | 頁尾資訊、標籤徽章、時間戳記（全面通過 WCAG AA `>= 4.5:1` 對比度） |
+| `accent-gold` | `#dfc068` (溫潤典籍金) | 圖書館徽章、焦點高亮、選中狀態 |
+| `accent-cyan` | `#56ccf2` (學術天藍) | 內部超連結、WikiLinks、數學常數 |
+| `border-subtle` | `#1c273b` (深邃幽藍) | 分隔線、卡片邊框（微弱鏡面邊緣 `--specular-edge`） |
 
 - **可及性對比門檻**：全站深色表面（`bg-primary`、`bg-surface`、`bg-elevated`、`bg-hover`）上之一般文字對比度必須達到 WCAG AA `>= 4.5:1`、大字或徽章達 `>= 3.0:1`，不得為追求視覺弱化而降低次要文字可讀性。
 
@@ -229,7 +232,7 @@ flowchart TD
 
 為證明依循 `AGENTS.md` 新增頁面規則可實際落地並通過完整自動化驗證，目前網站中**真正已實作、已對稱建置並通過測試**的可重複擴充頁面案例為學習路徑導覽頁：
 
-- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro` 皆透過薄路由包裝共用元件 `site/src/components/PathsPage.astro`（同樣模式亦應用於 `HomePage.astro` 與 `ReaderPage.astro`），確保雙語結構同步演進且零重複樣板。
+- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro` 皆透過薄路由包裝共用元件 `site/src/components/PathsPage.astro`（同樣模式亦完整應用於 `HomePage.astro`、`CatalogPage.astro`、`AboutPage.astro` 與 `ReaderPage.astro`），確保雙語結構同步演進且零重複樣板。
 - **模板與圖標規範**：繼承 `BaseLayout.astro` 並互設 `alternateUrl`（`/library/zh/paths/` ↔ `/library/en/paths/`），介面圖標全面採用 `Icon.astro`（零 Emoji）。
 - **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 56 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
 - **品質與回歸保障**：單一 `<h1>`、CSS Grid 採 `minmax(0, 1fr)` 與 `min-width: 0`（Desktop 1440px / Mobile 390px 零橫向溢出），並受 `npm run verify-paths`、`npm run build` 與 Playwright `npm test` 持續守門。

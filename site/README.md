@@ -18,9 +18,9 @@
 - **Mathematics**: KaTeX（編譯期靜態預渲染，零版面跳動，本機離線字型支援）
 - **Icon System**: 專屬 SVG Line Icon 元件（`src/components/Icon.astro`，UI 全面零 Emoji 規範）
 - **Markdown & Diagram Pipeline**: Marked 15.x + `cjkStrong` + Custom Heading Renderer + Build-Time Mermaid SVG Cache (`src/data/mermaid-cache/`, local bundled `mermaid` fallback with zero external CDN) + Explicit Error Fallback
-- **Shared Bilingual Architecture**: 共用元件 `HomePage.astro`、`PathsPage.astro`、`ReaderPage.astro` 搭配對稱薄路由包裝 (`src/pages/{zh,en}/*.astro`)
+- **Shared Bilingual Architecture**: 共用元件 `HomePage.astro`、`PathsPage.astro`、`CatalogPage.astro`、`AboutPage.astro`、`ReaderPage.astro` 搭配對稱薄路由包裝 (`src/pages/{zh,en}/*.astro`)
 - **Link Resolution**: Obsidian WikiLinks (`CONCISE_VOLUME_LABELS` 精簡標籤＋完整 `title`/`aria-label`) 與站內雙語路由解析
-- **Design System**: 深色學術研究風格（Dark Academic Research Library Theme），繁體中文優先雙語介面
+- **Design System**: 深色學術研究風格（Midnight Archival Monograph，`DESIGN.md` & `src/styles/global.css`），繁體中文優先雙語介面
 - **Target Deployment**: GitHub Pages (Base Path: `/library`)
 - **Testing**: Playwright 端對端瀏覽器自動化測試 + DAG 拓樸校驗（共 **53** 項靜態語料＋桌面/手機瀏覽器驗收）
 

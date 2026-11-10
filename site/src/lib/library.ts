@@ -234,6 +234,253 @@ function compileKatex(tex: string, isBlock: boolean, throwOnError: boolean): str
   return isBlock ? `<div class="katex-display-container">${rendered}</div>` : rendered;
 }
 
+function texToReadablePlain(tex: string): string {
+  return tex
+    .replace(/\\%/g, '%')
+    .replace(/\\(?:left|right)\b/g, '')
+    .replace(/\\[,;:!]/g, ' ')
+    .replace(/\\to\b|\\rightarrow\b/g, '→')
+    .replace(/\\times\b/g, '×')
+    .replace(/\\cdot\b/g, '·')
+    .replace(/\\parallel\b/g, '‖')
+    .replace(/\\mid\b/g, '|')
+    .replace(/\\subset\b/g, '⊂')
+    .replace(/\\subseteq\b/g, '⊆')
+    .replace(/\\in\b/g, '∈')
+    .replace(/\\notin\b/g, '∉')
+    .replace(/\\geq?\b/g, '≥')
+    .replace(/\\leq?\b/g, '≤')
+    .replace(/\\approx\b/g, '≈')
+    .replace(/\\sim\b/g, '~')
+    .replace(/\\ll\b/g, '≪')
+    .replace(/\\gg\b/g, '≫')
+    .replace(/\\nexists\b/g, '∄')
+    .replace(/\\exists\b/g, '∃')
+    .replace(/\\rightsquigarrow\b/g, '⇝')
+    .replace(/\\(?:l|c)?dots\b/g, '…')
+    .replace(/\\infty\b/g, '∞')
+    .replace(/\\nabla\b/g, '∇')
+    .replace(/\\top\b/g, 'ᵀ')
+    .replace(/\\eta\b/g, 'η')
+    .replace(/\\epsilon\b/g, 'ε')
+    .replace(/\\alpha\b/g, 'α')
+    .replace(/\\beta\b/g, 'β')
+    .replace(/\\theta\b/g, 'θ')
+    .replace(/\\tau\b/g, 'τ')
+    .replace(/\\lambda\b/g, 'λ')
+    .replace(/\\Delta\b/g, 'Δ')
+    .replace(/\\Omega\b/g, 'Ω')
+    .replace(/\\mu\b/g, 'μ')
+    .replace(/\\Sigma\b/g, 'Σ')
+    .replace(/\\mathcal\{G\}/g, 'G')
+    .replace(/\\mathbb\{R\}/g, 'ℝ')
+    .replace(/\\mathbb\{Z\}/g, 'ℤ')
+    .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+    .replace(/\\(?:mathbb|mathcal|mathbf|boldsymbol|mathrm|text|operatorname)\{([^}]+)\}/g, '$1')
+    .replace(/\\boldsymbol\s+/g, '')
+    .replace(/\\(ln|log|exp|sin|cos|max|min|arg)\b/g, '$1')
+    .replace(/[{}]/g, '')
+    .replace(/\\/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function stripLangBannerAndLeadingH1(rawMarkdown: string): string {
+  const withoutLangBanner = rawMarkdown.replace(
+    /^(?:\r?\n)*>\s*(?:🌐\s*)?(?:\*\*)?(?:語言(?:切換)?|Language(?:\s+Switch)?)\s*\/\s*(?:Language(?:\s+Switch)?|語言(?:切換)?)(?:\*\*)?:[^\r\n]*(?:\r?\n)+/m,
+    ''
+  );
+  return withoutLangBanner.replace(/^#\s+[^\r\n]+(?:\r?\n|$)/m, '');
+}
+
+function buildNeutralOrientation(
+  title: string,
+  hall: KnowledgeHall,
+  category: string,
+  moduleName: string,
+  lang: 'zh' | 'en'
+): string {
+  const topic = category || moduleName || (lang === 'zh' ? hall.nameZh : hall.nameEn);
+  if (lang === 'zh') {
+    return `本篇隸屬「${hall.nameZh}」（${topic}），主題為《${title}》。`;
+  }
+  return `Part of ${hall.nameEn} (${topic}), presenting ${title}.`;
+}
+
+function cleanProseCandidate(raw: string): string {
+  return raw
+    .replace(/\$\$([\s\S]*?)\$\$/g, (_m, tex) => texToReadablePlain(tex))
+    .replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (_m, tex) => texToReadablePlain(tex))
+    .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, target, label) => {
+      const text = (label || target).trim();
+      return text.replace(/\s*\(Agent EN\)\s*$/i, '').trim();
+    })
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/`\[(?:FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION|RULE-\d{3}-\d{2})\]`/g, '')
+    .replace(/\[(?:FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION|RULE-\d{3}-\d{2})\]/g, '')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/(^|\s)\*([^*\n]+)\*(?=\s|[.,;!?)]|$)/g, '$1$2')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([.,。，;；!！?？:：])/g, '$1')
+    .trim();
+}
+
+function extractStudyOrientation(
+  rawMarkdown: string,
+  frontmatter: Record<string, any>,
+  title: string,
+  hall: KnowledgeHall,
+  lang: 'zh' | 'en'
+): string {
+  const explicit = frontmatter.summary || frontmatter.abstract;
+  if (typeof explicit === 'string' && explicit.trim().length > 0) {
+    return explicit.replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  const body = stripLangBannerAndLeadingH1(rawMarkdown).replace(/\r\n?/g, '\n');
+  const lines = body.split('\n');
+  const candidates: { sectionIdx: number; text: string }[] = [];
+
+  let inCodeFence = false;
+  let inMathBlock = false;
+  let inListItem = false;
+  let inTable = false;
+  let sectionIdx = 0;
+  let buffer: string[] = [];
+
+  const flushBuffer = () => {
+    if (buffer.length > 0) {
+      candidates.push({ sectionIdx, text: buffer.join(' ') });
+      buffer = [];
+    }
+  };
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+
+    if (/^```/.test(trimmed)) {
+      flushBuffer();
+      inCodeFence = !inCodeFence;
+      inListItem = false;
+      inTable = false;
+      continue;
+    }
+    if (inCodeFence) continue;
+
+    if (/^\$\$/.test(trimmed)) {
+      flushBuffer();
+      // Check single-line $$ ... $$ vs multi-line block
+      if (trimmed === '$$' || !/\$\$$/.test(trimmed.slice(2))) {
+        inMathBlock = !inMathBlock;
+      }
+      inListItem = false;
+      inTable = false;
+      continue;
+    }
+    if (inMathBlock) continue;
+
+    if (!trimmed) {
+      flushBuffer();
+      inListItem = false;
+      inTable = false;
+      continue;
+    }
+
+    if (/^#/.test(trimmed)) {
+      flushBuffer();
+      if (/^##\s+/.test(trimmed)) sectionIdx += 1;
+      inListItem = false;
+      inTable = false;
+      continue;
+    }
+
+    if (
+      /^[-*_]{3,}$/.test(trimmed) ||
+      /^>/.test(trimmed) ||
+      /^</.test(trimmed) ||
+      /[┌┐└┘│─┬┴├┤▼▲►◄═║╔╗╚╝]/.test(trimmed)
+    ) {
+      flushBuffer();
+      inListItem = false;
+      inTable = false;
+      continue;
+    }
+
+    if (/^\|/.test(trimmed) || (inTable && /\|/.test(trimmed))) {
+      flushBuffer();
+      inTable = true;
+      inListItem = false;
+      continue;
+    }
+    inTable = false;
+
+    if (/^\s*(?:[-*+]|\d+[.)])\s+/.test(rawLine)) {
+      flushBuffer();
+      inListItem = true;
+      continue;
+    }
+
+    // Continuation lines of indented list items or bibliography entries
+    if (inListItem && /^\s{2,}\S/.test(rawLine)) {
+      flushBuffer();
+      continue;
+    }
+    inListItem = false;
+
+    // Metadata key-value lines (e.g., "**English title:** ...", "Document role: ...") or standalone bold headings
+    if (
+      /^\*\*[^*]+[:：]\*\*/.test(trimmed) ||
+      /^[A-Za-z][A-Za-z0-9 _-]{1,28}:\s/.test(trimmed) ||
+      /^\*\*[^*]+\*\*[。.!?]?$/.test(trimmed)
+    ) {
+      flushBuffer();
+      continue;
+    }
+
+    buffer.push(trimmed);
+  }
+  flushBuffer();
+
+  // Prefer substantive prose from the opening sections (Sections 0..3) before falling back
+  const danglingFormulaStarter = /^(?:where\b|which\b|whereby\b|herein\b|here\b|thus\b|therefore\b|hence\b|since\b|this\s+restores\b|其中\s|即[:：]|此處|上式|代入)/i;
+  for (const cand of candidates) {
+    if (cand.sectionIdx > 2) break;
+    const cleaned = cleanProseCandidate(cand.text);
+    const hasCjk = /[\u4e00-\u9fff]/.test(cleaned);
+    const minLen = hasCjk ? 24 : 50;
+    if (cleaned.length < minLen) continue;
+    if (danglingFormulaStarter.test(cleaned)) continue;
+    if (/[\$\\{}]|┌|└|│|---|\|\s*---/.test(cleaned)) continue;
+    // Handle colon-terminated paragraphs introducing lists/equations: keep earlier complete sentence(s) if present, else skip
+    let candidateText = cleaned;
+    if (/[:：]$/.test(candidateText)) {
+      const sentenceEndIdx = Math.max(candidateText.lastIndexOf('。'), candidateText.lastIndexOf('. '));
+      if (sentenceEndIdx >= (hasCjk ? 24 : 50)) {
+        candidateText = candidateText.slice(0, sentenceEndIdx + 1).trim();
+      } else {
+        continue;
+      }
+    }
+    if (candidateText.length > 180) {
+      const cut = candidateText.slice(0, 177);
+      const lastBreak = Math.max(cut.lastIndexOf('。'), cut.lastIndexOf('. '), cut.lastIndexOf('，'), cut.lastIndexOf(', '), cut.lastIndexOf(' '));
+      const cleanCut = lastBreak > 90 ? cut.slice(0, lastBreak).trimEnd() : cut.trimEnd();
+      return `${cleanCut.replace(/[,，、;；:：]+$/, '')}...`;
+    }
+    return candidateText;
+  }
+
+  return buildNeutralOrientation(
+    title,
+    hall,
+    String(frontmatter.category || ''),
+    String(frontmatter.module || ''),
+    lang
+  );
+}
+
 export function renderArticleMarkdown(
   rawMarkdown: string,
   lang: 'zh' | 'en',
@@ -250,10 +497,9 @@ export function renderArticleMarkdown(
     return `%%%CODEBLOCK_${idx}%%%`;
   }
 
-  // Protect fenced code blocks (```...```)
-  // Strip leading document title H1 (# Title) to guarantee exactly one H1 per page,
-  // matching the reader header H1 and preventing duplicated title rendering.
-  const contentWithoutLeadingH1 = rawMarkdown.replace(/^#\s+[^\r\n]+(?:\r?\n|$)/m, '');
+  // Strip duplicate inline language-switcher blockquote and leading H1 to preserve
+  // canonical navigation/header H1 and prevent duplicate H1s or wrong body language links.
+  const contentWithoutLeadingH1 = stripLangBannerAndLeadingH1(rawMarkdown);
   let processed = contentWithoutLeadingH1.replace(/```[\s\S]*?```/g, saveCode);
   // Protect inline code blocks (`...`)
   processed = processed.replace(/`[^`\n]+`/g, saveCode);
@@ -262,25 +508,6 @@ export function renderArticleMarkdown(
   // Use alphanumeric token identifiers without underscores to prevent markdown emphasis interference
   const mathTokens: string[] = [];
   const rawMathSources: string[] = [];
-  function texToReadablePlain(tex: string): string {
-    return tex
-      .replace(/\\to\b/g, '→')
-      .replace(/\\times\b/g, '×')
-      .replace(/\\nabla\b/g, '∇')
-      .replace(/\\eta\b/g, 'η')
-      .replace(/\\epsilon\b/g, 'ε')
-      .replace(/\\alpha\b/g, 'α')
-      .replace(/\\beta\b/g, 'β')
-      .replace(/\\theta\b/g, 'θ')
-      .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
-      .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
-      .replace(/\\(?:mathbb|mathcal|mathbf|mathrm|text|operatorname)\{([^}]+)\}/g, '$1')
-      .replace(/\\(ln|log|exp|sin|cos)\b/g, '$1')
-      .replace(/[{}]/g, '')
-      .replace(/\\/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
 
   function saveMath(math: string, isBlock: boolean): string {
     const idx = mathTokens.length;
@@ -371,10 +598,13 @@ export function renderArticleMarkdown(
     return `![${alt}](${base}/assets/${filename})`;
   });
 
-  // Transform standard Markdown links to notes
+  // Transform standard Markdown links to notes, preserving target language
   processed = processed.replace(/\[([^\]]+)\]\(([^)]*LIB-(\d{3})[^)]*\.md)\)/gi, (match, text, url, num) => {
     const slug = `lib-${num.toLowerCase()}`;
-    return `[${text}](${base}/${lang}/notes/${slug}/)`;
+    const pointsToEn = /(?:^|\/)en\//i.test(url) || /(?:%28|\()Agent(?:%20|\s)+EN(?:%29|\))/i.test(url);
+    const pointsToZh = /(?:^|\/)(?:\.\.\/)*0\d_[^/]*\//i.test(url) && !pointsToEn;
+    const targetLang = pointsToEn ? 'en' : (pointsToZh ? 'zh' : lang);
+    return `[${text}](${base}/${targetLang}/notes/${slug}/)`;
   });
 
   // Stage 5: Transform Evidence Tags & Rules
@@ -518,24 +748,14 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
           return m ? m[0].toLowerCase() : '';
         }).filter(Boolean);
 
-        // Derive executive brief from raw Markdown intro
-        const cleanIntro = rawMarkdown
-          .split('\n')
-          .filter(l => !l.startsWith('#') && !l.startsWith('>') && !l.startsWith('---') && !l.startsWith('- **') && l.trim().length > 10)
-          .slice(0, 2)
-          .join(' ')
-          .replace(/`([^`]+)`/g, '$1')
-          .replace(/\*\*([^*]+)\*\*/g, '$1')
-          .replace(/\$([^\$]+)\$/g, '$1')
-          .slice(0, 160) + '...';
-
-        const excerpt = frontmatter.summary || frontmatter.abstract || cleanIntro;
+        const title = frontmatter.title || file.replace(/\.md$/, '');
+        const excerpt = extractStudyOrientation(rawMarkdown, frontmatter, title, hall, 'zh');
 
         zhMap.set(slug, {
           callNumber,
           slug,
           lang: 'zh',
-          title: frontmatter.title || file.replace(/\.md$/, ''),
+          title,
           status: frontmatter.status || 'source-verified',
           invariantsCount: frontmatter.invariants_count || rules.length,
           module: frontmatter.module || hall.nameZh,
@@ -590,23 +810,14 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
           return m ? m[0].toLowerCase() : '';
         }).filter(Boolean);
 
-        const cleanIntro = rawMarkdown
-          .split('\n')
-          .filter(l => !l.startsWith('#') && !l.startsWith('>') && !l.startsWith('---') && !l.startsWith('- **') && l.trim().length > 10)
-          .slice(0, 2)
-          .join(' ')
-          .replace(/`([^`]+)`/g, '$1')
-          .replace(/\*\*([^*]+)\*\*/g, '$1')
-          .replace(/\$([^\$]+)\$/g, '$1')
-          .slice(0, 160) + '...';
-
-        const excerpt = frontmatter.summary || frontmatter.abstract || cleanIntro;
+        const title = frontmatter.title || file.replace(/\.md$/, '');
+        const excerpt = extractStudyOrientation(rawMarkdown, frontmatter, title, hall, 'en');
 
         enMap.set(slug, {
           callNumber,
           slug,
           lang: 'en',
-          title: frontmatter.title || file.replace(/\.md$/, ''),
+          title,
           status: frontmatter.status || 'source-verified',
           invariantsCount: frontmatter.invariants_count || rules.length,
           module: frontmatter.module || hall.nameEn,

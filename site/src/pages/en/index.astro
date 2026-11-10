@@ -126,10 +126,10 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
         <div class="showcase-card">
           <div class="showcase-hall">HALL 05 • SPATIAL SENSING</div>
           <h3 class="showcase-title">
-            <a href={`${base}/en/notes/lib-504/`}>LIB-504 Spatial Transformer Networks (STN)</a>
+            <a href={`${base}/en/notes/lib-504/`}>LIB-504 3D Gaussian Splatting Theory & Rasterization</a>
           </h3>
           <p class="showcase-rationale">
-            <strong>Why Read:</strong> Differentiable geometric affine warping, bilinear sampling bounds, and backward gradient flow for coordinate grids in vision pipelines.
+            <strong>Why Read:</strong> From continuous volume rendering integrals to differentiable 3D Gaussian ellipsoid projections, mastering real-time neural rendering and GPU tile-based rasterization.
           </p>
           <a href={`${base}/en/notes/lib-504/`} class="showcase-link">
             <span>Read Volume</span>
@@ -255,7 +255,7 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
   }
   .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
     margin-bottom: 2.5rem;
     padding: 1.25rem;
@@ -265,10 +265,11 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
   }
   @media (min-width: 640px) {
     .metrics-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
   .metric-card {
+    min-width: 0;
     text-align: center;
     padding: 0.5rem 0.25rem;
   }
@@ -373,10 +374,11 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
   }
   @media (min-width: 768px) {
     .showcase-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   .showcase-card {
+    min-width: 0;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -442,20 +444,21 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
   }
   .halls-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
   }
   @media (min-width: 640px) {
     .halls-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (min-width: 1024px) {
     .halls-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .hall-card {
+    min-width: 0;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -532,18 +535,18 @@ const featuredArticles = featuredSlugs.map(slug => en.get(slug)).filter(Boolean)
   }
   .articles-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     margin-bottom: 2.5rem;
   }
   @media (min-width: 768px) {
     .articles-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (min-width: 1024px) {
     .articles-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .featured-all-cta {

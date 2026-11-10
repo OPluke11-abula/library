@@ -126,10 +126,10 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
         <div class="showcase-card">
           <div class="showcase-hall">HALL 05 • 空間感知</div>
           <h3 class="showcase-title">
-            <a href={`${base}/zh/notes/lib-504/`}>LIB-504 空間變換網絡 (STN) 幾何映射</a>
+            <a href={`${base}/zh/notes/lib-504/`}>LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS)</a>
           </h3>
           <p class="showcase-rationale">
-            <strong>推薦理由：</strong>電腦視覺在仿射變換下的可微分採樣理論，兼顧雙線性插值與網格生成器反向傳播梯度計算。
+            <strong>推薦理由：</strong>從連續體積渲染積分到可微分 3D 高斯橢球投影，掌握真實即時神經渲染與 GPU Tile-based 光柵化架構。
           </p>
           <a href={`${base}/zh/notes/lib-504/`} class="showcase-link">
             <span>開始研讀</span>
@@ -255,7 +255,7 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   }
   .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
     margin-bottom: 2.5rem;
     padding: 1.25rem;
@@ -265,10 +265,11 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   }
   @media (min-width: 640px) {
     .metrics-grid {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
   .metric-card {
+    min-width: 0;
     text-align: center;
     padding: 0.5rem 0.25rem;
   }
@@ -373,10 +374,11 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   }
   @media (min-width: 768px) {
     .showcase-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   .showcase-card {
+    min-width: 0;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -442,20 +444,21 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   }
   .halls-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
   }
   @media (min-width: 640px) {
     .halls-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (min-width: 1024px) {
     .halls-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .hall-card {
+    min-width: 0;
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
@@ -532,18 +535,18 @@ const featuredArticles = featuredSlugs.map(slug => zh.get(slug)).filter(Boolean)
   }
   .articles-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     margin-bottom: 2.5rem;
   }
   @media (min-width: 768px) {
     .articles-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (min-width: 1024px) {
     .articles-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   .featured-all-cta {

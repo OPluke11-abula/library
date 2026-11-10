@@ -31,9 +31,6 @@ const nextArticle = currIdx >= 0 && currIdx < topoArticles.length - 1 ? topoArti
 
 const alternateUrl = `${base}/en/notes/${article.slug}/`;
 
-// Rough reading time estimate (approx 300 words per minute for technical prose)
-const wordCount = (article.rawMarkdown || '').length;
-const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
 ---
 
 <BaseLayout title={`${article.callNumber} ${article.title}`} lang="zh" alternateUrl={alternateUrl}>
@@ -54,65 +51,31 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
         <div class="header-main-meta">
           <div class="meta-badges">
             <span class="callno-badge">{article.callNumber}</span>
-            <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
-              {article.status}
-            </span>
             <span class="hall-badge-head">
               <Icon name={article.hall.iconName} size={14} />
               <span>{article.hall.code} {article.hall.nameZh}</span>
-            </span>
-            <span class="invariants-badge">
-              <Icon name="shield-check" size={14} />
-              <span>{article.invariantsCount} 條形式化合約</span>
             </span>
           </div>
 
           <h1 class="reader-title">{article.title}</h1>
 
           <!-- Executive Reading Guide (Context Brief) -->
-          <div class="executive-brief">
-            <div class="brief-grid">
-              <div class="brief-item">
-                <span class="brief-label">預估閱讀時間</span>
-                <span class="brief-value">
-                  <Icon name="clock" size={13} />
-                  <span>約 {readMinutes} 分鐘 ({wordCount} 字)</span>
-                </span>
-              </div>
-              <div class="brief-item">
-                <span class="brief-label">目標讀者 (Audience)</span>
-                <span class="brief-value">{article.audience.join(', ') || '資工系學生 / AI 代理人'}</span>
-              </div>
-              {article.mathFoundations.length > 0 && (
-                <div class="brief-item">
-                  <span class="brief-label">數學基石</span>
-                  <span class="brief-value">{article.mathFoundations.join(', ')}</span>
-                </div>
-              )}
-              {article.hardwareTarget.length > 0 && (
-                <div class="brief-item">
-                  <span class="brief-label">硬體對齊</span>
-                  <span class="brief-value">{article.hardwareTarget.join(', ')}</span>
-                </div>
+          <div class="reader-executive-guide">
+            <p class="reader-guide-lead">
+              <strong>研讀導引：</strong> {article.excerpt}
+            </p>
+            <div class="reader-guide-actions">
+              <a href="#article-content" class="btn-start-reading">
+                <Icon name="book-open" size={15} />
+                <span>開始閱讀</span>
+              </a>
+              {alternateUrl && (
+                <a href={alternateUrl} class="btn-mirror-link">
+                  <Icon name="globe" size={14} />
+                  <span>切換英文版 (English)</span>
+                </a>
               )}
             </div>
-            <div class="brief-meta-author">
-              <span>典籍作者：{article.author}</span>
-              <span class="meta-dot">•</span>
-              <span>撰寫維護日：{article.created}</span>
-            </div>
-          </div>
-
-          <!-- Bilingual Toggle Switcher Banner -->
-          <div class="bilingual-switch-bar">
-            <div class="bilingual-left">
-              <Icon name="globe" size={15} />
-              <span class="bilingual-notice">本篇具備鏡像英文科研版 (English Research Edition)：</span>
-            </div>
-            <a href={alternateUrl} class="bilingual-btn">
-              <span>閱讀英文版 (Read in English)</span>
-              <Icon name="arrow-right" size={13} />
-            </a>
           </div>
         </div>
       </div>
@@ -132,6 +95,44 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
           </summary>
 
           <div class="drawer-content">
+            <!-- Metadata & Technical Specification Dossier -->
+            <div class="specs-dossier">
+              <div class="specs-grid">
+                <div class="spec-item">
+                  <span class="spec-label">典籍狀態 (Status)</span>
+                  <div class="spec-value">
+                    <span class={`badge-status status-${article.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                      {article.status}
+                    </span>
+                  </div>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">作者與維護日</span>
+                  <div class="spec-value author-date">
+                    <span>{article.author}</span>
+                    <span class="spec-dot">•</span>
+                    <span>{article.created}</span>
+                  </div>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">目標讀者 (Target Audience)</span>
+                  <div class="spec-value">{article.audience.join(', ') || '資工系學生 / AI 代理人'}</div>
+                </div>
+                {article.mathFoundations.length > 0 && (
+                  <div class="spec-item">
+                    <span class="spec-label">數學基石 (Math Foundations)</span>
+                    <div class="spec-value">{article.mathFoundations.join(', ')}</div>
+                  </div>
+                )}
+                {article.hardwareTarget.length > 0 && (
+                  <div class="spec-item">
+                    <span class="spec-label">硬體對齊 (Hardware Target)</span>
+                    <div class="spec-value">{article.hardwareTarget.join(', ')}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div class="topo-card">
               <div class="topo-nodes-grid">
                 <!-- Prerequisites -->
@@ -209,7 +210,7 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
     <div class="container reader-body-layout">
       <!-- Article Reading Column -->
       <article class="article-body">
-        <div class="rendered-markdown" set:html={article.htmlContent} />
+        <div id="article-content" class="rendered-markdown" set:html={article.htmlContent} />
 
         <!-- Sequential prev/next footer -->
         <nav class="reader-pagination" aria-label="Topological Sequence Navigation">
@@ -531,15 +532,16 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
   }
   .topo-nodes-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
   }
   @media (min-width: 768px) {
     .topo-nodes-grid {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   .topo-column {
+    min-width: 0;
     background-color: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
@@ -577,6 +579,8 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
+    max-width: 100%;
     font-size: 0.85rem;
     color: var(--text-secondary);
     text-decoration: none;
@@ -591,12 +595,15 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
     color: #ffffff;
   }
   .topo-code {
+    flex-shrink: 0;
     font-family: var(--font-mono);
     font-size: 0.75rem;
     font-weight: 700;
     color: var(--accent-cyan);
   }
   .topo-text {
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -619,15 +626,16 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
   }
   .drawer-rules-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.6rem;
   }
   @media (min-width: 640px) {
     .drawer-rules-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   .rule-contract-card {
+    min-width: 0;
     background-color: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
     border-radius: 6px;
@@ -669,6 +677,7 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
     min-width: 0;
   }
   .rendered-markdown {
+    scroll-margin-top: 84px;
     font-size: 1.05rem;
     line-height: 1.8;
     color: #cbd5e1;
@@ -818,4 +827,126 @@ const readMinutes = Math.max(3, Math.ceil(wordCount / 350));
     padding: 0.15rem 0.45rem;
     border-radius: 4px;
   }
+
+  /* Reader Executive Guide */
+  .header-main-meta {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .reader-title {
+    overflow-wrap: anywhere;
+  }
+  .reader-executive-guide {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .reader-guide-lead {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .reader-guide-lead strong {
+    color: #ffffff;
+  }
+  .reader-guide-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .btn-start-reading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.15rem;
+    background-color: var(--accent-cyan);
+    color: #0b0f19;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-start-reading:hover {
+    background-color: #7dd3fc;
+    color: #0b0f19;
+    text-decoration: none;
+  }
+  .btn-mirror-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.84rem;
+    font-weight: 500;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .btn-mirror-link:hover {
+    color: #ffffff;
+    border-color: var(--border-accent);
+    background-color: rgba(255, 255, 255, 0.03);
+    text-decoration: none;
+  }
+
+  .specs-dossier {
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .specs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  @media (min-width: 640px) {
+    .specs-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .specs-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .spec-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .spec-value {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .author-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .spec-dot {
+    color: var(--text-muted);
+  }
+
 </style>

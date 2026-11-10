@@ -107,10 +107,25 @@ async function runTests() {
     const featuredCount = await page.locator('.featured-section .article-card').count();
     assert('Home: 6 Featured articles displayed', featuredCount === 6, `Found: ${featuredCount}`);
 
+    // LIB-504 description check (ZH)
+    const zhLib504Text = await page.locator('.showcase-card:has-text("LIB-504")').textContent();
+    assert('Home ZH LIB-504: Accurately describes NeRF & 3DGS', zhLib504Text?.includes('3D 高斯潑濺') || zhLib504Text?.includes('NeRF'), zhLib504Text?.slice(0, 80));
+    assert('Home ZH LIB-504: Zero mention of STN or 空間變換網路', !zhLib504Text?.includes('STN') && !zhLib504Text?.includes('空間變換網路'));
+
+    // Zero horizontal desktop overflow on Home
+    const homeOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Home ZH: Zero desktop horizontal scroll overflow', homeOverflow);
+
     // Required Screenshot 1: homepage-zh-desktop-1440.png
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'homepage-zh-desktop-1440.png'), fullPage: true });
-    // Also save legacy screenshot name
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-01-home-zh.png'), fullPage: true });
+
+    // 2b. Home Page (EN) - LIB-504 Check
+    await page.goto('http://localhost:4321/library/en/');
+    await page.waitForLoadState('networkidle');
+    const enLib504Text = await page.locator('.showcase-card:has-text("LIB-504")').textContent();
+    assert('Home EN LIB-504: Accurately describes 3D Gaussian Splatting', enLib504Text?.includes('3D Gaussian Splatting') || enLib504Text?.includes('NeRF'), enLib504Text?.slice(0, 80));
+    assert('Home EN LIB-504: Zero mention of STN or Spatial Transformer', !enLib504Text?.includes('STN') && !enLib504Text?.includes('Spatial Transformer'));
 
     // 3. Catalog Page (ZH)
     await page.goto('http://localhost:4321/library/zh/library/');
@@ -118,6 +133,10 @@ async function runTests() {
     
     const initialArticles = await page.locator('#catalog-grid .grid-item:visible').count();
     assert('Catalog: Initial articles count is 28', initialArticles === 28, `Found: ${initialArticles}`);
+
+    // Zero horizontal desktop overflow on Catalog BEFORE filtering (verifies all 28 cards)
+    const catalogOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Catalog ZH: Zero desktop horizontal scroll overflow', catalogOverflow);
 
     // Search test: filter by keyword "質心" (matches LIB-501 & LIB-901)
     await page.fill('#catalog-search', '質心');
@@ -150,14 +169,23 @@ async function runTests() {
     const readerTitle = await page.textContent('.reader-title');
     assert('Reader: LIB-001 title rendered', readerTitle?.includes('深度學習第一性原理先修精要'));
 
+    // Single H1 Invariant
+    const h1Count = await page.locator('h1').count();
+    assert('Reader LIB-001: Exactly one H1 rendered on page', h1Count === 1, `H1 count: ${h1Count}`);
+
+    // Above-the-fold Start Reading button
+    const startReadingBtn = await page.locator('.btn-start-reading').isVisible();
+    assert('Reader LIB-001: Start Reading entry button present', startReadingBtn);
+
+    // Date format validation: YYYY-MM-DD
+    const dateText = await page.locator('.author-date span:last-child').textContent();
+    assert('Reader LIB-001: Date formatted strictly as YYYY-MM-DD', /^\d{4}-\d{2}-\d{2}$/.test(dateText?.trim() || ''), dateText);
+
     const katexCount = await page.locator('.katex').count();
     assert('Reader: KaTeX formulas rendered statically', katexCount > 0, `KaTeX elements: ${katexCount}`);
 
     const wikilinksCount = await page.locator('.wikilink-badge').count();
     assert('Reader: Obsidian WikiLinks resolved to live links', wikilinksCount > 0, `WikiLinks: ${wikilinksCount}`);
-
-    const rulesCount = await page.locator('.rule-pill').count();
-    assert('Reader: System Rule pills rendered', rulesCount > 0, `Rule pills: ${rulesCount}`);
 
     const prereqNodes = await page.locator('.topo-nodes-grid .topo-column:first-child .topo-link').count();
     assert('Reader: Prerequisites DAG nodes linked', prereqNodes === 1, `Prereqs: ${prereqNodes}`);
@@ -168,15 +196,41 @@ async function runTests() {
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-03-reader-zh.png') });
 
     // 5. Bilingual Switch: click switch to English
-    await page.click('.bilingual-btn');
+    await page.click('.btn-mirror-link');
     await page.waitForLoadState('networkidle');
     assert('Reader bilingual switch: URL changed to /en/notes/lib-001/', page.url().includes('/en/notes/lib-001/'), page.url());
 
     const enReaderTitle = await page.textContent('.reader-title');
     assert('Reader EN: English title rendered', enReaderTitle?.includes('Deep Learning First Principles'));
+    const enH1Count = await page.locator('h1').count();
+    assert('Reader EN LIB-001: Exactly one H1 rendered', enH1Count === 1, `H1 count: ${enH1Count}`);
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-04-reader-en.png') });
 
-    // 6. Learning Paths (ZH)
+    // 6. KaTeX & Math Invariants: Verify previously failing formulas
+    // Check ZH LIB-506 (had unescaped underscore in \text{[SAFETY_BOUND]})
+    await page.goto('http://localhost:4321/library/zh/notes/lib-506/');
+    await page.waitForLoadState('networkidle');
+    const zh506KatexErrors = await page.locator('.katex-error').count();
+    assert('Reader LIB-506 (ZH): Zero KaTeX formula rendering errors', zh506KatexErrors === 0, `Errors: ${zh506KatexErrors}`);
+
+    // Check EN LIB-506
+    await page.goto('http://localhost:4321/library/en/notes/lib-506/');
+    await page.waitForLoadState('networkidle');
+    const en506KatexErrors = await page.locator('.katex-error').count();
+    assert('Reader LIB-506 (EN): Zero KaTeX formula rendering errors', en506KatexErrors === 0, `Errors: ${en506KatexErrors}`);
+
+    // Check ZH LIB-802 (had unclosed subscript brace)
+    await page.goto('http://localhost:4321/library/zh/notes/lib-802/');
+    await page.waitForLoadState('networkidle');
+    const zh802KatexErrors = await page.locator('.katex-error').count();
+    assert('Reader LIB-802 (ZH): Zero KaTeX formula rendering errors', zh802KatexErrors === 0, `Errors: ${zh802KatexErrors}`);
+
+    // Check HTML Entity Double Escaping Invariant
+    const rawDom = await page.content();
+    assert('Reader LIB-802: Zero double-escaped &amp;amp; entities', !rawDom.includes('&amp;amp;'));
+    assert('Reader LIB-802: Zero double-escaped &amp;#39; entities', !rawDom.includes('&amp;#39;'));
+
+    // 7. Learning Paths (ZH)
     await page.goto('http://localhost:4321/library/zh/paths/');
     await page.waitForLoadState('networkidle');
 
@@ -186,32 +240,33 @@ async function runTests() {
     const stepsCount = await page.locator('.timeline-step').count();
     assert('Learning Paths: 23 Authentic DAG steps rendered', stepsCount === 23, `Steps: ${stepsCount}`);
 
-    const edgePillsCount = await page.locator('.direct-edge-pill').count();
-    assert('Learning Paths: 20 Direct DAG edge badges displayed', edgePillsCount === 20, `Edge badges: ${edgePillsCount}`);
+    const redundantPills = await page.locator('.direct-edge-pill').count();
+    assert('Learning Paths: Zero redundant noisy direct-edge pills', redundantPills === 0, `Pills: ${redundantPills}`);
 
-    const roadmapLocator = page.locator('.roadmap-img-wrapper img');
-    await roadmapLocator.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
-    const roadmapImg = await roadmapLocator.isVisible();
-    assert('Learning Paths: Global Roadmap SVG displayed', roadmapImg);
+    const accordionOpen = await page.locator('details.roadmap-accordion').getAttribute('open');
+    assert('Learning Paths: SVG Panorama accordion collapsed by default', accordionOpen === null);
+
+    // Zero horizontal desktop overflow on Paths
+    const pathsOverflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Learning Paths ZH: Zero desktop horizontal scroll overflow', pathsOverflow);
 
     // Required Screenshot 3: paths-zh-desktop-1440.png
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'paths-zh-desktop-1440.png'), fullPage: true });
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-05-paths-zh.png') });
 
-    // 6b. Learning Paths (EN)
+    // 7b. Learning Paths (EN)
     await page.goto('http://localhost:4321/library/en/paths/');
     await page.waitForLoadState('networkidle');
 
     const enStepsCount = await page.locator('.timeline-step').count();
     assert('Learning Paths EN: 23 steps rendered symmetrically', enStepsCount === 23, `Steps EN: ${enStepsCount}`);
 
-    const enEdgePillsCount = await page.locator('.direct-edge-pill').count();
-    assert('Learning Paths EN: 20 Direct edge badges displayed', enEdgePillsCount === 20, `Edge badges EN: ${enEdgePillsCount}`);
+    const enRedundantPills = await page.locator('.direct-edge-pill').count();
+    assert('Learning Paths EN: Zero redundant noisy direct-edge pills', enRedundantPills === 0, `Pills: ${enRedundantPills}`);
 
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'desktop-05-paths-en.png') });
 
-    // 7. Reader Page (ZH: LIB-405) - Verification & Screenshot
+    // 8. Reader Page (ZH: LIB-405) - Verification & Screenshot
     await page.goto('http://localhost:4321/library/zh/notes/lib-405/');
     await page.waitForLoadState('networkidle');
     const lib405Title = await page.textContent('.reader-title');
@@ -225,7 +280,7 @@ async function runTests() {
     // Required Screenshot 5: reader-lib405-zh-desktop-1440.png
     await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'reader-lib405-zh-desktop-1440.png'), fullPage: true });
 
-    // 8. About Page (ZH)
+    // 9. About Page (ZH)
     await page.goto('http://localhost:4321/library/zh/about/');
     await page.waitForLoadState('networkidle');
 
@@ -246,11 +301,16 @@ async function runTests() {
     const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
     const mPage = await mobileContext.newPage();
 
-    // Mobile Home (ZH)
+    // Mobile Home & Catalog (ZH)
+    await mPage.goto('http://localhost:4321/library/zh/library/');
+    await mPage.waitForLoadState('networkidle');
+    const mCatalogOverflow = await mPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+
     await mPage.goto('http://localhost:4321/library/zh/');
     await mPage.waitForLoadState('networkidle');
     const mHeroVisible = await mPage.locator('.hero-title').isVisible();
-    assert('Mobile Home: Hero title visible on mobile', mHeroVisible);
+    const mHomeOverflow = await mPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Mobile Home & Catalog: Hero visible and zero horizontal overflow', mHeroVisible && mHomeOverflow && mCatalogOverflow, `homeOk=${mHomeOverflow}, catalogOk=${mCatalogOverflow}`);
 
     // Required Screenshot 2: homepage-zh-mobile-390.png
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'homepage-zh-mobile-390.png'), fullPage: true });
@@ -271,7 +331,8 @@ async function runTests() {
     await mPage.goto('http://localhost:4321/library/zh/paths/');
     await mPage.waitForLoadState('networkidle');
     const mPathsVisible = await mPage.locator('.path-title').first().isVisible();
-    assert('Mobile Paths: Path cards rendered cleanly on mobile', mPathsVisible);
+    const mPathsOverflow = await mPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Mobile Paths: Path cards rendered cleanly with zero overflow', mPathsVisible && mPathsOverflow);
 
     // Required Screenshot 4: paths-zh-mobile-390.png
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'paths-zh-mobile-390.png'), fullPage: true });
@@ -280,7 +341,8 @@ async function runTests() {
     await mPage.goto('http://localhost:4321/library/zh/notes/lib-405/');
     await mPage.waitForLoadState('networkidle');
     const mKatexVisible = await mPage.locator('.katex').first().isVisible();
-    assert('Mobile Reader: KaTeX math rendered correctly on mobile', mKatexVisible);
+    const mReaderOverflow = await mPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
+    assert('Mobile Reader: KaTeX math rendered cleanly with zero overflow', mKatexVisible && mReaderOverflow);
 
     // Required Screenshot 6: reader-lib405-zh-mobile-390.png
     await mPage.screenshot({ path: path.join(SCREENSHOTS_DIR, 'reader-lib405-zh-mobile-390.png'), fullPage: true });

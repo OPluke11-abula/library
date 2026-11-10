@@ -95,18 +95,22 @@ library/
 - 嚴禁依賴任何未被打包的外部圖標套件或網路 CDN 字型。
 
 ### 3.4 讀者第一閱讀版面 (Reader-First Editorial Layout)
-- **第一屏內文聚焦**：文章閱讀頁以內文閱讀為第一優先，第一屏禁止大篇幅引用、標籤與元資料淹沒讀者。
-- **導讀摘要 (Executive Context Brief)**：文章頂部提供簡明導讀卡（預估閱讀時間、目標讀者、數學基石、硬體對齊），幫助讀者迅速建立研讀心智模型。
-- **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的拓樸座標、前後依賴（Prerequisites / Successors）與形式化系統合約，以 `<details class="metadata-drawer">` 優雅收合，讀者按需展開，不干擾正文閱讀流暢度。
+- **第一屏研讀導引與閱讀入口 (Study Orientation & Action)**：文章頂部優先呈現篇名、核心研讀導引（Study Orientation / Context Brief）以及顯眼的「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。移除不精確、誤導性的技術文章「預估閱讀時間」。
+- **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（狀態、作者、嚴格 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴（Prerequisites / Successors），統一收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
+- **單一 H1 語意純淨性 (Strict Single H1 Invariant)**：Reader 頁面嚴格維持僅有一個主要的 `<h1>`（即版面 Header 的篇名）；原始 Markdown 中的文件大標題 `# 標題` 由渲染管線自語意層消除，避免重複顯示或污染 TOC，其餘內文層級（H2、H3 等）則 100% 完整保留。
 - **舒適閱讀欄寬與行高**：正文閱讀欄寬嚴格控制於 68–76 字元（`max-width: 760px`），行高 1.8，字級 1.05rem。
 - **右側常駐目錄 (Sticky TOC)**：桌面端右側懸浮章節目錄，平滑捲動跳轉。
-- **滾動防禦機制**：程式碼區塊（`<pre>`）、表格（`<table>`）與 KaTeX 獨立顯示公式（`.katex-display-container`）均具備 `overflow-x: auto` 橫向滾動保護，禁止在手機端發生橫向撐破版面。
+- **滾動防禦與零橫向溢出 (Zero Horizontal Scroll Overflow)**：程式碼區塊（`<pre>`）、表格（`<table>`）與 KaTeX 獨立顯示公式（`.katex-display-container`）均具備 `overflow-x: auto` 橫向滾動保護；全站桌面端（1440px）與手機端（390px）嚴格保證 `scrollWidth <= clientWidth`，Grid 容器必須搭配 `minmax(0, 1fr)` 與 `min-width: 0` 防止非預期撐破版面。
 
 ### 3.5 杜絕 AI 模板感與浮誇裝飾 (Anti-Decorative Bloat)
 - 移除廉價 KPI 儀表板卡片、浮誇漸層或無實質價值的光暈動畫。
 - 分館卡片、導讀卡片以讀者導向簡介與編號為主，避免千篇一律的模板色塊。
 
-### 3.6 Content Density & Interface Clarity（內容密度與介面清晰度）
+### 3.6 典籍簡介真實性與事實查核 (Content Fidelity & Fact-Checking)
+- **內容忠實性**：首頁精選、分館目錄與各處展示卡片之文章代號、篇名與推薦理由，必須 100% 忠實對齊原始 Markdown 內容與 Frontmatter。
+- **典型負面禁忌**：嚴禁憑空發明或張冠李戴。例如 `LIB-504` 之核心研究為「3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與可微分光柵化」，嚴禁誤植為「空間變換網路 (Spatial Transformer Networks, STN)」。
+
+### 3.7 Content Density & Interface Clarity（內容密度與介面清晰度）
 
 **Primary Principle**
 
@@ -160,8 +164,12 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - 嚴禁在 `site/` 內部重複建立或複製 `LIB-###.md`。
 3. **Markdown / LaTeX 編譯品質守則**：
    - **零星號洩漏 (Zero Leaked Asterisks)**：CommonMark 對 CJK 標點（如 `是**「...」**`）有左側界定限制。`src/lib/library.ts` 透過自研 `cjkStrong` 內聯語彙分析器擴充 Marked，確保中文粗體 100% 正確解析為 `<strong>`，內文嚴禁殘留裸露星號 `**`。
+   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 頁面僅保留 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，避免重複顯示或雙重標記；同時 Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，保障全站 56 篇雙語典籍之 H1 唯一性。
+   - **零雙重跳脫與實體外洩防護 (Zero Double Escaping)**：Marked 內建之 `parseInline` 會將 `&` 轉化為 `&amp;`、`'` 轉化為 `&#39;`。在生成目錄（TOC）與標題錨點 ID 前，必須精確還原為乾淨純文字（`plainText`），再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 等實體編碼洩漏在網頁可見文字中。
+   - **KaTeX 嚴格原樣優先與容錯修復 (Verbatim-First & Robust KaTeX Invariant)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時啟動安全回退修復：
+     1. 自動轉義 `\text{...}` 內部未跳脫之底線（例如 `LIB-506` 的 `\text{[SAFETY_BOUND]}` 修正為 `\text{[SAFETY\_BOUND]}`）。
+     2. 在偵測到未閉合大括號（`{` 多於 `}`）時，修復非標準下標括號閉合（例如 `LIB-802` 的 `_{j, :]^2]` 修正為 `_{j, :}^2]`）。全站 56 篇典籍達到 **0 個 `katex-error`**。
    - **標題語意完整性**：嚴禁在 Markdown 解析前使用正規表示式字串粗暴替換 `<h2/h3>`，此舉會引發 CommonMark 區塊層級判定失效。標題生成與錨點計算必須透過 Marked Custom Heading Renderer 完成。
-   - **LaTeX 數學隔離與預渲染**：行內 `$ ... $` 與獨立塊 `$$ ... $$` 透過 KaTeX 靜態編譯，預先替換為防 Markdown 碰撞的純英數字 Token，渲染完成後精確還原，杜絕底線 `_` 誤觸 Markdown 斜體之問題。
    - **Obsidian WikiLinks**：支援雙括號語法（例如 `\[\[LIB-### ...\]\]` 與 `\[\[LIB-### ...|自訂標題\]\]`），自動轉換為站內對應頁面超連結（`.wikilink-badge`）。
 
 ---
@@ -186,8 +194,10 @@ The interface should be concise without becoming ambiguous. Removing words is no
      - **路線 1 (Deep Learning)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-602` (5 邊)
      - **路線 2 (Computer Vision)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-401` ➔ `LIB-501` ➔ `LIB-502` ➔ `LIB-504` ➔ `LIB-505` ➔ `LIB-506` (9 邊)
      - **路線 3 (AI Agents)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-703` ➔ `LIB-704` (6 邊)
-3. **全景地圖次要收合 (Collapsible Panorama Section)**：
-   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），避免干擾讀者的學習焦點。
+3. **去除節點重複贅標 (Clean Learning Path Cards)**：
+   - 移除每個節點卡片上重複出現的「直接拓樸邊 (Direct Edge) ... Verified Invariant」重複性徽章，改由頂部路徑長度標章與節點內部的「為何進入下一步 (Why Next Step)」自然展現因果關係，貫徹 Content Density & Interface Clarity 原則。
+4. **全景地圖次要收合 (Collapsible Panorama Section)**：
+   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊（不加 open 屬性）**，確保讀者進站時優先聚焦於教學步驟卡。
 
 ---
 
@@ -204,13 +214,59 @@ flowchart TD
 ```
 
 ### 步驟說明：
-1. **閱讀規範**：重新檢驗本文件與設計系統規定，嚴格禁止 UI Emoji。
+1. **閱讀規範**：重新檢驗本文件與設計系統規定，嚴格禁止 UI Emoji，遵循讀者第一版面與內容密度原則。
 2. **確認資料來源與拓樸真實性**：確認新頁面所需資料來自現有 Markdown Frontmatter 或真實系統統計。若涉學習路徑，必經 `verifyLearningPathsStrictly()` 守門。
 3. **選用共用模板與無 Emoji 組件**：使用 `src/layouts/BaseLayout.astro` 與 `src/components/Icon.astro`。
-4. **實作頁面與路由**：在 `site/src/pages/zh/` 與 `site/src/pages/en/` 建立對稱的 `.astro` 頁面。
+4. **實作頁面與路由**：在 `site/src/pages/zh/` 與 `site/src/pages/en/` 建立對稱的 `.astro` 頁面，保持路由對稱。
 5. **更新導覽**：於 `Header.astro` 與 `Footer.astro` 加入新頁面連結，保持中英文選單一致。
-6. **執行完整驗證**：在 `site/` 執行 TypeCheck、Path Edge 驗證與 Build，並執行 Playwright 測試與截圖。
+6. **執行完整驗證**：在 `site/` 依序執行 `npm run verify-paths`、`npm run build`（含 Astro 編譯檢查）與 `npm test`（Playwright 瀏覽器實測與視覺截圖）。
 7. **停止於乾淨本地完成**：回報真實證據（Log 與截圖），等待使用者 Git Delivery 授權。
+
+### 7.1 AI 新增頁面具體示範 (AI Page Extension Demonstration)
+
+為證明自主 AI 代理人能嚴格重複遵守本規範擴充網站，以「建立雙語專題進階導讀頁面」為例，AI 必須嚴格執行以下最小完整範例：
+
+```astro
+---
+// site/src/pages/zh/example.astro (對應 en/example.astro 鏡像對稱)
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { loadLibraryArticles } from '../../lib/library';
+
+const { zh } = loadLibraryArticles();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const alternateUrl = `${base}/en/example/`;
+---
+
+<BaseLayout title="專題導讀示範 (Project Guide Demo)" lang="zh" alternateUrl={alternateUrl}>
+  <div class="container py-8">
+    <header class="page-header">
+      <!-- 規範遵循：使用統一 SVG Line Icon，嚴格禁止 Emoji -->
+      <div class="header-badge">
+        <Icon name="academic" size={16} />
+        <span>研究指引 (Research Guide)</span>
+      </div>
+      <h1 class="page-title">資訊工程專題研究方法論</h1>
+      <p class="page-subtitle">遵循 AGENTS.md 規範之 AI 頁面擴充示範。</p>
+    </header>
+
+    <!-- 規範遵循：CSS Grid 必須搭配 minmax(0, 1fr) 風格軌道與 min-width: 0 防止橫向撐破版面 -->
+    <div class="content-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem;">
+      <div class="card" style="min-width: 0; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 8px;">
+        <h3>第一性原理實踐</h3>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">所有數學推導與硬體對齊合約均來自原始知識庫真理來源。</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+```
+
+**AI 遵守檢核表 (Agent Compliance Checklist)**：
+- [x] **SSOT 唯一真理**：內容自 `loadLibraryArticles()` 取得，絕不私自修改根目錄 Markdown 典籍。
+- [x] **雙語對稱路由**：同步在 `zh/example.astro` 與 `en/example.astro` 建立對稱頁面，並在 `Header.astro` 中英文選單同步配置。
+- [x] **零 Emoji 守則**：全面使用 `<Icon name="..." />`，UI 絕無任何 Emoji 字元。
+- [x] **單一 H1 與防溢出**：整頁僅有一個 `<h1>`，Grid 容器具備 `minmax(0, 1fr)` 與 `min-width: 0`。
+- [ ] **自動化回歸測試**：建置通過 65 頁＋新增雙語對稱頁之靜態產出，Playwright 端對端測試 100% 通過。
 
 ---
 
@@ -222,7 +278,7 @@ flowchart TD
    ```bash
    python scripts/validate_library.py
    ```
-   - 預期結果：`ALL 11 INTEGRITY INVARIANTS PASSED`。
+   - 預期結果：於乾淨工作區（GitHub CI `validate.yml` 環境，不含 `site/node_modules`）回報 `ALL 11 INTEGRITY INVARIANTS PASSED`。若於本機存在 `site/node_modules` 時執行，舊版腳本會掃描第三方 `node_modules/**/*.md` 之已知限制，請以 CI 或隔離環境驗證為準。
 2. **學習路徑直接拓樸邊自動化驗證**：
    ```bash
    cd site && npm run verify-paths
@@ -239,7 +295,7 @@ flowchart TD
    ```bash
    cd site && npm test
    ```
-   - 預期結果：32 項桌機（1440x900）與手機（390x844）測試全數 PASS。
+   - 預期結果：47 項桌機（1440x900）與手機（390x844）測試全數 PASS（包含單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、LIB-504 真實性）。
 6. **六大視覺驗收截圖產出**：
    - `homepage-zh-desktop-1440.png`
    - `homepage-zh-mobile-390.png`

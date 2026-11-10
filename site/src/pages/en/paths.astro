@@ -48,7 +48,11 @@ const { en } = loadLibraryArticles();
                     <Icon name="shield-check" size={15} />
                     <span class="dossier-label">Learning Outcomes</span>
                   </div>
-                  <p class="dossier-text">{path.learningOutcomesEn}</p>
+                  <ul class="dossier-list">
+                    {path.learningOutcomesEn.map(item => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
                 </div>
 
                 <div class="dossier-card">
@@ -57,7 +61,7 @@ const { en } = loadLibraryArticles();
                     <span class="dossier-label">Starting Volume</span>
                   </div>
                   <p class="dossier-text">
-                    <strong>{path.startingVolume}</strong> (Master first principles and geometric motivation before progressing)
+                    <strong>{path.startingVolume}</strong> (Library overview &amp; navigator hub: orient yourself with wing taxonomy, provenance conventions, and DAG dependencies before starting {path.steps[1]?.callNumber || 'LIB-001'})
                   </p>
                 </div>
               </div>
@@ -305,6 +309,19 @@ const { en } = loadLibraryArticles();
     line-height: 1.55;
     margin-bottom: 0;
   }
+  .dossier-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .dossier-list li {
+    margin-bottom: 0.25rem;
+  }
+  .dossier-list li:last-child {
+    margin-bottom: 0;
+  }
   .dossier-text strong {
     color: var(--accent-gold);
   }
@@ -544,5 +561,64 @@ const { en } = loadLibraryArticles();
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-bottom: 1rem;
+  }
+
+  @media (max-width: 639px) {
+    .paths-page {
+      padding: 1.35rem 0 2.5rem;
+    }
+    .paths-header {
+      margin-bottom: 1.4rem;
+    }
+    .paths-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.55rem;
+    }
+    .paths-lead {
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .paths-list-section {
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .path-header {
+      padding: 1.15rem 1rem 1rem;
+    }
+    .path-title {
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+    }
+    .path-desc {
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+    }
+    .journey-dossier {
+      gap: 0.65rem;
+      padding-top: 0.9rem;
+    }
+    .dossier-card {
+      padding: 0.75rem;
+    }
+    .steps-timeline {
+      padding: 1.1rem 1rem 1.25rem;
+    }
+    .timeline-step {
+      gap: 0.8rem;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      font-size: 0.76rem;
+    }
+    .step-content {
+      padding-bottom: 1.35rem;
+    }
+    .step-title {
+      font-size: 1.08rem;
+    }
+    .roadmap-diagram-section {
+      margin-bottom: 2rem;
+    }
   }
 </style>

@@ -17,7 +17,7 @@
 - **Language**: TypeScript 5.x
 - **Mathematics**: KaTeX（編譯期靜態預渲染，零版面跳動，本機離線字型支援）
 - **Icon System**: 專屬 SVG Line Icon 元件（`src/components/Icon.astro`，UI 全面零 Emoji 規範）
-- **Markdown Pipeline**: Marked 15.x + 自研 CJK 粗體標點語彙分析器 (`cjkStrong`) + Custom Heading Renderer
+- **Markdown Pipeline**: Marked 15.x + 自研 CJK 粗體標點語彙分析器 (`cjkStrong`) + Custom Heading Renderer + Single H1 消除管線
 - **Link Resolution**: Obsidian WikiLinks 動態解析轉換為型態安全站內路由
 - **Design System**: 深色學術研究風格（Dark Academic Research Library Theme），繁體中文優先雙語介面
 - **Target Deployment**: GitHub Pages (Base Path: `/library`)
@@ -48,7 +48,7 @@ npm run dev
 # 6. 執行正式靜態建置 (包含 verify-paths 前置守門)
 npm run build
 
-# 7. 執行完整自動化測試 (包含 DAG 檢驗與 Playwright 桌面/手機真實瀏覽器測試)
+# 7. 執行完整自動化測試 (包含 DAG 檢驗與 Playwright 47 項桌面/手機真實瀏覽器測試)
 npm test
 
 # 8. 本機預覽建置成果
@@ -57,9 +57,9 @@ npm run preview
 
 ---
 
-## 4. Editorial UX Redesign v2 設計與實證指南
+## 4. Editorial UX Redesign & Final Quality Fix 設計與實證指南
 
-本專案遵循根目錄 `AGENTS.md` 之最新設計系統規範，落實 **Editorial UX Redesign v2**：
+本專案嚴格遵循根目錄 `AGENTS.md` 之設計系統規範，落實高階研究圖書館品質：
 
 ### 核心成果亮點：
 
@@ -68,27 +68,31 @@ npm run preview
    - 採用純向量 SVG Line Icon 系統 (`src/components/Icon.astro`)，風格沉穩一致。
 
 2. **讀者第一導向閱讀體驗 (Reader-First Editorial Layout)**
-   - **導讀摘要 (Executive Context Brief)**：文章開頭提供預估閱讀時間、目標讀者、數學基石與硬體對齊指引。
-   - **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的拓樸座標、前後依賴與 104 條形式化系統合約收合於 `<details class="metadata-drawer">` 中，讓讀者第一眼即專注於文章內容。
+   - **第一屏研讀導引與閱讀入口 (Study Orientation & Action)**：文章頂部優先呈現篇名、核心研讀導引以及「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。移除不精確、誤導性的技術文章「預估閱讀時間」。
+   - **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（典籍狀態、作者、統一格式化為 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴，收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
    - **舒適閱讀排版**：閱讀欄寬限制於 68–76 字元（760px），行高 1.8，字級 1.05rem；表格、程式碼與公式具備橫向滾動保護。
    - **常駐章節目錄 (Sticky TOC)**：桌面端右側懸浮目錄，平滑捲動跳轉。
 
-3. **零星號洩漏與完美 Markdown / LaTeX 渲染 (Zero Leaked Asterisks)**
-   - 針對 CommonMark 規範中 CJK 標點與粗體（如 `是**「...」**`）之衝突，引入自研 `cjkStrong` 語彙分析器，使裸露星號降為 **0**。
-   - 以 Marked Custom Heading Renderer 取代字串正則替換，杜絕區塊層級被誤當成 raw HTML 的解析失效問題。
-   - KaTeX 數學公式於編譯期靜態解析，與 Markdown 語意徹底隔離。
+3. **零星號洩漏、單一 H1 與零雙重跳脫 (Rendering QA)**
+   - **零星號洩漏 (Zero Leaked Asterisks)**：針對 CommonMark 規範中 CJK 標點與粗體（如 `是**「...」**`）之衝突，引入自研 `cjkStrong` 語彙分析器，使裸露星號降為 **0**。
+   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 每頁僅保留版面 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，同時 Marked Custom Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，全館 56 篇雙語典籍 H1 違規數嚴格為 **0**。
+   - **零雙重跳脫 (Zero Double Escaping)**：在生成目錄（TOC）與標題錨點 ID 前，精確還原 Marked 內建 HTML Entities 為乾淨純文字，再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 編碼洩漏。
+   - **KaTeX 原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：優先以原始 TeX 嚴格編譯（`throwOnError: true`），確保合法公式與轉義百分比 `\%` 100% 原樣輸出；僅對解析失敗公式允許 `\text{...}` 內部底線轉義與已查證 `LIB-802` 原文筆誤之精確例外顯示修復，移除通用下標猜測 Regex，任何未知錯誤皆明確以 `console.error` 及 `.katex-error` 回報。全館 56 篇典籍目前達到 **0 個 `katex-error`**。
 
 4. **教學引導旅程學習路徑 (Guided Learning Journey)**
    - 學習路徑提供適用對象（Target Audience）、學習收穫（Learning Outcomes）、起始推薦（Starting Volume）、步驟目的（Step Objective）與為何下一步（Why Next Step）。
    - 100% 嚴格驗證全館 3 條路徑、23 個時序節點與 20 條直接 DAG 拓樸邊。
-   - 全館巨型 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（Collapsible Accordion）。
+   - 移除節點卡片上冗餘重複的「直接拓樸邊」標籤，貫徹 Content Density 原則。
+   - 全館巨型 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊**。
 
 5. **搜尋範圍誠實命名 (Article Search Transparency)**
-   - 目錄檢索文案統一標明為「文章搜尋」，明確說明搜尋涵蓋篇名、編號、標籤與摘要。
+   - 目錄檢索文案統一標明為「文章搜尋」，明確說明搜尋涵蓋篇名、編號、標籤與摘要，杜絕誇大全文搜尋。
 
-6. **內容密度與介面清晰度 (Content Density & Interface Clarity)**
-   - 避免不必要的次要標籤與重複說明，優先透過版面結構、視覺層級與間距傳達資訊。
-   - 保留關鍵操作標籤、導航上下文、無障礙標籤與教學推導細節，維持版面簡潔而不犧牲精確度。
+6. **典籍介紹真實性 (Content Fidelity)**
+   - 首頁展示之 LIB-504 正確標註為「3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與可微分光柵化」，推薦理由說明體積渲染積分與 GPU Tile-based 光柵化架構，絕無張冠李戴之空間變換網路 (STN)。
+
+7. **版面零橫向溢出 (Zero Desktop Overflow)**
+   - 桌面端與行動端均嚴格保證 `scrollWidth <= clientWidth`（1440px 桌面端無橫向捲動條），Grid 容器搭配 `minmax(0, 1fr)` 與 `min-width: 0`。
 
 ---
 
@@ -101,3 +105,34 @@ Playwright 端對端測試已自動產出 6 大驗收截圖於 `tests/screenshot
 - `paths-zh-mobile-390.png` (390x844 手機版教學路徑)
 - `reader-lib405-zh-desktop-1440.png` (1440x900 桌面版 LIB-405 閱讀頁)
 - `reader-lib405-zh-mobile-390.png` (390x844 手機版 LIB-405 閱讀頁)
+
+---
+
+## 6. AI 新增頁面示範 (AI Page Extension Demonstration — Week 9 Core Theme)
+
+本專案為大學第九週作業核心主題：「**建立 `AGENTS.md`，讓 AI 能依照專案規則持續新增網頁**」。
+
+為證明任何全新的 AI 代理人在無歷史上下文之 Session 下，皆能重複遵守規則擴充網站，本專案提供具體範例與作業檢驗標準：
+
+### 已實作實證與擴充標準作業實踐：
+
+- **真正已實作之可重複擴充頁面**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro`（Learning Paths 雙語頁，透過 `loadLibraryArticles()` 整合 SSOT 資料與 20 條直接 DAG 拓樸邊）。
+- **AI 擴充示意範本**：`AGENTS.md` 第 7.2 節提供未建立之 `example.astro` 示意範本，遵循以下五步驟擴充：
+
+1. **依據 SSOT 唯一真理來源**：
+   - AI 調用 `src/lib/library.ts` 內之 `loadLibraryArticles()` 或現有 Frontmatter 並實際於頁面渲染，不修改、不分裂根目錄 Markdown 筆記。
+2. **選用共用版面與無 Emoji 元件**：
+   - 繼承 `src/layouts/BaseLayout.astro`，引入 `src/components/Icon.astro`（如 `<Icon name="academic" size={16} />`）。
+   - 嚴格遵守 UI 零 Emoji 禁令，杜絕任何 Emoji 符號出現在介面按鈕、徽章或導覽中。
+3. **建立雙語對稱路由（示意，如 `<page>.astro`）**：
+   - 同步建立 `site/src/pages/zh/<page>.astro` 與 `site/src/pages/en/<page>.astro`。
+   - 互設 `alternateUrl`，使 Header 語言切換紐能無縫原位跳轉。
+4. **落實防溢出與單一 H1 規範**：
+   - 頁面僅保留一個頂級 `<h1>`。
+   - CSS Grid 容器一律採用 `minmax(0, 1fr)` 與 `min-width: 0`，杜絕任何撐破視窗寬度之橫向滾動。
+5. **執行可重現自動化驗證**：
+   ```bash
+   npm run verify-paths   # 20 條直接 DAG 拓樸邊 100% 通過
+   npm run build          # 靜態 HTML 編譯產出，0 錯誤
+   npm test               # 47 項 Playwright 測試與無頭瀏覽器驗收 100% 通過
+   ```

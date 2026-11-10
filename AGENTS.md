@@ -95,18 +95,22 @@ library/
 - 嚴禁依賴任何未被打包的外部圖標套件或網路 CDN 字型。
 
 ### 3.4 讀者第一閱讀版面 (Reader-First Editorial Layout)
-- **第一屏內文聚焦**：文章閱讀頁以內文閱讀為第一優先，第一屏禁止大篇幅引用、標籤與元資料淹沒讀者。
-- **導讀摘要 (Executive Context Brief)**：文章頂部提供簡明導讀卡（預估閱讀時間、目標讀者、數學基石、硬體對齊），幫助讀者迅速建立研讀心智模型。
-- **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的拓樸座標、前後依賴（Prerequisites / Successors）與形式化系統合約，以 `<details class="metadata-drawer">` 優雅收合，讀者按需展開，不干擾正文閱讀流暢度。
+- **第一屏研讀導引與閱讀入口 (Study Orientation & Action)**：文章頂部優先呈現篇名、核心研讀導引（Study Orientation / Context Brief）以及顯眼的「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。移除不精確、誤導性的技術文章「預估閱讀時間」。
+- **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（狀態、作者、嚴格 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴（Prerequisites / Successors），統一收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
+- **單一 H1 語意純淨性 (Strict Single H1 Invariant)**：Reader 頁面嚴格維持僅有一個主要的 `<h1>`（即版面 Header 的篇名）；原始 Markdown 中的文件大標題 `# 標題` 由渲染管線自語意層消除，避免重複顯示或污染 TOC，其餘內文層級（H2、H3 等）則 100% 完整保留。
 - **舒適閱讀欄寬與行高**：正文閱讀欄寬嚴格控制於 68–76 字元（`max-width: 760px`），行高 1.8，字級 1.05rem。
 - **右側常駐目錄 (Sticky TOC)**：桌面端右側懸浮章節目錄，平滑捲動跳轉。
-- **滾動防禦機制**：程式碼區塊（`<pre>`）、表格（`<table>`）與 KaTeX 獨立顯示公式（`.katex-display-container`）均具備 `overflow-x: auto` 橫向滾動保護，禁止在手機端發生橫向撐破版面。
+- **滾動防禦與零橫向溢出 (Zero Horizontal Scroll Overflow)**：程式碼區塊（`<pre>`）、表格（`<table>`）與 KaTeX 獨立顯示公式（`.katex-display-container`）均具備 `overflow-x: auto` 橫向滾動保護；全站桌面端（1440px）與手機端（390px）嚴格保證 `scrollWidth <= clientWidth`，Grid 容器必須搭配 `minmax(0, 1fr)` 與 `min-width: 0` 防止非預期撐破版面。
 
 ### 3.5 杜絕 AI 模板感與浮誇裝飾 (Anti-Decorative Bloat)
 - 移除廉價 KPI 儀表板卡片、浮誇漸層或無實質價值的光暈動畫。
 - 分館卡片、導讀卡片以讀者導向簡介與編號為主，避免千篇一律的模板色塊。
 
-### 3.6 Content Density & Interface Clarity（內容密度與介面清晰度）
+### 3.6 典籍簡介真實性與事實查核 (Content Fidelity & Fact-Checking)
+- **內容忠實性**：首頁精選、分館目錄與各處展示卡片之文章代號、篇名與推薦理由，必須 100% 忠實對齊原始 Markdown 內容與 Frontmatter。
+- **典型負面禁忌**：嚴禁憑空發明或張冠李戴。例如 `LIB-504` 之核心研究為「3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與可微分光柵化」，嚴禁誤植為「空間變換網路 (Spatial Transformer Networks, STN)」。
+
+### 3.7 Content Density & Interface Clarity（內容密度與介面清晰度）
 
 **Primary Principle**
 
@@ -160,8 +164,12 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - 嚴禁在 `site/` 內部重複建立或複製 `LIB-###.md`。
 3. **Markdown / LaTeX 編譯品質守則**：
    - **零星號洩漏 (Zero Leaked Asterisks)**：CommonMark 對 CJK 標點（如 `是**「...」**`）有左側界定限制。`src/lib/library.ts` 透過自研 `cjkStrong` 內聯語彙分析器擴充 Marked，確保中文粗體 100% 正確解析為 `<strong>`，內文嚴禁殘留裸露星號 `**`。
+   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 頁面僅保留 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，避免重複顯示或雙重標記；同時 Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，保障全站 56 篇雙語典籍之 H1 唯一性。
+   - **零雙重跳脫與實體外洩防護 (Zero Double Escaping)**：Marked 內建之 `parseInline` 會將 `&` 轉化為 `&amp;`、`'` 轉化為 `&#39;`。在生成目錄（TOC）與標題錨點 ID 前，必須精確還原為乾淨純文字（`plainText`），再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 等實體編碼洩漏在網頁可見文字中。
+   - **KaTeX 嚴格原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保所有合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時允許以下兩項安全／明確稽核之顯示回復：
+     1. 自動轉義 `\text{...}` 內部未跳脫之底線（例如 `LIB-506` 的 `\text{[SAFETY_BOUND]}` 修正為 `\text{[SAFETY\_BOUND]}`）。
+     2. 嚴禁對未經查證的不平衡下標括號進行通用 Regex 猜測修復；僅對已核對筆誤來源之 `LIB-802` 原始公式設置精確字串匹配例外（`EXACT_KATEX_DISPLAY_EXCEPTIONS`：原始筆記保持唯讀不動，網站僅做顯示修復）。任何未知公式解析錯誤皆必須以 `console.error` 明確回報並透過 `.katex-error` 顯式呈現，不得靜默改寫或宣稱語意正確。
    - **標題語意完整性**：嚴禁在 Markdown 解析前使用正規表示式字串粗暴替換 `<h2/h3>`，此舉會引發 CommonMark 區塊層級判定失效。標題生成與錨點計算必須透過 Marked Custom Heading Renderer 完成。
-   - **LaTeX 數學隔離與預渲染**：行內 `$ ... $` 與獨立塊 `$$ ... $$` 透過 KaTeX 靜態編譯，預先替換為防 Markdown 碰撞的純英數字 Token，渲染完成後精確還原，杜絕底線 `_` 誤觸 Markdown 斜體之問題。
    - **Obsidian WikiLinks**：支援雙括號語法（例如 `\[\[LIB-### ...\]\]` 與 `\[\[LIB-### ...|自訂標題\]\]`），自動轉換為站內對應頁面超連結（`.wikilink-badge`）。
 
 ---
@@ -186,8 +194,10 @@ The interface should be concise without becoming ambiguous. Removing words is no
      - **路線 1 (Deep Learning)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-602` (5 邊)
      - **路線 2 (Computer Vision)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-401` ➔ `LIB-501` ➔ `LIB-502` ➔ `LIB-504` ➔ `LIB-505` ➔ `LIB-506` (9 邊)
      - **路線 3 (AI Agents)**: `LIB-000` ➔ `LIB-001` ➔ `LIB-101` ➔ `LIB-203` ➔ `LIB-405` ➔ `LIB-703` ➔ `LIB-704` (6 邊)
-3. **全景地圖次要收合 (Collapsible Panorama Section)**：
-   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），避免干擾讀者的學習焦點。
+3. **去除節點重複贅標 (Clean Learning Path Cards)**：
+   - 移除每個節點卡片上重複出現的「直接拓樸邊 (Direct Edge) ... Verified Invariant」重複性徽章，改由頂部路徑長度標章與節點內部的「為何進入下一步 (Why Next Step)」自然展現因果關係，貫徹 Content Density & Interface Clarity 原則。
+4. **全景地圖次要收合 (Collapsible Panorama Section)**：
+   - 龐大的全館總覽 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊（不加 open 屬性）**，確保讀者進站時優先聚焦於教學步驟卡。
 
 ---
 
@@ -204,13 +214,75 @@ flowchart TD
 ```
 
 ### 步驟說明：
-1. **閱讀規範**：重新檢驗本文件與設計系統規定，嚴格禁止 UI Emoji。
+1. **閱讀規範**：重新檢驗本文件與設計系統規定，嚴格禁止 UI Emoji，遵循讀者第一版面與內容密度原則。
 2. **確認資料來源與拓樸真實性**：確認新頁面所需資料來自現有 Markdown Frontmatter 或真實系統統計。若涉學習路徑，必經 `verifyLearningPathsStrictly()` 守門。
 3. **選用共用模板與無 Emoji 組件**：使用 `src/layouts/BaseLayout.astro` 與 `src/components/Icon.astro`。
-4. **實作頁面與路由**：在 `site/src/pages/zh/` 與 `site/src/pages/en/` 建立對稱的 `.astro` 頁面。
+4. **實作頁面與路由**：在 `site/src/pages/zh/` 與 `site/src/pages/en/` 建立對稱的 `.astro` 頁面，保持路由對稱。
 5. **更新導覽**：於 `Header.astro` 與 `Footer.astro` 加入新頁面連結，保持中英文選單一致。
-6. **執行完整驗證**：在 `site/` 執行 TypeCheck、Path Edge 驗證與 Build，並執行 Playwright 測試與截圖。
+6. **執行完整驗證**：在 `site/` 依序執行 `npm run verify-paths`、`npm run build`（含 Astro 編譯檢查）與 `npm test`（Playwright 瀏覽器實測與視覺截圖）。
 7. **停止於乾淨本地完成**：回報真實證據（Log 與截圖），等待使用者 Git Delivery 授權。
+
+### 7.1 已實作之可重複擴充實證案例：Learning Paths 雙語頁面
+
+為證明依循 `AGENTS.md` 新增頁面規則可實際落地並通過完整自動化驗證，目前網站中**真正已實作、已對稱建置並通過測試**的可重複擴充頁面案例為學習路徑導覽頁：
+
+- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro`
+- **模板與圖標規範**：繼承 `BaseLayout.astro` 並互設 `alternateUrl`（`/library/zh/paths/` ↔ `/library/en/paths/`），介面圖標全面採用 `Icon.astro`（零 Emoji）。
+- **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 56 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
+- **品質與回歸保障**：單一 `<h1>`、CSS Grid 採 `minmax(0, 1fr)` 與 `min-width: 0`（Desktop 1440px / Mobile 390px 零橫向溢出），並受 `npm run verify-paths`、`npm run build` 與 Playwright `npm test` 持續守門。
+
+### 7.2 AI 新增雙語頁面示意範本（Blueprint — 尚未建立之示意程式）
+
+> **注意**：以下 `example.astro` 為提供後續 AI 代理人參考之**尚未建立、尚未執行建置與測試的示意範本（Blueprint Template）**；倉庫內實際並沒有 `example.astro` 頁面。任何 AI 執行新增頁面任務時，須依此結構實際建立 `zh/` 與 `en/` 雙語對稱檔案並通過驗證，方可勾選檢核表。
+
+```astro
+---
+// [示意範本 — 尚未建立] site/src/pages/zh/example.astro（須同步建立 site/src/pages/en/example.astro）
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { loadLibraryArticles, type ArticleData } from '../../lib/library';
+
+const { zh } = loadLibraryArticles();
+const featuredIds = ['lib-903', 'lib-904'];
+const guides = featuredIds.map(id => zh.get(id)).filter(Boolean) as ArticleData[];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const alternateUrl = `${base}/en/example/`;
+---
+
+<BaseLayout title="研究專題方法導讀 (Research Methodology Guide)" lang="zh" alternateUrl={alternateUrl}>
+  <div class="container py-8">
+    <header class="page-header">
+      <!-- 規範遵循：使用統一 SVG Line Icon，嚴格禁止 Emoji -->
+      <div class="header-badge">
+        <Icon name="academic" size={16} />
+        <span>研究指引 (Research Guide)</span>
+      </div>
+      <h1 class="page-title">研究方法與專題藍圖導讀</h1>
+      <p class="page-subtitle">從既有知識庫 SSOT 動態彙整指定典籍之雙語頁面擴充示意。</p>
+    </header>
+
+    <!-- 規範遵循：CSS Grid 搭配 minmax(min(280px, 100%), 1fr) 與 min-width: 0 防止橫向撐破版面 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem;">
+      {guides.map(article => (
+        <article style="min-width: 0; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 8px;">
+          <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">{article.callNumber}</span>
+          <h2 style="font-size: 1.15rem; margin: 0.5rem 0;">
+            <a href={`${base}/zh/notes/${article.slug}/`}>{article.title}</a>
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; overflow-wrap: anywhere;">{article.excerpt}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+```
+
+**AI 新增頁面執行前／後檢核表（Agent Execution Checklist — 建立新頁時逐項核對後勾選）**：
+- [ ] **SSOT 唯一真理**：資料實際來自 `loadLibraryArticles()` 等現有來源並於模板中使用，未修改根目錄原始 Markdown 典籍。
+- [ ] **雙語對稱路由與導覽**：同步建立 `site/src/pages/zh/<page>.astro` 與 `site/src/pages/en/<page>.astro` 並於 `Header.astro` / `Footer.astro` 更新連結與 `alternateUrl`。
+- [ ] **零 Emoji 守則**：介面元素全面使用 `<Icon name="..." />`，無任何 Emoji 字元。
+- [ ] **單一 H1 與防溢出**：整頁僅有一個 `<h1>`，Grid 與卡片具備 `minmax(0, 1fr)` / `min-width: 0` 防溢出保護。
+- [ ] **完整實證測試通過**：實作完成後實際執行 `npm run verify-paths`、`npm run build`（產出頁數包含新增雙語頁）與 `npm test` 全部 PASS。
 
 ---
 
@@ -222,7 +294,7 @@ flowchart TD
    ```bash
    python scripts/validate_library.py
    ```
-   - 預期結果：`ALL 11 INTEGRITY INVARIANTS PASSED`。
+   - 預期結果：於乾淨工作區（GitHub CI `validate.yml` 環境，不含 `site/node_modules`）回報 `ALL 11 INTEGRITY INVARIANTS PASSED`。若於本機存在 `site/node_modules` 時執行，舊版腳本會掃描第三方 `node_modules/**/*.md` 之已知限制，請以 CI 或隔離環境驗證為準。
 2. **學習路徑直接拓樸邊自動化驗證**：
    ```bash
    cd site && npm run verify-paths
@@ -239,7 +311,7 @@ flowchart TD
    ```bash
    cd site && npm test
    ```
-   - 預期結果：32 項桌機（1440x900）與手機（390x844）測試全數 PASS。
+   - 預期結果：47 項桌機（1440x900）與手機（390x844）測試全數 PASS（包含單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、LIB-504 真實性）。
 6. **六大視覺驗收截圖產出**：
    - `homepage-zh-desktop-1440.png`
    - `homepage-zh-mobile-390.png`

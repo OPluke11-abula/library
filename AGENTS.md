@@ -172,7 +172,7 @@ The interface should be concise without becoming ambiguous. Removing words is no
      2. 嚴禁對未經查證的不平衡下標括號進行通用 Regex 猜測修復；僅對已核對筆誤來源之 `LIB-802` 原始公式設置精確字串匹配例外（`EXACT_KATEX_DISPLAY_EXCEPTIONS`：原始筆記保持唯讀不動，網站僅做顯示修復）。任何未知公式解析錯誤皆必須以 `console.error` 明確回報並透過 `.katex-error` 顯式呈現，不得靜默改寫或宣稱語意正確。
    - **多行數學區塊 (`$$...$$`) 與標題完整性**：嚴禁在 Markdown 解析前用單純 Regex 切割標題。分段切割函式（`splitMarkdownByH2`）必須同時追蹤程式碼圍欄與奇偶成對 `$$` 數學區塊，確保公式內部註解不誤判為章節；標題生成與錨點計算透過 Marked Custom Heading Renderer 完成，並濾除裝飾性 Unicode Emoji（保留 `[FACT]` / `[RULE-###-##]` 證據標記與數學內容）。
    - **Mermaid 本地視覺圖表與明確失敗守則 (Local Mermaid SVG & Explicit Fallback)**：全館 ```` ```mermaid ```` 區塊必須渲染為真實視覺 SVG（禁顯未渲染原始碼或依賴外部 CDN）。建置階段透過 `site/scripts/render-mermaid.mjs` 預先產出靜態 SVG 快取至 `site/src/data/mermaid-cache/`（供應無瀏覽器環境之 CI 快速建置）；未知或新增語法由前端 `src/scripts/reader-enhance.ts` 動態載入本地打包之 `mermaid` 套件接手渲染。圖表外框具備縮放（`−`/`100%`/`+`/高度切換）、寬度自適應防裁切與次要 `<details>`「查看原始碼」；含 Mermaid 之章節保持於正文開放流程。若語法不支援或渲染失敗，必須顯式呈現 Accessible 錯誤區塊（`.mermaid-error-box`）並展開原始碼。
-   - **Obsidian WikiLinks 精簡可讀性**：支援雙括號語法（`[[LIB-### ...]]` 與 `[[LIB-### ...|自訂標題]]`），透過 `CONCISE_VOLUME_LABELS` 與 `formatConciseWikiLabel` 轉為無歧義簡短識別連結（完整篇名保留於 `title` 與 `aria-label`，作者自訂 `|別名` 優先保留），維持站內雙語路由 `.wikilink-badge` 樣式。
+   - **Obsidian WikiLinks 精簡可讀性**：支援雙括號語法（例如 `\[\[LIB-### ...\]\]` 與 `\[\[LIB-### ...|自訂標題\]\]`），透過 `CONCISE_VOLUME_LABELS` 與 `formatConciseWikiLabel` 轉為無歧義簡短識別連結（完整篇名保留於 `title` 與 `aria-label`，作者自訂 `|別名` 優先保留），維持站內雙語路由 `.wikilink-badge` 樣式。
 
 ---
 

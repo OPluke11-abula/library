@@ -209,7 +209,37 @@ function formatDate(val: any): string {
   return str;
 }
 
-export function renderArticleMarkdown(rawMarkdown: string, lang: 'zh' | 'en', base: string = '/library'): { html: string; toc: TocItem[] } {
+/**
+ * Audited display-only exceptions for verified KaTeX typos in immutable SSOT notes.
+ * Original Markdown source files are strictly preserved untouched per SSOT rules.
+ */
+interface KatexExceptionEntry {
+  expectedSource: string;
+  replacement: string;
+}
+
+const EXACT_KATEX_DISPLAY_EXCEPTIONS: Readonly<Record<string, KatexExceptionEntry>> = {
+  // Source typo in LIB-802 (zh) line 87: 'X_{j, :]^2]' has ']' instead of '}' (Shift omitted).
+  // Displayed on website as 'X_{j, :}^2]' per AWQ diagonal second-moment approximation;
+  // row-slice squaring notation should still be checked against the original LIB-802 note.
+  '\\arg\\min_{\\hat{W}} \\|W X - \\hat{W} X\\|_F^2 \\approx \\sum_{j=1}^{C_{\\text{in}}} \\|W_{:, j} - \\hat{W}_{:, j}\\|_2^2 \\cdot \\mathbb{E}[X_{j, :]^2]': {
+    expectedSource: 'LIB-802 (zh)',
+    replacement:
+      '\\arg\\min_{\\hat{W}} \\|W X - \\hat{W} X\\|_F^2 \\approx \\sum_{j=1}^{C_{\\text{in}}} \\|W_{:, j} - \\hat{W}_{:, j}\\|_2^2 \\cdot \\mathbb{E}[X_{j, :}^2]',
+  },
+};
+
+function compileKatex(tex: string, isBlock: boolean, throwOnError: boolean): string {
+  const rendered = katex.renderToString(tex, { displayMode: isBlock, throwOnError });
+  return isBlock ? `<div class="katex-display-container">${rendered}</div>` : rendered;
+}
+
+export function renderArticleMarkdown(
+  rawMarkdown: string,
+  lang: 'zh' | 'en',
+  base: string = '/library',
+  sourceLabel: string = ''
+): { html: string; toc: TocItem[] } {
   const toc: TocItem[] = [];
 
   // Stage 1: Protect code blocks and inline code
@@ -264,36 +294,51 @@ export function renderArticleMarkdown(rawMarkdown: string, lang: 'zh' | 'en', ba
       .trim();
     const suffix = extractedCodes.length > 0 ? ` ${extractedCodes.join(' ')}` : '';
     rawMathSources.push(texToReadablePlain(rawMath));
+    if (!rawMath) {
+      mathTokens.push('');
+      return `KATEXX${idx}X${suffix}`;
+    }
     try {
-      // First attempt strict verbatim compilation so all valid source formulas render unmodified
-      const rendered = rawMath
-        ? (isBlock
-            ? `<div class="katex-display-container">${katex.renderToString(rawMath, { displayMode: true, throwOnError: true })}</div>`
-            : katex.renderToString(rawMath, { displayMode: false, throwOnError: true }))
-        : '';
-      mathTokens.push(rendered);
-    } catch {
-      // Targeted fallback recovery only when raw TeX fails KaTeX parsing:
-      // 1. Escape unescaped '_' inside \text{...} (e.g. LIB-506 \text{[SAFETY_BOUND]})
-      let repaired = rawMath.replace(/\\text\{([^}]+)\}/g, (_m, inner) => {
+      // 1. Verbatim-First: valid formulas must compile unmodified
+      mathTokens.push(compileKatex(rawMath, isBlock, true));
+      return `KATEXX${idx}X${suffix}`;
+    } catch (verbatimError) {
+      // 2. Permitted safe/audited recoveries when verbatim TeX fails KaTeX parsing:
+      //    a) Escape unescaped '_' inside \text{...} (e.g. LIB-506 \text{[SAFETY_BOUND]})
+      let candidate = rawMath.replace(/\\text\{([^}]+)\}/g, (_m, inner) => {
         return `\\text{${inner.replace(/(?<!\\)_/g, '\\_')}}`;
       });
-      // 2. Repair unclosed subscript typo '_{...]' only when unbalanced '{' > '}' remains (e.g. LIB-802 \mathbb{E}[X_{j, :]^2])
-      const openBraces = (repaired.match(/(?<!\\)\{/g) || []).length;
-      const closeBraces = (repaired.match(/(?<!\\)\}/g) || []).length;
-      if (openBraces > closeBraces) {
-        repaired = repaired.replace(/_\{([^}]*?)\](\^2\]|\^2|\s|$)/g, '_{$1}$2');
+      //    b) Exact audited source-typo exception for LIB-802 only (display-only fix; raw Markdown unchanged)
+      if (Object.prototype.hasOwnProperty.call(EXACT_KATEX_DISPLAY_EXCEPTIONS, candidate)) {
+        const entry = EXACT_KATEX_DISPLAY_EXCEPTIONS[candidate];
+        if (!sourceLabel || sourceLabel === entry.expectedSource) {
+          candidate = entry.replacement;
+        }
       }
-      try {
-        const rendered = isBlock
-          ? `<div class="katex-display-container">${katex.renderToString(repaired, { displayMode: true, throwOnError: false })}</div>`
-          : katex.renderToString(repaired, { displayMode: false, throwOnError: false });
-        mathTokens.push(rendered);
-      } catch {
-        mathTokens.push(isBlock ? `$$${rawMath}$$` : `$${rawMath}$`);
+
+      if (candidate !== rawMath) {
+        try {
+          mathTokens.push(compileKatex(candidate, isBlock, true));
+          return `KATEXX${idx}X${suffix}`;
+        } catch (recoveryError) {
+          console.error(
+            `[KaTeX Parse Error]${sourceLabel ? ` [${sourceLabel}]` : ''} Permitted recovery failed:`,
+            rawMath,
+            recoveryError
+          );
+        }
+      } else {
+        console.error(
+          `[KaTeX Parse Error]${sourceLabel ? ` [${sourceLabel}]` : ''} Unrecognized formula parse failure (not rewritten):`,
+          rawMath,
+          verbatimError
+        );
       }
+
+      // 3. Unknown parse errors: render visibly as KaTeX error span (.katex-error) without silent rewriting
+      mathTokens.push(compileKatex(rawMath, isBlock, false));
+      return `KATEXX${idx}X${suffix}`;
     }
-    return `KATEXX${idx}X${suffix}`;
   }
 
   // Display math $$ ... $$
@@ -456,7 +501,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
         if (!callNumber) continue;
 
         const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'zh');
+        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'zh', '/library', `${callNumber} (zh)`);
         const rules = parseRules(rawMarkdown);
 
         // Parse prerequisites and successors
@@ -529,7 +574,7 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
         if (!callNumber) continue;
 
         const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'en');
+        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'en', '/library', `${callNumber} (en)`);
         const rules = parseRules(rawMarkdown);
 
         const prereqsRaw = Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [];

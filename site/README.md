@@ -77,7 +77,7 @@ npm run preview
    - **零星號洩漏 (Zero Leaked Asterisks)**：針對 CommonMark 規範中 CJK 標點與粗體（如 `是**「...」**`）之衝突，引入自研 `cjkStrong` 語彙分析器，使裸露星號降為 **0**。
    - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 每頁僅保留版面 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，同時 Marked Custom Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，全館 56 篇雙語典籍 H1 違規數嚴格為 **0**。
    - **零雙重跳脫 (Zero Double Escaping)**：在生成目錄（TOC）與標題錨點 ID 前，精確還原 Marked 內建 HTML Entities 為乾淨純文字，再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 編碼洩漏。
-   - **KaTeX 原樣優先與容錯修復 (Verbatim-First & Robust KaTeX Invariant)**：優先以原始 TeX 嚴格編譯，確保全館合法公式 100% 原樣輸出；僅針對解析失敗之公式進行目標容錯（`\text{...}` 內部底線跳脫與未閉合下標括號修復），全館 56 篇典籍達到 **0 個 `katex-error`**。
+   - **KaTeX 原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：優先以原始 TeX 嚴格編譯（`throwOnError: true`），確保合法公式與轉義百分比 `\%` 100% 原樣輸出；僅對解析失敗公式允許 `\text{...}` 內部底線轉義與已查證 `LIB-802` 原文筆誤之精確例外顯示修復，移除通用下標猜測 Regex，任何未知錯誤皆明確以 `console.error` 及 `.katex-error` 回報。全館 56 篇典籍目前達到 **0 個 `katex-error`**。
 
 4. **教學引導旅程學習路徑 (Guided Learning Journey)**
    - 學習路徑提供適用對象（Target Audience）、學習收穫（Learning Outcomes）、起始推薦（Starting Volume）、步驟目的（Step Objective）與為何下一步（Why Next Step）。
@@ -114,16 +114,18 @@ Playwright 端對端測試已自動產出 6 大驗收截圖於 `tests/screenshot
 
 為證明任何全新的 AI 代理人在無歷史上下文之 Session 下，皆能重複遵守規則擴充網站，本專案提供具體範例與作業檢驗標準：
 
-### 示範案例：AI 新增「研究專題導讀頁面」標準作業實踐
+### 已實作實證與擴充標準作業實踐：
+
+- **真正已實作之可重複擴充頁面**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro`（Learning Paths 雙語頁，透過 `loadLibraryArticles()` 整合 SSOT 資料與 20 條直接 DAG 拓樸邊）。
+- **AI 擴充示意範本**：`AGENTS.md` 第 7.2 節提供未建立之 `example.astro` 示意範本，遵循以下五步驟擴充：
 
 1. **依據 SSOT 唯一真理來源**：
-   - AI 調用 `src/lib/library.ts` 內之 `loadLibraryArticles()` 或現有 Frontmatter，不修改、不分裂根目錄 Markdown 筆記。
+   - AI 調用 `src/lib/library.ts` 內之 `loadLibraryArticles()` 或現有 Frontmatter 並實際於頁面渲染，不修改、不分裂根目錄 Markdown 筆記。
 2. **選用共用版面與無 Emoji 元件**：
    - 繼承 `src/layouts/BaseLayout.astro`，引入 `src/components/Icon.astro`（如 `<Icon name="academic" size={16} />`）。
    - 嚴格遵守 UI 零 Emoji 禁令，杜絕任何 Emoji 符號出現在介面按鈕、徽章或導覽中。
-3. **建立雙語對稱路由**：
-   - 中文版建立於 `site/src/pages/zh/example.astro`。
-   - 英文版建立於 `site/src/pages/en/example.astro`。
+3. **建立雙語對稱路由（示意，如 `<page>.astro`）**：
+   - 同步建立 `site/src/pages/zh/<page>.astro` 與 `site/src/pages/en/<page>.astro`。
    - 互設 `alternateUrl`，使 Header 語言切換紐能無縫原位跳轉。
 4. **落實防溢出與單一 H1 規範**：
    - 頁面僅保留一個頂級 `<h1>`。

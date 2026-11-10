@@ -166,9 +166,9 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - **零星號洩漏 (Zero Leaked Asterisks)**：CommonMark 對 CJK 標點（如 `是**「...」**`）有左側界定限制。`src/lib/library.ts` 透過自研 `cjkStrong` 內聯語彙分析器擴充 Marked，確保中文粗體 100% 正確解析為 `<strong>`，內文嚴禁殘留裸露星號 `**`。
    - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 頁面僅保留 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，避免重複顯示或雙重標記；同時 Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，保障全站 56 篇雙語典籍之 H1 唯一性。
    - **零雙重跳脫與實體外洩防護 (Zero Double Escaping)**：Marked 內建之 `parseInline` 會將 `&` 轉化為 `&amp;`、`'` 轉化為 `&#39;`。在生成目錄（TOC）與標題錨點 ID 前，必須精確還原為乾淨純文字（`plainText`），再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 等實體編碼洩漏在網頁可見文字中。
-   - **KaTeX 嚴格原樣優先與容錯修復 (Verbatim-First & Robust KaTeX Invariant)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時啟動安全回退修復：
+   - **KaTeX 嚴格原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保所有合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時允許以下兩項安全／明確稽核之顯示回復：
      1. 自動轉義 `\text{...}` 內部未跳脫之底線（例如 `LIB-506` 的 `\text{[SAFETY_BOUND]}` 修正為 `\text{[SAFETY\_BOUND]}`）。
-     2. 在偵測到未閉合大括號（`{` 多於 `}`）時，修復非標準下標括號閉合（例如 `LIB-802` 的 `_{j, :]^2]` 修正為 `_{j, :}^2]`）。全站 56 篇典籍達到 **0 個 `katex-error`**。
+     2. 嚴禁對未經查證的不平衡下標括號進行通用 Regex 猜測修復；僅對已核對筆誤來源之 `LIB-802` 原始公式設置精確字串匹配例外（`EXACT_KATEX_DISPLAY_EXCEPTIONS`：原始筆記保持唯讀不動，網站僅做顯示修復）。任何未知公式解析錯誤皆必須以 `console.error` 明確回報並透過 `.katex-error` 顯式呈現，不得靜默改寫或宣稱語意正確。
    - **標題語意完整性**：嚴禁在 Markdown 解析前使用正規表示式字串粗暴替換 `<h2/h3>`，此舉會引發 CommonMark 區塊層級判定失效。標題生成與錨點計算必須透過 Marked Custom Heading Renderer 完成。
    - **Obsidian WikiLinks**：支援雙括號語法（例如 `\[\[LIB-### ...\]\]` 與 `\[\[LIB-### ...|自訂標題\]\]`），自動轉換為站內對應頁面超連結（`.wikilink-badge`）。
 
@@ -222,23 +222,34 @@ flowchart TD
 6. **執行完整驗證**：在 `site/` 依序執行 `npm run verify-paths`、`npm run build`（含 Astro 編譯檢查）與 `npm test`（Playwright 瀏覽器實測與視覺截圖）。
 7. **停止於乾淨本地完成**：回報真實證據（Log 與截圖），等待使用者 Git Delivery 授權。
 
-### 7.1 AI 新增頁面具體示範 (AI Page Extension Demonstration)
+### 7.1 已實作之可重複擴充實證案例：Learning Paths 雙語頁面
 
-為證明自主 AI 代理人能嚴格重複遵守本規範擴充網站，以「建立雙語專題進階導讀頁面」為例，AI 必須嚴格執行以下最小完整範例：
+為證明依循 `AGENTS.md` 新增頁面規則可實際落地並通過完整自動化驗證，目前網站中**真正已實作、已對稱建置並通過測試**的可重複擴充頁面案例為學習路徑導覽頁：
+
+- **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro`
+- **模板與圖標規範**：繼承 `BaseLayout.astro` 並互設 `alternateUrl`（`/library/zh/paths/` ↔ `/library/en/paths/`），介面圖標全面採用 `Icon.astro`（零 Emoji）。
+- **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 56 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
+- **品質與回歸保障**：單一 `<h1>`、CSS Grid 採 `minmax(0, 1fr)` 與 `min-width: 0`（Desktop 1440px / Mobile 390px 零橫向溢出），並受 `npm run verify-paths`、`npm run build` 與 Playwright `npm test` 持續守門。
+
+### 7.2 AI 新增雙語頁面示意範本（Blueprint — 尚未建立之示意程式）
+
+> **注意**：以下 `example.astro` 為提供後續 AI 代理人參考之**尚未建立、尚未執行建置與測試的示意範本（Blueprint Template）**；倉庫內實際並沒有 `example.astro` 頁面。任何 AI 執行新增頁面任務時，須依此結構實際建立 `zh/` 與 `en/` 雙語對稱檔案並通過驗證，方可勾選檢核表。
 
 ```astro
 ---
-// site/src/pages/zh/example.astro (對應 en/example.astro 鏡像對稱)
+// [示意範本 — 尚未建立] site/src/pages/zh/example.astro（須同步建立 site/src/pages/en/example.astro）
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
-import { loadLibraryArticles } from '../../lib/library';
+import { loadLibraryArticles, type ArticleData } from '../../lib/library';
 
 const { zh } = loadLibraryArticles();
+const featuredIds = ['lib-903', 'lib-904'];
+const guides = featuredIds.map(id => zh.get(id)).filter(Boolean) as ArticleData[];
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const alternateUrl = `${base}/en/example/`;
 ---
 
-<BaseLayout title="專題導讀示範 (Project Guide Demo)" lang="zh" alternateUrl={alternateUrl}>
+<BaseLayout title="研究專題方法導讀 (Research Methodology Guide)" lang="zh" alternateUrl={alternateUrl}>
   <div class="container py-8">
     <header class="page-header">
       <!-- 規範遵循：使用統一 SVG Line Icon，嚴格禁止 Emoji -->
@@ -246,27 +257,32 @@ const alternateUrl = `${base}/en/example/`;
         <Icon name="academic" size={16} />
         <span>研究指引 (Research Guide)</span>
       </div>
-      <h1 class="page-title">資訊工程專題研究方法論</h1>
-      <p class="page-subtitle">遵循 AGENTS.md 規範之 AI 頁面擴充示範。</p>
+      <h1 class="page-title">研究方法與專題藍圖導讀</h1>
+      <p class="page-subtitle">從既有知識庫 SSOT 動態彙整指定典籍之雙語頁面擴充示意。</p>
     </header>
 
-    <!-- 規範遵循：CSS Grid 必須搭配 minmax(0, 1fr) 風格軌道與 min-width: 0 防止橫向撐破版面 -->
-    <div class="content-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem;">
-      <div class="card" style="min-width: 0; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 8px;">
-        <h3>第一性原理實踐</h3>
-        <p style="color: var(--text-secondary); font-size: 0.95rem;">所有數學推導與硬體對齊合約均來自原始知識庫真理來源。</p>
-      </div>
+    <!-- 規範遵循：CSS Grid 搭配 minmax(min(280px, 100%), 1fr) 與 min-width: 0 防止橫向撐破版面 -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem;">
+      {guides.map(article => (
+        <article style="min-width: 0; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 8px;">
+          <span style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">{article.callNumber}</span>
+          <h2 style="font-size: 1.15rem; margin: 0.5rem 0;">
+            <a href={`${base}/zh/notes/${article.slug}/`}>{article.title}</a>
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 0.92rem; overflow-wrap: anywhere;">{article.excerpt}</p>
+        </article>
+      ))}
     </div>
   </div>
 </BaseLayout>
 ```
 
-**AI 遵守檢核表 (Agent Compliance Checklist)**：
-- [x] **SSOT 唯一真理**：內容自 `loadLibraryArticles()` 取得，絕不私自修改根目錄 Markdown 典籍。
-- [x] **雙語對稱路由**：同步在 `zh/example.astro` 與 `en/example.astro` 建立對稱頁面，並在 `Header.astro` 中英文選單同步配置。
-- [x] **零 Emoji 守則**：全面使用 `<Icon name="..." />`，UI 絕無任何 Emoji 字元。
-- [x] **單一 H1 與防溢出**：整頁僅有一個 `<h1>`，Grid 容器具備 `minmax(0, 1fr)` 與 `min-width: 0`。
-- [ ] **自動化回歸測試**：建置通過 65 頁＋新增雙語對稱頁之靜態產出，Playwright 端對端測試 100% 通過。
+**AI 新增頁面執行前／後檢核表（Agent Execution Checklist — 建立新頁時逐項核對後勾選）**：
+- [ ] **SSOT 唯一真理**：資料實際來自 `loadLibraryArticles()` 等現有來源並於模板中使用，未修改根目錄原始 Markdown 典籍。
+- [ ] **雙語對稱路由與導覽**：同步建立 `site/src/pages/zh/<page>.astro` 與 `site/src/pages/en/<page>.astro` 並於 `Header.astro` / `Footer.astro` 更新連結與 `alternateUrl`。
+- [ ] **零 Emoji 守則**：介面元素全面使用 `<Icon name="..." />`，無任何 Emoji 字元。
+- [ ] **單一 H1 與防溢出**：整頁僅有一個 `<h1>`，Grid 與卡片具備 `minmax(0, 1fr)` / `min-width: 0` 防溢出保護。
+- [ ] **完整實證測試通過**：實作完成後實際執行 `npm run verify-paths`、`npm run build`（產出頁數包含新增雙語頁）與 `npm test` 全部 PASS。
 
 ---
 

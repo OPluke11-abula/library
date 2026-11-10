@@ -69,14 +69,13 @@ library/
 
 ### 3.1 語言與排版
 - **繁體中文優先雙語介面**：介面預設為 Traditional Chinese（臺灣慣用語法，如「資訊工程」、「快取」、「向量」、「矩陣」），英文為次要版本。
-- **字型家族**：
-  - 中文主字型：`Noto Serif TC`, `Songti TC`, `Source Han Serif TW`, serif
-  - 西文標題：`Cinzel`, `Playfair Display`, `Georgia`, serif
-  - 內文與介面：`Inter`, system-ui, sans-serif
-  - 程式碼字型：`JetBrains Mono`, `Fira Code`, monospace
-  - 數學式：由 KaTeX 專用離線字型渲染
+- **零外部 CDN 字型依賴棧（Zero-External-Font System Stack）**：全站停用 Google Fonts（`fonts.googleapis.com` / `fonts.gstatic.com`）等外部執行期字型請求，統一採用零外部依賴之原生系統字型棧並於 `BaseLayout.astro`、`global.css` 與本規範保持完全同步：
+  - 襯線標題：`Georgia, "Times New Roman", "Noto Serif CJK TC", "Songti TC", "PMingLiU", serif`
+  - 內文與介面：`system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", Roboto, "Helvetica Neue", Arial, sans-serif`
+  - 程式碼字型：`ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`
+  - 數學式：由本地離線打包之 `/katex/` 樣式與字型渲染
 
-### 3.2 色彩哲學（Color Palette）
+### 3.2 色彩哲學與 WCAG AA 對比度（Color Palette & Accessibility）
 | 語意命名 | 色碼 / 描述 | 用途 |
 | :--- | :--- | :--- |
 | `bg-primary` | `#0b0f19` (極深群青藍黑) | 網站全域背景 |
@@ -84,18 +83,21 @@ library/
 | `bg-elevated` | `#1a2234` (高階面板) | 浮動卡片、程式碼區塊、抽屜面板 |
 | `text-primary` | `#f8fafc` (白銀灰) | 主要標題、核心閱讀內文 |
 | `text-secondary` | `#94a3b8` (石板灰) | 次要敘述、詮釋資料標籤 |
-| `text-muted` | `#64748b` (鉛灰) | 頁尾資訊、版權、時間戳記 |
+| `text-muted` | `#8a99ad` (靜謐岩灰) | 頁尾資訊、標籤徽章、時間戳記（全面通過 WCAG AA `>= 4.5:1` 對比度） |
 | `accent-gold` | `#d4af37` / `#f59e0b` (古雅典金) | 圖書館徽章、高亮強調、選中狀態 |
 | `accent-cyan` | `#38bdf8` (學術天藍) | 內部超連結、WikiLinks、數學常數 |
 | `border-subtle` | `#1e293b` (深邃幽藍) | 分隔線、卡片邊框 |
+
+- **可及性對比門檻**：全站深色表面（`bg-primary`、`bg-surface`、`bg-elevated`、`bg-hover`）上之一般文字對比度必須達到 WCAG AA `>= 4.5:1`、大字或徽章達 `>= 3.0:1`，不得為追求視覺弱化而降低次要文字可讀性。
 
 ### 3.3 UI 介面全面禁止使用 Emoji (UI No-Emoji Rule)
 - **核心禁令**：網站 UI 介面（導覽列 Header、頁尾 Footer、分館卡片、標籤、按鈕、狀態徽章、搜尋列）**全面嚴格禁止使用 Emoji**（如 🏛️、🌐、🔍、📚、⚖️、⚡ 等）。
 - **統一線條圖標系統**：所有 UI 圖標必須使用純 SVG Line Icon 元件 `src/components/Icon.astro`（包含 `atlas`, `compass`, `math`, `cpu`, `chart`, `network`, `camera`, `text`, `bot`, `settings`, `academic`, `globe`, `search`, `book-open`, `layers`, `shield-check`, `clock` 等）。
 - 嚴禁依賴任何未被打包的外部圖標套件或網路 CDN 字型。
 
-### 3.4 讀者第一閱讀版面 (Reader-First Editorial Layout)
-- **第一屏研讀導引與閱讀入口 (Study Orientation & Action)**：文章頂部優先呈現篇名、核心研讀導引（Study Orientation / Context Brief）以及顯眼的「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。移除不精確、誤導性的技術文章「預估閱讀時間」。
+### 3.4 讀者第一閱讀版面與手機首屏密度 (Reader-First & Mobile Density)
+- **第一屏研讀導引與行動端優先 (Study Orientation & Mobile Viewport)**: 文章頂部優先呈現篇名、基於原始敘述抽取之乾淨研讀導引（`Study Orientation` / `article.excerpt`）以及顯眼的「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。手機版（`390px`）必須收斂頂部留白、導覽列高度與過長篩選列（Catalog 分館/標籤採單列橫向捲動條、Reader 隱藏次要抽屜提示並維持單欄分頁），讓首屏無需長距離捲動即可觸及主要行動與實質內容。移除不精確、誤導性的技術文章「預估閱讀時間」。
+- **來源真實之研讀導引 (Source-Grounded Study Orientations)**：卡片摘要與 Reader 研讀導引僅得取自 Frontmatter 摘要或經淨化之開頭敘事段落；若原文開篇為表格、架構圖或研究契約而無獨立導讀段落，須平實退回至「分館 + 類別 + 篇名」之中立導覽，**嚴禁洩漏**縮排書目清單、ASCII 圖框、Markdown 表格、鍵值詮釋區塊、殘留 `\r` 或未編譯 LaTeX 指令（統一經 `texToReadablePlain` 轉換）。
 - **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（狀態、作者、嚴格 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴（Prerequisites / Successors），統一收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
 - **單一 H1 語意純淨性 (Strict Single H1 Invariant)**：Reader 頁面嚴格維持僅有一個主要的 `<h1>`（即版面 Header 的篇名）；原始 Markdown 中的文件大標題 `# 標題` 由渲染管線自語意層消除，避免重複顯示或污染 TOC，其餘內文層級（H2、H3 等）則 100% 完整保留。
 - **舒適閱讀欄寬與行高**：正文閱讀欄寬嚴格控制於 68–76 字元（`max-width: 760px`），行高 1.8，字級 1.05rem。
@@ -141,7 +143,7 @@ The interface should be concise without becoming ambiguous. Removing words is no
 - 所有 28 篇核心典籍皆擁有唯一的格式代號：`LIB-###`（例如 `LIB-000` 至 `LIB-906`）。
 - 任何與文章相關之邏輯、資料索引與錨點，均以此 ID 作為 Canonical Key。
 
-### 4.2 URL 結構對稱性
+### 4.2 URL 結構對稱性與語意導覽完整性 (URL Symmetry & Semantic Navigation)
 中文與英文版必須維持嚴格對稱的 URL 階層：
 - **首頁**：中文 `/library/zh/`，英文 `/library/en/`
 - **文章目錄 (Catalog)**：中文 `/library/zh/library/`，英文 `/library/en/library/`
@@ -149,7 +151,8 @@ The interface should be concise without becoming ambiguous. Removing words is no
 - **學習路徑 (Paths)**：中文 `/library/zh/paths/`，英文 `/library/en/paths/`
 - **關於 (About)**：中文 `/library/zh/about/`，英文 `/library/en/about/`
 
-在任何閱讀頁面，點擊語言切換鈕必須原位跳轉至對應語言之相同文章 ID，嚴禁跳回首頁。
+- **雙向對稱語言切換合約**：Header 導覽列與 Reader `.btn-mirror-link` 切換鈕必須保留相同 `LIB-###` ID 並嚴格跨語跳轉（`zh` → `en`、`en` → `zh`），嚴禁指向自身語系。
+- **正文語意連結防衝突與目標語系推斷**：原始 Markdown 頂部的重複「語言切換 / Language」引言橫幅由渲染管線於建置期剔除，避免與網頁導覽列衝突；正文中若存有任何 `.md` 篇目連結，渲染器須依來源路徑（`en/` 與 `Agent EN` → `en`，`0#_*/` → `zh`）精準判定目標語系，不得硬編碼當前頁面語系。
 
 ### 4.3 搜尋範圍誠實命名 (Search Scope Transparency)
 - 圖書館目錄檢索僅針對篇名、編號、標籤與摘要進行即時篩選，介面與文案**統一標示為「文章搜尋」**，嚴格禁止誇大宣稱為「全文搜尋」。
@@ -182,7 +185,7 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - 每條路徑必須明確標註：
      - **適用對象 (Target Audience)**：明確指出適合大學生、專題生或高階研究員。
      - **預期學習收穫 (Learning Outcomes)**：條列完成研讀後的具體認知成果。
-     - **起始推薦典籍 (Starting Volume)**：指明第一步的研讀心態與理論基石。
+     - **起始推薦典籍 (Starting Volume & Role Fidelity)**：真實說明起始節點角色——例如 `LIB-000` 為「全館總覽、分館分類、證據標記與 DAG 拓樸導航系統」，不得虛構其教授數學或幾何基礎（第一性原理與數學推導實際始於 `LIB-001` / `LIB-101`）。
      - **步驟研讀目的 (Step Objective)**：說明每個節點在路徑中的角色。
      - **為何進入下一步 (Why Next Step)**：說明從前一節點過渡到下一節點的邏輯因果關係。
 2. **數學級嚴謹的直接 DAG 拓樸邊 (Strict Direct DAG Edge Invariant)**：
@@ -311,7 +314,7 @@ const alternateUrl = `${base}/en/example/`;
    ```bash
    cd site && npm test
    ```
-   - 預期結果：47 項桌機（1440x900）與手機（390x844）測試全數 PASS（包含單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、LIB-504 真實性）。
+   - 預期結果：64 項靜態語料與桌機（1440x900）／手機（390x844）瀏覽器實測全數 PASS（涵蓋全 56 篇雙向語言切換與正文無衝突、56 篇研讀導引純淨度、零 Google Fonts 外部請求、WCAG AA 對比度 `>= 4.5:1`、`LIB-000` 路徑定位真實性、手機首屏密度、單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、`LIB-504` 真實性）。
 6. **六大視覺驗收截圖產出**：
    - `homepage-zh-desktop-1440.png`
    - `homepage-zh-mobile-390.png`

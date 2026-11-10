@@ -32,12 +32,7 @@ const siteTitle = `${title} | Grand Library`;
     <title>{siteTitle}</title>
     <meta name="description" content={description} />
 
-    <!-- Google Fonts for Academic Elegance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" />
-
-    <!-- KaTeX Stylesheet (Local offline synced) -->
+    <!-- KaTeX Stylesheet (Local offline synced; all UI/article typography uses zero-external-dependency system fonts) -->
     <link rel="stylesheet" href={`${base}/katex/katex.min.css`} />
   </head>
   <body>

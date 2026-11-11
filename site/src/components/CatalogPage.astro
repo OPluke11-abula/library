@@ -1,0 +1,508 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from './ArticleCard.astro';
+import Icon from './Icon.astro';
+import { KNOWLEDGE_HALLS, loadLibraryArticles } from '../lib/library';
+
+interface Props {
+  lang: 'zh' | 'en';
+}
+
+const { lang } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isZh = lang === 'zh';
+
+const { zh, en } = loadLibraryArticles();
+const articlesMap = isZh ? zh : en;
+const articles = Array.from(articlesMap.values()).sort((a, b) => a.callNumber.localeCompare(b.callNumber));
+const allTags = Array.from(new Set(articles.flatMap(a => a.tags))).sort();
+const alternateUrl = isZh ? `${base}/en/library/` : `${base}/zh/library/`;
+---
+
+<BaseLayout
+  title={isZh ? '典籍目錄 — Grand Library Catalog' : 'Library Catalog — Grand Library'}
+  lang={lang}
+  alternateUrl={alternateUrl}
+>
+  <div class="catalog-page">
+    <div class="container">
+      <header class="catalog-header">
+        <div class="catalog-rule" aria-hidden="true"></div>
+        <h1 class="catalog-title">{isZh ? '圖書館典籍目錄' : 'Knowledge Atlas Catalog'}</h1>
+        <p class="catalog-desc">
+          {isZh
+            ? '收錄全館 28 篇核心知識典籍，包含理論基石、計算機體系、深度神經網路與頂尖專題工程。支援文章篇名、編號、標籤與摘要即時檢索。'
+            : 'Encompassing all 28 core knowledge volumes across theoretical foundations, systems engineering, deep neural architectures, and frontier projects. Supports article-level search by title, ID, tag, and excerpt.'}
+        </p>
+      </header>
+
+      <!-- Filter & Search Controls -->
+      <div class="controls-container">
+        <div class="search-box">
+          <div class="search-icon">
+            <Icon name="search" size={16} />
+          </div>
+          <input
+            type="search"
+            id="catalog-search"
+            placeholder={isZh ? '文章搜尋：篇名、編號 (如 LIB-001)、標籤或核心關鍵字...' : 'Search articles by title, call number (e.g. LIB-001), tags, or keywords...'}
+            autocomplete="off"
+            aria-label={isZh ? '文章搜尋' : 'Article Search'}
+          />
+        </div>
+
+        <div class="filters-row">
+          <span class="filter-label">{isZh ? '分館過濾' : 'Wing Filter'}</span>
+          <div class="hall-pills" id="hall-filters">
+            <button class="pill-btn active" data-hall="all">{isZh ? '全部分館 (28)' : 'All Halls (28)'}</button>
+            {KNOWLEDGE_HALLS.map(hall => {
+              const count = articles.filter(a => a.hall.code === hall.code).length;
+              return (
+                <button class="pill-btn" data-hall={hall.code}>
+                  <Icon name={hall.iconName} size={13} />
+                  <span>{hall.code} {isZh ? hall.nameZh : hall.nameEn}</span>
+                  <span class="pill-count">({count})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div class="meta-row">
+          <div id="results-count" class="results-count">
+            {isZh ? '顯示 28 篇典籍' : 'Showing 28 Volumes'}
+          </div>
+          <div class="tag-shortcuts">
+            <span class="tag-label">{isZh ? '熱門標籤' : 'Topics'}</span>
+            {allTags.slice(0, 8).map(tag => (
+              <button class="tag-quick-btn" data-tag={tag}>#{tag}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Articles Grid -->
+      <div class="articles-grid" id="catalog-grid">
+        {articles.map(art => (
+          <div
+            class="grid-item"
+            data-title={art.title.toLowerCase()}
+            data-callno={art.callNumber.toLowerCase()}
+            data-tags={art.tags.join(',').toLowerCase()}
+            data-hall={art.hall.code}
+            data-excerpt={art.excerpt.toLowerCase()}
+          >
+            <ArticleCard article={art} lang={lang} />
+          </div>
+        ))}
+      </div>
+
+      <div id="empty-state" class="empty-state" hidden>
+        <div class="empty-icon">
+          <Icon name="book-open" size={32} />
+        </div>
+        <h3>{isZh ? '查無相符典籍' : 'No Matching Volumes Found'}</h3>
+        <p>{isZh ? '請嘗試其他搜尋關鍵字或清除篩選條件。' : 'Try another search query or reset filters to view all volumes.'}</p>
+        <button id="reset-filters" class="btn-secondary" style="margin-top: 1rem;">
+          {isZh ? '重設搜尋條件' : 'Reset Filters'}
+        </button>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const isZh = document.documentElement.lang.startsWith('zh');
+  const searchInput = document.getElementById('catalog-search') as HTMLInputElement;
+  const hallButtons = document.querySelectorAll('#hall-filters .pill-btn');
+  const tagButtons = document.querySelectorAll('.tag-quick-btn');
+  const gridItems = document.querySelectorAll('#catalog-grid .grid-item') as NodeListOf<HTMLElement>;
+  const resultsCount = document.getElementById('results-count');
+  const emptyState = document.getElementById('empty-state');
+  const resetBtn = document.getElementById('reset-filters');
+
+  let activeHall = 'all';
+  let activeTag = '';
+  let searchQuery = '';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const hallParam = urlParams.get('hall');
+  if (hallParam) {
+    activeHall = hallParam;
+    hallButtons.forEach(btn => {
+      if (btn.getAttribute('data-hall') === hallParam) {
+        hallButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  function filterArticles() {
+    let visibleCount = 0;
+    const query = searchQuery.trim().toLowerCase();
+
+    gridItems.forEach(item => {
+      const title = item.getAttribute('data-title') || '';
+      const callno = item.getAttribute('data-callno') || '';
+      const tags = item.getAttribute('data-tags') || '';
+      const excerpt = item.getAttribute('data-excerpt') || '';
+      const hall = item.getAttribute('data-hall') || '';
+
+      const matchesHall = activeHall === 'all' || hall === activeHall;
+      const matchesTag = !activeTag || tags.includes(activeTag.toLowerCase());
+      const matchesSearch = !query ||
+        title.includes(query) ||
+        callno.includes(query) ||
+        tags.includes(query) ||
+        excerpt.includes(query);
+
+      if (matchesHall && matchesTag && matchesSearch) {
+        item.style.display = '';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    if (resultsCount) {
+      resultsCount.textContent = isZh ? `顯示 ${visibleCount} 篇典籍` : `Showing ${visibleCount} Volumes`;
+    }
+
+    if (emptyState) {
+      if (visibleCount === 0) emptyState.removeAttribute('hidden');
+      else emptyState.setAttribute('hidden', '');
+    }
+  }
+
+  searchInput?.addEventListener('input', (e) => {
+    searchQuery = (e.target as HTMLInputElement).value;
+    filterArticles();
+  });
+
+  hallButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      hallButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeHall = btn.getAttribute('data-hall') || 'all';
+      filterArticles();
+    });
+  });
+
+  tagButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-tag') || '';
+      if (activeTag === tag) {
+        activeTag = '';
+        btn.classList.remove('active');
+      } else {
+        tagButtons.forEach(b => b.classList.remove('active'));
+        activeTag = tag;
+        btn.classList.add('active');
+      }
+      filterArticles();
+    });
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    searchQuery = '';
+    activeHall = 'all';
+    activeTag = '';
+    if (searchInput) searchInput.value = '';
+    hallButtons.forEach(b => b.classList.remove('active'));
+    document.querySelector('#hall-filters [data-hall="all"]')?.classList.add('active');
+    tagButtons.forEach(b => b.classList.remove('active'));
+    filterArticles();
+  });
+
+  if (hallParam) {
+    filterArticles();
+  }
+</script>
+
+<style>
+  .catalog-page {
+    padding: 3rem 0 5rem;
+  }
+  .catalog-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+  }
+  .catalog-rule {
+    width: 36px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
+    border-radius: 2px;
+    margin: 0 auto 0.85rem;
+  }
+  .catalog-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-top: 0;
+    margin-bottom: 0.7rem;
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .catalog-desc {
+    font-size: 0.96rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin-bottom: 0;
+  }
+
+  .controls-container {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 0 var(--specular-edge), var(--shadow-card);
+    border-radius: 12px;
+    padding: 1.45rem;
+    margin-bottom: 2.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+  .search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+  }
+  #catalog-search {
+    width: 100%;
+    padding: 0.78rem 1rem 0.78rem 2.75rem;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 7px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.18s var(--ease-out-expo), box-shadow 0.18s var(--ease-out-expo);
+  }
+  #catalog-search:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(86, 204, 242, 0.16);
+  }
+  .filters-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  @media (min-width: 768px) {
+    .filters-row {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+  .filter-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    min-width: 78px;
+    padding-top: 0.32rem;
+  }
+  .hall-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.42rem;
+  }
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.32rem 0.68rem;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.18s var(--ease-out-expo);
+  }
+  .pill-btn:hover {
+    border-color: var(--border-accent);
+    color: #ffffff;
+  }
+  .pill-btn.active {
+    background-color: rgba(86, 204, 242, 0.12);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-weight: 600;
+  }
+  .pill-count {
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+  @media (min-width: 768px) {
+    .meta-row {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+  .results-count {
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-cyan);
+  }
+  .tag-shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .tag-label {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+  .tag-quick-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: 5px;
+    padding: 0.16rem 0.48rem;
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s var(--ease-out-expo);
+  }
+  .tag-quick-btn:hover, .tag-quick-btn.active {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    background-color: rgba(223, 192, 104, 0.1);
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.4rem;
+  }
+  .grid-item {
+    min-width: 0;
+    display: flex;
+  }
+  @media (min-width: 768px) {
+    .articles-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .articles-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 0 var(--specular-edge);
+    border-radius: 10px;
+    margin: 2rem auto;
+    max-width: 480px;
+  }
+  .empty-icon {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+  .empty-state h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+  .empty-state p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.52rem 1.05rem;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: var(--bg-elevated);
+    color: #ffffff;
+    border: 1px solid var(--border-accent);
+  }
+
+  @media (max-width: 767px) {
+    .catalog-page {
+      padding: 1.35rem 0 2.75rem;
+    }
+    .catalog-header {
+      margin-bottom: 1.15rem;
+    }
+    .catalog-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.45rem;
+    }
+    .catalog-desc {
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .controls-container {
+      padding: 0.85rem;
+      gap: 0.7rem;
+      margin-bottom: 1.15rem;
+    }
+    .filters-row {
+      gap: 0.4rem;
+    }
+    .filter-label {
+      padding-top: 0;
+    }
+    .hall-pills {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      max-width: 100%;
+      padding-bottom: 0.25rem;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pill-btn {
+      flex-shrink: 0;
+      padding: 0.28rem 0.55rem;
+      font-size: 0.76rem;
+    }
+    .meta-row {
+      gap: 0.5rem;
+      padding-top: 0.65rem;
+    }
+    .tag-shortcuts {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      max-width: 100%;
+      padding-bottom: 0.2rem;
+      scrollbar-width: thin;
+    }
+    .tag-label, .tag-quick-btn {
+      flex-shrink: 0;
+    }
+    .articles-grid {
+      gap: 1rem;
+    }
+  }
+</style>

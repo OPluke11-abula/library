@@ -1,0 +1,23 @@
+{
+  "23b873106f156064": {
+    "file": "00_總覽與拓樸導覽/LIB-000 圖書館總覽與拓樸導覽系統 (Grand Library Index & Navigator).md",
+    "width": 998,
+    "height": 3207,
+    "viewBox": "28.5 4 997.5 3207",
+    "firstLine": "flowchart TD"
+  },
+  "bf45579b9a696d15": {
+    "file": "00_總覽與拓樸導覽/LIB-001 深度學習第一性原理先修精要：模型如何學習的六大基石 (Deep Learning First Principles - The Six Pillars of How Models Learn).md",
+    "width": 1320,
+    "height": 124,
+    "viewBox": "4 4 1320 124",
+    "firstLine": "flowchart LR"
+  },
+  "058e35015305cd90": {
+    "file": "en/00_overview/LIB-000 Grand Library Index & Navigator (Agent EN).md",
+    "width": 838,
+    "height": 638,
+    "viewBox": "4 4 837.4375 638",
+    "firstLine": "graph TD"
+  }
+}

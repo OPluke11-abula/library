@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import katex from 'katex';
@@ -7,7 +8,9 @@ import { Marked } from 'marked';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const SITE_DIR = path.resolve(__dirname, '../../');
 const ROOT_DIR = path.resolve(__dirname, '../../../');
+const MERMAID_CACHE_DIR = path.join(SITE_DIR, 'src', 'data', 'mermaid-cache');
 
 export interface KnowledgeHall {
   id: string;
@@ -134,10 +137,22 @@ export const KNOWLEDGE_HALLS: KnowledgeHall[] = [
   }
 ];
 
+export type PedagogyStage = 'understand' | 'explore' | 'technical' | 'research';
+
 export interface TocItem {
   id: string;
   text: string;
+  shortText: string;
   level: number;
+  stage: PedagogyStage;
+}
+
+export interface ArticleSection {
+  stage: PedagogyStage;
+  heading: string;
+  shortHeading: string;
+  id: string;
+  html: string;
 }
 
 export interface RuleInfo {
@@ -169,9 +184,14 @@ export interface ArticleData {
   filePath: string;
   rawMarkdown: string;
   htmlContent: string;
+  leadContextHtml: string;
+  lessonSections: ArticleSection[];
+  researchSections: ArticleSection[];
+  takeaways: string[];
   toc: TocItem[];
   rules: RuleInfo[];
   excerpt: string;
+  coreFocus: string;
   executiveBrief: string;
 }
 
@@ -280,6 +300,9 @@ function texToReadablePlain(tex: string): string {
     .replace(/\\(?:mathbb|mathcal|mathbf|boldsymbol|mathrm|text|operatorname)\{([^}]+)\}/g, '$1')
     .replace(/\\boldsymbol\s+/g, '')
     .replace(/\\(ln|log|exp|sin|cos|max|min|arg)\b/g, '$1')
+    .replace(/\^2\b/g, '²')
+    .replace(/\^3\b/g, '³')
+    .replace(/\^T\b/g, 'ᵀ')
     .replace(/[{}]/g, '')
     .replace(/\\/g, '')
     .replace(/\s+/g, ' ')
@@ -292,6 +315,37 @@ function stripLangBannerAndLeadingH1(rawMarkdown: string): string {
     ''
   );
   return withoutLangBanner.replace(/^#\s+[^\r\n]+(?:\r?\n|$)/m, '');
+}
+
+function buildCoreFocus(
+  frontmatter: Record<string, any>,
+  title: string,
+  hall: KnowledgeHall,
+  lang: 'zh' | 'en'
+): string {
+  const explicit = frontmatter.summary || frontmatter.abstract;
+  if (typeof explicit === 'string' && explicit.trim().length > 0) {
+    return explicit.replace(/\r?\n/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  const mathItems = Array.isArray(frontmatter.math_foundations)
+    ? frontmatter.math_foundations.map((v: unknown) => String(v).trim()).filter(Boolean).slice(0, 3)
+    : [];
+  if (mathItems.length > 0) {
+    if (lang === 'zh') {
+      return `本單元隸屬「${hall.nameZh}」，聚焦 ${mathItems.join('、')}。`;
+    }
+    const listText = mathItems.length === 1
+      ? mathItems[0]
+      : `${mathItems.slice(0, -1).join(', ')} and ${mathItems[mathItems.length - 1]}`;
+    return `Part of ${hall.nameEn}, focusing on ${listText}.`;
+  }
+  return buildNeutralOrientation(
+    title,
+    hall,
+    String(frontmatter.category || ''),
+    String(frontmatter.module || ''),
+    lang
+  );
 }
 
 function buildNeutralOrientation(
@@ -369,12 +423,9 @@ function extractStudyOrientation(
     }
     if (inCodeFence) continue;
 
-    if (/^\$\$/.test(trimmed)) {
+    if (!inCodeFence && (rawLine.match(/\$\$/g) || []).length % 2 === 1) {
       flushBuffer();
-      // Check single-line $$ ... $$ vs multi-line block
-      if (trimmed === '$$' || !/\$\$$/.test(trimmed.slice(2))) {
-        inMathBlock = !inMathBlock;
-      }
+      inMathBlock = !inMathBlock;
       inListItem = false;
       inTable = false;
       continue;
@@ -444,7 +495,7 @@ function extractStudyOrientation(
   flushBuffer();
 
   // Prefer substantive prose from the opening sections (Sections 0..3) before falling back
-  const danglingFormulaStarter = /^(?:where\b|which\b|whereby\b|herein\b|here\b|thus\b|therefore\b|hence\b|since\b|this\s+restores\b|其中\s|即[:：]|此處|上式|代入)/i;
+  const danglingFormulaStarter = /^(?:where\b|which\b|whereby\b|herein\b|here\b|thus\b|therefore\b|hence\b|since\b|this\s+restores\b|because\s+[A-Z]\b|其中\s|即[:：]|此處|上式|代入)/i;
   for (const cand of candidates) {
     if (cand.sectionIdx > 2) break;
     const cleaned = cleanProseCandidate(cand.text);
@@ -452,7 +503,7 @@ function extractStudyOrientation(
     const minLen = hasCjk ? 24 : 50;
     if (cleaned.length < minLen) continue;
     if (danglingFormulaStarter.test(cleaned)) continue;
-    if (/[\$\\{}]|┌|└|│|---|\|\s*---/.test(cleaned)) continue;
+    if (/[\$\\{}∄∃∀∈∉⇝]|┌|└|│|---|\|\s*---|\|V\|/.test(cleaned)) continue;
     // Handle colon-terminated paragraphs introducing lists/equations: keep earlier complete sentence(s) if present, else skip
     let candidateText = cleaned;
     if (/[:：]$/.test(candidateText)) {
@@ -472,24 +523,372 @@ function extractStudyOrientation(
     return candidateText;
   }
 
-  return buildNeutralOrientation(
-    title,
-    hall,
-    String(frontmatter.category || ''),
-    String(frontmatter.module || ''),
-    lang
-  );
+  return buildCoreFocus(frontmatter, title, hall, lang);
 }
 
-export function renderArticleMarkdown(
-  rawMarkdown: string,
-  lang: 'zh' | 'en',
-  base: string = '/library',
-  sourceLabel: string = ''
-): { html: string; toc: TocItem[] } {
-  const toc: TocItem[] = [];
+export const CONCISE_VOLUME_LABELS: Readonly<Record<string, { zh: string; en: string }>> = {
+  'lib-000': { zh: 'LIB-000 · 圖書館總覽與導航', en: 'LIB-000 · Library Navigator' },
+  'lib-001': { zh: 'LIB-001 · 深度學習第一性原理', en: 'LIB-001 · DL First Principles' },
+  'lib-101': { zh: 'LIB-101 · 線性代數與高維幾何', en: 'LIB-101 · Linear Algebra & Geometry' },
+  'lib-102': { zh: 'LIB-102 · 機率、資訊論與變分推論', en: 'LIB-102 · Probability & Variational Inference' },
+  'lib-104': { zh: 'LIB-104 · 凸最佳化與梯度幾何', en: 'LIB-104 · Convex Optimization' },
+  'lib-203': { zh: 'LIB-203 · GPU 體系結構與硬體對齊', en: 'LIB-203 · GPU & Hardware Architecture' },
+  'lib-301': { zh: 'LIB-301 · 資料偏差與領域漂移', en: 'LIB-301 · Dataset Bias & Domain Shift' },
+  'lib-401': { zh: 'LIB-401 · CNN 空間歸納偏置', en: 'LIB-401 · CNN Inductive Bias' },
+  'lib-405': { zh: 'LIB-405 · Transformer 注意力機制', en: 'LIB-405 · Transformer & Attention' },
+  'lib-406': { zh: 'LIB-406 · 擴散 SDE 與流匹配', en: 'LIB-406 · Diffusion & Flow Matching' },
+  'lib-407': { zh: 'LIB-407 · 指令擴散影像編輯', en: 'LIB-407 · Diffusion Image Editing' },
+  'lib-408': { zh: 'LIB-408 · 情境感知生成與融合', en: 'LIB-408 · Context-Aware Object Insertion' },
+  'lib-501': { zh: 'LIB-501 · 視覺前處理與質心對齊', en: 'LIB-501 · CV Center-of-Mass Alignment' },
+  'lib-502': { zh: 'LIB-502 · 相機射影幾何與 SfM', en: 'LIB-502 · Projective Geometry & SfM' },
+  'lib-504': { zh: 'LIB-504 · NeRF 與 3D 高斯潑濺', en: 'LIB-504 · NeRF & 3D Gaussian Splatting' },
+  'lib-505': { zh: 'LIB-505 · 開放詞彙 3DGS 語意檢索', en: 'LIB-505 · Open-Vocab 3DGS Retrieval' },
+  'lib-506': { zh: 'LIB-506 · LLM + 3DGS 空間問答導覽', en: 'LIB-506 · LLM + 3DGS Scene QA' },
+  'lib-602': { zh: 'LIB-602 · 現代 LLM 與縮放定律', en: 'LIB-602 · Modern LLM & Scaling Laws' },
+  'lib-603': { zh: 'LIB-603 · 密集檢索、RAG 與 CAG', en: 'LIB-603 · Dense Retrieval, RAG & CAG' },
+  'lib-703': { zh: 'LIB-703 · LLM Agent 認知與協議', en: 'LIB-703 · LLM Agent Architecture' },
+  'lib-704': { zh: 'LIB-704 · S1 雙進程反射代理人', en: 'LIB-704 · Dual-Process S1 Agents' },
+  'lib-801': { zh: 'LIB-801 · 模型校準與不確定性', en: 'LIB-801 · Calibration & Uncertainty' },
+  'lib-802': { zh: 'LIB-802 · 模型量化與低精度推論', en: 'LIB-802 · Quantization & Low-Precision' },
+  'lib-901': { zh: 'LIB-901 · MNIST 生產系統復盤', en: 'LIB-901 · Production MNIST Post-Mortem' },
+  'lib-903': { zh: 'LIB-903 · 專題藍圖與科研演進', en: 'LIB-903 · Capstone Blueprint & Evolution' },
+  'lib-904': { zh: 'LIB-904 · 學術文獻體系與對齊', en: 'LIB-904 · Research Literature Synthesis' },
+  'lib-905': { zh: 'LIB-905 · 前沿視覺多模態專題藍圖', en: 'LIB-905 · Multimodal Capstone Blueprints' },
+  'lib-906': { zh: 'LIB-906 · 對話質疑認知修訂基準', en: 'LIB-906 · Conversational Epistemic Revision' },
+};
 
-  // Stage 1: Protect code blocks and inline code
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeHtmlAttr(text: string): string {
+  return escapeHtml(text).replace(/\r?\n/g, '&#10;');
+}
+
+export function formatConciseHeading(plainText: string, maxLen = 40): string {
+  let clean = plainText
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .replace(/、\s+/g, '、')
+    .trim();
+  // Remove trailing verbose parenthetical translation when CJK heading already conveys topic
+  if (/[\u4e00-\u9fff]/.test(clean)) {
+    clean = clean.replace(/\s*\([A-Za-z0-9\s,&:/+\-.'’]{14,}\)\s*$/, '').trim();
+  }
+  clean = clean.replace(/\s*\(Agent\s*(?:EN|Edition)\)\s*$/i, '').trim();
+  if (clean.length <= maxLen) return clean;
+  const cut = clean.slice(0, maxLen - 1);
+  const sep = Math.max(cut.lastIndexOf('：'), cut.lastIndexOf(':'), cut.lastIndexOf('、'), cut.lastIndexOf(' '));
+  const shortened = sep > maxLen * 0.45 ? cut.slice(0, sep).trim() : cut.trim();
+  return `${shortened}…`;
+}
+
+export function formatConciseWikiLabel(
+  slug: string,
+  rawTarget: string,
+  customLabel: string | undefined,
+  lang: 'zh' | 'en'
+): { display: string; fullTitle: string } {
+  const fullTitle = rawTarget.trim();
+  if (customLabel && customLabel.trim().length > 0) {
+    return { display: customLabel.trim(), fullTitle };
+  }
+  const preset = CONCISE_VOLUME_LABELS[slug.toLowerCase()];
+  if (preset) {
+    return { display: preset[lang], fullTitle };
+  }
+  const callMatch = fullTitle.match(/LIB-\d{3}/i);
+  const callNo = callMatch ? callMatch[0].toUpperCase() : slug.toUpperCase();
+  const remainder = fullTitle.replace(/^LIB-\d{3}\s*/i, '');
+  const shortRemainder = formatConciseHeading(remainder, 24);
+  return {
+    display: shortRemainder ? `${callNo} · ${shortRemainder}` : callNo,
+    fullTitle,
+  };
+}
+
+let cachedMermaidManifest: Record<string, { file?: string; width: number; height: number; firstLine?: string }> | null = null;
+function getMermaidManifest(): Record<string, { file?: string; width: number; height: number; firstLine?: string }> {
+  if (cachedMermaidManifest) return cachedMermaidManifest;
+  const manifestPath = path.join(MERMAID_CACHE_DIR, 'manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    try {
+      cachedMermaidManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      return cachedMermaidManifest!;
+    } catch {
+      cachedMermaidManifest = {};
+      return cachedMermaidManifest;
+    }
+  }
+  cachedMermaidManifest = {};
+  return cachedMermaidManifest;
+}
+
+const SUPPORTED_MERMAID_HEADER_RE = /^(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram(?:-v2)?|erDiagram|journey|gantt|pie|gitGraph|mindmap|timeline|quadrantChart)\b/i;
+
+function inferMermaidCaption(rawSource: string, lang: 'zh' | 'en'): string {
+  const lines = rawSource.replace(/\r\n?/g, '\n').split('\n').map(l => l.trim()).filter(Boolean);
+  const commentLine = lines.find(l => l.startsWith('%%') && !l.startsWith('%%{'));
+  if (commentLine) {
+    const cleaned = commentLine.replace(/^%%+\s*/, '').replace(/\s*\([^)]{10,}\)\s*$/, '').trim();
+    if (cleaned.length >= 4) return cleaned;
+  }
+  const headerLine = lines.find(l => !l.startsWith('%%')) || '';
+  if (/^(?:flowchart|graph)\b/i.test(headerLine)) {
+    return lang === 'zh' ? '概念架構與拓樸流程圖' : 'Conceptual Flow & Architecture Diagram';
+  }
+  if (/^sequenceDiagram\b/i.test(headerLine)) {
+    return lang === 'zh' ? '系統時序互動圖' : 'System Sequence Diagram';
+  }
+  return lang === 'zh' ? '視覺圖表' : 'Architecture Diagram';
+}
+
+export function renderMermaidBlockHtml(rawSource: string, lang: 'zh' | 'en'): string {
+  const normalized = rawSource.replace(/\r\n?/g, '\n').trim();
+  const firstCodeLine = normalized.split('\n').map(l => l.trim()).find(l => l && !l.startsWith('%%')) || '';
+  const escapedSource = escapeHtml(normalized);
+  const caption = inferMermaidCaption(normalized, lang);
+
+  if (!normalized || !SUPPORTED_MERMAID_HEADER_RE.test(firstCodeLine)) {
+    const errTitle = lang === 'zh' ? '流程圖語法無法渲染' : 'Diagram Rendering Failed';
+    const errDesc = lang === 'zh'
+      ? '無法辨識有效的 Mermaid 圖表定義，已保留原始語法以維持內容完整性。'
+      : 'Unrecognized or unsupported Mermaid diagram definition; raw source preserved below.';
+    return `<figure class="mermaid-figure mermaid-figure-error" role="group" aria-label="${escapeHtmlAttr(errTitle)}">
+  <div class="mermaid-error-box" role="alert">
+    <strong>${escapeHtml(errTitle)}</strong>
+    <p>${escapeHtml(errDesc)}</p>
+  </div>
+  <details class="mermaid-source-drawer" open>
+    <summary>${lang === 'zh' ? '查看原始碼 (Mermaid)' : 'View Mermaid Source'}</summary>
+    <pre class="mermaid-raw-source"><code>${escapedSource}</code></pre>
+  </details>
+</figure>`;
+  }
+
+  const hash = crypto.createHash('sha256').update(normalized).digest('hex').slice(0, 16);
+  const manifest = getMermaidManifest();
+  const svgPath = path.join(MERMAID_CACHE_DIR, `${hash}.svg`);
+  const hasCachedSvg = fs.existsSync(svgPath);
+  const meta = manifest[hash];
+  const diagramHeight = meta?.height || 0;
+  const diagramWidth = meta?.width || 0;
+  const isTall = diagramHeight > 820;
+
+  const toolbarHtml = `<figcaption class="mermaid-toolbar">
+    <div class="mermaid-caption">
+      <span class="mermaid-kind-badge">${escapeHtml(firstCodeLine.split(/\s+/)[0].toUpperCase())}</span>
+      <span class="mermaid-title-text">${escapeHtml(caption)}</span>
+    </div>
+    <div class="mermaid-controls" role="group" aria-label="${lang === 'zh' ? '圖表檢視控制' : 'Diagram view controls'}">
+      <button type="button" class="mermaid-btn" data-zoom-action="out" aria-label="${lang === 'zh' ? '縮小圖表' : 'Zoom out'}">−</button>
+      <button type="button" class="mermaid-btn mermaid-zoom-reset" data-zoom-action="reset" aria-label="${lang === 'zh' ? '重設圖表縮放' : 'Reset zoom'}">100%</button>
+      <button type="button" class="mermaid-btn" data-zoom-action="in" aria-label="${lang === 'zh' ? '放大圖表' : 'Zoom in'}">+</button>
+      ${isTall ? `<button type="button" class="mermaid-btn mermaid-expand-btn" data-zoom-action="toggle-height" aria-expanded="false">${lang === 'zh' ? '展開全高' : 'Full height'}</button>` : ''}
+    </div>
+  </figcaption>`;
+
+  const sourceDrawerHtml = `<details class="mermaid-source-drawer">
+    <summary>${lang === 'zh' ? '查看原始碼' : 'View Source'}</summary>
+    <pre class="mermaid-raw-source"><code>${escapedSource}</code></pre>
+  </details>`;
+
+  if (hasCachedSvg) {
+    const svgMarkup = fs.readFileSync(svgPath, 'utf-8')
+      .replace(/<svg\b/i, `<svg role="img" aria-label="${escapeHtmlAttr(caption)}"`);
+    const isWideStrip = diagramWidth > 1050 && diagramHeight > 0 && diagramHeight < 400;
+    return `<figure class="mermaid-figure" data-mermaid-rendered="true" data-diagram-width="${diagramWidth}" data-diagram-height="${diagramHeight}"${isWideStrip ? ' data-diagram-wide="true"' : ''}>
+  ${toolbarHtml}
+  <div class="mermaid-viewport${isTall ? ' is-tall' : ''}" tabindex="0" role="region" aria-label="${escapeHtmlAttr(caption)}">
+    <div class="mermaid-svg-stage">${svgMarkup}</div>
+  </div>
+  ${sourceDrawerHtml}
+</figure>`;
+  }
+
+  return `<figure class="mermaid-figure mermaid-figure-pending" data-mermaid-pending="true" data-mermaid-hash="${hash}" data-mermaid-src="${escapeHtmlAttr(normalized)}">
+  ${toolbarHtml}
+  <div class="mermaid-viewport" tabindex="0" role="region" aria-label="${escapeHtmlAttr(caption)}">
+    <div class="mermaid-svg-stage">
+      <p class="mermaid-loading-note">${lang === 'zh' ? '正在本地載入互動圖表…' : 'Rendering local diagram…'}</p>
+    </div>
+  </div>
+  <div class="mermaid-error-box" role="alert" hidden>
+    <strong>${lang === 'zh' ? '圖表渲染失敗' : 'Diagram Rendering Failed'}</strong>
+    <p class="mermaid-error-msg"></p>
+  </div>
+  ${sourceDrawerHtml}
+</figure>`;
+}
+
+interface RawMarkdownSection {
+  heading: string;
+  markdown: string;
+}
+
+function splitMarkdownByH2(markdownBody: string): { preamble: string; sections: RawMarkdownSection[] } {
+  const lines = markdownBody.replace(/\r\n?/g, '\n').split('\n');
+  const preambleLines: string[] = [];
+  const sections: RawMarkdownSection[] = [];
+  let current: { heading: string; lines: string[] } | null = null;
+  let inCodeFence = false;
+  let inMathBlock = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^```/.test(trimmed)) {
+      inCodeFence = !inCodeFence;
+    } else if (!inCodeFence && (line.match(/\$\$/g) || []).length % 2 === 1) {
+      inMathBlock = !inMathBlock;
+    }
+
+    if (!inCodeFence && !inMathBlock) {
+      const h2Match = line.match(/^##\s+(.+)$/);
+      if (h2Match) {
+        if (current) {
+          sections.push({ heading: current.heading, markdown: current.lines.join('\n') });
+        }
+        current = { heading: h2Match[1].trim(), lines: [] };
+        continue;
+      }
+    }
+
+    if (current) {
+      current.lines.push(line);
+    } else {
+      preambleLines.push(line);
+    }
+  }
+
+  if (current) {
+    sections.push({ heading: current.heading, markdown: current.lines.join('\n') });
+  }
+
+  return { preamble: preambleLines.join('\n').trim(), sections };
+}
+
+function splitCoordinateContent(coordMarkdown: string): { promotedIntroMd: string; adminCoordMd: string } {
+  const lines = coordMarkdown.replace(/\r\n?/g, '\n').split('\n');
+  const promotedLines: string[] = [];
+  const adminLines: string[] = [];
+  let targetBucket: 'promoted' | 'admin' = 'admin';
+  let inCodeFence = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (/^```/.test(trimmed)) {
+      if (!inCodeFence) {
+        // Standalone diagram code blocks in top coordinates (e.g. LIB-904 overview diagram) belong in Concept Overview
+        inCodeFence = true;
+        targetBucket = 'promoted';
+        promotedLines.push(line);
+      } else {
+        inCodeFence = false;
+        promotedLines.push(line);
+        targetBucket = 'admin';
+      }
+      continue;
+    }
+
+    if (inCodeFence) {
+      promotedLines.push(line);
+      continue;
+    }
+
+    if (trimmed === '---') {
+      continue;
+    }
+
+    // Core framing items to promote above prerequisites/bibliography
+    if (/^-\s*\*\*(?:核心定位|核心主題|核心目標|學術定位|Core Scope)[:：]?\*\*/i.test(trimmed)) {
+      targetBucket = 'promoted';
+      promotedLines.push(line.replace(/^-\s*/, ''));
+      continue;
+    }
+
+    // Administrative / bibliography coordinate items stay in Research Details
+    if (
+      /^-\s*\*\*(?:前置依賴|後續節點|難度等級|權威期刊|主要文獻|Prerequisites?|Successors?)/i.test(trimmed) ||
+      /^\*\*(?:English title|Chinese title|Document role|Current phase|Evidence status):/i.test(trimmed)
+    ) {
+      targetBucket = 'admin';
+      adminLines.push(line);
+      continue;
+    }
+
+    // Epigraph / Research question blockquotes in coordinates belong in Concept Overview
+    if (trimmed.startsWith('>')) {
+      targetBucket = 'promoted';
+      promotedLines.push(line);
+      continue;
+    }
+
+    if (!trimmed) {
+      if (promotedLines.length > 0 && promotedLines[promotedLines.length - 1] !== '') promotedLines.push('');
+      if (adminLines.length > 0 && adminLines[adminLines.length - 1] !== '') adminLines.push('');
+      targetBucket = 'admin';
+      continue;
+    }
+
+    if (targetBucket === 'promoted') {
+      promotedLines.push(line);
+    } else {
+      adminLines.push(line);
+    }
+  }
+
+  return {
+    promotedIntroMd: promotedLines.join('\n').trim(),
+    adminCoordMd: adminLines.join('\n').trim(),
+  };
+}
+
+function classifySectionStage(heading: string, bodyMd: string): 'coordinates' | PedagogyStage {
+  if (/^(?:🧭\s*)?拓樸導航與概念座標|^導讀與概念座標|^Conceptual Coordinates/i.test(heading)) {
+    return 'coordinates';
+  }
+  // Visual diagrams (e.g. Mermaid in LIB-000 EN section 5) stay open in Explore so knowledge graphs never hide collapsed
+  if (/```mermaid\b/i.test(bodyMd)) {
+    return 'explore';
+  }
+  if (/學士直觀|前言|心智模型|問題背景|老師簡報|Problem Statement|Conceptual Mental Model|Executive Conceptual Mental Model|Physical Formulation|Attention Map Modulation|目錄索引|正式研究定位/i.test(heading)) {
+    return 'understand';
+  }
+  if (/核心基石|推薦路徑|全域拓樸|五大專題全景|十大分館|Taxonomy|Defensible Status|Evidence Provenance|Topological|Five Grand|Failure Modes|失效模式|8-Stage|Six Evolutionary|學習拓樸路徑|總結複習|數學先修|學術科研第一性原理|全棧工程交付矩陣|Solo Full-Stack|Minimum Viable/i.test(heading)) {
+    return 'explore';
+  }
+  if (/數學形式化|Mathematical|博士級|計算機體系|Systems|Pipeline|Microarchitecture|端到端系統|工業級|極簡可執行|Production|模組化生命週期|階段：我們做的|進階實驗|Theoretical Derivations|國科會專題計畫|NSTC|Proposal Framework|Ledger-Backtrack/i.test(heading)) {
+    return 'technical';
+  }
+  if (/AI Agent|Agent Invariant|Agent Protocol|System Invariant|系統架構規範|系統規範|合約|契約|Contract|權威|參考文獻|文獻|Canonical|Peer-Reviewed|推甄|攻略|Audit|Metrics|Baselines|Gap Matrix|Benchmark|Reviewer|Temporal Ground|Research Review|Research State|Paper Result|Technical Guardrails|相關研究|研究狀態|課程對齊|館藏研讀|工作契約|PushBack-Bench|Novelty Hypothesis|Invariants & Implementation/i.test(heading)) {
+    return 'research';
+  }
+  return 'explore';
+}
+
+function renderMarkdownFragment(
+  rawFragment: string,
+  lang: 'zh' | 'en',
+  base: string,
+  sourceLabel: string,
+  stage: PedagogyStage,
+  toc: TocItem[]
+): string {
+  // Extract Mermaid blocks BEFORE general fenced code blocks so diagrams become visual SVGs
+  const mermaidTokens: string[] = [];
+  let processed = rawFragment.replace(/^```mermaid[ \t]*\r?\n([\s\S]*?)```/gim, (_m, src) => {
+    const idx = mermaidTokens.length;
+    mermaidTokens.push(renderMermaidBlockHtml(src, lang));
+    return `\n\nMERMAIDX${idx}X\n\n`;
+  });
+
+  // Protect remaining non-Mermaid fenced code blocks and inline code
   const codeBlocks: string[] = [];
   function saveCode(match: string): string {
     const idx = codeBlocks.length;
@@ -497,22 +896,15 @@ export function renderArticleMarkdown(
     return `%%%CODEBLOCK_${idx}%%%`;
   }
 
-  // Strip duplicate inline language-switcher blockquote and leading H1 to preserve
-  // canonical navigation/header H1 and prevent duplicate H1s or wrong body language links.
-  const contentWithoutLeadingH1 = stripLangBannerAndLeadingH1(rawMarkdown);
-  let processed = contentWithoutLeadingH1.replace(/```[\s\S]*?```/g, saveCode);
-  // Protect inline code blocks (`...`)
+  processed = processed.replace(/```[\s\S]*?```/g, saveCode);
   processed = processed.replace(/`[^`\n]+`/g, saveCode);
 
-  // Stage 2: Protect & Pre-render LaTeX math
-  // Use alphanumeric token identifiers without underscores to prevent markdown emphasis interference
   const mathTokens: string[] = [];
   const rawMathSources: string[] = [];
 
   function saveMath(math: string, isBlock: boolean): string {
     const idx = mathTokens.length;
     const extractedCodes: string[] = [];
-    // Separate any inline code tokens accidentally wrapped inside $...$ so KaTeX neither comments out %%% nor swallows them
     const rawMath = math
       .replace(/%%%CODEBLOCK_\d+%%%/g, (codeTok) => {
         extractedCodes.push(codeTok);
@@ -526,16 +918,12 @@ export function renderArticleMarkdown(
       return `KATEXX${idx}X${suffix}`;
     }
     try {
-      // 1. Verbatim-First: valid formulas must compile unmodified
       mathTokens.push(compileKatex(rawMath, isBlock, true));
       return `KATEXX${idx}X${suffix}`;
     } catch (verbatimError) {
-      // 2. Permitted safe/audited recoveries when verbatim TeX fails KaTeX parsing:
-      //    a) Escape unescaped '_' inside \text{...} (e.g. LIB-506 \text{[SAFETY_BOUND]})
       let candidate = rawMath.replace(/\\text\{([^}]+)\}/g, (_m, inner) => {
         return `\\text{${inner.replace(/(?<!\\)_/g, '\\_')}}`;
       });
-      //    b) Exact audited source-typo exception for LIB-802 only (display-only fix; raw Markdown unchanged)
       if (Object.prototype.hasOwnProperty.call(EXACT_KATEX_DISPLAY_EXCEPTIONS, candidate)) {
         const entry = EXACT_KATEX_DISPLAY_EXCEPTIONS[candidate];
         if (!sourceLabel || sourceLabel === entry.expectedSource) {
@@ -562,44 +950,39 @@ export function renderArticleMarkdown(
         );
       }
 
-      // 3. Unknown parse errors: render visibly as KaTeX error span (.katex-error) without silent rewriting
       mathTokens.push(compileKatex(rawMath, isBlock, false));
       return `KATEXX${idx}X${suffix}`;
     }
   }
 
-  // Display math $$ ... $$
-  processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => saveMath(math, true));
-  // Inline math $ ... $ (excluding escaped \$)
-  processed = processed.replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (match, math) => saveMath(math, false));
+  processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (_m, math) => saveMath(math, true));
+  processed = processed.replace(/(?<!\$)\$([^\$\n]+?)\$(?!\$)/g, (_m, math) => saveMath(math, false));
 
-  // Stage 3: Transform Obsidian WikiLinks [[target]] or [[target|label]]
-  processed = processed.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, target, customLabel) => {
+  // Transform Obsidian WikiLinks with concise readable labels while preserving canonical route & full source title
+  processed = processed.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, target, customLabel) => {
     const cleanTarget = target.trim();
-    const label = customLabel ? customLabel.trim() : cleanTarget;
-
     const libMatch = cleanTarget.match(/LIB-(\d{3})/i);
     if (libMatch) {
       const targetSlug = `lib-${libMatch[1].toLowerCase()}`;
       const targetUrl = `${base}/${lang}/notes/${targetSlug}/`;
-      return `<a class="wikilink-badge" href="${targetUrl}">${label}</a>`;
+      const { display, fullTitle } = formatConciseWikiLabel(targetSlug, cleanTarget, customLabel, lang);
+      return `<a class="wikilink-badge" href="${targetUrl}" title="${escapeHtmlAttr(fullTitle)}" aria-label="${escapeHtmlAttr(fullTitle)}">${escapeHtml(display)}</a>`;
     }
 
+    const label = customLabel ? customLabel.trim() : cleanTarget;
     if (cleanTarget.startsWith('assets/') || cleanTarget.includes('.svg') || cleanTarget.includes('.png')) {
       const assetName = path.basename(cleanTarget);
-      return `<a class="wikilink-asset" href="${base}/assets/${assetName}" target="_blank" rel="noopener">${label}</a>`;
+      return `<a class="wikilink-asset" href="${base}/assets/${assetName}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
     }
 
-    return `<span class="wikilink-text">${label}</span>`;
+    return `<span class="wikilink-text">${escapeHtml(label)}</span>`;
   });
 
-  // Stage 4: Transform Markdown image links
-  processed = processed.replace(/!\[(.*?)\]\(((?:\.\.\/)*assets\/([^)]+))\)/g, (match, alt, fullPath, filename) => {
+  processed = processed.replace(/!\[(.*?)\]\(((?:\.\.\/)*assets\/([^)]+))\)/g, (_m, alt, _fullPath, filename) => {
     return `![${alt}](${base}/assets/${filename})`;
   });
 
-  // Transform standard Markdown links to notes, preserving target language
-  processed = processed.replace(/\[([^\]]+)\]\(([^)]*LIB-(\d{3})[^)]*\.md)\)/gi, (match, text, url, num) => {
+  processed = processed.replace(/\[([^\]]+)\]\(([^)]*LIB-(\d{3})[^)]*\.md)\)/gi, (_m, text, url, num) => {
     const slug = `lib-${num.toLowerCase()}`;
     const pointsToEn = /(?:^|\/)en\//i.test(url) || /(?:%28|\()Agent(?:%20|\s)+EN(?:%29|\))/i.test(url);
     const pointsToZh = /(?:^|\/)(?:\.\.\/)*0\d_[^/]*\//i.test(url) && !pointsToEn;
@@ -607,21 +990,18 @@ export function renderArticleMarkdown(
     return `[${text}](${base}/${targetLang}/notes/${slug}/)`;
   });
 
-  // Stage 5: Transform Evidence Tags & Rules
-  processed = processed.replace(/\[(FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION)\]/g, (match, tag) => {
+  processed = processed.replace(/\[(FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION)\]/g, (_m, tag) => {
     return `<span class="evidence-pill pill-${tag.toLowerCase()}">${tag}</span>`;
   });
 
-  processed = processed.replace(/\[(RULE-\d{3}-\d{2})\]/g, (match, ruleId) => {
+  processed = processed.replace(/\[(RULE-\d{3}-\d{2})\]/g, (_m, ruleId) => {
     return `<span class="rule-pill">${ruleId}</span>`;
   });
 
-  // Stage 6: Restore code blocks before marked parses markdown
   processed = processed.replace(/%%%CODEBLOCK_(\d+)%%%/g, (match, idx) => {
     return codeBlocks[parseInt(idx, 10)] || match;
   });
 
-  // Stage 7: Setup marked with CJK strong emphasis extension & custom heading renderer
   const cjkStrongExtension = {
     name: 'cjkStrong',
     level: 'inline' as const,
@@ -646,13 +1026,16 @@ export function renderArticleMarkdown(
     renderer: {
       heading(this: any, { tokens, depth }: { tokens: any[]; depth: number }) {
         if (depth === 1) {
-          // Suppress duplicate H1 from markdown body; reader header provides the canonical H1
           return '';
         }
         const text = this.parser.parseInline(tokens);
-        // Extract pure text for TOC and ID without HTML tags or double-escaped entities
-        const plainText = text
-          .replace(/KATEXX(\d+)X/g, (_m, i) => rawMathSources[parseInt(i, 10)] || '')
+        const cleanedInlineHtml = text
+          .replace(/(<[^>]+>)|([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}])/gu, (_m: string, tag: string) => tag || '')
+          .replace(/、\s+/g, '、')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
+        const plainText = cleanedInlineHtml
+          .replace(/KATEXX(\d+)X/g, (_m: string, i: string) => rawMathSources[parseInt(i, 10)] || '')
           .replace(/<[^>]+>/g, '')
           .replace(/&amp;/g, '&')
           .replace(/&lt;/g, '<')
@@ -661,12 +1044,24 @@ export function renderArticleMarkdown(
           .replace(/&#39;/g, "'")
           .replace(/\s+/g, ' ')
           .trim();
+        const plainForConcise = plainText
+          .replace(/\[(?:FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION)\]/g, '')
+          .replace(/\b(?:FACT|DERIVATION|LITERATURE_RESULT|EMPIRICAL_RESULT|HEURISTIC|DESIGN_DECISION|TARGET|SAFETY_BOUND|HYPOTHESIS|OPEN_QUESTION)\b/g, '')
+          .replace(/\s+([、，,:：])/g, '$1')
+          .replace(/\s{2,}/g, ' ')
+          .trim();
         const slugId = plainText
           .toLowerCase()
           .replace(/[^\w\u4e00-\u9fa5\-_]+/g, '-')
           .replace(/^-+|-+$/g, '') || `section-${toc.length + 1}`;
-        toc.push({ id: slugId, text: plainText, level: depth });
-        return `<h${depth} id="${slugId}">${text}</h${depth}>\n`;
+        toc.push({
+          id: slugId,
+          text: plainForConcise || plainText,
+          shortText: formatConciseHeading(plainForConcise || plainText, depth === 2 ? 44 : 40),
+          level: depth,
+          stage
+        });
+        return `<h${depth} id="${slugId}">${cleanedInlineHtml}</h${depth}>\n`;
       }
     }
   });
@@ -676,12 +1071,114 @@ export function renderArticleMarkdown(
     breaks: false,
   }) as string;
 
-  // Stage 8: Reinsert KaTeX pre-rendered HTML tokens
   html = html.replace(/KATEXX(\d+)X/g, (match, idx) => {
     return mathTokens[parseInt(idx, 10)] || match;
   });
 
-  return { html, toc };
+  // Unwrap standalone MERMAIDX...X tokens from <p>...</p> so <figure> sits cleanly in block flow
+  html = html.replace(/<p>\s*MERMAIDX(\d+)X\s*<\/p>/g, (_m, idx) => {
+    return mermaidTokens[parseInt(idx, 10)] || '';
+  });
+  html = html.replace(/MERMAIDX(\d+)X/g, (match, idx) => {
+    return mermaidTokens[parseInt(idx, 10)] || match;
+  });
+
+  return html;
+}
+
+export interface RenderedArticleStructure {
+  html: string;
+  leadContextHtml: string;
+  lessonSections: ArticleSection[];
+  researchSections: ArticleSection[];
+  toc: TocItem[];
+  takeaways: string[];
+}
+
+export function renderArticleMarkdown(
+  rawMarkdown: string,
+  lang: 'zh' | 'en',
+  base: string = '/library',
+  sourceLabel: string = ''
+): RenderedArticleStructure {
+  const toc: TocItem[] = [];
+  const cleanBody = stripLangBannerAndLeadingH1(rawMarkdown);
+  const { preamble, sections } = splitMarkdownByH2(cleanBody);
+
+  let leadContextHtml = '';
+  const openQueue: { stage: PedagogyStage; heading: string; md: string }[] = [];
+  const researchQueue: { stage: PedagogyStage; heading: string; md: string }[] = [];
+
+  if (preamble) {
+    // Discard standalone horizontal rules at top preamble
+    const trimmedPreamble = preamble.replace(/^---+\s*$/gm, '').trim();
+    if (trimmedPreamble) {
+      openQueue.push({ stage: 'understand', heading: '', md: trimmedPreamble });
+    }
+  }
+
+  for (const sec of sections) {
+    const role = classifySectionStage(sec.heading, sec.markdown);
+    if (role === 'coordinates') {
+      const { promotedIntroMd, adminCoordMd } = splitCoordinateContent(sec.markdown);
+      if (promotedIntroMd) {
+        // Render promoted conceptual framing without registering as a coordinate heading in TOC
+        const dummyToc: TocItem[] = [];
+        leadContextHtml = renderMarkdownFragment(promotedIntroMd, lang, base, sourceLabel, 'understand', dummyToc);
+      }
+      if (adminCoordMd) {
+        researchQueue.push({ stage: 'research', heading: sec.heading, md: adminCoordMd });
+      }
+    } else if (role === 'research') {
+      researchQueue.push({ stage: 'research', heading: sec.heading, md: sec.markdown });
+    } else {
+      openQueue.push({ stage: role, heading: sec.heading, md: sec.markdown });
+    }
+  }
+
+  const renderSectionGroup = (queue: { stage: PedagogyStage; heading: string; md: string }[]): ArticleSection[] => {
+    const rendered: ArticleSection[] = [];
+    for (const item of queue) {
+      const mdToRender = item.heading ? `## ${item.heading}\n\n${item.md}` : item.md;
+      const beforeTocLen = toc.length;
+      const html = renderMarkdownFragment(mdToRender, lang, base, sourceLabel, item.stage, toc);
+      const secToc = toc.slice(beforeTocLen).find(t => t.level === 2);
+      rendered.push({
+        stage: item.stage,
+        heading: secToc?.text || item.heading,
+        shortHeading: secToc?.shortText || formatConciseHeading(item.heading),
+        id: secToc?.id || '',
+        html,
+      });
+    }
+    return rendered;
+  };
+
+  const lessonSections = renderSectionGroup(openQueue);
+  const researchSections = renderSectionGroup(researchQueue);
+
+  // Derive 2-3 factual topic takeaways directly from this note's open headings (no fabricated summaries)
+  const openH2s = toc.filter(t => t.stage !== 'research' && t.level === 2);
+  const openH3s = toc.filter(t => t.stage !== 'research' && t.level === 3);
+  const takeawaySource = openH2s.length >= 2 ? openH2s : [...openH2s, ...openH3s];
+  const takeaways = Array.from(new Set(takeawaySource.map(t => formatConciseHeading(t.text, 56)))).slice(0, 3);
+
+  const html = [
+    leadContextHtml,
+    ...lessonSections.map(s => s.html),
+    ...researchSections.map(s => s.html),
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    html,
+    leadContextHtml,
+    lessonSections,
+    researchSections,
+    toc,
+    takeaways,
+  };
 }
 
 function extractCallNumber(filename: string): string | null {
@@ -709,6 +1206,78 @@ function parseRules(body: string): RuleInfo[] {
 
 let cachedArticles: { zh: Map<string, ArticleData>; en: Map<string, ArticleData> } | null = null;
 
+function extractCallIds(rawRefs: unknown[]): string[] {
+  return rawRefs
+    .map((item) => {
+      const m = String(item).match(/LIB-\d{3}/i);
+      return m ? m[0].toLowerCase() : '';
+    })
+    .filter(Boolean);
+}
+
+function loadHallDirectory(
+  dirPath: string,
+  lang: 'zh' | 'en',
+  hall: KnowledgeHall,
+  targetMap: Map<string, ArticleData>
+): void {
+  if (!fs.existsSync(dirPath)) return;
+  const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.md') && !f.startsWith('README'));
+
+  for (const file of files) {
+    const fullPath = path.join(dirPath, file);
+    const fileContent = fs.readFileSync(fullPath, 'utf-8');
+    const { data: frontmatter, content: rawMarkdown } = matter(fileContent);
+
+    const callNumber = frontmatter.call_number || extractCallNumber(file);
+    if (!callNumber) continue;
+
+    const slug = callNumber.toLowerCase();
+    const rendered = renderArticleMarkdown(rawMarkdown, lang, '/library', `${callNumber} (${lang})`);
+    const rules = parseRules(rawMarkdown);
+
+    const prereqsRaw = Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [];
+    const succsRaw = Array.isArray(frontmatter.successors) ? frontmatter.successors : [];
+    const title = frontmatter.title || file.replace(/\.md$/, '');
+    const excerpt = extractStudyOrientation(rawMarkdown, frontmatter, title, hall, lang);
+    const coreFocus = buildCoreFocus(frontmatter, title, hall, lang);
+
+    targetMap.set(slug, {
+      callNumber,
+      slug,
+      lang,
+      title,
+      status: frontmatter.status || 'source-verified',
+      invariantsCount: frontmatter.invariants_count || rules.length,
+      module: frontmatter.module || (lang === 'zh' ? hall.nameZh : hall.nameEn),
+      category: frontmatter.category || '',
+      audience: Array.isArray(frontmatter.audience) ? frontmatter.audience : [],
+      mathFoundations: Array.isArray(frontmatter.math_foundations) ? frontmatter.math_foundations : [],
+      hardwareTarget: Array.isArray(frontmatter.hardware_target) ? frontmatter.hardware_target : [],
+      created: formatDate(frontmatter.created),
+      author: frontmatter.author || 'Luke',
+      tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
+      prerequisitesRaw: prereqsRaw,
+      successorsRaw: succsRaw,
+      prerequisiteIds: extractCallIds(prereqsRaw),
+      successorIds: extractCallIds(succsRaw),
+      hall,
+      filePath: fullPath,
+      rawMarkdown,
+      htmlContent: rendered.html,
+      leadContextHtml: rendered.leadContextHtml,
+      lessonSections: rendered.lessonSections,
+      researchSections: rendered.researchSections,
+      takeaways: rendered.takeaways,
+      toc: rendered.toc,
+      rules,
+      excerpt,
+      coreFocus,
+      executiveBrief: excerpt,
+    });
+  }
+}
+
 export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<string, ArticleData> } {
   if (cachedArticles) return cachedArticles;
 
@@ -716,133 +1285,8 @@ export function loadLibraryArticles(): { zh: Map<string, ArticleData>; en: Map<s
   const enMap = new Map<string, ArticleData>();
 
   for (const hall of KNOWLEDGE_HALLS) {
-    const zhDir = path.join(ROOT_DIR, hall.dirZh);
-    const enDir = path.join(ROOT_DIR, hall.dirEn);
-
-    // Read ZH articles
-    if (fs.existsSync(zhDir)) {
-      const files = fs.readdirSync(zhDir).filter(f => f.endsWith('.md') && !f.startsWith('README'));
-      for (const file of files) {
-        const fullPath = path.join(zhDir, file);
-        const fileContent = fs.readFileSync(fullPath, 'utf-8');
-        const { data: frontmatter, content: rawMarkdown } = matter(fileContent);
-
-        const callNumber = frontmatter.call_number || extractCallNumber(file);
-        if (!callNumber) continue;
-
-        const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'zh', '/library', `${callNumber} (zh)`);
-        const rules = parseRules(rawMarkdown);
-
-        // Parse prerequisites and successors
-        const prereqsRaw = Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [];
-        const succsRaw = Array.isArray(frontmatter.successors) ? frontmatter.successors : [];
-
-        const prereqIds = prereqsRaw.map((p: string) => {
-          const m = p.match(/LIB-\d{3}/i);
-          return m ? m[0].toLowerCase() : '';
-        }).filter(Boolean);
-
-        const succIds = succsRaw.map((s: string) => {
-          const m = s.match(/LIB-\d{3}/i);
-          return m ? m[0].toLowerCase() : '';
-        }).filter(Boolean);
-
-        const title = frontmatter.title || file.replace(/\.md$/, '');
-        const excerpt = extractStudyOrientation(rawMarkdown, frontmatter, title, hall, 'zh');
-
-        zhMap.set(slug, {
-          callNumber,
-          slug,
-          lang: 'zh',
-          title,
-          status: frontmatter.status || 'source-verified',
-          invariantsCount: frontmatter.invariants_count || rules.length,
-          module: frontmatter.module || hall.nameZh,
-          category: frontmatter.category || '',
-          audience: Array.isArray(frontmatter.audience) ? frontmatter.audience : [],
-          mathFoundations: Array.isArray(frontmatter.math_foundations) ? frontmatter.math_foundations : [],
-          hardwareTarget: Array.isArray(frontmatter.hardware_target) ? frontmatter.hardware_target : [],
-          created: formatDate(frontmatter.created),
-          author: frontmatter.author || 'Luke',
-          tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
-          prerequisitesRaw: prereqsRaw,
-          successorsRaw: succsRaw,
-          prerequisiteIds: prereqIds,
-          successorIds: succIds,
-          hall,
-          filePath: fullPath,
-          rawMarkdown,
-          htmlContent,
-          toc,
-          rules,
-          excerpt,
-          executiveBrief: excerpt
-        });
-      }
-    }
-
-    // Read EN articles
-    if (fs.existsSync(enDir)) {
-      const files = fs.readdirSync(enDir).filter(f => f.endsWith('.md') && !f.startsWith('README'));
-      for (const file of files) {
-        const fullPath = path.join(enDir, file);
-        const fileContent = fs.readFileSync(fullPath, 'utf-8');
-        const { data: frontmatter, content: rawMarkdown } = matter(fileContent);
-
-        const callNumber = frontmatter.call_number || extractCallNumber(file);
-        if (!callNumber) continue;
-
-        const slug = callNumber.toLowerCase();
-        const { html: htmlContent, toc } = renderArticleMarkdown(rawMarkdown, 'en', '/library', `${callNumber} (en)`);
-        const rules = parseRules(rawMarkdown);
-
-        const prereqsRaw = Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [];
-        const succsRaw = Array.isArray(frontmatter.successors) ? frontmatter.successors : [];
-
-        const prereqIds = prereqsRaw.map((p: string) => {
-          const m = p.match(/LIB-\d{3}/i);
-          return m ? m[0].toLowerCase() : '';
-        }).filter(Boolean);
-
-        const succIds = succsRaw.map((s: string) => {
-          const m = s.match(/LIB-\d{3}/i);
-          return m ? m[0].toLowerCase() : '';
-        }).filter(Boolean);
-
-        const title = frontmatter.title || file.replace(/\.md$/, '');
-        const excerpt = extractStudyOrientation(rawMarkdown, frontmatter, title, hall, 'en');
-
-        enMap.set(slug, {
-          callNumber,
-          slug,
-          lang: 'en',
-          title,
-          status: frontmatter.status || 'source-verified',
-          invariantsCount: frontmatter.invariants_count || rules.length,
-          module: frontmatter.module || hall.nameEn,
-          category: frontmatter.category || '',
-          audience: Array.isArray(frontmatter.audience) ? frontmatter.audience : [],
-          mathFoundations: Array.isArray(frontmatter.math_foundations) ? frontmatter.math_foundations : [],
-          hardwareTarget: Array.isArray(frontmatter.hardware_target) ? frontmatter.hardware_target : [],
-          created: formatDate(frontmatter.created),
-          author: frontmatter.author || 'Luke',
-          tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
-          prerequisitesRaw: prereqsRaw,
-          successorsRaw: succsRaw,
-          prerequisiteIds: prereqIds,
-          successorIds: succIds,
-          hall,
-          filePath: fullPath,
-          rawMarkdown,
-          htmlContent,
-          toc,
-          rules,
-          excerpt,
-          executiveBrief: excerpt
-        });
-      }
-    }
+    loadHallDirectory(path.join(ROOT_DIR, hall.dirZh), 'zh', hall, zhMap);
+    loadHallDirectory(path.join(ROOT_DIR, hall.dirEn), 'en', hall, enMap);
   }
 
   cachedArticles = { zh: zhMap, en: enMap };

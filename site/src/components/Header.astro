@@ -125,9 +125,11 @@ if (!switchHref) {
 
 <style>
   .site-header {
-    background-color: rgba(11, 15, 25, 0.94);
-    backdrop-filter: blur(12px);
+    background-color: rgba(9, 13, 22, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 24px -16px rgba(2, 6, 23, 0.85);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -157,15 +159,16 @@ if (!switchHref) {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background-color: var(--bg-surface);
+    background: linear-gradient(145deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
     border: 1px solid var(--border-accent);
+    box-shadow: inset 0 1px 0 var(--specular-edge);
     color: var(--accent-cyan);
-    transition: all 0.2s ease;
+    transition: border-color 0.2s var(--ease-out-expo), color 0.2s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo);
   }
   .site-brand:hover .brand-emblem {
-    border-color: var(--accent-cyan);
-    color: #ffffff;
-    box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+    box-shadow: inset 0 1px 0 rgba(223, 192, 104, 0.2), 0 0 14px rgba(223, 192, 104, 0.14);
   }
   .brand-text {
     display: flex;
@@ -175,14 +178,14 @@ if (!switchHref) {
     font-family: var(--font-serif);
     font-weight: 700;
     font-size: 1.15rem;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     line-height: 1.2;
     color: #ffffff;
   }
   .brand-subtitle {
     font-size: 0.72rem;
     color: var(--text-muted);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.015em;
     font-weight: 500;
   }
   .desktop-nav {
@@ -205,12 +208,13 @@ if (!switchHref) {
     font-weight: 500;
     color: var(--text-secondary);
     text-decoration: none;
-    padding: 0.4rem 0.2rem;
+    padding: 0.4rem 0.25rem;
     position: relative;
-    transition: color 0.15s ease;
+    transition: color 0.18s var(--ease-out-expo);
   }
   .nav-link:hover {
     color: #ffffff;
+    text-decoration: none;
   }
   .nav-link.active {
     color: var(--accent-cyan);
@@ -223,7 +227,7 @@ if (!switchHref) {
     left: 0;
     right: 0;
     height: 2px;
-    background-color: var(--accent-cyan);
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-gold));
     border-radius: 2px;
   }
   .nav-actions {
@@ -235,20 +239,22 @@ if (!switchHref) {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.35rem 0.75rem;
+    padding: 0.36rem 0.8rem;
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--text-secondary);
     background-color: var(--bg-surface);
     border: 1px solid var(--border-subtle);
+    box-shadow: inset 0 1px 0 var(--specular-edge);
     border-radius: 6px;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all 0.18s var(--ease-out-expo);
   }
   .lang-switch:hover {
     color: #ffffff;
     border-color: var(--border-accent);
     background-color: var(--bg-elevated);
+    text-decoration: none;
   }
   .mobile-toggle {
     display: flex;

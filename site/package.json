@@ -5,6 +5,7 @@
   "description": "Grand Library — CS & AI Knowledge Atlas (Astro Static Site)",
   "scripts": {
     "sync-assets": "node scripts/sync-assets.js",
+    "render-mermaid": "node scripts/render-mermaid.mjs",
     "verify-paths": "node --experimental-strip-types scripts/verify-learning-paths.mjs",
     "predev": "node scripts/sync-assets.js",
     "dev": "astro dev",
@@ -19,7 +20,8 @@
     "astro": "^5.4.1",
     "gray-matter": "^4.0.3",
     "katex": "^0.16.21",
-    "marked": "^15.0.7"
+    "marked": "^15.0.7",
+    "mermaid": "^12.3.0"
   },
   "devDependencies": {
     "@types/katex": "^0.16.7",

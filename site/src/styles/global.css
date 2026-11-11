@@ -1,19 +1,22 @@
 :root {
-  --bg-primary: #0b0f19;
-  --bg-surface: #121826;
-  --bg-elevated: #1a2234;
-  --bg-hover: #222d44;
-  --border-subtle: #1e293b;
-  --border-accent: #2e3d55;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #8a99ad;
-  --accent-gold: #d4af37;
-  --accent-gold-hover: #f59e0b;
-  --accent-cyan: #38bdf8;
+  --bg-primary: #090d16;
+  --bg-surface: #0f1624;
+  --bg-elevated: #172133;
+  --bg-hover: #1e2a40;
+  --border-subtle: #1c273b;
+  --border-accent: #2c3c58;
+  --text-primary: #f5f7fa;
+  --text-secondary: #a8b6ca;
+  --text-muted: #8e9db2;
+  --accent-gold: #dfc068;
+  --accent-gold-hover: #eccf7c;
+  --accent-cyan: #56ccf2;
   --accent-emerald: #10b981;
   --accent-purple: #a855f7;
   --accent-red: #ef4444;
+  --specular-edge: rgba(255, 255, 255, 0.06);
+  --shadow-card: 0 12px 30px -14px rgba(2, 6, 23, 0.72);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   --font-serif: Georgia, "Times New Roman", "Noto Serif CJK TC", "Songti TC", "PMingLiU", serif;
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -26,6 +29,11 @@
   padding: 0;
 }
 
+::selection {
+  background-color: rgba(223, 192, 104, 0.28);
+  color: #ffffff;
+}
+
 html {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
@@ -34,6 +42,8 @@ html {
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  scrollbar-color: var(--border-accent) transparent;
+  scrollbar-width: thin;
 }
 
 body {
@@ -46,11 +56,11 @@ body {
 a {
   color: var(--accent-cyan);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.18s var(--ease-out-expo);
 }
 
 a:hover {
-  color: #7dd3fc;
+  color: #8be0fa;
   text-decoration: underline;
 }
 
@@ -58,52 +68,55 @@ a:hover {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   color: #ffffff;
-  line-height: 1.35;
+  line-height: 1.32;
   margin-bottom: 0.85rem;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
 }
 
 h1 {
-  font-size: 2.2rem;
+  font-size: 2.25rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 0.75rem;
   margin-top: 1.5rem;
 }
 
 h2 {
-  font-size: 1.6rem;
+  font-size: 1.62rem;
   font-weight: 600;
-  margin-top: 2.25rem;
-  padding-bottom: 0.5rem;
+  margin-top: 2.4rem;
+  padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--border-subtle);
-  color: #f1f5f9;
+  color: #f5f7fa;
 }
 
 h3 {
-  font-size: 1.3rem;
+  font-size: 1.28rem;
   font-weight: 600;
-  margin-top: 1.75rem;
-  color: #e2e8f0;
+  margin-top: 1.8rem;
+  color: #e6edf6;
 }
 
 h4 {
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 600;
   margin-top: 1.35rem;
-  color: #cbd5e1;
+  color: #d4deec;
 }
 
 /* Body Content Typography */
 p {
   margin-bottom: 1.25rem;
-  color: #cbd5e1;
+  color: #ced8e7;
+  text-wrap: pretty;
 }
 
 ul, ol {
   margin-bottom: 1.35rem;
   padding-left: 1.75rem;
-  color: #cbd5e1;
+  color: #ced8e7;
 }
 
 li {
@@ -115,19 +128,21 @@ li {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.75rem 0;
+  margin: 1.85rem 0;
   font-size: 0.92rem;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow-x: auto;
   display: block;
+  box-shadow: inset 0 1px 0 var(--specular-edge);
 }
 
 th, td {
   padding: 0.85rem 1.1rem;
   border: 1px solid var(--border-subtle);
   text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 
 th {
@@ -135,33 +150,38 @@ th {
   font-family: var(--font-serif);
   color: var(--accent-gold);
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.015em;
 }
 
 tr:nth-child(even) {
-  background-color: rgba(255, 255, 255, 0.015);
+  background-color: rgba(255, 255, 255, 0.016);
+}
+
+tbody tr:hover {
+  background-color: rgba(86, 204, 242, 0.04);
 }
 
 /* Code & Pre Blocks */
 pre {
-  background-color: #0c101d !important;
+  background-color: #0b101b !important;
   border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 1px 0 var(--specular-edge);
   border-radius: 8px;
   padding: 1.25rem;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.88rem;
-  line-height: 1.6;
-  margin: 1.5rem 0;
-  color: #f8fafc;
+  line-height: 1.62;
+  margin: 1.55rem 0;
+  color: #f5f7fa;
 }
 
 code {
   font-family: var(--font-mono);
   font-size: 0.88em;
   background-color: var(--bg-elevated);
-  color: #e0e7ff;
-  padding: 0.15em 0.4em;
+  color: #e4ecff;
+  padding: 0.14em 0.42em;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -172,15 +192,14 @@ pre code {
   padding: 0;
 }
 
-/* Blockquotes */
+/* Archival Blockquotes (Avoid slanted CJK text) */
 blockquote {
-  border-left: 3px solid var(--accent-cyan);
-  background-color: rgba(56, 189, 248, 0.04);
-  padding: 1.1rem 1.35rem;
-  margin: 1.6rem 0;
-  border-radius: 0 6px 6px 0;
-  font-style: italic;
-  color: #cbd5e1;
+  border-left: 3px solid var(--accent-gold);
+  background: linear-gradient(90deg, rgba(223, 192, 104, 0.07) 0%, rgba(15, 22, 36, 0.55) 100%);
+  padding: 1.05rem 1.35rem;
+  margin: 1.65rem 0;
+  border-radius: 0 8px 8px 0;
+  color: #dbe4f0;
   line-height: 1.75;
 }
 
@@ -198,7 +217,7 @@ img, svg {
 .article-body img {
   display: block;
   margin: 2rem auto;
-  background-color: #0d121f;
+  background-color: #0c111e;
   border: 1px solid var(--border-subtle);
   padding: 0.75rem;
   border-radius: 8px;
@@ -209,9 +228,13 @@ img, svg {
   overflow-x: auto;
   overflow-y: clip;
   max-width: 100%;
-  margin: 1.5rem 0;
-  padding: 0.85rem 0;
+  margin: 1.65rem 0;
+  padding: 1.05rem 1.25rem;
   text-align: center;
+  background-color: rgba(15, 22, 36, 0.72);
+  border: 1px solid rgba(168, 182, 202, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
 }
 
 .rendered-markdown {
@@ -232,11 +255,11 @@ img, svg {
 
 /* Obsidian WikiLinks */
 .wikilink-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.1rem 0.5rem;
-  font-size: 0.85em;
+  display: inline;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.86em;
   background-color: rgba(56, 189, 248, 0.1);
   color: var(--accent-cyan) !important;
   border: 1px solid rgba(56, 189, 248, 0.28);
@@ -306,6 +329,8 @@ img, svg {
   font-weight: 600;
   border-radius: 9999px;
   text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-source-verified {
@@ -348,5 +373,187 @@ img, svg {
 @media (min-width: 640px) {
   .container {
     padding: 0 1.25rem;
+  }
+}
+
+/* Keyboard Focus Ring */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+/* Mermaid Diagram Presentation & Inspection Controls */
+.mermaid-figure {
+  margin: 1.75rem 0;
+  background-color: #0d1322;
+  border: 1px solid var(--border-accent);
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.mermaid-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.65rem 1rem;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mermaid-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.mermaid-kind-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent-cyan);
+  background-color: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.mermaid-title-text {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  overflow-wrap: anywhere;
+}
+
+.mermaid-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.mermaid-btn {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: 5px;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.mermaid-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-cyan);
+  color: #ffffff;
+}
+
+.mermaid-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
+  padding: 1.25rem;
+  background-color: #0d1322;
+}
+
+.mermaid-viewport.is-tall:not(.is-expanded) {
+  max-height: 70vh;
+}
+
+.mermaid-svg-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.mermaid-figure[data-zoomed="true"] .mermaid-svg-stage,
+.mermaid-figure[data-diagram-wide="true"] .mermaid-svg-stage {
+  min-width: fit-content;
+}
+
+.mermaid-svg-stage svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mermaid-figure[data-zoomed="true"] .mermaid-svg-stage svg,
+.mermaid-figure[data-diagram-wide="true"] .mermaid-svg-stage svg {
+  max-width: none;
+}
+
+.mermaid-loading-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 1rem 0;
+}
+
+.mermaid-error-box {
+  margin: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 6px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  color: #fca5a5;
+}
+
+.mermaid-error-box strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #fecaca;
+}
+
+.mermaid-error-box p {
+  font-size: 0.84rem;
+  margin-bottom: 0;
+  color: #fca5a5;
+}
+
+.mermaid-source-drawer {
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+}
+
+.mermaid-source-drawer summary {
+  padding: 0.55rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.mermaid-source-drawer summary:hover {
+  color: var(--accent-cyan);
+}
+
+.mermaid-raw-source {
+  margin: 0 !important;
+  border: none !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  border-radius: 0 !important;
+  font-size: 0.8rem !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

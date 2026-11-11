@@ -17,11 +17,12 @@
 - **Language**: TypeScript 5.x
 - **Mathematics**: KaTeX（編譯期靜態預渲染，零版面跳動，本機離線字型支援）
 - **Icon System**: 專屬 SVG Line Icon 元件（`src/components/Icon.astro`，UI 全面零 Emoji 規範）
-- **Markdown Pipeline**: Marked 15.x + 自研 CJK 粗體標點語彙分析器 (`cjkStrong`) + Custom Heading Renderer + Single H1 消除管線
-- **Link Resolution**: Obsidian WikiLinks 動態解析轉換為型態安全站內路由
-- **Design System**: 深色學術研究風格（Dark Academic Research Library Theme），繁體中文優先雙語介面
+- **Markdown & Diagram Pipeline**: Marked 15.x + `cjkStrong` + Custom Heading Renderer + Build-Time Mermaid SVG Cache (`src/data/mermaid-cache/`, local bundled `mermaid` fallback with zero external CDN) + Explicit Error Fallback
+- **Shared Bilingual Architecture**: 共用元件 `HomePage.astro`、`PathsPage.astro`、`CatalogPage.astro`、`AboutPage.astro`、`ReaderPage.astro` 搭配對稱薄路由包裝 (`src/pages/{zh,en}/*.astro`)
+- **Link Resolution**: Obsidian WikiLinks (`CONCISE_VOLUME_LABELS` 精簡標籤＋完整 `title`/`aria-label`) 與站內雙語路由解析
+- **Design System**: 深色學術研究風格（Midnight Archival Monograph，`DESIGN.md` & `src/styles/global.css`），繁體中文優先雙語介面
 - **Target Deployment**: GitHub Pages (Base Path: `/library`)
-- **Testing**: Playwright 端對端瀏覽器自動化測試 + 拓樸有向無環圖（DAG）自動化邊緣對稱性校驗器
+- **Testing**: Playwright 端對端瀏覽器自動化測試 + DAG 拓樸校驗（共 **53** 項靜態語料＋桌面/手機瀏覽器驗收）
 
 ---
 
@@ -36,8 +37,9 @@ cd site
 # 2. 乾淨重現安裝依賴 (CI Mode)
 npm ci
 
-# 3. 執行靜態資產同步 (SVG 圖表與 KaTeX 字型)
+# 3. 執行靜態資產同步與（選用）更新 Mermaid 靜態圖表快取
 npm run sync-assets
+# npm run render-mermaid  # 若新增/更動原始 Markdown 中的 Mermaid 區塊時重跑以更新 src/data/mermaid-cache/
 
 # 4. 執行學習路徑嚴格 DAG 拓樸直接依賴檢查
 npm run verify-paths
@@ -48,7 +50,7 @@ npm run dev
 # 6. 執行正式靜態建置 (包含 verify-paths 前置守門)
 npm run build
 
-# 7. 執行完整自動化測試 (包含 DAG 檢驗與 Playwright 47 項桌面/手機真實瀏覽器測試)
+# 7. 執行完整自動化測試 (包含 DAG 檢驗與 Playwright 53 項語料＋桌面/手機瀏覽器驗收)
 npm test
 
 # 8. 本機預覽建置成果
@@ -57,54 +59,41 @@ npm run preview
 
 ---
 
-## 4. Editorial UX Redesign & Final Quality Fix 設計與實證指南
+## 4. Editorial UX Redesign & Quality Architecture 設計與實證指南
 
 本專案嚴格遵循根目錄 `AGENTS.md` 之設計系統規範，落實高階研究圖書館品質：
 
 ### 核心成果亮點：
 
 1. **UI 介面全面禁用 Emoji (UI No-Emoji Rule)**
-   - 全站 Header、Footer、分館卡片、標籤、按鈕、搜尋列與狀態徽章，全面移除所有未經統一的 Emoji。
-   - 採用純向量 SVG Line Icon 系統 (`src/components/Icon.astro`)，風格沉穩一致。
+   - 全站 Header、Footer、分館卡片、標籤、按鈕、搜尋列、狀態徽章與渲染章節標題，全面移除裝飾性 Emoji，採用 SVG Line Icon 系統 (`src/components/Icon.astro`)。
 
-2. **讀者第一導向閱讀體驗 (Reader-First Editorial Layout)**
-   - **第一屏研讀導引與閱讀入口 (Study Orientation & Action)**：文章頂部優先呈現篇名、核心研讀導引以及「開始閱讀 (Start Reading)」入口按鈕（錨點平滑跳轉至 `#article-content`）。移除不精確、誤導性的技術文章「預估閱讀時間」。
-   - **漸進式揭露抽屜 (Progressive Disclosure Drawer)**：密集的技術規格（典籍狀態、作者、統一格式化為 `YYYY-MM-DD` 撰寫維護日、目標讀者、數學基石、硬體對齊、104 條形式化系統合約）與前後依賴，收納於 `<details class="metadata-drawer">` 中，讀者按需展開，第一屏維持專注。
-   - **舒適閱讀排版**：閱讀欄寬限制於 68–76 字元（760px），行高 1.8，字級 1.05rem；表格、程式碼與公式具備橫向滾動保護。
-   - **常駐章節目錄 (Sticky TOC)**：桌面端右側懸浮目錄，平滑捲動跳轉。
+2. **讀者第一教學階層體驗與漸進研究附錄 (Reader-First Pedagogy & `#research-details`)**
+   - **第一屏教學導引**：文章頂部呈現篇名、基於 Frontmatter `math_foundations` 與分館結構產出之非重複「核心主題 (`coreFocus`)」、正文摘要要點 (`takeaways`) 及「開始學習」CTA（含圖表記事額外提供「檢視知識拓樸圖」錨點）；開篇直接進入 **觀念入門 (Understand) -> 核心脈絡 (Explore) -> 技術深化與推導 (Technical Deep Dive)**。
+   - **研究附錄折疊抽屜 (`#research-details`)**：密集規格（狀態、作者、`YYYY-MM-DD` 維護日、目標讀者、數學基石、硬體對齊、`[RULE-###-##]` 系統合約）、前後依賴與權威文獻統一收斂於 `#research-details` 抽屜，點選文內錨點時自動展開。
+   - **階層式可收合目錄與 Scroll-Spy**：右側閱讀大綱預設僅顯示 H2 章節，子章節（H3/H4）隨 `IntersectionObserver` Scroll-Spy 或點擊展開。
+   - **精簡 WikiLinks**：Obsidian 雙括號連結以無歧義精簡標籤顯示（完整標題置於 `title` / `aria-label`），維持行文流暢。
 
-3. **零星號洩漏、單一 H1 與零雙重跳脫 (Rendering QA)**
-   - **零星號洩漏 (Zero Leaked Asterisks)**：針對 CommonMark 規範中 CJK 標點與粗體（如 `是**「...」**`）之衝突，引入自研 `cjkStrong` 語彙分析器，使裸露星號降為 **0**。
-   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 每頁僅保留版面 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，同時 Marked Custom Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，全館 56 篇雙語典籍 H1 違規數嚴格為 **0**。
-   - **零雙重跳脫 (Zero Double Escaping)**：在生成目錄（TOC）與標題錨點 ID 前，精確還原 Marked 內建 HTML Entities 為乾淨純文字，再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 編碼洩漏。
-   - **KaTeX 原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：優先以原始 TeX 嚴格編譯（`throwOnError: true`），確保合法公式與轉義百分比 `\%` 100% 原樣輸出；僅對解析失敗公式允許 `\text{...}` 內部底線轉義與已查證 `LIB-802` 原文筆誤之精確例外顯示修復，移除通用下標猜測 Regex，任何未知錯誤皆明確以 `console.error` 及 `.katex-error` 回報。全館 56 篇典籍目前達到 **0 個 `katex-error`**。
+3. **Mermaid 本地視覺圖表與 Render QA**
+   - **Mermaid 本地預渲染＋動態備援**：`LIB-000` (ZH/EN) 與 `LIB-001` (ZH) 等 ```` ```mermaid ```` 圖表於建置期渲染為 SVG 並快取於 `src/data/mermaid-cache/`，支援縮放、`Full height` 切換與「查看原始碼」次要抽屜；未知區塊由本地打包 `mermaid` 動態渲染，解析失敗顯式回報錯誤警訊，全程零外部 CDN。
+   - **零星號、單一 H1、零雙重跳脫與 KaTeX 原樣優先**：支援 `cjkStrong` 中文粗體解析、單一頂部 `<h1>`、`splitMarkdownByH2` 多行 `$$` 塊精確追蹤、`texToReadablePlain` 純文字轉換與嚴格 `throwOnError: true` KaTeX 編譯（僅安全跳脫 `\text{...}` 內底線及已稽核 `LIB-802` 顯式例外）；全館 56 篇 **0 個 `katex-error`**。
 
-4. **教學引導旅程學習路徑 (Guided Learning Journey)**
-   - 學習路徑提供適用對象（Target Audience）、學習收穫（Learning Outcomes）、起始推薦（Starting Volume）、步驟目的（Step Objective）與為何下一步（Why Next Step）。
-   - 100% 嚴格驗證全館 3 條路徑、23 個時序節點與 20 條直接 DAG 拓樸邊。
-   - 移除節點卡片上冗餘重複的「直接拓樸邊」標籤，貫徹 Content Density 原則。
-   - 全館巨型 SVG 拓樸圖移至頁面底部之折疊手風琴區塊（`<details class="roadmap-accordion">`），且**預設折疊**。
+4. **方向優先學習路徑與精簡首頁 (Direction-First Learning Paths & Editorial Homepage)**
+   - **學習路徑第一屏方向選擇矩陣**：桌面首屏（1440x900）立即呈現 3 張差異化方向卡片（Deep Learning、Computer Vision & 3D、AI Agents），先選方向或直達第 1 步，再展開 23 個步驟詳情；全館巨大 SVG 拓樸圖移至頁面底部並預設折疊，驗證全館 3 條路徑、23 節點與 20 條直接 DAG 拓樸邊。
+   - **首頁精簡化**：移除廉價 `.metric-card` KPI 儀表板方塊，改以單行編輯資訊帶與路線入口引導學習；`LIB-504` 正確對應 NeRF 與 3DGS（無 STN 誤植）。
 
-5. **搜尋範圍誠實命名 (Article Search Transparency)**
-   - 目錄檢索文案統一標明為「文章搜尋」，明確說明搜尋涵蓋篇名、編號、標籤與摘要，杜絕誇大全文搜尋。
-
-6. **典籍介紹真實性 (Content Fidelity)**
-   - 首頁展示之 LIB-504 正確標註為「3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與可微分光柵化」，推薦理由說明體積渲染積分與 GPU Tile-based 光柵化架構，絕無張冠李戴之空間變換網路 (STN)。
-
-7. **版面零橫向溢出 (Zero Desktop Overflow)**
-   - 桌面端與行動端均嚴格保證 `scrollWidth <= clientWidth`（1440px 桌面端無橫向捲動條），Grid 容器搭配 `minmax(0, 1fr)` 與 `min-width: 0`。
+5. **搜尋透明度與響應式安全**
+   - 目錄統一標註「文章搜尋」；全站桌面（1440px）與行動（390px）保證 `scrollWidth <= clientWidth`，Grid 採用 `minmax(0, 1fr)` 與 `min-width: 0`。
 
 ---
 
 ## 5. 驗收截圖清單 (Verification Screenshots)
 
-Playwright 端對端測試已自動產出 6 大驗收截圖於 `tests/screenshots/`：
-- `homepage-zh-desktop-1440.png` (1440x900 桌面版首頁)
-- `homepage-zh-mobile-390.png` (390x844 手機版首頁)
-- `paths-zh-desktop-1440.png` (1440x900 桌面版教學路徑)
-- `paths-zh-mobile-390.png` (390x844 手機版教學路徑)
-- `reader-lib405-zh-desktop-1440.png` (1440x900 桌面版 LIB-405 閱讀頁)
-- `reader-lib405-zh-mobile-390.png` (390x844 手機版 LIB-405 閱讀頁)
+Playwright 端對端測試自動產出下列核心驗收截圖於 `site/tests/screenshots/`（不提交至 Git）：
+- `homepage-zh-desktop-1440-top.png` / `homepage-zh-mobile-390-top.png` (首頁 1440x900 與 390x844 首屏)
+- `paths-zh-desktop-1440-top.png` / `paths-zh-mobile-390-top.png` (學習路徑 3 路線首屏選擇矩陣)
+- `lib000-zh-desktop-1440-diagram.png` / `lib000-en-desktop-1440-diagram.png` (中／英 LIB-000 Mermaid 視覺圖表渲染與無裁切驗證)
+- `lib703-zh-desktop-1440-top.png` / `lib405-zh-desktop-1440-top.png` / `lib104-zh-desktop-1440-math.png` (Reader 首屏教學導引、精簡 WikiLinks、可收合 TOC 與數學推導)
 
 ---
 
@@ -133,6 +122,6 @@ Playwright 端對端測試已自動產出 6 大驗收截圖於 `tests/screenshot
 5. **執行可重現自動化驗證**：
    ```bash
    npm run verify-paths   # 20 條直接 DAG 拓樸邊 100% 通過
-   npm run build          # 靜態 HTML 編譯產出，0 錯誤
-   npm test               # 47 項 Playwright 測試與無頭瀏覽器驗收 100% 通過
+   npm run build          # 靜態 HTML 編譯產出（65 頁），0 錯誤
+   npm test               # 53 項靜態語料＋桌面/手機 Playwright 瀏覽器驗收 100% 通過
    ```

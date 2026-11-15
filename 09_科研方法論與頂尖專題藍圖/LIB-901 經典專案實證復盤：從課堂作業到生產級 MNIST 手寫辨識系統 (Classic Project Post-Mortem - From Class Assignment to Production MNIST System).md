@@ -373,6 +373,27 @@ def preprocess_image(inp):
 
 ---
 
+## 第四階段：跨專案生產級工程復盤——互動式 AI 應用之佇列延遲拆解與可重現審查模式（Reviewer Mode） `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+
+在將課堂專題（包含視覺辨識、CIFAR-10 架構消融與 *Gaussian Guide* 3DGS 研究助教）推向互動式 Web 部署與同行評審的過程中，我們進一步提煉出兩項通用的生產級系統工程法則：
+
+### 1. 互動式 AI 應用之端到端延遲拆解與 Gradio `474.5s` 佇列阻塞事件診斷
+當使用者在 Gradio Web 介面點擊提問後遭遇高達 **`474.502 s`（近 8 分鐘）** 的極端回應卡頓時，直覺式的猜測往往誤以為「Colab CPU 跑不動本地 Embedding 模型或 FAISS 搜尋」。然而，遵循 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]] 之 `RULE-203-07`，我們以 `time.perf_counter()` 對推論管線各階段執行獨立微基準拆解：
+$$T_{\text{E2E}} = T_{\text{queue/lock}} + T_{\text{embed}} + T_{\text{FAISS}} + T_{\text{LLM}}$$
+* **實測分段數據** `[EMPIRICAL_RESULT]`：
+  * 本地 CPU 查詢嵌入（`EmbeddingGemma-2` 768 維）：$T_{\text{embed}} = \mathbf{0.692\text{ s}}$
+  * 本地 FAISS `IndexFlatIP` 精確內積檢索：$T_{\text{FAISS}} = \mathbf{0.004\text{ s}}$（僅 **4 毫秒**！）
+  * 遠端 Groq API (`gpt-oss-120b`) 生成耗時：$T_{\text{LLM}} = \mathbf{1.120\text{ s}}$
+  * 實際服務計算總耗時：$T_{\text{service}} = 0.692 + 0.004 + 1.120 = \mathbf{1.816\text{ s}}$！
+* **根因定位與工程根治方案**：數據鐵證顯示，超過 **`472.6 s`（佔比 99.6%）** 的時間並非花在向量檢索或模型計算，而是消耗在 Gradio 預設事件佇列（Event Queue）於雲端容器代理下的連線阻塞與使用者重複點擊堆積！透過 **(1) 單人研究環境顯式設定 `demo.launch(queue=False)`**、**(2) 加裝非阻塞互斥鎖 `threading.Lock()`（Request Guard：`if not _REQUEST_LOCK.acquire(blocking=False): return "上一題仍在處理中"`）**，以及 **(3) 於 UI 狀態列即時揭露 `total / embed / search / llm` 四維度耗時**，徹底根除了佇列假死問題 `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
+
+### 2. 科研與專題 Notebook 之「凍結證據快照（Frozen Evidence Snapshot）+ 資源安全鎖」模式
+在提交深度學習消融實驗（如 CIFAR-10 八模型 30-Epoch 訓練）或 RAG 評測專題時，若助教或審稿委員必須花費數十分鐘重新訓練 GPU 模型或申請 API Key 才能看到圖表，極易因環境差異或執行超時導致審查失敗：
+* **Reviewer Mode（凍結證據快照優先）**：將完整實驗之訓練曲線、驗證指標、混淆矩陣與 SHA-256 校驗碼封裝為內建唯讀字典（`FROZEN_EVIDENCE`）或離線產物包（`rag-data.zip`）。開啟 Notebook 或點擊 `Run All` 時，預設於 **3 秒內**直接從凍結快照渲染所有比較表格與視覺化圖表 `[DESIGN_DECISION]`。
+* **資源安全鎖（Safety-Gated Execution）**：將耗時之完整重訓練（`RUN_FULL_TRAINING = False`）與重嵌入管線預設關閉，並在互動介面要求勾選「確認重跑（Confirm Execution）」安全鎖後方可觸發，兼顧 **100% 審查即時重現性**與**零底層代碼隱藏之完全可重驗性** `[SAFETY_BOUND]`。
+
+---
+
 ## 總結複習手冊：你現在掌握的五大底層硬實力
 
 1. **硬體原理**：維度分塊與 GPU GEMM 分割/Tensor Core 對齊啟發（[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)|LIB-203]]）。

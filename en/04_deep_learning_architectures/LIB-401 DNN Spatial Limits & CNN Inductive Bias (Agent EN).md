@@ -1,7 +1,7 @@
 ---
 call_number: LIB-401
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: DNN Spatial Limits & CNN Inductive Bias (Agent Edition)
 module: DL-Architectures
 category: Architecture-Core
@@ -100,6 +100,10 @@ For discrete token embedding sequences $X \in \mathbb{R}^{B \times T \times D_{\
 ## 2.5 Systems & Hardware Alignment: Im2Col GEMM & Winograd Transform `[FACT]`
 - **Implicit GEMM (`Im2Col`)**: Modern GPU libraries (cuDNN) lower 2D sliding-window convolutions into matrix multiplications by unrolling local $k \times k \times C_{\text{in}}$ patches into columns, mapping directly onto NVIDIA Tensor Core MMA tiles.
 - **Winograd Minimal Filtering**: For $3 \times 3$ stride-1 convolutions, Winograd $F(2\times 2, 3\times 3)$ reduces arithmetic multiplications per $2\times 2$ output tile from $36$ to $16$ ($2.25\times$ compute reduction).
+- **Controlled CIFAR-10 Eight-Model Empirical Ablation (`45k` Train / `5k` Val / `10k` Test, `30` Epochs, `Batch=64`, `Adam lr=0.001`, `Seed=42`, Shared `GAP -> Dense(64) -> Dense(10)` Head)** `[EMPIRICAL_RESULT]` `[DERIVATION]` `[SAFETY_BOUND]`:
+  1. **Q1 Non-Monotonic Depth Scaling in Plain Conv Stacks**: `Model A` (3-layer, `22,154` params) achieves `67.52%` Val Acc (`0.901` loss); `Model B` (6-layer, `49,898` params) peaks at **`74.96%` Val Acc (`0.799` loss, Best `75.40%`)**; `Model C` (9-layer, `77,642` params) reaches the highest Train Acc (`86.71%`) but degrades on validation to **`74.14%` (`0.876` loss)** due to capacity overfitting and unresidualized optimization degradation.
+  2. **Q2 The $1\times 1$ Bottleneck Roofline Latency Paradox (`Model D` vs. `Model E` on $16\times 16\times 64$)**: Factorizing a direct $3\times 3$ conv (`Model D`, `43,530` total params, `11,206,656` conv MACs) into a $1\times 1 \to 3\times 3$ bottleneck (`Model E`, `27,178` total params `-37.56%`, `7,012,352` conv MACs `-37.43%`) slightly improves Val Acc (`63.14% -> 63.44%`), yet measured GPU Batch-128 median latency remains identical (**`1.080 ms` vs. `1.083 ms`**, cross-verified with [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]]) because splitting one kernel into two sequential kernels on small $16\times 16$ spatial maps incurs dual kernel-launch and intermediate HBM round-trip overhead.
+  3. **Q3 Multi-Branch Mini-Inception Launch Overhead & `BatchNorm + Dropout` Variance Shift (`Model S` vs. `Model I` vs. `Model I+` on $28\times 28\times 64 \to 96$)**: Three-branch `Model I` cuts module parameters by **`82.24%`** (`55,392 -> 9,840`, total `147,082 -> 101,530`) with `71.12%` Val Acc (vs. `72.38%` for single-branch `Model S`), but increases 30-epoch training time by **`+26.7%` (`108.99s -> 138.08s`)** due to parallel branch kernel launches and `Concatenate` memory copies. Appending `BatchNorm + Dropout(0.2)` (`Model I+`) drops Val Acc by **`-3.94 pp` to `67.18%`** (Val Loss `1.362`) due to **Dropout–BatchNorm Variance Shift Disharmony** (Li et al., CVPR 2019).
 
 ---
 
@@ -169,6 +173,11 @@ def verify_inception_bottleneck_compression(c_in: int = 192, c_mid: int = 16, c_
 - **Specification**: (1) When input channels $C_{\text{in}} \ge 128$ and spatial kernel size $k \ge 5$, architectures MUST prepend a $1 \times 1$ pointwise bottleneck projection ($C_{\text{mid}} \le C_{\text{in}} / 4$) to achieve $\ge 4.0\times$ MACs reduction; (2) When terminal spatial feature volume $H \times W \times C > 4096$, `GlobalAvgPool2D` / `AdaptiveAvgPool2d((1, 1))` MUST replace `Flatten() + Dense(4096)`; (3) In $L$-layer stacked recurrent models ($L \ge 2$), all non-terminal layers $l < L$ MUST maintain 3D temporal rank $[B, T, D_h]$ (`return_sequences=True`).
 - **Violation Consequence**: Uncompressed large-kernel convolutions and dense flattening cause severe parameter bloat ($>10^8$ weights), while omitting `return_sequences=True` in intermediate recurrent layers collapses the time dimension and aborts multi-layer sequence propagation.
 
+### [RULE-401-05] Small-Tensor Operator-Split Overhead & BN-Dropout Disharmony Guardrail
+- **Contract Level**: `OPTIMIZATION_HEURISTIC`
+- **Specification**: (1) On small spatial feature maps ($H, W \le 32$, $C \le 96$), replacing a single $3\times 3$ convolution with a $1\times 1 \to 3\times 3$ bottleneck or multi-branch Mini-Inception module reduces parameters and MACs ($37\%\text{--}82\%$) but adds sequential/branch kernel launches and `Concatenate` HBM traffic that can neutralize wall-clock speedup (`1.080 ms` vs. `1.083 ms` inference; `+26.7%` training time); architecture evaluations MUST report synchronized wall-clock latency alongside theoretical MACs `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]`; (2) Architectures MUST avoid blindly coupling `BatchNormalization` and activation `Dropout` inside convolutional blocks or immediately after branch concatenation without ablation verification due to train-to-eval variance shift degradation (`-3.94 pp` CIFAR-10 Val Acc drop) `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`.
+- **Violation Consequence**: Extrapolating latency solely from FLOPs/MACs mispredicts GPU execution time on memory-bound feature maps, while mixing `Dropout` and `BatchNorm` induces severe inference variance shift and validation loss spikes.
+
 ---
 
 ## 5. Canonical & Peer-Reviewed References
@@ -179,3 +188,4 @@ def verify_inception_bottleneck_compression(c_in: int = 192, c_mid: int = 16, c_
 4. **He, K., Zhang, X., Ren, S., & Sun, J.** (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770–778. DOI: [10.1109/CVPR.2016.90](https://doi.org/10.1109/CVPR.2016.90).
 5. **Simonyan, K., & Zisserman, A.** (2015). "Very Deep Convolutional Networks for Large-Scale Image Recognition." *International Conference on Learning Representations (ICLR 2015)*. [arXiv:1409.1556](https://arxiv.org/abs/1409.1556).
 6. **Szegedy, C., Liu, W., Jia, Y., et al.** (2015). "Going deeper with convolutions." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2015)*, pp. 1–9. DOI: [10.1109/CVPR.2015.7298594](https://doi.org/10.1109/CVPR.2015.7298594).
+7. **Li, X., Chen, S., Hu, X., & Yang, J.** (2019). "Understanding the Disharmony between Dropout and Batch Normalization by Variance Shift." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2019)*, pp. 2682–2690. DOI: [10.1109/CVPR.2019.00279](https://doi.org/10.1109/CVPR.2019.00279).

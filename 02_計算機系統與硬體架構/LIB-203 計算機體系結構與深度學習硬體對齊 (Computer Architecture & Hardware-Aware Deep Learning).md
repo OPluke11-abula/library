@@ -1,7 +1,7 @@
 ---
 call_number: LIB-203
 status: source-verified
-invariants_count: 6
+invariants_count: 7
 title: 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)
 module: Computer-Systems-Architecture
 category: Hardware-Alignment
@@ -203,6 +203,24 @@ $$I^* = \frac{82.6 \times 10^{12}}{1008 \times 10^9} \approx 82\text{ FLOP/Byte}
    - **進程級無緩衝啟動**：設定環境變數 `PYTHONUNBUFFERED=1` 或命令列參數 `python -u`（強制 `stdout`/`stderr` 二進位與文字層完全停用緩衝，適用於容器化訓練與 SLURM 作業）。
    - **吞吐量反模式警告**：在每秒輸出數萬行之高頻迴圈中，嚴禁無差別濫用逐字元 `flush=True`，否則高頻率 Ring 3 $\leftrightarrow$ Ring 0 系統呼叫將使主機 CPU 陷入 I/O 阻塞（I/O-Bound Syscall Thrashing） `[SAFETY_BOUND]`。
 
+### 8. 主機端與加速器時間基準：系統牆上時鐘 (`time.time()`) vs. 硬體單調計時器 (`time.perf_counter()`) 與 GPU 非同步測速協議 `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+在深度學習算子延遲剖析（Latency Profiling）、資料載入吞吐量（Throughput）計算與消融基準測試中，混用「系統日曆時間（Wall-Clock Time）」與「經過時間（Elapsed Time）」是導致基準數據失真甚至除零崩潰的常見系統陷阱：
+1. **為什麼 `time.time()` 絕對不可用於效能測速？——非單調牆上時鐘與 NTP 校時漂移** `[FACT]` `[DERIVATION]`：
+   - **底層系統呼叫來源**：Python 的 `time.time()` 讀取作業系統的**即時牆上時鐘（Real-Time Wall Clock）**（Linux 之 `clock_gettime(CLOCK_REALTIME)`、Windows 之 `GetSystemTimePreciseAsFileTime`），代表自 Unix Epoch（`1970-01-01T00:00:00Z`）起算的日曆秒數。
+   - **非單調性（Non-Monotonic，`monotonic == False, adjustable == True`）**：系統牆上時鐘隨時受網路時間協定守護進程（NTP / `chronyd` / `systemd-timesyncd` / PTP）、虛擬機 Hypervisor 時鐘同步、閏秒或手動修改系統時間所干擾。設真實經過時間為 $\Delta t_{\text{true}} > 0$，但執行期間發生時鐘校準偏移 $\delta_{\text{NTP}} \in \mathbb{R}$（包含步進跳變 Step 或頻率微調 Slew），則 `time.time()` 量測值為：
+     $$\hat{\Delta t}_{\text{wall}} = t_{\text{end}}^{\text{wall}} - t_{\text{start}}^{\text{wall}} = \Delta t_{\text{true}} + \delta_{\text{NTP}}$$
+     當系統時鐘被向後回撥（$\delta_{\text{NTP}} < -\Delta t_{\text{true}}$）或歸零時，將直接產生**負延遲（$\hat{\Delta t}_{\text{wall}} \le 0$）**，導致吞吐量公式 $\text{Samples/sec} = \frac{B}{\hat{\Delta t}_{\text{wall}}}$ 出現負值或觸發 `ZeroDivisionError` `[SAFETY_BOUND]`！
+2. **硬體級單調高解析度計時器：`time.perf_counter()` 與 `time.perf_counter_ns()`（PEP 418）** `[FACT]`：
+   - **底層硬體計數器映射**：`time.perf_counter()` 直接讀取作業系統最高解析度之**單調遞增硬體計時器**（Linux `CLOCK_MONOTONIC`、Windows `QueryPerformanceCounter (QPC)`、macOS `mach_absolute_time`）。在現代 x86_64 與 ARM64 處理器上，其硬體根源為 **不變時間戳記計數器（Invariant TSC，`RDTSC` 指令）** 或 **ARM Generic Timer (`CNTVCT_EL0`)**——由獨立於 CPU 動態調頻（DVFS / Turbo Boost）的恆定石英振盪器驅動。
+   - **嚴格單調不變量（Strict Monotonicity，`monotonic == True, adjustable == False`）**：
+     $$\forall t_2 > t_1, \quad C_{\text{perf}}(t_2) \ge C_{\text{perf}}(t_1), \quad \Delta t_{\text{mono}} = \frac{C_{\text{perf}}(t_2) - C_{\text{perf}}(t_1)}{f_{\text{TSC}}}$$
+     無論中途是否發生 NTP 網路校時或人為窜改系統日期，`time.perf_counter()` 兩點相減的經過時間恆不受干擾 `[FACT]`。此外，由於其起算零點（Reference Point）未定義，單獨一個 `perf_counter()` 數值無日曆意義，**僅有兩次呼叫之差值具備物理意義**；在微秒/奈秒級微基準測試中，應優先採用返回 64 位元整數奈秒之 `time.perf_counter_ns()`，避免 IEEE-754 `float64`（53-bit 尾數）在長時間運作下損失亞奈秒精度 `[DESIGN_DECISION]`。
+   - **一句話工程分野**：記錄「**程式在幾點幾分開始執行（日誌時間戳記）**」用 `time.time()`（或 `datetime.now(timezone.utc)`）；量測「**程式區段實際跑了多久（延遲與吞吐量）**」一律強制使用 `time.perf_counter()` / `time.perf_counter_ns()` `[SAFETY_BOUND]`。
+3. **GPU 非同步執行陷阱與 Roofline 算子分裂實證（結合 CIFAR-10 $1\times 1$ 瓶頸實驗）** `[FACT]` `[EMPIRICAL_RESULT]`：
+   - **Host-Device 非同步發射陷阱**：在 CUDA 架構中，主機端呼叫 `out = model(x)` 僅是將 Kernel 描述符推入 GPU Command Queue 並立即返回（耗時僅約 $5\text{--}20\,\mu\text{s}$）。若未執行同步便直接以 `time.perf_counter()` 相減，測得的只是 **CPU 排隊發射開銷（Kernel Launch Overhead）**，而非 GPU Tensor Core 真實計算時間 `[SAFETY_BOUND]`！
+   - **標準 GPU 測速三要件**：① **預熱（Warm-up $\ge 5\text{--}50$ 輪）**：消除首次 CUDA Context 初始化、cuDNN 卷積演算法自動搜尋（Autotuning）與 JIT 編譯開銷；② **雙端屏障同步**：在計時起點前與終點前皆強制呼叫 `torch.cuda.synchronize()`（或使用硬體流事件 `torch.cuda.Event(enable_timing=True)`）；③ **多輪中位數統計（Median & IQR）**：抵抗 OS 排程抖動。
+   - **理論 MACs 降幅 $\neq$ 實測延遲降幅之實證（[[LIB-401 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)]] 交叉驗證）**：在 CIFAR-10 實證中（Batch=128，5 次 Warm-up + 20 次 `perf_counter` 同步量測），將 $16\times 16\times 64$ 特徵圖上的直接 $3\times 3$ 卷積（`Model D`）改為 $1\times 1 \to 3\times 3$ 瓶頸結構（`Model E`），雖然全模型卷積乘加運算量（MACs）大幅減少 **`37.43%`**（`11,206,656` $\to$ `7,012,352`），但實測 GPU 中位數推論延遲卻為 **`1.080 ms` vs. `1.083 ms`（幾乎完全持平）** `[EMPIRICAL_RESULT]`。原因正在於：小空間尺寸張量處於 Roofline 的 **Memory-Bandwidth & Kernel-Launch Bound** 區間，將 1 個卷積層拆為 2 個順序層需發射 2 次 Kernel 並增加一次中間特徵圖 HBM 讀寫往返，完全抵銷了算術 FLOPs 的節省！
+
 ---
 
 ## 四、💻 工業級工程實作：4 層 2^n 金字塔 DNN 參數量解析與維度對齊基準
@@ -332,10 +350,46 @@ def verify_stdio_buffering_and_flush():
     line_stream.detach()
 
 
+def verify_monotonic_timer_and_benchmark():
+    """
+    實證驗證 time.time() (可調牆上時鐘) 與 time.perf_counter() (硬體單調計時器) 之底層屬性，
+    並示範包含預熱 (Warm-up) 與中位數統計之標準微基準測速協議
+    """
+    import statistics
+
+    time_info = time.get_clock_info("time")
+    perf_info = time.get_clock_info("perf_counter")
+
+    # 1. 驗證系統時鐘可被 NTP 調整且非單調，而 perf_counter 具備嚴格單調性與不可調整性
+    assert time_info.monotonic is False and time_info.adjustable is True
+    assert perf_info.monotonic is True and perf_info.adjustable is False
+
+    # 2. 驗證 perf_counter_ns() 單調遞增性與預熱 + 中位數測速協議
+    t0_ns = time.perf_counter_ns()
+    t1_ns = time.perf_counter_ns()
+    assert t1_ns >= t0_ns
+
+    # Warm-up (消除首次快取冷啟動與編譯開銷)
+    for _ in range(5):
+        _ = sum(range(10_000))
+
+    latencies_ms = []
+    for _ in range(20):
+        start_ns = time.perf_counter_ns()
+        _ = sum(range(10_000))
+        elapsed_ms = (time.perf_counter_ns() - start_ns) / 1e6
+        assert elapsed_ms >= 0.0
+        latencies_ms.append(elapsed_ms)
+
+    median_ms = statistics.median(latencies_ms)
+    print(f"perf_counter impl={perf_info.implementation}, resolution={perf_info.resolution:.2e}s, median={median_ms:.4f}ms")
+
+
 if __name__ == "__main__":
     benchmark_dimension_alignment()
     verify_eager_vs_lazy_generator()
     verify_stdio_buffering_and_flush()
+    verify_monotonic_timer_and_benchmark()
 ```
 
 ---
@@ -392,6 +446,14 @@ if __name__ == "__main__":
   - **實體磁碟持久化邊界與高頻保護**：`flush=True` 僅排空 Python 使用者空間緩衝區至 OS Kernel Page Cache；若檢查點或關鍵審計日誌需防範斷電/崩潰遺失，必須額外執行 `os.fsync(fd)` `[FACT]` `[SAFETY_BOUND]`。反之，在每秒 $> 10^3$ 次之緊密數值迴圈內嚴禁逐次呼叫 `flush=True`，以避免高頻 Ring 3 $\leftrightarrow$ Ring 0 系統呼叫退化為 I/O 瓶頸 `[DESIGN_DECISION]`。
 - **違規後果**: 未執行 `flush=True` 將導致終端機進度條定格卡死、背景訓練崩潰時遺失最後 $8\text{ KB}$ 關鍵錯誤日誌，或在 Agent/MCP 子進程雙向管線通訊中引發永久性 I/O 死鎖（Deadlock）。
 
+### [RULE-203-07] 單調高解析度計時器與預熱中位數測速強制合約 (Monotonic Performance Counter & Synchronized Warm-Up Benchmark Guardrail)
+- **合約等級**: `SAFETY_CRITICAL`
+- **前置條件**: 執行任何程式碼耗時剖析、吞吐量（Throughput）計算、RAG/API 延遲監控或深度學習模型推論/訓練基準測試（Benchmarking）。
+- **量化決策邊界**:
+  - **嚴禁以 `time.time()` 量測時間差**：`time.time()` 讀取可調整之作業系統牆上時鐘（`monotonic == False, adjustable == True`），僅限用於記錄日曆時間戳記（幾點幾分開始）；任何經過時間（Elapsed Duration）計算**必須**強制使用硬體單調高解析度計時器 `time.perf_counter()` 或 `time.perf_counter_ns()`（`monotonic == True, adjustable == False`） `[FACT]` `[SAFETY_BOUND]`。
+  - **GPU 非同步屏障同步與預熱中位數協議**：在 CUDA 加速器上量測算子或模型延遲時，必須先執行 $\ge 5$ 輪預熱（Warm-up），並在計時起點與終點前顯式執行 `torch.cuda.synchronize()`（或使用 `torch.cuda.Event(enable_timing=True)`），再取 $\ge 20$ 輪獨立量測之中位數（Median）與四分位距（IQR），嚴禁直接對未同步之非同步 Kernel Launch 測速或僅憑理論 FLOPs/MACs 降幅宣稱實測加速 `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`。
+- **違規後果**: 使用 `time.time()` 相減在遭遇 NTP 網路校時或時鐘微調時將導致延遲失真、負延遲或吞吐量除零崩潰；未執行 `torch.cuda.synchronize()` 將僅測得微秒級主機端佇列發射時間，造成數十倍的虛假加速幻覺。
+
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -414,3 +476,6 @@ if __name__ == "__main__":
 6. **Python 產生器表達式與惰性求值官方規範 (PEP 289 & PEP 255)**
    - *Specification*: Hettinger, R. (2002). "PEP 289 – Generator Expressions." & Schemenauer, N., Peters, T., & Hetland, M. L. (2001). "PEP 255 – Simple Generators." *Python Enhancement Proposals, Python Software Foundation*. URL: [https://peps.python.org/pep-0289/](https://peps.python.org/pep-0289/).
    - *Core Contribution*: 定義 CPython 協程狀態機（`PyGenObject`）與按需惰性求值（Lazy Evaluation）協定，將序列轉換與串流歸約之輔助空間複雜度由 $O(N)$ 降至常數級 $O(1)$。
+7. **Python 單調時鐘與高解析度效能計數器官方規範 (PEP 418)**
+   - *Specification*: Stinner, V.,バッチ, C., & Jewett, J. J. (2012). "PEP 418 – Add monotonic time, performance counter, and process time functions." *Python Enhancement Proposals, Python Software Foundation*. URL: [https://peps.python.org/pep-0418/](https://peps.python.org/pep-0418/).
+   - *Core Contribution*: 形式化區分可受 NTP 調整之系統牆上時鐘（`time.time()`）與底層作業系統單調高解析度計數器（`time.perf_counter()` / `CLOCK_MONOTONIC` / `QueryPerformanceCounter`），奠定跨平台延遲基準測試之時間不變量。

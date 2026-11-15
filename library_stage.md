@@ -1,9 +1,9 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-10-31  
+> **更新時間**: 2026-11-15  
 > **當前交接基準 HEAD**: 最新 `main` 分支權威提交（詳見 `reports/library_integrity.json` 之 `git_commit_sha` 與 `corpus_sha256`）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件、915 個階層式 Chunks），104 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），108 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（隨每次 PR 合併自動同步更新於 `reports/library_integrity.json`）
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 104 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 108 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -239,8 +239,18 @@
 - **P2: Reflection（低信心自省二階段重寫檢索 Self-Reflective Corrective RAG）**：
   - 當第一輪檢索信心度偏低（`confidence_score < 0.35` 或 `low_confidence_abstain == True`）時，自動觸發雙語橋接詞彙擴展重寫（`reflect_rewrite=True`），僅在第二輪信心度顯著提升且解除拒答門檻時採納結果。
 - **P2: Tool Use（MCP Stdio Server 擴充第 4 項確定性工具 `library_verify_integrity` 與雙向 UTF-8 管線加固）**：
-  - 於 `run_mcp_stdio_server()` 新增 `library_verify_integrity` 工具（即時驗證 28 卷、915 Chunks、104 條不變量、DAG 無環性與 `corpus_sha256` 溯源），並補齊 `sys.stdin.reconfigure(encoding="utf-8")`。
+  - 於 `run_mcp_stdio_server()` 新增 `library_verify_integrity` 工具（即時驗證 28 卷、108 條不變量、DAG 無環性與 `corpus_sha256` 溯源），並補齊 `sys.stdin.reconfigure(encoding="utf-8")`。
   - 雙套件基準測試結果：16 題 Golden Suite 達成 `Recall@1 = 100%`、`Recall@5 = 100%`、`Exact Rule Recall@5 = 100%`；24 題零洩漏 Holdout Suite 達成 `Recall@1 = 95.0%`、`Recall@5 = 100.0%`、`MRR@5 = 0.9750`、`NDCG@5 = 0.9815`、`Exact Rule Recall@5 = 95.0%`、`Multi-Hop Subgraph Recall@5 = 100.0%`、`Abstain Accuracy = 100.0%`。
+
+### 22. 蔡炎龍教授 TAICA L09–L10（Harness 六元組與 Loop/Graph 控制流）、四大 Colab 專題實證與 `time.perf_counter()` 單調計時器入庫（108 條不變量）
+- **P0: 擴充 `LIB-203`（`time.time()` NTP 漂移陷阱 vs. `time.perf_counter()` 硬體單調計數器與 GPU 非同步測速協議，`RULE-203-07`）**：
+  - 推導 POSIX `CLOCK_REALTIME` 可調整牆上時鐘與硬體 Invariant TSC / `CLOCK_MONOTONIC` / `QueryPerformanceCounter` 之單調性差異（PEP 418），建立預熱（Warm-up）+ `torch.cuda.synchronize()` 屏障同步 + 多輪中位數測速協議，新增 `verify_monotonic_timer_and_benchmark()` 與 `[RULE-203-07]`（`SAFETY_CRITICAL`）。
+- **P0: 擴充 `LIB-703`（Harness 六大工作裝備、Loop 五要素、Graph 節點最小權限隔離、無狀態 API 視窗截斷與雙重審查狀態機，`RULE-703-06` & `RULE-703-07`）**：
+  - 納入蔡炎龍教授 TAICA L09–L10 之完整 Harness 六元組、好老闆交辦三要素、Work Agent vs. Code Agent 對照、`AGENTS.md` 12,000 字元上限拆解原則與 LLM Wiki 先 8–10 題結構化訪談協議。
+  - 建立 `Prompt -> Loop -> Graph` 控制流圖論演進（含 Loop 獨立對話審查與硬上限剎車、Graph 節點最小權限讀寫隔離與定向退回邊）、Colab 2 *TraceBack Detective* 無狀態 API $\mathcal{O}(T^2) \to \mathcal{O}(T)$ 滑動視窗截斷，以及 Colab 4 *English Mistake Coach* 四階段雙重審查（Double-Review Reflection）Fail-Closed 狀態機，新增 `[RULE-703-06]`（`SAFETY_CRITICAL`）與 `[RULE-703-07]`（`BOUNDARY_GUARD`）。
+- **P0: 擴充 `LIB-401`、`LIB-603` 與 `LIB-901`（CIFAR-10 八模型消融、Gaussian Guide 3DGS RAG 實證與 Gradio `474.5s` 佇列延遲拆解，`RULE-401-05`）**：
+  - 於 `LIB-401` 收錄 Colab 1 八組 CIFAR-10 CNN 30-Epoch 實證數據（Q1 6 層 `74.96%` 峰值 vs. 9 層 `74.14%` 過擬合反彈；Q2 $1\times 1$ 瓶頸削減 `37.43%` MACs 但在 $16\times 16$ 特徵圖上 GPU 中位數延遲 `1.080 ms` vs. `1.083 ms` 持平之 Roofline 解剖；Q3 Mini-Inception 削減 `82.24%` 模組參數與 `BatchNorm + Dropout` 方差偏移失諧），新增 `[RULE-401-05]`（`OPTIMIZATION_HEURISTIC`）。
+  - 於 `LIB-603` 補入 Colab 3 `RAG01 -> rag-data.zip -> RAG02` 離線知識包封裝契約、16 題 3DGS 檢索消融（`BM25 MRR@3=1.0000` vs. `Hybrid RRF 0.9375` vs. `Dense 0.9271`）與「已引用 (`Cited`) vs. 僅檢索 (`Retrieved Only`)」雙態標記；於 `LIB-901` 補入 Gradio `474.5s` 佇列阻塞事件之分段延遲拆解與 Reviewer Mode 凍結證據快照模式。全庫正式推進至 **108 條決策合約不變量**。
 
 ---
 

@@ -3,7 +3,7 @@
 scripts/library_rag.py
 ======================
 Executable DAG-Aware Hybrid RAG, Lexical Subword MaxSim Reranking, and CAG Compiler Engine
-for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 104 invariants).
+for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 108 invariants).
 
 Implements the mathematical and systems contracts of LIB-603 ([RULE-603-01..04]),
 LIB-000 ([RULE-000-01]), LIB-703, and LIB-906 using zero-dependency standard-library
@@ -128,6 +128,12 @@ BILINGUAL_TERM_BRIDGES: Dict[str, List[str]] = {
     "迎合": ["sycophancy", "capitulation", "事實讓步", "社交道歉"],
     "長序列": ["flashattention", "sram", "hbm", "tiling"],
     "自注意力": ["attention", "flashattention", "softmax"],
+    "單調": ["monotonic", "perf_counter", "perf_counter_ns"],
+    "計時器": ["perf_counter", "monotonic", "clock_realtime", "ntp"],
+    "雙重審查": ["double-review", "reviser", "fail-closed", "uncertain"],
+    "雙審核": ["double-review", "reviser", "fail-closed", "uncertain"],
+    "瓶頸層": ["bottleneck", "1x1", "roofline", "inception"],
+    "佇列": ["queueing", "gradio", "latency", "snapshot"],
 }
 
 
@@ -188,6 +194,15 @@ def get_git_commit_sha(root: Path = ROOT) -> str:
             ["git", "rev-parse", "HEAD"], cwd=str(root), stderr=subprocess.DEVNULL, text=True
         ).strip()
     except Exception:
+        head_file = root / ".git" / "HEAD"
+        if head_file.exists():
+            ref_txt = head_file.read_text(encoding="utf-8").strip()
+            if ref_txt.startswith("ref: "):
+                ref_path = root / ".git" / ref_txt[5:]
+                if ref_path.exists():
+                    return ref_path.read_text(encoding="utf-8").strip()
+            elif len(ref_txt) == 40:
+                return ref_txt
         return "UNKNOWN"
 
 
@@ -456,7 +471,7 @@ def reciprocal_rank_fusion(
 
 class LibraryGraphRAGEngine:
     """
-    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 104 invariants).
+    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 108 invariants).
     """
 
     def __init__(self, root: Path = ROOT):
@@ -483,7 +498,7 @@ class LibraryGraphRAGEngine:
         discovered: List[Tuple[str, str, Path]] = []
         for p in sorted(self.root.rglob("LIB-*.md")):
             rel = p.relative_to(self.root).as_posix()
-            if rel.startswith("_archive_legacy/"):
+            if any(part in p.parts for part in ("_archive_legacy", ".obsidian", "node_modules", ".git", "dist", ".astro")):
                 continue
             m = re.match(r"^(LIB-\d{3})\b", p.name)
             if not m:
@@ -1511,7 +1526,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                     "tools": [
                         {
                             "name": "library_hybrid_search",
-                            "description": "Search the 28-volume CS/DL Library (104 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
+                            "description": "Search the 28-volume CS/DL Library (108 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {
@@ -1554,7 +1569,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                         },
                         {
                             "name": "library_verify_integrity",
-                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (28 volumes, 104 invariants).",
+                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (28 volumes, 108 invariants).",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {},

@@ -90,6 +90,10 @@ Most university machine learning courses end with `model.fit(X_train, y_train)` 
 - Implement real-time Gradio sketchpad frontend with bidirectional REST API.
 - Live probability distribution bar chart with ECE uncertainty warnings when confidence $< 0.70$.
 
+### Stage 7: End-to-End Queueing Latency Decomposition & Reproducible "Reviewer Mode" Architecture `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+- **Queueing vs. Service-Time Latency Decomposition (*Gaussian Guide* `474.5s` Gradio Incident)**: When an interactive AI web endpoint exhibited a `474.502 s` response stall, stage-isolated `time.perf_counter()` micro-benchmarking (`RULE-203-07`) decomposed end-to-end latency into $T_{\text{E2E}} = T_{\text{queue/lock}} + T_{\text{embed}} \, (0.692\text{ s}) + T_{\text{FAISS}} \, (0.004\text{ s}) + T_{\text{LLM}} \, (1.120\text{ s})$. Proving that total service time was only `1.816 s` (with CPU FAISS search taking just `4 ms`) ruled out compute bottlenecks and pinpointed event-loop queue contention, which was resolved via `demo.launch(queue=False)` plus a non-blocking `threading.Lock()` Request Guard and live per-stage latency telemetry (`total / embed / search / llm`) `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`.
+- **Frozen Evidence Snapshot + Safety-Gated Execution Pattern**: Research notebooks (CIFAR-10 8-model ablation & 3DGS RAG evaluation) embed SHA-256-verified frozen telemetry snapshots (`FROZEN_EVIDENCE` / `rag-data.zip`) so reviewers can inspect all curves, tables, and interactive diagnostics in $<3\text{ s}$ without GPU retraining or API keys, while gating expensive full-retraining paths behind explicit `RUN_FULL_TRAINING = False` and UI confirmation locks `[DESIGN_DECISION]`.
+
 ---
 
 ## 3. Production Serving Contract

@@ -1,7 +1,7 @@
 ---
 call_number: LIB-401
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: 全連結網路空間極限與卷積神經網路理論必然性 (DNN Spatial Limits & CNN Inductive Bias)
 module: Deep-Learning-Foundations
 category: Neural-Architectures
@@ -139,6 +139,26 @@ GPU 不擅長執行細碎的滑動窗口循環，但極其擅長大矩陣乘法 
 對於小型卷積核（如 $3 \times 3$）：
 - Winograd $F(2 \times 2, 3 \times 3)$ 演算法利用空間多項式變換，將單次卷積乘法次數由 36 次減少為 16 次，**計算複雜度降低 2.25 倍**，廣泛應用於 cuDNN 底層引擎。
 
+### 3. CIFAR-10 八模型控制變因消融實證：深度飽和、$1\times 1$ 瓶頸 Roofline 延遲悖論與 Mini-Inception 方差偏移 `[EMPIRICAL_RESULT]` `[DERIVATION]` `[SAFETY_BOUND]`
+為嚴密檢驗卷積深度、逐點瓶頸與多分支拓樸在真實硬體上的表現，我們在 CIFAR-10（固定分層切分：`45,000` 訓練 / `5,000` 驗證 / `10,000` 測試，`30` Epochs，`Batch=64`，`Adam lr=0.001`，`Seed=42`，統一採用 `GlobalAveragePooling2D -> Dense(64) -> Dense(10)` 分類頭）上完成 8 組控制變因消融實驗：
+
+| 實驗組別與模型代號 | 核心架構配置 | 目標模組參數 | 全模型總參數 | 訓練準確率 (Train Acc) | 最終驗證準確率 (Val Acc / Loss) | 訓練耗時 / 推論延遲 |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Q1 `Model A` (淺層 3L)** | `3 × Conv3x3` (`16 -> 32 -> 64`) | — | `22,154` | `70.19%` | `67.52%` (`0.901`) | `45.32 s` |
+| **Q1 `Model B` (中層 6L)** | `6 × Conv3x3` (`16×2 -> 32×2 -> 64×2`) | — | `49,898` | `84.64%` | **`74.96%` (`0.799`, Best `75.40%`)** | `61.48 s` |
+| **Q1 `Model C` (深層 9L)** | `9 × Conv3x3` (`16×3 -> 32×3 -> 64×3`) | — | `77,642` | `86.71%` | `74.14%` (`0.876`, 過擬合反彈) | `73.76 s` |
+| **Q2 `Model D` (直接 $3\times 3$)** | $16\times 16\times 64$ 直接 `Conv3x3(64)` | `36,928` | `43,530` | `64.61%` | `63.14%` (`1.019`) | `48.36 s` / **`1.080 ms`** |
+| **Q2 `Model E` ($1\times 1$ 瓶頸)** | `Conv1x1(32) -> Conv3x3(64)` | **`20,576` (`-44.28%`)** | **`27,178` (`-37.56%`)** | `65.17%` | **`63.44%` (`1.019`, `+0.30 pp`)** | `48.87 s` / **`1.083 ms`** |
+| **Q3 `Model S` (標準單路)** | $28\times 28\times 64 \to$ 單路 `Conv3x3(96)` | `55,392` | `147,082` | `81.88%` | **`72.38%` (`0.822`)** | **`108.99 s`** |
+| **Q3 `Model I` (Mini-Inception)** | 3 分支 (`1x1` / `1x1->3x3` / `Pool->1x1`) | **`9,840` (`-82.24%`)** | **`101,530` (`-30.97%`)** | `78.59%` | `71.12%` (`0.858`, `-1.26 pp`) | `138.08 s` (`+26.7%`) |
+| **Q3 `Model I+` (Inception+BN+Drop)** | `Model I` + `BatchNorm` + `Dropout(0.2)` | `10,224` | `101,914` | `85.22%` | `67.18%` (`1.362`, `-3.94 pp`) | `145.31 s` |
+
+1. **洞見一（Q1 網路深度非單調性）**：在無殘差跳接（Residual Connections）之純堆疊卷積網路中，將層數由 3 層增至 6 層（`Model B`）帶來 `+7.44 pp` 驗證提升；但繼續加深至 9 層（`Model C`）時，儘管 Train Loss 降至 `0.372`，Validation Loss 卻由 `0.799` 惡化至 `0.876`（Val Acc 反降 `0.82 pp`） `[EMPIRICAL_RESULT]`。證明缺乏恆等映射捷徑時，過度堆疊深度會同時觸發容量過擬合與深層梯度優化退化。
+2. **洞見二（Q2 理論 MACs 削減 `-37.43%` vs. 實測 GPU 延遲持平之 Roofline 解剖）**：`Model E` 利用 $1\times 1$ 降維瓶頸將全模型卷積乘加量（MACs）由 `11,206,656` 壓縮至 `7,012,352`（`-37.43%`），且驗證準確率略優於 `Model D`（`63.44%` vs. `63.14%`）；然而在 GPU Batch=128 預熱同步實測中，兩者中位數延遲完全持平（`1.080 ms` vs. `1.083 ms`） `[EMPIRICAL_RESULT]`。其物理根源在於：在 $16\times 16$ 小空間解析度與 $32\text{--}64$ 小通道數下，算術強度 $I$ 遠低於 GPU 轉折點 $I^*$（見 [[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]），將 1 個融合 $3\times 3$ Kernel 拆裂為 $1\times 1$ 與 $3\times 3$ 兩個順序 Kernel 需承受**雙倍 Kernel Launch 開銷**與**額外一次中間特徵圖 HBM 讀寫往返**，完全抵銷了乘加次數的縮減。
+3. **洞見三（Q3 多分支啟動開銷與 `BatchNorm + Dropout` 方差偏移失諧）**：
+   - `Model I` 透過三分支多尺度設計削減了 **`82.24%`** 的目標模組參數（`55,392 -> 9,840`），但因 3 條平行分支的獨立 Kernel 排程與 `Concatenate` 顯存拼接拷貝，訓練時間反比單路大卷積 `Model S` 增加 `26.7%`（`108.99s -> 138.08s`） `[EMPIRICAL_RESULT]`。
+   - `Model I+` 在分支拼接後同時插入 `BatchNorm` 與 `Dropout(0.2)`，導致驗證準確率較 `Model I` 暴跌 `3.94 pp`（Val Loss 飆升至 `1.362`）。這印證了 Li et al. (CVPR 2019) 揭示的 **Dropout–BatchNorm 方差偏移（Variance Shift）定理**：訓練階段 Inverted Dropout 將保留機率 $p_{\text{keep}} = 1 - p$ 之激活輸出放大 $\frac{1}{1-p}$ 倍，使後續或鄰近 BN 層記錄的移動平均方差 $\hat{\sigma}_{\text{train}}^2$ 偏離推論階段（關閉 Dropout，$p=0$）的真實方差 $\sigma_{\text{eval}}^2$，引發推論特徵尺度偏移 `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`。
+
 ---
 
 ## 四、💻 工業級工程實作：8 層 DNN vs 輕量 CNN 空間抗形變消融實證
@@ -267,6 +287,14 @@ assert not isinstance(first_layer, torch.nn.Linear), "空間網格輸入嚴禁�
 ```python
 assert feat_gap.ndim == 2 and seq_hidden_l1.ndim == 3, "GAP 輸出必須為 2D [B, C]，且非終端序列層必須維持 3D [B, T, D]！"
 ```
+
+### [RULE-401-05] 小尺度特徵圖算子分裂開銷評估與 BN-Dropout 方差失諧防護合約 (Small-Tensor Operator-Split Overhead & BN-Dropout Disharmony Guardrail)
+- **合約等級**: `OPTIMIZATION_HEURISTIC`
+- **前置條件 (Pre-conditions)**: 於空間解析度 $H, W \le 32$、通道數 $C \le 96$ 之小型卷積網路中引入 $1\times 1$ 瓶頸、多分支 Inception 模組，或組合使用 `BatchNormalization` 與 `Dropout`。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **禁止以理論 MACs 降幅替代實測 GPU 延遲**：在小空間特徵圖（如 $16\times 16 \times 64$）中，將單路 $3\times 3$ 卷積拆為 $1\times 1 \to 3\times 3$ 瓶頸或三分支 Mini-Inception 雖可削減 $37\%\text{--}82\%$ 模組參數與 MACs，但因雙倍/多路 Kernel Launch 與 `Concatenate` HBM 讀寫開銷，GPU 實測延遲可能持平甚至上升（如 `1.080 ms -> 1.083 ms` 或訓練耗時 `+26.7%`）；架構選型必須同時報告參數量、MACs 與預熱同步中位數延遲 `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]`。
+  - **防範 BatchNorm 與 Dropout 串接方差偏移**：在卷積特徵提取層或分支 `Concatenate` 後，嚴禁未經消融驗證即同時緊鄰混用 `BatchNormalization` 與高比率空間/激活 `Dropout`（實測引發 `-3.94 pp` 驗證退化與 `18.04 pp` Train-Val 落差）；若需正則化，應優先將單一低比率 Dropout 置於全域池化（GAP）後的分類頭末端，或採用 Weight Decay / 資料擴增 `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`。
+- **違規後果**: 盲目堆疊無殘差深層卷積（$>6$ 層於小型資料集）或混用 BN+Dropout 將導致驗證集 Loss 反彈劣化；僅看理論 FLOPs 將誤判邊緣端與 GPU 的真實推論吞吐量。
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -289,3 +317,6 @@ assert feat_gap.ndim == 2 and seq_hidden_l1.ndim == 3, "GAP 輸出必須為 2D [
 6. **GoogLeNet 與 Inception $1 \times 1$ 瓶頸架構奠基作 (CVPR 2015)**
    - *Paper*: Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., Erhan, D., Vanhoucke, V., & Rabinovich, A. (2015). "Going deeper with convolutions." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2015)*, pp. 1-9. DOI: [10.1109/CVPR.2015.7298594](https://doi.org/10.1109/CVPR.2015.7298594).
    - *Core Contribution*: 提出多尺度平行分支 Inception 模組、$1 \times 1$ 逐點卷積通道降維瓶頸與末端全域平均池化 (Global Average Pooling)，大幅壓縮參數量與計算複雜度。
+7. **BatchNorm 與 Dropout 共同作用之方差偏移失諧定理 (CVPR 2019)**
+   - *Paper*: Li, X., Chen, S., Hu, X., & Yang, J. (2019). "Understanding the Disharmony between Dropout and Batch Normalization by Variance Shift." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2019)*, pp. 2682-2690. DOI: [10.1109/CVPR.2019.00279](https://doi.org/10.1109/CVPR.2019.00279).
+   - *Core Contribution*: 從數學與實證證明 Dropout 在訓練與推論階段改變神經元激活方差，導致緊隨其後的 BatchNormalization 產生嚴重特徵分佈偏移與驗證準確率退化。

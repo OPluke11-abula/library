@@ -1,7 +1,7 @@
 ---
 call_number: LIB-703
 status: source-verified
-invariants_count: 5
+invariants_count: 7
 title: LLM Agent Cognitive Architecture & Protocols (Agent Edition)
 module: Agent-Cognition
 category: Systems-Frontiers
@@ -89,6 +89,24 @@ To operate over infinite time horizons within finite token contexts:
 5. **The Three Coding Paradigms & Production Boundaries of "Vibe Coding"** `[FACT]` `[SAFETY_BOUND]`:
    Karpathy (2025) contrasts manual coding (no LLM), human-led AI-assisted engineering (human architectural control + strict diff review + automated test verification), and **Vibe Coding** (pure natural-language prompting, blindly clicking `Accept All` without reading diffs, and pasting raw error logs until symptoms disappear). While Vibe Coding accelerates throwaway weekend prototypes, it is strictly forbidden in production systems, safety-critical infrastructure, and axiomatic knowledge repositories, where every diff must pass syntactic AST parsing and deterministic invariant checks `[SAFETY_BOUND]`.
 
+### 5. Complete Harness Six-Tuple, Prompt $\to$ Loop $\to$ Graph Control Topology, Stateless API $\mathcal{O}(T^2)$ Cost & Double-Review Reflection Automaton `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+1. **The Complete Harness Six-Tuple, Good Boss Delegation Triad & Work Agent vs. Code Agent (Tsai, TAICA 2026 L09–L10)** `[FACT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`:
+   - **Complete Harness Six-Tuple**: $\mathcal{H}_{\text{Agent}} = \langle \text{Workspace}, \; \text{Tools}, \; \text{Connectors (MCP)}, \; \text{Skills (\texttt{SKILL.md})}, \; \text{Rules (\texttt{AGENTS.md})}, \; \text{Schedule} \rangle$. Cross-tool rule interoperability: `CLAUDE.md` can reference `@AGENTS.md` to share a single source of truth; avoid maintaining divergent `GEMINI.md` and `AGENTS.md` files simultaneously (`GEMINI.md` takes higher loading precedence and causes silent rule conflicts); and keep `AGENTS.md` $\le 12,000$ characters (Google Antigravity's per-rule-file ceiling) by offloading long-form SOPs into on-demand `SKILL.md` modules `[FACT]` `[SAFETY_BOUND]`.
+   - **Good Boss Delegation Triad & Interview-First Spec Generation**: Every task specification must explicitly state **(1) Deliverable Spec** (exact path and schema), **(2) Boundary Constraints** (read-only vs. mutable directories), and **(3) Executable Acceptance Criteria** (*"Saying 'check it' is not verification; saying 'make it better' is not a specification"*). Before generating `AGENTS.md` for a new knowledge base (e.g., an LLM Wiki), the agent must conduct an **8–10 question single-question-at-a-time structured interview** (target reader, page types, language/terminology, citation granularity, contradiction handling, single vs. batch ingestion, downstream deliverables, lint rules) `[DESIGN_DECISION]`.
+   - **Work Agent vs. Code Agent**: Work Agents (ChatGPT Work, Claude Desktop, OpenWorker) present final outputs/summaries and rely on manual file versioning and human reading; Code Agents (Antigravity, Claude Code, Codex, OpenCode) present line-by-line `diff`s, use `git` as the native state baseline, and verify completion via executable scripts (`Exit Code == 0`) `[FACT]`.
+2. **Control-Flow Graph Progression (`Prompt` $\to$ `Loop` $\to$ `Graph`)** (Huntley 2025 `Ralph loop`; Osmani 2026 *Loop Engineering*; Tsai 2026 L10) `[FACT]` `[SAFETY_BOUND]`:
+   - **Prompt ($G_{\text{prompt}} = (\{A\}, \emptyset)$)**: Single pass; the human acts as the manual glue between steps.
+   - **Loop ($G_{\text{loop}} = (\{A\}, \{(A, A)\})$)**: The AI decides the next step inside a self-executing specification. A safe autonomous Loop requires **five mandatory elements**: (1) **Goal**, (2) **Constraints**, (3) **Two-Tier Completion Criteria** (**Deterministic Script Check** + **Fresh-Context Independent AI Review** in a clean conversation given *only* the final artifact and raw sources—never letting the same generation context grade its own output), (4) **Hard Braking Conditions** (hard iteration cap e.g. $K_{\max} \le 3$, abstention when source material is below threshold e.g. $< 3$ pages, and token budget cutoffs), and (5) **Trigger** `[SAFETY_BOUND]`.
+   - **Graph ($G_{\text{graph}} = (V, E_{\text{fwd}}, E_{\text{rollback}})$ — File-State Workflow Prototype)**: For multi-stage pipelines (e.g., `sources.md` $\to$ `cards/` $\to$ `outline.md` $\to$ `drafts/` $\to$ `deck.html` $\to$ `report.md`), control returns to the system designer via explicit forward and **targeted rollback edges** (*"Roll back to the exact stage that failed; keep outer loops rare and inner node loops fast"*). Each node enforces **Least-Privilege Read/Write Scoping** (e.g., the HTML rendering node reads approved `drafts/` and is strictly forbidden from mutating a single word of text; the Gatekeeper node only emits `report.md` and triggers targeted rollback edges without self-editing) `[SAFETY_BOUND]`.
+3. **Stateless HTTP Inference APIs, $\mathcal{O}(T^2)$ Cumulative Token Growth & Sliding-Window Socratic Debugging (*TraceBack Detective*)** `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]`:
+   - Because cloud Chat Completions APIs are stateless, turn $t$ must re-transmit $[S_{\text{sys}}, u_1, a_1, \dots, u_t]$. Without truncation, cumulative input tokens across $T$ turns grow quadratically:
+     $$C_{\text{unbounded}}(T) = \sum_{t=1}^{T} \left(L_{\text{sys}} + t \cdot \bar{L}_{\text{turn}}\right) = T \cdot L_{\text{sys}} + \frac{T(T+1)}{2}\bar{L}_{\text{turn}} = \mathcal{O}(T^2)$$
+   - Applying sliding-window truncation `history[-2W:]` (e.g., `history[-12:]` retaining the last 6 user/assistant pairs) bounds per-turn input to $\mathcal{O}(L_{\text{sys}} + W \cdot \bar{L}_{\text{turn}})$ and total $T$-turn cost to $\mathcal{O}(T)$, while keeping $S_{\text{sys}}$ at `index 0` maximizes Prefix KV-Cache reuse (Prompt Caching) `[DERIVATION]`.
+4. **Four-Stage Double-Review Reflection Automaton (*English Mistake Coach*)** `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`:
+   - Formal state machine: `Writer` (minimal-edit draft $y^{(0)}$ + typed `edits` list) $\to$ `Reviewer 1` ($d_1 \in \{\texttt{KEEP}, \texttt{REVISE}, \texttt{UNCERTAIN}\}$) $\to$ **Conditional `Reviser`** (invoked iff $d_1 = \texttt{REVISE}$, avoiding unnecessary LLM latency and preventing overcorrection on already-valid inputs) $\to$ **Mandatory `Reviewer 2`** ($d_2$) $\to$ **Fail-Closed Gate**:
+     $$\text{Approved}(y^{(1)}) \iff \left(d_2 = \texttt{KEEP}\right) \land \left(d_1 \neq \texttt{UNCERTAIN}\right) \land \left(d_2 \neq \texttt{UNCERTAIN}\right)$$
+     Any `UNCERTAIN` flag on semantically ambiguous inputs (e.g., `"I saw her duck."`) halts publication with `NEEDS_CONTEXT` rather than guessing intent (verified on `"we are go in the school"` $\to$ `"We are going to school."` in `2,293` tokens with `VERIFIED_DOUBLE_REVIEW`) `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`.
+
 ---
 
 ## 3. Production JSON-RPC Tool Schema & Closed-Loop Reference Implementation
@@ -161,6 +179,26 @@ def quote_order_deterministic(item_name: str, quantity: int) -> Dict[str, Any]:
         "currency": "TWD",
         "ordered": False,
     }
+
+
+def evaluate_double_review_gate(
+    r1_decision: str, r2_decision: str, draft_text: str, revised_text: Optional[str] = None
+) -> Dict[str, Any]:
+    """Four-stage Double-Review Reflection fail-closed release gate."""
+    reviser_invoked = r1_decision == "REVISE"
+    final_candidate = revised_text if (reviser_invoked and revised_text) else draft_text
+    if r1_decision == "UNCERTAIN" or r2_decision == "UNCERTAIN":
+        status, approved = "NEEDS_CONTEXT", False
+    elif r2_decision == "KEEP":
+        status, approved = "VERIFIED_DOUBLE_REVIEW", True
+    else:
+        status, approved = "NOT_APPROVED", False
+    return {
+        "status": status,
+        "approved": approved,
+        "reviser_invoked": reviser_invoked,
+        "final": final_candidate,
+    }
 ```
 
 ---
@@ -192,6 +230,16 @@ def quote_order_deterministic(item_name: str, quantity: int) -> Dict[str, Any]:
 - **Specification**: (1) Agents handling arithmetic pricing, inventory, or live system queries MUST enforce two-stage tool routing (Stage 1: structured function call generation $\to$ Stage 2: host execution returning a schema-validated JSON payload for grounded synthesis) rather than mental LLM arithmetic `[DESIGN_DECISION]`; (2) vertical agent-to-tool integration MUST follow **MCP** JSON-RPC schemas while horizontal inter-agent delegation follows **A2A** protocols `[FACT]`; and (3) in production repositories and verified knowledge bases, blind Vibe Coding (`Accept All` without diff inspection and automated validator exit code `0`) is strictly prohibited `[SAFETY_BOUND]`.
 - **Violation Consequence**: Direct LLM arithmetic hallucinates transactional figures, conflating tool and peer protocols breaks modularity, and unreviewed Vibe Coding silently introduces structural regressions.
 
+### [RULE-703-06] Autonomous Loop Five-Element, Hard Brake & Fresh-Context Review Invariant
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: Every autonomous Loop specification MUST define **(1) Goal, (2) Read/Write Boundary Constraints, (3) Two-Tier Completion Criteria, (4) Hard Braking Conditions, and (5) Trigger**. Completion verification MUST combine deterministic script checks (`Exit Code == 0`) with a **Fresh-Context Independent AI Review** executed in a clean conversation receiving *only* the final artifact and raw sources (never allowing the generation context to grade its own output) `[SAFETY_BOUND]`. Loops MUST enforce hard iteration caps (e.g., $K_{\max} \le 3$) and evidence-insufficiency abstention, and project rule manuals (`AGENTS.md`, referenced via `@AGENTS.md` in `CLAUDE.md`) MUST remain $\le 12,000$ characters by offloading detailed SOPs into `SKILL.md` modules `[FACT]` `[SAFETY_BOUND]`.
+- **Violation Consequence**: Unsupervised loops without hard brakes or fresh-context review compound errors indefinitely, rationalize their own hallucinations, and exhaust token budgets.
+
+### [RULE-703-07] Graph Node Least-Privilege Scoping, Targeted Rollback & Double-Review Fail-Closed Gate
+- **Contract Level**: `BOUNDARY_GUARD`
+- **Specification**: In multi-stage Graph workflows $G=(V, E_{\text{fwd}}, E_{\text{rollback}})$, all intermediate states MUST be persisted as git-tracked files and each node MUST enforce strict least-privilege read/write whitelists: downstream rendering nodes (`drafts/ -> deck.html`) MUST NOT mutate a single word of approved text, and Gatekeeper nodes MUST only emit audit reports and trigger targeted rollback edges to the specific failing upstream stage without self-editing `[SAFETY_BOUND]`. In high-precision revision pipelines (`Writer -> Reviewer 1 -> Conditional Reviser -> Reviewer 2`), the `Reviser` MUST execute iff $d_1 = \texttt{REVISE}$ (preventing overcorrection), and publication MUST fail closed unless $d_2 = \texttt{KEEP}$ and neither reviewer flags `UNCERTAIN` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`.
+- **Violation Consequence**: Unscoped node permissions allow presentation stages to silently corrupt verified facts, while monolithic loops obscure failure localization across multi-stage pipelines.
+
 ---
 
 ## 5. Canonical & Peer-Reviewed References
@@ -201,3 +249,4 @@ def quote_order_deterministic(item_name: str, quantity: int) -> Dict[str, Any]:
 3. **Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K., & Yao, S.** (2023). "Reflexion: Language Agents with Verbal Reinforcement Learning." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
 4. **Schick, T., Dwivedi-Yu, J., Dessì, R., Raileanu, R., Lomeli, M., Zettlemoyer, L., Cancedda, N., & Scialom, T.** (2023). "Toolformer: Language Models Can Teach Themselves to Use Tools." *Advances in Neural Information Processing Systems (NeurIPS 2023)*, 36.
 5. **Ng, A.** (2024). "Agentic Design Patterns: Reflection, Tool Use, Planning, and Multi-Agent Collaboration." *DeepLearning.AI*; **Anthropic** (2024). *Model Context Protocol (MCP) Specification*; **Google** (2025). *Agent2Agent (A2A) Open Protocol*.
+6. **Tsai, Y.-L. (蔡炎龍)** (2026). *TAICA Generative AI: Theory and Practice — Unit 09 (Agentic Work & Harness) & Unit 10 (Loop, Graph & Workflow Prototype)*. National Chengchi University (NCCU); **Osmani, A.** (2026). *Loop Engineering & Self-Executing Specs*; **Huntley, G.** (2025). *The Ralph Loop Pattern*.

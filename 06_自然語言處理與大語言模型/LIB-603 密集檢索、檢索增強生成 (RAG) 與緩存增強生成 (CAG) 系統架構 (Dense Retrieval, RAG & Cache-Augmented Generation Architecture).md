@@ -127,6 +127,24 @@ $$\mathrm{Score}_{\mathrm{RRF}}(q, d) = \sum_{m \in \{\mathrm{BM25}, \mathrm{Den
    - **忠實度 (Faithfulness / Groundedness)**：將模型回答拆解為原子主張集合 $\mathcal{C}_{\mathrm{ans}}$（銜接 [[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]），計算可由檢索上下文 $\mathcal{C}_{\mathrm{expanded}}(q)$ 邏輯蘊含之比例 $\mathrm{Faithfulness} = \frac{|\{c \in \mathcal{C}_{\mathrm{ans}} : \mathcal{C}_{\mathrm{expanded}}(q) \models c\}|}{|\mathcal{C}_{\mathrm{ans}}|}$。
    - **回答相關性 (Answer Relevance)**：衡量生成回應對原始問題意圖之直接覆蓋度。
 
+### 7. 離線向量知識包封裝協定（`RAG01 -> rag-data.zip -> RAG02`）、高術語密度小型語料消融與雙態引用標記實證（Gaussian Guide 3DGS 實證） `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+在針對特定科學文獻（如 3D Gaussian Splatting，參見 [[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]）建構研究助教時，*Gaussian Guide* 專題驗證了三項關鍵生產級 RAG 工程規範：
+1. **雙階段離線知識包封裝契約（`RAG01` 離線建置 $\to$ `rag-data.zip` $\to$ `RAG02` 線上秒級載入）** `[DESIGN_DECISION]` `[SAFETY_BOUND]`：
+   - 將耗時的資料清理、段落意識分塊与高維度嵌入計算（`RAG01`：採用 `google/embeddinggemma-2` 輸出 768 維 $L_2$ 正規化向量並建立 `faiss.IndexFlatIP` 精確內積索引）與線上問答服務（`RAG02`）徹底解耦。
+   - 標準知識包 `rag-data.zip` 強制封裝四項結構化資產：`index.faiss`（二進位向量索引）、`documents.json`（含 `doc_id`、`source`、`page`、`chunk_id`、`text`）、`index_doc_ids.json`（FAISS 整數列號至 `doc_id` 之雙向映射表）與 `config.json`（鎖定 `embedding_model`、`model_revision` 40-hex commit SHA、`dimension: 768`、`chunk_size`、`chunk_overlap` 及各檔案之 SHA-256 雜湊清單），載入時執行 1:1 筆數與維度斷言（`index.ntotal == len(documents) == len(index_doc_ids)`），杜絕向量與文本錯位 `[SAFETY_BOUND]`。
+2. **高專有名詞密度小型語料之檢索消融實證（16-Query 3DGS Benchmark）** `[EMPIRICAL_RESULT]`：
+   在涵蓋 3DGS 協方差矩陣 $\Sigma = R S S^T R^T$、EWA 雅可比投影 $J$、球諧函數（SH）與自適應密度控制之 16 題黃金基準測試（`top_k = 3`）中，三種檢索模態之實測表現如下：
+
+| 檢索方法 (Retriever Mode) | Hit@1 | Hit@3 | MRR@3 | 實證行為與失效邊界分析 |
+| :--- | :---: | :---: | :---: | :--- |
+| **`Dense (FAISS IndexFlatIP)`** | `0.8750` | `1.0000` | `0.9271` | 語意泛化強，但在高密度數學符號與專有名詞縮寫（如 `SH`、`EWA`）查詢上偶發 Top-1 排名滑落（Rank 2） |
+| **`BM25` (稀疏詞彙匹配)** | **`1.0000`** | **`1.0000`** | **`1.0000`** | 在小型高術語密度領域語料中，精確詞彙匹配展现極強判別力，16 題全數 Top-1 命中 |
+| **`Hybrid RRF` (`BM25 + Dense`)** | `0.8750` | `1.0000` | `0.9375` | 兼顧精確術語錨定與跨語句同義改寫召回，顯著優於純密集檢索（`+0.0104` MRR@3） |
+
+3. **「引用語法合法性 (`[doc_XXX]`) $\neq$ 主張級證據支持度」與雙態來源標記** `[FACT]` `[SAFETY_BOUND]`：
+   - **正則引用解析（Citation Syntax Parsing）**：支援 `[doc_001]`、複合括號 `[doc_001, doc_003]` 與分號 `[doc_001; doc_002]` 之多格式解析器（實測 8/8 單元測試全過）僅能證明「模型遵循了引用格式且 ID 存在於 Top-$K$ 檢索結果中」，**不等同於模型生成的主張在語意上必然受該段文字蘊含（Claim-Level Groundedness）**。
+   - **UI 雙態來源揭露與無證據拒答（Unanswerable Abstention）**：檢索面板必須將 Top-$K$ 召回段落明確區分為 **「已引用 (`Cited`)」** 與 **「僅檢索 (`Retrieved Only`)」** 兩種視覺狀態，讓研究人員一眼識別哪些段落真正支撐了答案；同時對超出語料範圍之不可回答問題（如詢問 NeRF 訓練時數、硬體售價或無關主題，`G017`–`G020`）強制執行 **4/4 零捏造拒答** `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`。
+
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體微架構映射：HNSW 圖走訪 vs. Prefix KV-Cache 駐留

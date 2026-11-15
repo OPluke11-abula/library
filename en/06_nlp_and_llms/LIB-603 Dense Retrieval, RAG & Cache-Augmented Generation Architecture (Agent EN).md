@@ -96,6 +96,14 @@ For axiomatic knowledge graphs $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ (such 
    $$\mathcal{C}_{\mathrm{expanded}}(q) = \mathrm{Parent}(\mathcal{V}_{\mathrm{hit}}) \cup \bigcup_{v \in \mathcal{V}_{\mathrm{hit}}} \left\{ \mathrm{Invariants}(u) \;\middle|\; (u \to v) \in \mathcal{E} \right\}$$
 2. **RAGAS Evaluation Triad (Es et al., EACL 2024)** `[LITERATURE_RESULT]`: Evaluates pipelines across **Context Precision/Recall**, **Faithfulness** ($\frac{|\{c \in \mathcal{C}_{\mathrm{ans}} : \mathcal{C}_{\mathrm{expanded}}(q) \models c\}|}{|\mathcal{C}_{\mathrm{ans}}|}$, coupled with `LIB-906` atomic claim verification), and **Answer Relevance**.
 
+### 7. Offline Vector Artifact Packaging (`RAG01 -> rag-data.zip -> RAG02`), Domain-Terminology Retrieval Ablation & Cited vs. Retrieved-Only Provenance (*Gaussian Guide* 3DGS Case Study) `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`
+1. **Decoupled Offline-to-Online RAG Artifact Contract (`rag-data.zip`)** `[DESIGN_DECISION]` `[SAFETY_BOUND]`:
+   - Separates offline indexing (`RAG01`: text cleaning, paragraph-aware chunking, `google/embeddinggemma-2` 768-dim $L_2$-normalized embeddings, `faiss.IndexFlatIP`) from online zero-rebuild serving (`RAG02`). The portable archive `rag-data.zip` bundles `index.faiss`, `documents.json`, `index_doc_ids.json`, and `config.json` (pinning `embedding_model`, 40-hex `model_revision`, `dimension: 768`, chunking hyperparameters, and SHA-256 file hashes) with strict 1:1 cardinality assertions (`index.ntotal == len(documents) == len(index_doc_ids)`).
+2. **Empirical Retrieval Ablation on Terminology-Dense Scientific Corpora (16-Query 3DGS Benchmark, `top_k = 3`)** `[EMPIRICAL_RESULT]`:
+   - On 3D Gaussian Splatting domain queries ([[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]): **`BM25`** achieves `Hit@1 = 1.0000`, `Hit@3 = 1.0000`, **`MRR@3 = 1.0000`**; **`Hybrid RRF`** achieves `Hit@1 = 0.8750`, `Hit@3 = 1.0000`, **`MRR@3 = 0.9375`**; and pure **`Dense (FAISS IndexFlatIP)`** achieves `Hit@1 = 0.8750`, `Hit@3 = 1.0000`, **`MRR@3 = 0.9271`**. Exact lexical matching excels on compact corpora dominated by specialized mathematical notation (`EWA Jacobian`, `SH coefficients`), reinforcing Hybrid RRF over standalone dense search.
+3. **Distinguishing Citation Syntax Validity from Claim-Level Groundedness** `[FACT]` `[SAFETY_BOUND]`:
+   - Multi-format regex citation parsers (`[doc_001]`, `[doc_001, doc_003]`, `[doc_001; doc_002]`, 8/8 unit tests passed) verify **citation format compliance and retrieval membership**, NOT semantic entailment of every generated clause. Production UIs must explicitly distinguish **"Cited (`已引用`)"** chunks from **"Retrieved Only (`僅檢索`)"** context cards and enforce 100% abstention on unanswerable out-of-scope queries (`4/4 PASS` on `G017`–`G020`).
+
 ---
 
 ## 3. Systems & Hardware Alignment: HNSW Traversal vs. Prefix KV-Cache Pinning

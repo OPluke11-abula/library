@@ -1,14 +1,14 @@
 {
   "summary": {
-    "git_commit_sha": "0d4cde7e9bac4822766dfb69ef726ac370d6c4f9",
-    "corpus_sha256": "e7e508e6817bc24c0b2fdaf1dde03d2d0d743dcac216ae7fad38eb0086dd9221",
+    "git_commit_sha": "ce1a04b348a9cdd36752f5d4c592017d964d4c45",
+    "corpus_sha256": "5827d8a015898c1e96ddfe019806b4997ec3a7ef832101e85b94bdafcc1fcae0",
     "volumes_indexed": 28,
     "bilingual_files_indexed": 56,
-    "parent_sections_count": 454,
-    "child_chunks_count": 915,
-    "rules_indexed_zh": 104,
-    "rules_indexed_en": 104,
-    "avg_chunk_tokens": 388.4
+    "parent_sections_count": 455,
+    "child_chunks_count": 936,
+    "rules_indexed_zh": 108,
+    "rules_indexed_en": 108,
+    "avg_chunk_tokens": 402.2
   },
   "dag_prerequisites": {
     "LIB-000": [],
@@ -2591,6 +2591,23 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-203:zh:S04:C08": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射",
+      "section_h3": "8. 主機端與加速器時間基準：系統牆上時鐘 (`time.time()`) vs. 硬體單調計時器 (`time.perf_counter()`) 與 GPU 非同步測速協議 `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:zh:S05:C00": {
       "call_number": "LIB-203",
       "lang": "zh",
@@ -2737,6 +2754,27 @@
       ],
       "evidence_tags": [
         "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-203:zh:S06:C07": {
+      "call_number": "LIB-203",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-203-07] 單調高解析度計時器與預熱中位數測速強制合約 (Monotonic Performance Counter & Synchronized Warm-Up Benchmark Guardrail)",
+      "rule_ids": [
+        "RULE-203-07"
+      ],
+      "defined_rule_ids": [
+        "RULE-203-07"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "EMPIRICAL_RESULT",
         "FACT",
         "SAFETY_BOUND"
       ],
@@ -2904,6 +2942,23 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-203:en:S04:C07": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "3. GPU Microarchitecture & CUDA Execution Model",
+      "section_h3": "7. Host & Accelerator Timing Primitives: Wall-Clock (`time.time()`) vs. Monotonic Hardware Counter (`time.perf_counter()`) & Asynchronous GPU Benchmarking `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-203:en:S05:C00": {
       "call_number": "LIB-203",
       "lang": "en",
@@ -3028,6 +3083,27 @@
       ],
       "evidence_tags": [
         "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-203:en:S06:C07": {
+      "call_number": "LIB-203",
+      "lang": "en",
+      "section_h2": "5. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-203-07] Monotonic Performance Counter & Synchronized Warm-Up Benchmark Guardrail",
+      "rule_ids": [
+        "RULE-203-07"
+      ],
+      "defined_rule_ids": [
+        "RULE-203-07"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "EMPIRICAL_RESULT",
         "FACT",
         "SAFETY_BOUND"
       ],
@@ -3563,6 +3639,21 @@
       "evidence_tags": [],
       "epistemic_weight": 1.0
     },
+    "LIB-401:zh:S04:C03": {
+      "call_number": "LIB-401",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射",
+      "section_h3": "3. CIFAR-10 八模型控制變因消融實證：深度飽和、$1\\times 1$ 瓶頸 Roofline 延遲悖論與 Mini-Inception 方差偏移 `[EMPIRICAL_RESULT]` `[DERIVATION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-401:zh:S05:C00": {
       "call_number": "LIB-401",
       "lang": "zh",
@@ -3589,7 +3680,7 @@
         "CRITICAL_INVARIANT"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:zh:S06:C02": {
       "call_number": "LIB-401",
@@ -3606,7 +3697,7 @@
         "BOUNDARY_GUARD"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:zh:S06:C03": {
       "call_number": "LIB-401",
@@ -3623,7 +3714,7 @@
         "BOUNDARY_GUARD"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:zh:S06:C04": {
       "call_number": "LIB-401",
@@ -3640,7 +3731,28 @@
         "PERFORMANCE_CRITICAL"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
+    },
+    "LIB-401:zh:S06:C05": {
+      "call_number": "LIB-401",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-401-05] 小尺度特徵圖算子分裂開銷評估與 BN-Dropout 方差失諧防護合約 (Small-Tensor Operator-Split Overhead & BN-Dropout Disharmony Guardrail)",
+      "rule_ids": [
+        "RULE-401-05"
+      ],
+      "defined_rule_ids": [
+        "RULE-401-05"
+      ],
+      "contract_levels": [
+        "OPTIMIZATION_HEURISTIC"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-401:zh:S07:C00": {
       "call_number": "LIB-401",
@@ -3762,7 +3874,10 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [
-        "FACT"
+        "DERIVATION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
       ],
       "epistemic_weight": 1.0
     },
@@ -3792,7 +3907,7 @@
         "CRITICAL_INVARIANT"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:en:S06:C02": {
       "call_number": "LIB-401",
@@ -3809,7 +3924,7 @@
         "BOUNDARY_GUARD"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:en:S06:C03": {
       "call_number": "LIB-401",
@@ -3826,7 +3941,7 @@
         "BOUNDARY_GUARD"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
     },
     "LIB-401:en:S06:C04": {
       "call_number": "LIB-401",
@@ -3843,7 +3958,28 @@
         "PERFORMANCE_CRITICAL"
       ],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.98
+    },
+    "LIB-401:en:S06:C05": {
+      "call_number": "LIB-401",
+      "lang": "en",
+      "section_h2": "4. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-401-05] Small-Tensor Operator-Split Overhead & BN-Dropout Disharmony Guardrail",
+      "rule_ids": [
+        "RULE-401-05"
+      ],
+      "defined_rule_ids": [
+        "RULE-401-05"
+      ],
+      "contract_levels": [
+        "OPTIMIZATION_HEURISTIC"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-401:en:S07:C00": {
       "call_number": "LIB-401",
@@ -7694,6 +7830,22 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-603:zh:S03:C07": {
+      "call_number": "LIB-603",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：InfoNCE 互資訊下界、兩階段重排序與 RAG/CAG 複雜度",
+      "section_h3": "7. 離線向量知識包封裝協定（`RAG01 -> rag-data.zip -> RAG02`）、高術語密度小型語料消融與雙態引用標記實證（Gaussian Guide 3DGS 實證） `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-603:zh:S04:C00": {
       "call_number": "LIB-603",
       "lang": "zh",
@@ -7943,6 +8095,22 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-603:en:S03:C07": {
+      "call_number": "LIB-603",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "7. Offline Vector Artifact Packaging (`RAG01 -> rag-data.zip -> RAG02`), Domain-Terminology Retrieval Ablation & Cited vs. Retrieved-Only Provenance (*Gaussian Guide* 3DGS Case Study) `[FACT]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-603:en:S04:C00": {
       "call_number": "LIB-603",
       "lang": "en",
@@ -8136,6 +8304,21 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-703:zh:S02:C04": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：從「鸚鵡學舌」到「具備手腳與筆記本的科學家」",
+      "section_h3": "4. 完整 Harness 六大工作裝備、好老闆交辦三要素與 Work Agent vs. Code Agent 架構分野 `[FACT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-703:zh:S03:C01": {
       "call_number": "LIB-703",
       "lang": "zh",
@@ -8202,6 +8385,23 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-703:zh:S03:C06": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：POMDP 形式化、ReAct 迴圈與樹狀思考 (ToT)",
+      "section_h3": "6. 從 Prompt、Loop 到 Graph 的控制流圖論演進與雙重審查（Double-Review Reflection）狀態機 `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-703:zh:S04:C00": {
       "call_number": "LIB-703",
       "lang": "zh",
@@ -8211,7 +8411,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 0.85
+      "epistemic_weight": 1.0
     },
     "LIB-703:zh:S04:C01": {
       "call_number": "LIB-703",
@@ -8222,7 +8422,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 0.85
+      "epistemic_weight": 1.0
     },
     "LIB-703:zh:S04:C02": {
       "call_number": "LIB-703",
@@ -8240,6 +8440,22 @@
         "DESIGN_DECISION"
       ],
       "epistemic_weight": 0.85
+    },
+    "LIB-703:zh:S04:C03": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體微架構映射：記憶體分層與 Token 經濟學",
+      "section_h3": "3. 無狀態推論 API（Stateless HTTP API）之 $\\mathcal{O}(T^2)$ Token 累積成本、滑動視窗截斷與蘇格拉底式引導除錯 `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
     },
     "LIB-703:zh:S05:C00": {
       "call_number": "LIB-703",
@@ -8340,6 +8556,46 @@
         "SAFETY_BOUND"
       ],
       "epistemic_weight": 1.0
+    },
+    "LIB-703:zh:S06:C06": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-703-06] 自主迴圈（Loop）五要素、硬上限剎車與獨立對話審查合約 (Autonomous Loop Five-Element, Hard Brake & Fresh-Context Review Invariant)",
+      "rule_ids": [
+        "RULE-703-06"
+      ],
+      "defined_rule_ids": [
+        "RULE-703-06"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-703:zh:S06:C07": {
+      "call_number": "LIB-703",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-703-07] 圖工作流（Graph）節點最小權限讀寫隔離、定向退回與雙重審查閉鎖合約 (Graph Node Least-Privilege Scoping, Targeted Rollback & Double-Review Fail-Closed Gate)",
+      "rule_ids": [
+        "RULE-703-07"
+      ],
+      "defined_rule_ids": [
+        "RULE-703-07"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-703:zh:S07:C00": {
       "call_number": "LIB-703",
@@ -8447,6 +8703,23 @@
       ],
       "epistemic_weight": 1.0
     },
+    "LIB-703:en:S03:C05": {
+      "call_number": "LIB-703",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "5. Complete Harness Six-Tuple, Prompt $\\to$ Loop $\\to$ Graph Control Topology, Stateless API $\\mathcal{O}(T^2)$ Cost & Double-Review Reflection Automaton `[FACT]` `[DERIVATION]` `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
     "LIB-703:en:S04:C00": {
       "call_number": "LIB-703",
       "lang": "en",
@@ -8548,6 +8821,46 @@
         "SAFETY_BOUND"
       ],
       "epistemic_weight": 1.0
+    },
+    "LIB-703:en:S05:C06": {
+      "call_number": "LIB-703",
+      "lang": "en",
+      "section_h2": "4. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-703-06] Autonomous Loop Five-Element, Hard Brake & Fresh-Context Review Invariant",
+      "rule_ids": [
+        "RULE-703-06"
+      ],
+      "defined_rule_ids": [
+        "RULE-703-06"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-703:en:S05:C07": {
+      "call_number": "LIB-703",
+      "lang": "en",
+      "section_h2": "4. Agent Invariants & Decision Protocols",
+      "section_h3": "[RULE-703-07] Graph Node Least-Privilege Scoping, Targeted Rollback & Double-Review Fail-Closed Gate",
+      "rule_ids": [
+        "RULE-703-07"
+      ],
+      "defined_rule_ids": [
+        "RULE-703-07"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
     },
     "LIB-703:en:S06:C00": {
       "call_number": "LIB-703",
@@ -9671,7 +9984,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S01:C00": {
       "call_number": "LIB-901",
@@ -9682,7 +9995,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S02:C00": {
       "call_number": "LIB-901",
@@ -9693,7 +10006,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S02:C01": {
       "call_number": "LIB-901",
@@ -9704,7 +10017,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S02:C02": {
       "call_number": "LIB-901",
@@ -9715,7 +10028,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S02:C03": {
       "call_number": "LIB-901",
@@ -9726,7 +10039,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S02:C04": {
       "call_number": "LIB-901",
@@ -9737,7 +10050,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S03:C00": {
       "call_number": "LIB-901",
@@ -9828,7 +10141,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S04:C01": {
       "call_number": "LIB-901",
@@ -9839,7 +10152,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S04:C02": {
       "call_number": "LIB-901",
@@ -9850,9 +10163,58 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:zh:S05:C00": {
+      "call_number": "LIB-901",
+      "lang": "zh",
+      "section_h2": "第四階段：跨專案生產級工程復盤——互動式 AI 應用之佇列延遲拆解與可重現審查模式（Reviewer Mode） `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-901:zh:S05:C01": {
+      "call_number": "LIB-901",
+      "lang": "zh",
+      "section_h2": "第四階段：跨專案生產級工程復盤——互動式 AI 應用之佇列延遲拆解與可重現審查模式（Reviewer Mode） `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`",
+      "section_h3": "1. 互動式 AI 應用之端到端延遲拆解與 Gradio `474.5s` 佇列阻塞事件診斷",
+      "rule_ids": [
+        "RULE-203-07"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-901:zh:S05:C02": {
+      "call_number": "LIB-901",
+      "lang": "zh",
+      "section_h2": "第四階段：跨專案生產級工程復盤——互動式 AI 應用之佇列延遲拆解與可重現審查模式（Reviewer Mode） `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`",
+      "section_h3": "2. 科研與專題 Notebook 之「凍結證據快照（Frozen Evidence Snapshot）+ 資源安全鎖」模式",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-901:zh:S06:C00": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "總結複習手冊：你現在掌握的五大底層硬實力",
@@ -9861,9 +10223,9 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
-    "LIB-901:zh:S06:C01": {
+    "LIB-901:zh:S07:C01": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "🤖 AI Agent 推論協議與工程不變量合約",
@@ -9880,7 +10242,7 @@
       "evidence_tags": [],
       "epistemic_weight": 0.98
     },
-    "LIB-901:zh:S06:C02": {
+    "LIB-901:zh:S07:C02": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "🤖 AI Agent 推論協議與工程不變量合約",
@@ -9897,7 +10259,7 @@
       "evidence_tags": [],
       "epistemic_weight": 0.98
     },
-    "LIB-901:zh:S06:C03": {
+    "LIB-901:zh:S07:C03": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "🤖 AI Agent 推論協議與工程不變量合約",
@@ -9917,7 +10279,7 @@
       ],
       "epistemic_weight": 0.98
     },
-    "LIB-901:zh:S06:C04": {
+    "LIB-901:zh:S07:C04": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "🤖 AI Agent 推論協議與工程不變量合約",
@@ -9937,7 +10299,7 @@
       ],
       "epistemic_weight": 0.85
     },
-    "LIB-901:zh:S07:C00": {
+    "LIB-901:zh:S08:C00": {
       "call_number": "LIB-901",
       "lang": "zh",
       "section_h2": "📚 經典先驅文獻與課堂教材引證",
@@ -9946,7 +10308,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:en:S00:C00": {
       "call_number": "LIB-901",
@@ -9957,7 +10319,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:en:S01:C00": {
       "call_number": "LIB-901",
@@ -9968,7 +10330,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:en:S02:C00": {
       "call_number": "LIB-901",
@@ -9979,7 +10341,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:en:S03:C00": {
       "call_number": "LIB-901",
@@ -10061,6 +10423,25 @@
       "evidence_tags": [],
       "epistemic_weight": 1.0
     },
+    "LIB-901:en:S03:C07": {
+      "call_number": "LIB-901",
+      "lang": "en",
+      "section_h2": "2. The Six Evolutionary Stages of the System",
+      "section_h3": "Stage 7: End-to-End Queueing Latency Decomposition & Reproducible \"Reviewer Mode\" Architecture `[EMPIRICAL_RESULT]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`",
+      "rule_ids": [
+        "RULE-203-07"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "EMPIRICAL_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
     "LIB-901:en:S04:C00": {
       "call_number": "LIB-901",
       "lang": "en",
@@ -10070,7 +10451,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-901:en:S05:C01": {
       "call_number": "LIB-901",
@@ -10155,7 +10536,7 @@
       "defined_rule_ids": [],
       "contract_levels": [],
       "evidence_tags": [],
-      "epistemic_weight": 1.0
+      "epistemic_weight": 0.9
     },
     "LIB-903:zh:S00:C00": {
       "call_number": "LIB-903",

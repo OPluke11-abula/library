@@ -11,7 +11,7 @@ Validates:
   5. Internal Wikilinks and relative Markdown link integrity.
   6. Detection of stale repository claims.
   7. Illegal C0 control characters and forbidden legacy status tokens.
-  8. Rule contract level presence and ZH/EN contract level parity across all 104 rules.
+  8. Rule contract level presence and ZH/EN contract level parity across all 108 rules.
   9. Inline body topological navigation vs. YAML frontmatter DAG parity.
   10. Canonical 10-tag Evidence Taxonomy enforcement (no compound slash tags or non-canonical tags).
   11. Python code block AST syntax verification and ZH/EN code block parity.
@@ -138,7 +138,7 @@ def find_library_files():
     for p in ROOT.rglob('*.md'):
         rel = p.relative_to(ROOT)
         rel_str = str(rel).replace('\\', '/')
-        if '_archive_legacy' in rel_str or '.obsidian' in rel_str:
+        if any(part in p.parts for part in ('_archive_legacy', '.obsidian', 'node_modules', '.git', 'dist', '.astro')):
             continue
         m = re.search(r'(LIB-\d{3})', p.name)
         if m:
@@ -354,7 +354,11 @@ def validate_all():
     print(f"Total Unique Invariants verified: {total_invariants}")
 
     # 5. Broken Link Validation (Wikilinks & Markdown Links)
-    all_md_files = [p.resolve() for p in ROOT.glob('**/*.md') if '_archive_legacy' not in str(p)]
+    all_md_files = [
+        p.resolve()
+        for p in ROOT.glob('**/*.md')
+        if not any(part in p.parts for part in ('_archive_legacy', '.obsidian', 'node_modules', '.git', 'dist', '.astro'))
+    ]
     file_basenames = {p.stem: p for p in all_md_files}
 
     broken_links = 0
@@ -529,7 +533,16 @@ def validate_all():
             ['git', 'rev-parse', 'HEAD'], cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
         ).strip()
     except Exception:
+        head_file = ROOT / '.git' / 'HEAD'
         git_sha = 'UNKNOWN'
+        if head_file.exists():
+            ref_txt = head_file.read_text(encoding='utf-8').strip()
+            if ref_txt.startswith('ref: '):
+                ref_path = ROOT / '.git' / ref_txt[5:]
+                if ref_path.exists():
+                    git_sha = ref_path.read_text(encoding='utf-8').strip()
+            elif len(ref_txt) == 40:
+                git_sha = ref_txt
 
     # Output report
     rep_dir = ROOT / 'reports'

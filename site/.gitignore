@@ -5,8 +5,9 @@ dist/
 # Dependencies
 node_modules/
 
-# Test artifacts
+# Test & visual review artifacts
 tests/screenshots/
+artifacts/
 
 # Generated assets (synced from root assets/ and katex dist by sync-assets.js)
 public/assets/

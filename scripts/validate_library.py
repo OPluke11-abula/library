@@ -11,7 +11,7 @@ Validates:
   5. Internal Wikilinks and relative Markdown link integrity.
   6. Detection of stale repository claims.
   7. Illegal C0 control characters and forbidden legacy status tokens.
-  8. Rule contract level presence and ZH/EN contract level parity across all 108 rules.
+  8. Rule contract level presence and ZH/EN contract level parity across all 114 rules.
   9. Inline body topological navigation vs. YAML frontmatter DAG parity.
   10. Canonical 10-tag Evidence Taxonomy enforcement (no compound slash tags or non-canonical tags).
   11. Python code block AST syntax verification and ZH/EN code block parity.

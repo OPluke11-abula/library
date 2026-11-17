@@ -1,7 +1,7 @@
 ---
 call_number: LIB-504
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 3D Gaussian Splatting Theory & Rasterization (Agent Edition)
 module: 3D-Vision
 category: Frontiers-Perception
@@ -68,6 +68,12 @@ where transmittance $T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$, and opacity $\alph
 $$\alpha_i = o_i \exp\left( -\frac{1}{2} (p - \mu'_i)^T (\Sigma'_i)^{-1} (p - \mu'_i) \right)$$
 Color $c_i$ is parameterized via Spherical Harmonics (SH) coefficients to capture view-dependent radiance reflections.
 
+### 1.5 Fixed Sparse-View RGB 3DGS Geometric Reliability & Identifiability Bounds `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
+Under fixed sparse RGB inputs ($K \in [2, 8]$ views, no recapture, no LiDAR/RGB-D sensors), unconstrained 3DGS overfits training views with floating artifacts and degraded geometry. Incorporating RGB-derived monocular depth priors $d_{\mathrm{mono}}(u, v)$ introduces spatially varying affine scale/shift ambiguity:
+$$\hat{Z}(u, v) = a(u, v) \cdot d_{\mathrm{mono}}(u, v) + b(u, v)$$
+- **Epistemic Demarcation**: Monocular depth priors are fallible candidate supervision signals, NEVER geometric ground truth `[SAFETY_BOUND]`. Furthermore, local parameter non-uniqueness (identifiability ambiguity) MUST NOT be conflated with guaranteed geometric error, nor does local identifiability guarantee geometric correctness when priors conflict with multi-view stereo evidence `[HYPOTHESIS]`.
+- **Three-Tier Pose & Initialization Isolation (`P1 / P2 / P3`)**: Distinguish **`P1` (`Precomputed-Pose`)** (controlled baseline comparison; cannot be claimed as strict sparse-RGB-only), **`P2` (`Training-View-Only SfM`)** (poses and sparse points derived solely from the $K$ fixed RGB inputs, logging failures honestly), and **`P3` (`Pose-Perturbed Sensitivity`)** `[DESIGN_DECISION]` `[SAFETY_BOUND]`. Any proposed depth gating or adaptive regularization MUST pass collision checks against **AffineGS (`arXiv:2611.07709`, 2026)**, **In Depth We Trust (CVPRW 2026)**, and **DepthGS (IEEE TPAMI 2026, DOI `10.1109/TPAMI.2026.3751295`)** `[FACT]`.
+
 ---
 
 ## 3. Production Covariance Matrix Decomposition Contract
@@ -122,6 +128,11 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 - **Specification**: During tiled front-to-back alpha blending rasterization ($T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$), thread evaluation for a given pixel MUST terminate immediately when accumulated opacity reaches $1 - T_i \ge 0.9999$.
 - **Violation Consequence**: Continuing ray integration past near-opaque surfaces consumes unnecessary memory bandwidth without altering output color values.
 
+### [RULE-504-04] Sparse-View 3DGS Depth-Prior Fallibility & Pose-Protocol Isolation Invariant
+- **Contract Level**: `SAFETY_CRITICAL`
+- **Specification**: Under fixed sparse RGB 3DGS reconstruction ($K \in [2, 8]$ views, no recapture, no extra physical depth sensor), monocular depth priors $d_{\mathrm{mono}}$ MUST be treated as fallible candidate supervision with full disclosure of pretrained weights/provenance—never as geometric ground truth `[SAFETY_BOUND]`. Experiments MUST isolate **`P1` (`Precomputed-Pose`)** from **`P2` (`Training-View-Only SfM`)** and **`P3` (`Pose-Perturbed`)**, strictly preventing evaluation geometry GT or test-view poses from leaking into optimization or hyperparameter selection `[SAFETY_BOUND]`.
+- **Violation Consequence**: Treating precomputed poses or monocular depth estimators as noiseless sparse-RGB-only inputs introduces hidden observational leakage and invalidates geometric reliability claims.
+
 ---
 
 ## 5. Canonical & Peer-Reviewed References
@@ -130,3 +141,4 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 2. **Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G.** (2023). "3D Gaussian Splatting for Real-Time Radiance Field Rendering." *ACM Transactions on Graphics (SIGGRAPH 2023)*, 42(4), Article 139. DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
 3. **Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B.** (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM SIGGRAPH 2024 Conference Papers*. DOI: [10.1145/3641519.3657428](https://doi.org/10.1145/3641519.3657428).
 4. **Wu, G., Yi, T., Fang, J., Xie, L., Zhang, X., Wei, W., Liu, W., Tian, Q., & Wang, X.** (2024). "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)*, pp. 20310–20320.
+5. **DepthGS (2026)**, *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*, DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295); **Xiao et al. (2026)**, "In Depth We Trust: Reliable Monocular Depth Supervision for 3DGS", *CVPR Workshops (3DMV 2026)*; **AffineGS (2026)**, [arXiv:2611.07709](https://arxiv.org/abs/2611.07709) (`arXiv preprint`).

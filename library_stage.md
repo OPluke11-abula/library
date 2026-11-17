@@ -1,9 +1,9 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-11-15  
+> **更新時間**: 2026-11-17  
 > **當前交接基準 HEAD**: 最新 `main` 分支權威提交（詳見 `reports/library_integrity.json` 之 `git_commit_sha` 與 `corpus_sha256`）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），108 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
+> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），114 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
 
 ---
 
@@ -33,7 +33,7 @@
 - **交接基準 Commit SHA**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（隨每次 PR 合併自動同步更新於 `reports/library_integrity.json`）
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 108 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **決策合約不變量**：精確維持 114 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
@@ -251,6 +251,14 @@
 - **P0: 擴充 `LIB-401`、`LIB-603` 與 `LIB-901`（CIFAR-10 八模型消融、Gaussian Guide 3DGS RAG 實證與 Gradio `474.5s` 佇列延遲拆解，`RULE-401-05`）**：
   - 於 `LIB-401` 收錄 Colab 1 八組 CIFAR-10 CNN 30-Epoch 實證數據（Q1 6 層 `74.96%` 峰值 vs. 9 層 `74.14%` 過擬合反彈；Q2 $1\times 1$ 瓶頸削減 `37.43%` MACs 但在 $16\times 16$ 特徵圖上 GPU 中位數延遲 `1.080 ms` vs. `1.083 ms` 持平之 Roofline 解剖；Q3 Mini-Inception 削減 `82.24%` 模組參數與 `BatchNorm + Dropout` 方差偏移失諧），新增 `[RULE-401-05]`（`OPTIMIZATION_HEURISTIC`）。
   - 於 `LIB-603` 補入 Colab 3 `RAG01 -> rag-data.zip -> RAG02` 離線知識包封裝契約、16 題 3DGS 檢索消融（`BM25 MRR@3=1.0000` vs. `Hybrid RRF 0.9375` vs. `Dense 0.9271`）與「已引用 (`Cited`) vs. 僅檢索 (`Retrieved Only`)」雙態標記；於 `LIB-901` 補入 Gradio `474.5s` 佇列阻塞事件之分段延遲拆解與 Reviewer Mode 凍結證據快照模式。全庫正式推進至 **108 條決策合約不變量**。
+
+### 23. `D-project` 專題科研突破整合：論文級實證方法論、少視角 3DGS 可靠性與 Active 3D-RAG（114 條不變量）
+- **P0: 擴充 `LIB-903` 與 `LIB-904`（寫出高品質頂會／SCI 論文之科研方法論與誠信基礎設施，`RULE-903-05`, `RULE-903-06`, `RULE-904-05`）**：
+  - 於 `LIB-903` 匯入 `System Carrier / Paper Kernel` 解耦與 `T / P / N / C` 非序列相依治理架構、國科會正式四表件（`C801–C804` + 第 16 點第 4 款 $\ge 6\text{h}$ AREE 倫理完訓）、**21 欄研究協定與 `Claim-to-Evidence` 六元組追溯矩陣**（嚴格隔離 `AUTHOR_REPORTED`、`REPRODUCED_BY_TEAM` 與 `NOT_RUN / UNVERIFIED`）、**獨立實驗分析單位與防偽重複（Scene-level Paired Cluster Bootstrap）**、雙典範資料集切分防漏（Per-Scene NVS vs. Cross-Scene Disjoint）、防 HARKing 與負面結果保留、資料授權邊界（`Publicly Accessible != Redistributable`）、臺灣《人體研究法》四路徑 IRB/REC 分流，以及 `CRediT (ANSI/NISO Z39.104-2022)` 與學會獨立之生成式 AI 揭露政策（ACM 2026 vs. NeurIPS 2026 vs. IEEE/CVF）。
+  - 於 `LIB-904` 匯入三維方法層級撞題審查矩陣（`Task / Mechanism / Evaluation` Collision Audit vs. Nearest Prior Work $\to$ `CLEAR_GAP` / `PARTIAL_OVERLAP` / `DIRECT_COLLISION`）、五大科學防線（含 **Representation Substitution Test 表徵替換檢驗** 與 `Zero-Shot Association != Physical Affordance`）以及 **Failure-First Hard Gates (`P0 -> G1 -> G2 -> G3 -> N`)**。
+- **P0: 擴充 `LIB-504`、`LIB-505`、`LIB-506` 與 `LIB-905`（3DGS 少視角幾何可靠性、L1–L8 查詢階梯與 Active 3D-RAG 核心，`RULE-504-04`, `RULE-505-04`, `RULE-506-04`）**：
+  - 於 `LIB-504` 匯入 `D-project` T-01 少視角固定 RGB 3DGS 之單目深度先驗仿射歧義與防誤信邊界、參數不唯一 $\neq$ 幾何錯誤之解耦、三分級姿態協定（`P1 Precomputed` / `P2 Train-Only SfM` / `P3 Pose-Perturbed`）與 2026 先行文獻（AffineGS, In Depth We Trust, DepthGS）。
+  - 於 `LIB-505` 與 `LIB-506` 匯入 2024–2026 前沿文獻盤點（OpenGaussian, 3DAffordSplat, GenSplat, ReLaGS, SplatTalk, POp-GS, CoV, GLMap）、`L1–L8` 八級查詢階梯、純 Python 可執行 **3D 高斯協方差法向量與淨空支撐體積門控 (`extract_smallest_eigenvector_3x3` / $\Phi_{\mathrm{geom}} \cdot \Psi_{\mathrm{free}}$) + `L8` 校準拒答**，以及 **兩階段高斯 $\alpha$-穿透率主動視角求解器 (`optimize_active_viewpoint_two_stage`)** 與 `RAGAS-3D` 評測規範；並同步更新 `LIB-905` 真實算力校準與演進邊界。全庫正式推進至 **114 條決策合約不變量**。
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 call_number: LIB-506
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Embodied-AI
@@ -93,6 +93,12 @@ To prevent conceptual ambiguity between introductory educational material and ri
 In dense 3DGS scenes where signed distance fields and opacity gradients are non-convex, sampling-based MPPI optimizes trajectories in parallel on GPU:
 1. Inject $K=512$ Gaussian perturbations: $u_k^{(i)} = u_k + \epsilon_k^{(i)}, \ \epsilon_k^{(i)} \sim \mathcal{N}(0, \Sigma)$.
 2. Vectorized rollout of $K$ candidate trajectories: $X^{(i)} \in \mathbb{R}^{H \times 4}$, evaluating total cost $S(U^{(i)}) = \Phi(x_H^{(i)}) + \sum_{k=0}^{H-1} (\ell(x_k^{(i)}, u_k^{(i)}) + \lambda u_k^T \Sigma^{-1} \epsilon_k^{(i)})$.
+
+### 1.6 Active Visual Evidence RAG, Two-Stage $\alpha$-Transmittance Viewpoint Solver & RAGAS-3D Metrics `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+While **SplatTalk (ICCV 2025)**, **POp-GS (CVPR 2025)**, **CoV: Chain-of-View (Findings of ACL 2026)**, and **GLMap (CVPR 2026 Highlight)** address static 3DGS QA or mesh-simulator view chaining, occluded queries in pre-reconstructed 3DGS require active visual evidence retrieval (noting explicitly that virtual view synthesis inside a world model differs from physical sensor active perception `[SAFETY_BOUND]`):
+- **Entropy & Visibility Trigger**: Measure candidate posterior entropy $\mathcal{H}(\mathcal{C}\mid q)$ and Gaussian-native effective ray visibility $\mathcal{I}_{\mathrm{vis}}(v_0, c_k^*) = \frac{1}{|c_k^*|}\sum_{g_i \in c_k^*} \alpha_i(v_0)\prod_{j \in \mathcal{N}_{\mathrm{front}}(i; v_0)} (1 - \alpha_j(v_0))$. Trigger active view acquisition iff $\mathcal{H} > \tau_{\mathrm{amb}}$ or $\mathcal{I}_{\mathrm{vis}}(v_0, c_k^*) < \tau_{\mathrm{vis}}$ `[DERIVATION]`.
+- **Two-Stage Tractable Viewpoint Solver**: Avoid continuous non-convex $SE(3)$ local minima by coupling **Stage 1** discrete collision-free hemisphere candidate scoring ($M \in [16, 32]$, optimizing $J(v) = \mathcal{I}_{\mathrm{vis}}(v, c_k^*) - \lambda_{\mathrm{cost}}\|v - v_0\|_2$) with **Stage 2** local opacity-Jacobian refinement on `(azimuth, elevation)` `[DESIGN_DECISION]`.
+- **RAGAS-3D Evaluation Protocol**: Evaluate `Context Precision@K`, `Context Recall@K`, **Citation Faithfulness** (requiring `[doc_id:chunk_id|cluster:cluster_id]` grounding when `GROUNDED` and zero citations when `ABSTAINED`), **Abstention AUROC**, and per-stage `P50/P95` latency `[FACT]`.
 3. Importance sampling weight calculation:
    $$w^{(i)} = \frac{\exp\left( -\frac{1}{\lambda} (S(U^{(i)}) - \min_j S(U^{(j)})) \right)}{\sum_{m=1}^K \exp\left( -\frac{1}{\lambda} (S(U^{(m)}) - \min_j S(U^{(j)})) \right)}, \quad U^* = \sum_{i=1}^K w^{(i)} U^{(i)}$$
 4. Execute $u_0^*$ and shift $U^*$ forward for warm-starting the subsequent cycle.
@@ -190,6 +196,78 @@ class BatchedMPPIController:
         return action_to_execute, x_rollout[int(torch.argmin(traj_cost).item()), 1:, 0:2]
 ```
 
+```python
+import math
+
+def compute_gaussian_alpha_visibility(
+    target_xyz: tuple[float, float, float],
+    mean_opacity: float,
+    occluders: list[tuple[tuple[float, float, float], float, float]],
+    camera_xyz: tuple[float, float, float],
+) -> float:
+    """Compute Gaussian-native front-to-back alpha transmittance visibility I_vis."""
+    transmittance = 1.0
+    ab = (target_xyz[0] - camera_xyz[0], target_xyz[1] - camera_xyz[1], target_xyz[2] - camera_xyz[2])
+    ab_len_sq = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2
+    for occ_xyz, occ_rad, occ_op in occluders:
+        ap = (occ_xyz[0] - camera_xyz[0], occ_xyz[1] - camera_xyz[1], occ_xyz[2] - camera_xyz[2])
+        t_ray = (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / max(ab_len_sq, 1e-12)
+        if 0.05 < t_ray < 0.95:
+            tc = max(0.0, min(1.0, t_ray))
+            closest = (camera_xyz[0] + tc * ab[0], camera_xyz[1] + tc * ab[1], camera_xyz[2] + tc * ab[2])
+            d_sq = (occ_xyz[0] - closest[0]) ** 2 + (occ_xyz[1] - closest[1]) ** 2 + (occ_xyz[2] - closest[2]) ** 2
+            splat_alpha = min(0.99, max(0.0, occ_op) * math.exp(-d_sq / (2.0 * max(occ_rad ** 2, 1e-4))))
+            transmittance *= (1.0 - splat_alpha)
+    return max(0.0, min(1.0, mean_opacity * transmittance))
+
+def optimize_active_viewpoint_two_stage(
+    target_xyz: tuple[float, float, float],
+    mean_opacity: float,
+    occluders: list[tuple[tuple[float, float, float], float, float]],
+    v0_xyz: tuple[float, float, float],
+    lambda_cost: float = 0.08,
+) -> tuple[tuple[float, float, float], float, float]:
+    """Two-stage solver: Stage 1 M=24 hemisphere sweep + Stage 2 local angular refinement."""
+    init_vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, v0_xyz)
+    best_score, best_xyz, best_az, best_el = init_vis, v0_xyz, 0.0, math.radians(25.0)
+    radius = 1.6
+    for e_i in range(3):
+        el = math.radians(15.0 + 22.0 * e_i)
+        for a_i in range(8):
+            az = (2.0 * math.pi * a_i) / 8
+            cand = (
+                target_xyz[0] + radius * math.cos(el) * math.cos(az),
+                target_xyz[1] + radius * math.cos(el) * math.sin(az),
+                target_xyz[2] + radius * math.sin(el),
+            )
+            vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, cand)
+            dist = math.sqrt(sum((cand[k] - v0_xyz[k]) ** 2 for k in range(3)))
+            if vis - lambda_cost * dist > best_score:
+                best_score, best_xyz, best_az, best_el = vis - lambda_cost * dist, cand, az, el
+    for _ in range(6):
+        improved = False
+        for d_az, d_el in ((0.08, 0.0), (-0.08, 0.0), (0.0, 0.08), (0.0, -0.08)):
+            az, el = best_az + d_az, max(0.1, min(1.3, best_el + d_el))
+            cand = (
+                target_xyz[0] + radius * math.cos(el) * math.cos(az),
+                target_xyz[1] + radius * math.cos(el) * math.sin(az),
+                target_xyz[2] + radius * math.sin(el),
+            )
+            vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, cand)
+            dist = math.sqrt(sum((cand[k] - v0_xyz[k]) ** 2 for k in range(3)))
+            if vis - lambda_cost * dist > best_score + 1e-6:
+                best_score, best_xyz, best_az, best_el, improved = vis - lambda_cost * dist, cand, az, el, True
+        if not improved:
+            break
+    return best_xyz, init_vis, compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, best_xyz)
+
+if __name__ == "__main__":
+    _, vis0, vis1 = optimize_active_viewpoint_two_stage(
+        (3.0, 0.0, 0.9), 0.96, [((1.5, 0.0, 1.2), 0.45, 0.92)], (0.0, 0.0, 1.5)
+    )
+    assert vis0 < 0.20 and vis1 > 0.85, f"Active viewpoint solver failed: vis0={vis0}, vis1={vis1}"
+```
+
 ---
 
 ## 4. Invariants & Implementation Specifications
@@ -209,6 +287,11 @@ class BatchedMPPIController:
 - **Specification**: Interactive embodied navigation clients MUST sustain Gaussian Splatting rendering frame rates of $\ge 45\text{ FPS}$ at 1080p ($\ge 72\text{ FPS}$ in VR mode). Local MPPI rollout solve latency MUST be bounded under $< 15\text{ms}$ ($\ge 30\text{Hz}$), global A* route replanning under $< 100\text{ms}$, and LLM spatial question-answering query latency under $< 800\text{ms}$ [TARGET].
 - **Violation Consequence**: Control solve latencies exceeding $15\text{ms}$ degrade tracking stability and cause VR motion sickness or controller divergence.
 
+### [RULE-506-04] Two-Stage Gaussian Alpha-Transmittance Active View & Citation Faithfulness Invariant
+- **Contract Level**: `PERFORMANCE_CRITICAL`
+- **Specification**: When 3DGS spatial QA encounters candidate entropy $\mathcal{H} > \tau_{\mathrm{amb}}$ or foreground occlusion $\mathcal{I}_{\mathrm{vis}}(v_0, c_k^*) < \tau_{\mathrm{vis}}$, the system MUST avoid unconstrained continuous $SE(3)$ gradient descent and instead execute a **Two-Stage Tractable Viewpoint Solver** (`Stage 1` discrete collision-free hemisphere sweep $M \in [16, 32]$ $\to$ `Stage 2` local opacity-Jacobian refinement) to retrieve unoccluded visual evidence (explicitly distinguishing world-model view synthesis from physical active perception) and enforce strict `[doc_id:chunk_id|cluster:cluster_id]` citation faithfulness with zero fabricated citations under `ABSTAINED` states `[DESIGN_DECISION]` `[SAFETY_BOUND]`.
+- **Violation Consequence**: Continuous $SE(3)$ pose gradients trap viewpoints in local occlusion minima, while ungrounded VLM decoding hallucinates unverified spatial facts.
+
 ---
 
 ## 5. Canonical References
@@ -220,3 +303,4 @@ class BatchedMPPIController:
 5. **Hughes, N., Chang, Y., & Carlone, L.** (2022). *Hydra: A Real-time Spatial Perception Engine for 3D Scene Graph Construction and Hierarchical Mapping*. **RSS 2022**.
 6. **Williams, G., Drews, P., Goldfain, B., et al.** (2017). *Information-Theoretic Model Predictive Control: Theory and Applications to Autonomous Driving*. **IEEE Transactions on Robotics (T-RO 2017)**.
 7. **Rawlings, J. B., Mayne, D. Q., & Diehl, M.** (2017). *Model Predictive Control: Theory, Computation, and Design* (2nd ed.). **Nob Hill Publishing**.
+8. **SplatTalk** (**ICCV 2025**); **POp-GS** (**CVPR 2025**); **CoV: Chain-of-View** (**Findings of ACL 2026**); **GLMap** (**CVPR 2026 Highlight**).

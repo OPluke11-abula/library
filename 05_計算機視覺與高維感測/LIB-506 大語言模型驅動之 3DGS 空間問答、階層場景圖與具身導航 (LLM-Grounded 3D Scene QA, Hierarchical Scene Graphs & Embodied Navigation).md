@@ -1,7 +1,7 @@
 ---
 call_number: LIB-506
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Embodied-AI
@@ -140,6 +140,19 @@ $$c_{\text{obs}}(p) = \begin{cases} \eta \cdot (R_{\text{safe}} - \text{dist}(p,
 3. **重要性加權聚合 (Softmax Aggregation)**：依據自由能原理計算各軌跡權重 $w^{(i)}$ 並閉式更新控制序列：
    $$w^{(i)} = \frac{\exp\left( -\frac{1}{\lambda} (S(U^{(i)}) - \min_j S(U^{(j)})) \right)}{\sum_{m=1}^K \exp\left( -\frac{1}{\lambda} (S(U^{(m)}) - \min_j S(U^{(j)})) \right)}, \quad U^* = \sum_{i=1}^K w^{(i)} U^{(i)}$$
 4. **時域滑動熱啟動 (Warm-Start Shifting)**：執行 $u_0^*$ 後，將控制序列前移：$u_k \leftarrow u_{k+1}^* \ (k=0,\dots,H-2)$，末端補零，作為下一週期的採樣中心 [HEURISTIC]。
+
+### 6. 主動視覺證據 RAG 與兩階段高斯 $\alpha$-穿透率視角求解器 (`D-project` Kernel 2A/2B) `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+隨 **SplatTalk (ICCV'25)**、**POp-GS (CVPR'25)**、**CoV: Chain-of-View (Findings of ACL'26)** 與 **GLMap (CVPR'26 Highlight)** 的出現，靜態單視角 3DGS 問答極易在遮擋情境產生 VLM 幻覺；同時須嚴格區分「於預重建 3D 場景合成新視角（World Model 內主動檢索）」與「實體機器人感測器主動感知（Physical Active Perception）」 `[SAFETY_BOUND]`：
+1. **熵與高斯穿透可見度雙觸發機制** `[DERIVATION]`：
+   給定前 $N$ 候選叢集之標準化語意-幾何後驗分佈 $p(c_k \mid q)$ 與初始視角 $v_0$ 下目標叢集 $c_k^*$ 之高斯原生有效可見度：
+   $$\mathcal{I}_{\mathrm{vis}}(v, c_k^*) = \frac{1}{|c_k^*|} \sum_{g_i \in c_k^*} \alpha_i(v) \prod_{j \in \mathcal{N}_{\mathrm{front}}(i; v)} \big(1 - \alpha_j(v)\big)$$
+   僅當香農熵 $\mathcal{H}(\mathcal{C} \mid q) > \tau_{\mathrm{amb}}$ **或** $\mathcal{I}_{\mathrm{vis}}(v_0, c_k^*) < \tau_{\mathrm{vis}}$ 時，才觸發主動視角證據檢索 `[DESIGN_DECISION]`。
+2. **兩階段可解視角規劃（克服連續 $SE(3)$ 非凸局部極小陷阱）** `[DERIVATION]` `[DESIGN_DECISION]`：
+   直接對離散高斯基元進行連續 $SE(3)$ 梯度下降易卡在不可微跳變與遮擋陰影區：
+   - **Stage 1（離散半球無碰撞候選打分）**：在目標質心周圍半球面取 $M \in [16, 32]$ 個無碰撞候選姿態（預設 $M=24$），批次評估目標目標函式 $J(v) = \mathcal{I}_{\mathrm{vis}}(v, c_k^*) - \lambda_{\mathrm{cost}}\|v - v_0\|_2$，確保快速跳脫遮擋物陰影。
+   - **Stage 2（局部不透明度雅可比微調）**：從 Stage 1 最佳解出發，對 $(\text{azimuth}, \text{elevation})$ 執行 $5\text{--}10$ 步數值／可微雅可比爬山微調，合成無遮擋新視角 $I_{\mathrm{synth}}(v^*)$ 供 VLM 引證生成。
+3. **RAGAS-3D 與分階段延遲評測指標** `[FACT]`：
+   在標準 `Context Precision@K` / `Context Recall@K` 之外，強制評估 **Citation Faithfulness**（所有輸出宣稱必須綁定 `[doc_id:chunk_id|cluster:cluster_id]`，且 `ABSTAINED` 態不得捏造引證）、**Abstention AUROC**（L1–L7 與 L8 區分度）以及各階段 `P50 / P95` 延遲解剖。
 
 ---
 
@@ -371,6 +384,80 @@ class BatchedMPPIController:
         return action_to_execute, best_trajectory
 ```
 
+以下為純 Python 實作之 **兩階段高斯 $\alpha$-穿透率主動視角求解器（Two-Stage Viewpoint Solver）** 驗證模組，對應 `RULE-506-04`：
+
+```python
+import math
+
+def compute_gaussian_alpha_visibility(
+    target_xyz: tuple[float, float, float],
+    mean_opacity: float,
+    occluders: list[tuple[tuple[float, float, float], float, float]],
+    camera_xyz: tuple[float, float, float],
+) -> float:
+    """計算視角 camera_xyz 對目標叢集之高斯前向 Alpha 穿透可見度 I_vis。"""
+    transmittance = 1.0
+    ab = (target_xyz[0] - camera_xyz[0], target_xyz[1] - camera_xyz[1], target_xyz[2] - camera_xyz[2])
+    ab_len_sq = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2
+    for occ_xyz, occ_rad, occ_op in occluders:
+        ap = (occ_xyz[0] - camera_xyz[0], occ_xyz[1] - camera_xyz[1], occ_xyz[2] - camera_xyz[2])
+        t_ray = (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / max(ab_len_sq, 1e-12)
+        if 0.05 < t_ray < 0.95:
+            tc = max(0.0, min(1.0, t_ray))
+            closest = (camera_xyz[0] + tc * ab[0], camera_xyz[1] + tc * ab[1], camera_xyz[2] + tc * ab[2])
+            d_sq = (occ_xyz[0] - closest[0]) ** 2 + (occ_xyz[1] - closest[1]) ** 2 + (occ_xyz[2] - closest[2]) ** 2
+            splat_alpha = min(0.99, max(0.0, occ_op) * math.exp(-d_sq / (2.0 * max(occ_rad ** 2, 1e-4))))
+            transmittance *= (1.0 - splat_alpha)
+    return max(0.0, min(1.0, mean_opacity * transmittance))
+
+def optimize_active_viewpoint_two_stage(
+    target_xyz: tuple[float, float, float],
+    mean_opacity: float,
+    occluders: list[tuple[tuple[float, float, float], float, float]],
+    v0_xyz: tuple[float, float, float],
+    lambda_cost: float = 0.08,
+) -> tuple[tuple[float, float, float], float, float]:
+    """Stage 1 半球離散掃描 (M=24) + Stage 2 局部座標微調，逃脫前景遮擋極小值。"""
+    init_vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, v0_xyz)
+    best_score, best_xyz, best_az, best_el = init_vis, v0_xyz, 0.0, math.radians(25.0)
+    radius = 1.6
+    for e_i in range(3):
+        el = math.radians(15.0 + 22.0 * e_i)
+        for a_i in range(8):
+            az = (2.0 * math.pi * a_i) / 8
+            cand = (
+                target_xyz[0] + radius * math.cos(el) * math.cos(az),
+                target_xyz[1] + radius * math.cos(el) * math.sin(az),
+                target_xyz[2] + radius * math.sin(el),
+            )
+            vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, cand)
+            dist = math.sqrt(sum((cand[k] - v0_xyz[k]) ** 2 for k in range(3)))
+            if vis - lambda_cost * dist > best_score:
+                best_score, best_xyz, best_az, best_el = vis - lambda_cost * dist, cand, az, el
+    for _ in range(6):
+        improved = False
+        for d_az, d_el in ((0.08, 0.0), (-0.08, 0.0), (0.0, 0.08), (0.0, -0.08)):
+            az, el = best_az + d_az, max(0.1, min(1.3, best_el + d_el))
+            cand = (
+                target_xyz[0] + radius * math.cos(el) * math.cos(az),
+                target_xyz[1] + radius * math.cos(el) * math.sin(az),
+                target_xyz[2] + radius * math.sin(el),
+            )
+            vis = compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, cand)
+            dist = math.sqrt(sum((cand[k] - v0_xyz[k]) ** 2 for k in range(3)))
+            if vis - lambda_cost * dist > best_score + 1e-6:
+                best_score, best_xyz, best_az, best_el, improved = vis - lambda_cost * dist, cand, az, el, True
+        if not improved:
+            break
+    return best_xyz, init_vis, compute_gaussian_alpha_visibility(target_xyz, mean_opacity, occluders, best_xyz)
+
+if __name__ == "__main__":
+    _, vis0, vis1 = optimize_active_viewpoint_two_stage(
+        (3.0, 0.0, 0.9), 0.96, [((1.5, 0.0, 1.2), 0.45, 0.92)], (0.0, 0.0, 1.5)
+    )
+    assert vis0 < 0.20 and vis1 > 0.85, f"主動視角穿透恢復異常: vis0={vis0}, vis1={vis1}"
+```
+
 ---
 
 ## 五、系統規範與不變量 (System Invariants)
@@ -387,6 +474,10 @@ class BatchedMPPIController:
 - **等級**: `PERFORMANCE_CRITICAL`
 - **邊界**: 在 Unity 或 WebXR 導覽客戶端執行時，高斯潑濺渲染幀率在 1080p 解析度下必須維持 $\ge 45\text{ FPS}$（VR 模式下 $\ge 72\text{ FPS}$）；局部 MPPI 滾動時域求解延遲必須 $< 15\text{ms}$（$\ge 30\text{Hz}$），全局 A* 路徑重算延遲 $< 100\text{ms}$，LLM 空間問答查詢延遲 $< 800\text{ms}$ [TARGET]。
 
+### [RULE-506-04] 兩階段高斯 $\alpha$-穿透率主動視角證據檢索與引證忠實合約 (Two-Stage Gaussian Alpha-Transmittance Active View & Citation Faithfulness Invariant)
+- **等級**: `PERFORMANCE_CRITICAL`
+- **邊界**: 當 3DGS 問答系統在初始視角面臨語意歧義（$\mathcal{H} > \tau_{\mathrm{amb}}$）或前景遮擋（$\mathcal{I}_{\mathrm{vis}} < \tau_{\mathrm{vis}}$）時，不得對靜態單視角進行猜測作答或直接對離散高斯執行無約束連續 $SE(3)$ 梯度優化；必須採用「Stage 1 離散半球候選掃描（$M \in [16, 32]$）$\to$ Stage 2 局部視角雅可比微調」兩階段求解器恢復無遮擋視覺證據（區分世界模型視角檢索與實體主動感知），並強制所有輸出宣稱附帶結構化叢集／文件引證（`ABSTAINED` 狀態嚴禁偽造引證） `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
+
 ---
 
 ## 六、標準引證與權威文獻 (Canonical References)
@@ -398,3 +489,4 @@ class BatchedMPPIController:
 5. **Hughes, N., Chang, Y., & Carlone, L.** (2022). *Hydra: A Real-time Spatial Perception Engine for 3D Scene Graph Construction and Hierarchical Mapping*. **Robotics: Science and Systems (RSS 2022)**.
 6. **Williams, G., Drews, P., Goldfain, B., et al.** (2017). *Information-Theoretic Model Predictive Control: Theory and Applications to Autonomous Driving*. **IEEE Transactions on Robotics (T-RO 2017)**.
 7. **Rawlings, J. B., Mayne, D. Q., & Diehl, M.** (2017). *Model Predictive Control: Theory, Computation, and Design* (2nd ed.). **Nob Hill Publishing**.
+8. **2025–2026 3DGS + LLM 空間問答與主動視角先驅對照**: **SplatTalk** (**ICCV 2025**); **POp-GS** (**CVPR 2025**); **CoV: Chain-of-View** (**Findings of ACL 2026**); **GLMap** (**CVPR 2026 Highlight**).

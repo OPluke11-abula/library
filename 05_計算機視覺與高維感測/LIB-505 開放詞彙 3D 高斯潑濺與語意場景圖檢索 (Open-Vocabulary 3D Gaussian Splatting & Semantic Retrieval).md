@@ -1,7 +1,7 @@
 ---
 call_number: LIB-505
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)
 module: Computer-Vision
 category: 3D-Gaussian-Splatting-Open-Vocabulary
@@ -87,7 +87,23 @@ $$\text{Score}(q, \mathcal{O}_m) = \alpha \cdot S_{\text{text}}(q, \mathcal{O}_m
 - **$S_{\text{view}}$（跨視角共識分數）**：
   $$S_{\text{view}}(\mathcal{O}_m) = \frac{1}{|\mathcal{V}_m|} \sum_{v \in \mathcal{V}_m} \mathbb{I}\left( \cos(e_q, F_v(\mathcal{O}_m)) > \tau \right)$$
 - **$S_{\text{conf}}$（物件幾何顯著性與不透明度置信度）**：$\bar{\alpha}_m \in [0, 1]$。
-- 權重約束：$\alpha + \beta + \gamma = 1.0$。
+- **權重約束：$\alpha + \beta + \gamma = 1.0$**。
+
+### 5. 八級查詢複雜度階梯 (`L1–L8`)、高斯協方差表面法向量門控 ($\Phi_{\mathrm{geom}} \cdot \Psi_{\mathrm{free}}$) 與校準拒答 (`Calibrated Abstention`) `[FACT]` `[DERIVATION]` `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+隨 2024–2026 頂會快速推進（**OpenGaussian (ECCV'24)**、**3DAffordSplat (ACM MM'25 Oral, `arXiv:2504.11218`)**、**GenSplat (CVPR'26)**、**ReLaGS (CVPR'26)**），單純的名詞或顯式空間關係檢索（L1–L3）已高度覆蓋，論文研究必須界定 **L1–L8 八級查詢複雜度階梯** 以定位真實學術增量：
+- **L1–L3（純名詞／單屬性／顯式空間關係）**：例 `"chair"`, `"red cup"`, `"monitor on desk"`（多數已有先行研究覆蓋）。
+- **L4（物理可供性與功能查詢，如 `"找出可以坐的東西"`）**：**嚴格區分 CLIP 零樣本詞彙共現關聯與物理支撐推理** `[FACT]`。單純 CLIP 餘弦分數會對「牆上的椅子海報」產生高分偽陽性！
+- **L5（物理狀態與淨空佔用，如 `"空椅子"`）**、**L6–L7（多因子組合約束）**、**L8（不可滿足或場景不存在之矛盾查詢，如 `"實驗室印表機旁的紅色沙發"`）**：現有 Top-$K$ 檢索缺乏校準拒答頭，遇到 L8 必然強迫輸出錯誤高亮 `[HYPOTHESIS]`。
+
+為通過 **表徵替換檢驗（Representation Substitution Test）** 並解決 L4/L5/L8 缺陷，`D-project` 形式化**原生高斯協方差幾何度量與佔用分解門控**：
+$$S_{\mathrm{total}}(q, c_k) = \sigma\!\big(f_{\mathrm{CE}}(q, u_k)\big) \cdot \underbrace{\Phi_{\mathrm{geom}}\!\big(\{\mu_i, \Sigma_i\}_{i \in c_k}, \mathcal{P}_{\mathrm{req}}(q)\big)}_{\text{Gaussian Surface Normal \& Scale}} \cdot \underbrace{\Psi_{\mathrm{free}}\!\big(\mathcal{V}_{\mathrm{above}}(c_k), \mathcal{G}\big)}_{\text{Unoccupied Support Volume}}$$
+1. **協方差最小特徵向量法向量提取**：扁平高斯基元在厚度軸方差最小，直接從 3D 高斯協方差矩陣 $\Sigma_i$ 提取局部法向量：
+   $$\mathbf{n}_i = \arg\min_{\|\mathbf{u}\|_2=1} \mathbf{u}^\top \Sigma_i \mathbf{u}$$
+   當查詢要求水平支撐面時，$\Phi_{\mathrm{geom}}$ 檢驗法向量與重力垂直軸對齊（$\mathbf{n}_k \cdot \mathbf{z}_{\mathrm{up}} \ge \cos\theta_{\max}$）及 $XY$ 支撐邊界尺度的滿足度 `[DERIVATION]`。
+2. **淨空支撐體積懲罰 ($\Psi_{\mathrm{free}}$)**：統計支撐面上方淨空體積 $\mathcal{V}_{\mathrm{above}}(c_k)$ 內遮擋高斯的累計不透明度：
+   $$\Psi_{\mathrm{free}}(c_k) = \exp\!\left(-\sum_{g_j \in \mathcal{V}_{\mathrm{above}}(c_k)} \alpha_j\right) \in (0, 1]$$
+   藉此嚴格區分「可坐的空椅子」、「堆滿紙箱的椅子」與「牆上垂直椅子海報」 `[DESIGN_DECISION]`。
+3. **校準拒答合約 (`Calibrated Abstention`)**：若 $\max_k S_{\mathrm{total}}(q, u_k) < \tau_{\mathrm{abstain}}$（於 `Validation` 集調校，嚴禁於 `Test` 集微調），強制回傳 `ABSTAINED` 並以場景級 **Abstention AUROC / ECE** 評估 `[SAFETY_BOUND]`。
 
 ---
 
@@ -163,6 +179,58 @@ class SemanticGaussianRetriever(nn.Module):
         }
 ```
 
+以下為不依賴外部套件之純 Python 驗證實作，對應 **高斯協方差最小特徵向量法向量提取 ($\Phi_{\mathrm{geom}}$)**、**淨空支撐體積門控 ($\Psi_{\mathrm{free}}$)** 與 **L8 校準拒答**（`RULE-505-04`）：
+
+```python
+import math
+
+def extract_smallest_eigenvector_3x3(cov: tuple) -> tuple[float, float, float]:
+    """透過平移反冪法提取 3x3 正定高斯協方差矩陣之最小特徵向量 (表面法向量 n_i)。"""
+    trace = cov[0][0] + cov[1][1] + cov[2][2]
+    shift = max(trace, 1e-6)
+    b00, b01, b02 = shift - cov[0][0], -cov[0][1], -cov[0][2]
+    b10, b11, b12 = -cov[1][0], shift - cov[1][1], -cov[1][2]
+    b20, b21, b22 = -cov[2][0], -cov[2][1], shift - cov[2][2]
+
+    vx, vy, vz = 0.17, 0.31, 0.93
+    for _ in range(18):
+        nx = b00 * vx + b01 * vy + b02 * vz
+        ny = b10 * vx + b11 * vy + b12 * vz
+        nz = b20 * vx + b21 * vy + b22 * vz
+        norm = math.sqrt(nx * nx + ny * ny + nz * nz)
+        if norm < 1e-12:
+            return (0.0, 0.0, 1.0)
+        vx, vy, vz = nx / norm, ny / norm, nz / norm
+    if vz < 0.0:
+        vx, vy, vz = -vx, -vy, -vz
+    return (vx, vy, vz)
+
+def score_gaussian_affordance_and_abstain(
+    semantic_score: float,
+    cov_3x3: tuple,
+    above_opacity_sum: float,
+    max_tilt_deg: float = 20.0,
+    tau_abstain: float = 0.35,
+) -> tuple[float, str]:
+    """結合法向量水平對齊 Phi_geom 與淨空佔用 Psi_free，執行校準拒答判定。"""
+    normal = extract_smallest_eigenvector_3x3(cov_3x3)
+    cos_limit = math.cos(math.radians(max_tilt_deg))
+    phi_geom = 1.0 if normal[2] >= cos_limit else max(0.05, (normal[2] / cos_limit) ** 3)
+    psi_free = math.exp(-max(0.0, above_opacity_sum))
+    total = semantic_score * phi_geom * psi_free
+    status = "ABSTAINED" if total < tau_abstain else "GROUNDED"
+    return total, status
+
+if __name__ == "__main__":
+    cov_horiz = ((0.25, 0.0, 0.0), (0.0, 0.25, 0.0), (0.0, 0.0, 0.002))
+    cov_vert = ((0.002, 0.0, 0.0), (0.0, 0.30, 0.0), (0.0, 0.0, 0.30))
+    s_empty, st_empty = score_gaussian_affordance_and_abstain(0.85, cov_horiz, 0.02)
+    s_clut, st_clut = score_gaussian_affordance_and_abstain(0.85, cov_horiz, 3.80)
+    s_wall, st_wall = score_gaussian_affordance_and_abstain(0.85, cov_vert, 0.0)
+    assert st_empty == "GROUNDED" and st_clut == "ABSTAINED" and st_wall == "ABSTAINED"
+    assert s_empty > s_clut and s_empty > s_wall
+```
+
 ---
 
 ## 五、系統規範與不變量 (System Invariants)
@@ -179,6 +247,10 @@ class SemanticGaussianRetriever(nn.Module):
 - **等級**: `HIGH_INVARIANT`
 - **邊界**: 通過相似度閾值選取的高斯子集，必須執行 DBSCAN 或 Radius Outlier Removal 聚類（要求半徑 $R = 0.1\text{m}$ 內至少具備 $K \ge 5$ 個同語意鄰近點），剔除半徑大於物件主體尺寸 2 倍以上的離散噪聲高斯點 `[HEURISTIC]`。
 
+### [RULE-505-04] 高斯協方差法向量幾何適配、淨空佔用與不可滿足查詢校準拒答合約 (Gaussian Covariance Affordance, Support Occupancy & Calibrated Abstention Invariant)
+- **等級**: `HIGH_INVARIANT`
+- **邊界**: 凡主張具備物理可供性／功能查詢（Level 4–5）與開放詞彙檢索之 3DGS 系統，不得僅依賴純 CLIP 餘弦相似度輸出結果；必須從 3D 高斯協方差矩陣 $\Sigma_i$ 提取最小特徵向量表面法向量驗證支撐平面方向（$\Phi_{\mathrm{geom}}$，滿足表徵替換檢驗），配合支撐面上方高斯累計不透明度懲罰 $\Psi_{\mathrm{free}} = \exp(-\sum \alpha_j)$ 區分空椅與堆疊障礙 `[DESIGN_DECISION]`，且當校正後最大分數低於驗證集校準閾值 $\tau_{\mathrm{abstain}}$ 時必須強制輸出 `ABSTAINED`（嚴禁在 Level 8 不可滿足查詢下強迫返回偽陽性 Top-$K$ 高亮） `[SAFETY_BOUND]`。
+
 ---
 
 ## 六、標準引證與權威文獻 (Canonical References)
@@ -188,3 +260,4 @@ class SemanticGaussianRetriever(nn.Module):
 3. **Qin, M., Li, W., Zhou, J., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)**.
 4. **Zhou, S., Chang, H., Jiang, S., et al.** (2024). *Feature 3DGS: Feature 3D Gaussian Splatting for Language and Spatial Reasoning*. **European Conference on Computer Vision (ECCV 2024)**.
 5. **Kirillov, A., Mintun, E., Ravi, N., Mao, H., et al.** (2023). *Segment Anything*. **IEEE/CVF International Conference on Computer Vision (ICCV 2023)**.
+6. **Wei, Z., et al.** (2025). *3DAffordSplat: Grounding 3D Object Affordances in Gaussian Splatting*. **ACM Multimedia 2025 (Oral)**, [arXiv:2504.11218](https://arxiv.org/abs/2504.11218); **ReLaGS** & **GenSplat** (**CVPR 2026**); **SeqAfford** (**CVPR 2025**).

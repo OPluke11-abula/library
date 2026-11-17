@@ -1,7 +1,7 @@
 {
   "status": "PASS",
-  "git_commit_sha": "ce1a04b348a9cdd36752f5d4c592017d964d4c45",
-  "corpus_sha256": "5827d8a015898c1e96ddfe019806b4997ec3a7ef832101e85b94bdafcc1fcae0",
+  "git_commit_sha": "b885b7d05707869ed20ed9f43855be02b1702fb5",
+  "corpus_sha256": "b29cca853bb91b1925c2e8d140469e306c90b620dd24a6092ffec19f5b0db590",
   "volume_count": 28,
   "bilingual_file_count": 56,
   "topological_order": [
@@ -34,7 +34,7 @@
     "LIB-906",
     "LIB-905"
   ],
-  "invariants_total": 108,
+  "invariants_total": 114,
   "checks_enabled": 11,
   "error_count": 0,
   "errors": [],

@@ -117,9 +117,20 @@ successors: []
 3. Deliverables & Quantitative Ablations
    - Comparative evaluation against SOTA baselines (LERF, InstructPix2Pix, ControlNet).
    - Interactive deployment demo (Unity WebGL / Gradio dashboard).
-4. Budget & Hardware Resource Allocation
-   - Compute infrastructure: Single/Dual NVIDIA RTX 4090 (24GB VRAM), depth sensors, VR head-mounted displays.
+4. Budget & Hardware Resource Allocation (`D-project` Realism Guard)
+   - Separate historical workstation assumptions (RTX 4090 24GB) from verified team hardware boundaries (4 GB / 8 GB VRAM laptops and independent capped Colab quotas where CCU != guaranteed GPU hours).
 ```
+
+---
+
+## 3.5 `D-project` Research Evolution: Single `T-01` Sparse-RGB 3DGS Focus & Active 3D-RAG Kernels
+
+Advancing beyond the five legacy poster specifications while preserving Carrier–Kernel decoupling ([[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]), `D-project` establishes two key methodological and technical pivots `[DESIGN_DECISION]`:
+1. **Single Working Track Focus (`T-01`: Fixed Sparse-RGB 3DGS Geometric Reliability)**:
+   - After 3D Nearest Prior Work collision audits (`ReLaGS CVPR'26`, `GenSplat CVPR'26`, `SplatTalk ICCV'25`, `FireEdit CVPR'25`, `KV-Edit ICCV'25`), research exploration focuses on **fixed sparse RGB views without recapture or physical depth sensors**, analyzing when monocular depth priors and local affine rectification (**AffineGS**, **In Depth We Trust**, **DepthGS**) conflict with geometric evidence (see [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]] and `RULE-504-04`).
+   - Enforces **Failure-First Hard Gates** (`P0 Source Audit -> G1 Synthetic Identifiability -> G2 Real Failure -> G3 Ablation`): unexecuted GPU runs and unpassed novelty gates remain strictly tagged `[HYPOTHESIS]` / `NOT_RUN` `[SAFETY_BOUND]`.
+2. **Active 3D-RAG Paper Kernel (`ActiveSpatialRAGKernel` × `RAGAS-3D`)**:
+   - Integrates the **Level 1–8 Query Complexity Taxonomy** (`L4` covariance surface-normal suitability $\Phi_{\mathrm{geom}}$, `L5` unoccupied support penalty $\Psi_{\mathrm{free}}$ passing the Representation Substitution Test, `L8` calibrated abstention) and the **Two-Stage $\alpha$-Transmittance Active Viewpoint Solver** ([[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]] & [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]), verified across 6 synthetic unit/ablation tests (`Abstention AUROC = 1.0` on the synthetic fixture; real ScanNet/3DGS GPU benchmarks remain pending) `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`.
 
 ---
 

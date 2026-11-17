@@ -28,7 +28,8 @@ prerequisites:
   - "[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]"
   - "[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]"
   - "[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]"
-successors: []
+successors:
+  - "[[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-906%20LLM%20Conversational%20Epistemic%20Revision%20%28Agent%20EN%29.md)
@@ -37,7 +38,7 @@ successors: []
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-602 現代大語言模型架構解剖與縮放定律 (Modern LLM Architecture & Scaling Laws)]]、[[LIB-603 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 (Dense Retrieval, RAG & Cache-Augmented Generation Architecture)]]、[[LIB-801 現代深度學習之模型校準、不確定性估計與過度自信 (Model Calibration & Uncertainty Estimation)]]、[[LIB-904 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)]]。
-- **後續節點**：無（終端專題節點）。
+- **後續節點**：[[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]]。
 
 **English title:** LLM Conversational Epistemic Revision — Selective Epistemic Revision under Conversational Pushback  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  

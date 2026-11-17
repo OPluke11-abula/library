@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import { loadLibraryArticles } from '../lib/library';
 
 interface Props {
   lang: 'zh' | 'en';
@@ -8,6 +9,8 @@ interface Props {
 const { lang } = Astro.props;
 const currentYear = new Date().getFullYear();
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { zh } = loadLibraryArticles();
+const volumeCount = zh.size;
 ---
 
 <footer class="site-footer">
@@ -29,7 +32,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <div class="footer-heading">{lang === 'zh' ? '導航入口' : 'Navigation'}</div>
         <ul class="footer-link-list">
           <li><a href={`${base}/${lang}/`}>{lang === 'zh' ? '首頁' : 'Home'}</a></li>
-          <li><a href={`${base}/${lang}/library/`}>{lang === 'zh' ? '典籍目錄 (28 篇)' : 'Catalog (28 Volumes)'}</a></li>
+          <li><a href={`${base}/${lang}/library/`}>{lang === 'zh' ? `典籍目錄 (${volumeCount} 篇)` : `Catalog (${volumeCount} Volumes)`}</a></li>
           <li><a href={`${base}/${lang}/paths/`}>{lang === 'zh' ? '學習路徑拓樸' : 'Learning Paths'}</a></li>
           <li><a href={`${base}/${lang}/about/`}>{lang === 'zh' ? '關於分館' : 'About'}</a></li>
         </ul>

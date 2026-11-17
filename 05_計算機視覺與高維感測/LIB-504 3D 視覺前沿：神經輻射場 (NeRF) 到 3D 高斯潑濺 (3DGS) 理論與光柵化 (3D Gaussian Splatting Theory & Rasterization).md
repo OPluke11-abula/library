@@ -32,6 +32,8 @@ prerequisites:
 successors:
   - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]"
+  - "[[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]]"
   - "[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]"
 ---
 
@@ -41,7 +43,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-203 計算機體系結構與深度學習硬體對齊 (Computer Architecture & Hardware-Aware Deep Learning)]]、[[LIB-502 相機射影幾何、對極幾何與運動結構恢復 (Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion)]]。
-- **後續節點**：[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
+- **後續節點**：[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]、[[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]]、[[LIB-905 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)]]。
 - **權威期刊/會議文獻出處**：
   - Mildenhall et al. (ECCV 2020) *NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis*.
   - Zwicker et al. (IEEE TVCG 2001) *Surface Splatting*.
@@ -255,16 +257,17 @@ assert det > 0.0, f"2D 協方差行列式非正: det={det}"
 2. **3D Gaussian Splatting 開創性頂刊作 (ACM TOG / SIGGRAPH 2023)**
    - *Paper*: Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G. (2023). "3D Gaussian Splatting for Real-Time Radiance Field Rendering." *ACM Transactions on Graphics (TOG)*, 42(4), Article 139. DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
    - *Core Contribution*: 捨棄神經網路 MLP，提出以顯式 3D 高斯橢球為場景幾何表示，配合 GPU Tile-based 基數排序高速光柵化，首次達成 1080p 100+ FPS 即時高品質渲染。
-3. **2D Gaussian Splatting 幾何精確重建前沿 (SIGGRAPH 2024)**
-   - *Paper*: Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B. (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM Transactions on Graphics (TOG)*, 43(4), Article 55 (SIGGRAPH 2024).
-   - *Core Contribution*: 將 3D 高斯投影簡化為 2D 扁平高斯衝擊片 (Planar Surfels)，解決 3DGS 視角傾斜時之幾何多義性，完美重建高保真 3D 表面網格 (Mesh)。
+3. **2D Gaussian Splatting 幾何精確重建與 SuGaR 網格對齊前沿 (SIGGRAPH / CVPR 2024)**
+   - *Paper*: Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B. (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM Transactions on Graphics (TOG)*, 43(4), Article 55 (SIGGRAPH 2024), [`arXiv:2403.17888`](https://arxiv.org/abs/2403.17888), DOI: [10.1145/3641519.3657428](https://doi.org/10.1145/3641519.3657428).
+   - *Paper*: Guédon, A., & Lepetit, V. (2024). "SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and High-Quality Mesh Editing." *CVPR 2024*, [`arXiv:2311.12775`](https://arxiv.org/abs/2311.12775).
+   - *Core Contribution*: 將 3D 高斯投影簡化為 2D 扁平高斯衝擊片 (Planar Surfels) 或施以表面正則化抽取網格，解決 3DGS 視角傾斜時之幾何多義性；完整表面最佳化與 MCMC/快速排程延伸請見 [[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]]。
 4. **4D Gaussian Splatting 動態時空渲染 (CVPR 2024 頂會)**
    - *Paper*: Wu, G., Yi, T., Fang, J., Xie, L., Zhang, X., Wei, W., Liu, W., Tian, Q., & Wang, X. (2024). "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)*, pp. 20310-20320.
    - *Core Contribution*: 引入時空神經變形場，讓高斯粒子隨時間 $t$ 產生連續位移與旋轉，支援非剛體人體動態與虛擬試穿。
 5. **EWA 橢球加權平均光柵化經典 (IEEE Visualization 歷史經典)**
    - *Paper*: Zwicker, M., Pfister, H., van Baar, J., & Gross, M. (2001). "EWA Volume Splatting." *IEEE Visualization 2001*, pp. 29-36. DOI: [10.1109/VISUAL.2001.964490](https://doi.org/10.1109/VISUAL.2001.964490).
    - *Core Contribution*: 奠定 3D 高斯協方差矩陣向 2D 螢幕坐標系投影 Jacobian 近似轉換之數學公式 $\Sigma' = J W \Sigma W^T J^T$。
-6. **少視角 3DGS 單目深度監督與幾何可靠性前沿 (2026)**
-   - *Paper*: **DepthGS** (2026). *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*. DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295) (depth-discrepancy-guided adaptive normal regularization & cross-view depth consistency).
-   - *Paper*: Xiao et al. (2026). "In Depth We Trust: Reliable Monocular Depth Supervision for 3D Gaussian Splatting." *CVPR Workshops (3DMV 2026)* (CVF Open Access).
-   - *Preprint*: **AffineGS** (2026). Spatially varying affine depth rectification for sparse-view 3DGS. [arXiv:2611.07709](https://arxiv.org/abs/2611.07709) (`arXiv preprint`).
+6. **少視角 3DGS 單目深度監督與幾何可靠性前沿 (2026，深入專論見 [[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]])**
+   - *Paper*: Ren, X., Liu, Y., An, N., Cheng, J., Qiao, X., Li, Y.-F., & Kong, H. (2026). "DepthGS: Depth-Guided Gaussian Splatting with Adaptive Regularization for High-Quality Surface Reconstruction." *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*. [`arXiv:2611.13628`](https://arxiv.org/abs/2611.13628), DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295).
+   - *Paper*: Xiao, W.-H., Goan, E., Santa Cruz, R., Ahmedt-Aristizabal, D., Salvado, O., Fookes, C., & Lebrat, L. (2026). "In Depth We Trust: Reliable Monocular Depth Supervision for Gaussian Splatting." *CVPR Workshops (3DMV 2026)*, [`arXiv:2604.05715`](https://arxiv.org/abs/2604.05715) (CVF Open Access).
+   - *Paper*: Tse, T. H. E., Peng, J., Chen, R., & Yao, A. (2026). "AffineGS: Unlocking Accurate Geometry in 3DGS via Spatially Varying Affine Rectification." Accepted to *NeurIPS 2026*, [`arXiv:2611.07709`](https://arxiv.org/abs/2611.07709) (Code: `eldentse/AffineGS` & `AffineGS-LLFF-public`).

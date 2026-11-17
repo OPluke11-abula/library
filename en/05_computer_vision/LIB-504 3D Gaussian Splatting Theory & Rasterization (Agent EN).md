@@ -30,6 +30,8 @@ prerequisites:
 successors:
   - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
   - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]]"
+  - "[[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]]"
   - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
 ---
 
@@ -39,7 +41,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]].
-- **Successors**: [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+- **Successors**: [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]], [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -139,6 +141,6 @@ def compute_3d_covariance(scales: torch.Tensor, rotations: torch.Tensor) -> torc
 
 1. **Mildenhall, B., Srinivasan, P. P., Tancik, M., Barron, J. T., Ramamoorthi, R., & Ng, R.** (2020). "NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis." *European Conference on Computer Vision (ECCV 2020)*, pp. 405–421. DOI: [10.1007/978-3-030-58452-8_24](https://doi.org/10.1007/978-3-030-58452-8_24).
 2. **Kerbl, B., Kopanas, G., Leimkühler, T., & Drettakis, G.** (2023). "3D Gaussian Splatting for Real-Time Radiance Field Rendering." *ACM Transactions on Graphics (SIGGRAPH 2023)*, 42(4), Article 139. DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
-3. **Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B.** (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM SIGGRAPH 2024 Conference Papers*. DOI: [10.1145/3641519.3657428](https://doi.org/10.1145/3641519.3657428).
+3. **Huang, B., Yu, Z., Chen, E., Zheng, Y., & Yang, B.** (2024). "2D Gaussian Splatting for Geometrically Accurate Radiance Fields." *ACM SIGGRAPH 2024* ([arXiv:2403.17888](https://arxiv.org/abs/2403.17888), DOI: [10.1145/3641519.3657428](https://doi.org/10.1145/3641519.3657428)); **Guédon, A., & Lepetit, V.** (2024). "SuGaR: Surface-Aligned Gaussian Splatting for Efficient 3D Mesh Reconstruction and Editing." *CVPR 2024* ([arXiv:2311.12775](https://arxiv.org/abs/2311.12775)). (Further optimization & surface extensions: [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]]).
 4. **Wu, G., Yi, T., Fang, J., Xie, L., Zhang, X., Wei, W., Liu, W., Tian, Q., & Wang, X.** (2024). "4D Gaussian Splatting for Real-Time Dynamic Scene Rendering." *IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024)*, pp. 20310–20320.
-5. **DepthGS (2026)**, *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*, DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295); **Xiao et al. (2026)**, "In Depth We Trust: Reliable Monocular Depth Supervision for 3DGS", *CVPR Workshops (3DMV 2026)*; **AffineGS (2026)**, [arXiv:2611.07709](https://arxiv.org/abs/2611.07709) (`arXiv preprint`).
+5. **Sparse-View Depth Supervision & Affine Reliability (see dedicated expansion in [[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]])**: **Ren, X., Liu, Y., An, N., Cheng, J., Qiao, X., Li, Y.-F., & Kong, H.** (2026). "DepthGS: Depth-Guided Gaussian Splatting with Adaptive Regularization for High-Quality Surface Reconstruction." *IEEE TPAMI 2026* ([arXiv:2611.13628](https://arxiv.org/abs/2611.13628), DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295)); **Xiao, W.-H., Goan, E., Santa Cruz, R., Ahmedt-Aristizabal, D., Salvado, O., Fookes, C., & Lebrat, L.** (2026). "In Depth We Trust: Reliable Monocular Depth Supervision for Gaussian Splatting." *CVPR Workshops (3DMV 2026)* ([arXiv:2604.05715](https://arxiv.org/abs/2604.05715)); **Tse, T. H. E., Peng, J., Chen, R., & Yao, A.** (2026). "AffineGS: Unlocking Accurate Geometry in 3DGS via Spatially Varying Affine Rectification." *NeurIPS 2026* ([arXiv:2611.07709](https://arxiv.org/abs/2611.07709)).

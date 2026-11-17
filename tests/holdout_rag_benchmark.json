@@ -2,7 +2,7 @@
   "suite_name": "independent_holdout_benchmark_v1",
   "description": "Zero-leakage independent evaluation suite covering natural language, synonym paraphrase, multi-hop DAG reasoning, false-premise correction, unanswerable abstention, and cross-lingual retrieval. Zero queries contain LIB-xxx or RULE-xxx-xx identifiers.",
   "query_leakage_count": 0,
-  "total_queries": 24,
+  "total_queries": 32,
   "queries": [
     {
       "id": "H01",
@@ -227,6 +227,78 @@
       "query": "Epipolar geometry fundamental matrix estimation eight-point coordinate normalization",
       "expected_vol": "LIB-502",
       "expected_rule": "RULE-502-01"
+    },
+    {
+      "id": "H25",
+      "category": "natural_language",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "進行物件偵測置信度校準評估時，為何不應只報告固定閾值的 D-ECE，而必須同時量測 LaECE、LRP 並對比 Post-hoc Isotonic Regression？",
+      "expected_vol": "LIB-503",
+      "expected_rule": "RULE-503-03"
+    },
+    {
+      "id": "H26",
+      "category": "natural_language",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "How does Normalized Wasserstein Distance NWD prevent Hungarian matching gradient collapse on tiny objects smaller than 16x16 pixels where binary IoU drops to zero?",
+      "expected_vol": "LIB-503",
+      "expected_rule": "RULE-503-02"
+    },
+    {
+      "id": "H27",
+      "category": "natural_language",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "在固定 2 至 5 張稀疏 RGB 影像重建少視角 3DGS 時，為何必須隔離 P1 預存密集姿態與 P2 訓練視角 COLMAP 協議並記錄失敗樣本？",
+      "expected_vol": "LIB-507",
+      "expected_rule": "RULE-507-01"
+    },
+    {
+      "id": "H28",
+      "category": "false_premise",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "If two distinct affine disparity scale-shift coefficients produce non-unique parameterizations or depth noise reduces rendering PSNR, does that prove 3D surface geometry error without independent Chamfer Distance?",
+      "expected_vol": "LIB-507",
+      "expected_rule": "RULE-507-03"
+    },
+    {
+      "id": "H29",
+      "category": "natural_language",
+      "lang": "zh",
+      "target_lang": "zh",
+      "query": "為何在受控高頻視差設定下過高球諧函數 SH 角向容量會製造高 PSNR 的錯位看板假象（即便一般真實場景仍能保持表面一致），使單靠視角渲染指標無法保證 3D 表面幾何正確？",
+      "expected_vol": "LIB-508",
+      "expected_rule": "RULE-508-02"
+    },
+    {
+      "id": "H30",
+      "category": "synonym_paraphrase",
+      "lang": "en",
+      "target_lang": "en",
+      "query": "Why must 3DGS-MCMC and Taming-3DGS ablations under consumer 8GB VRAM limits cap primitive budgets below 300k Gaussians and log Peak Allocated VRAM?",
+      "expected_vol": "LIB-508",
+      "expected_rule": "RULE-508-01"
+    },
+    {
+      "id": "H31",
+      "category": "cross_lingual",
+      "lang": "zh",
+      "target_lang": "en",
+      "query": "提出新的演算法研究假說前，應如何針對最近似先行文獻執行三維撞題審查與表徵替換檢驗來排除僅重新包裝的方案？",
+      "expected_vol": "LIB-907",
+      "expected_rule": "RULE-907-02"
+    },
+    {
+      "id": "H32",
+      "category": "cross_lingual",
+      "lang": "en",
+      "target_lang": "zh",
+      "query": "How should research audits separate author-reported runtime from team estimates and block marking unexecuted minimal pilots as MEASURED or PASS?",
+      "expected_vol": "LIB-907",
+      "expected_rule": "RULE-907-01"
     }
   ]
 }

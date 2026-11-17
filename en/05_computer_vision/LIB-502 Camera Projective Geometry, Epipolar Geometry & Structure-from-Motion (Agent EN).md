@@ -34,6 +34,7 @@ prerequisites:
 successors:
   - "[[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]]"
   - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
+  - "[[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../05_%E8%A8%88%E7%AE%97%E6%A9%9F%E8%A6%96%E8%A6%BA%E8%88%87%E9%AB%98%E7%B6%AD%E6%84%9F%E6%B8%AC/LIB-502%20%E7%9B%B8%E6%A9%9F%E5%B0%84%E5%BD%B1%E5%B9%BE%E4%BD%95%E3%80%81%E5%B0%8D%E6%A5%B5%E5%B9%BE%E4%BD%95%E8%88%87%E9%81%8B%E5%8B%95%E7%B5%90%E6%A7%8B%E6%81%A2%E5%BE%A9%20%28Camera%20Projective%20Geometry,%20Epipolar%20Geometry%20%26%20Structure-from-Motion%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -42,7 +43,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]].
-- **Successors**: [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]].
+- **Successors**: [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]].
 
 ---
 

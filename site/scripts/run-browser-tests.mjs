@@ -152,14 +152,14 @@ async function runTests() {
     // ----------------------------------------------------
     // TEST SUITE 0: STATIC DIST CORPUS INVARIANTS (ALL 56 NOTES + MERMAID FALLBACK)
     // ----------------------------------------------------
-    console.log('\n=== Executing Static 56-Note Corpus Audit ===');
+    console.log('\n=== Executing Static Bilingual Corpus Audit ===');
     const noteSlugs = fs
       .readdirSync(path.join(DIST_DIR, 'zh/notes'))
       .filter(d => /^lib-\d{3}$/.test(d))
       .sort();
-    assert('Corpus audit: All 28 bilingual note pairs built', noteSlugs.length === 28, `Found: ${noteSlugs.length}`);
+    assert('Corpus audit: All 32 bilingual note pairs built', noteSlugs.length === 32, `Found: ${noteSlugs.length}`);
 
-    // Verify 65 expected built HTML pages
+    // Verify expected built HTML pages dynamically (noteSlugs * 2 + 9 core/landing/nav pages)
     const allHtmlFiles = [];
     const countHtml = (dir) => {
       for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -168,7 +168,8 @@ async function runTests() {
       }
     };
     countHtml(DIST_DIR);
-    assert('Build output: Exactly 65 static HTML pages generated', allHtmlFiles.length === 65, `Found: ${allHtmlFiles.length}`);
+    const expectedPages = noteSlugs.length * 2 + 9;
+    assert(`Build output: Exactly ${expectedPages} static HTML pages generated`, allHtmlFiles.length === expectedPages, `Found: ${allHtmlFiles.length}`);
 
     const brokenMirrorLinks = [];
     const leakedBodyBanners = [];
@@ -220,12 +221,13 @@ async function runTests() {
       }
     }
 
-    assert('Language Links: All 56 Header & Mirror switches point opposite-language matching ID', brokenMirrorLinks.length === 0, brokenMirrorLinks.join(', '));
-    assert('Lesson Content: All 56 articles open directly into teaching flow', emptyLessons.length === 0, emptyLessons.join(', '));
-    assert('Body Cleanliness: Zero duplicate language banners or .md hrefs across all 56 articles', leakedBodyBanners.length === 0, leakedBodyBanners.join(', '));
-    assert('Study Orientations: Zero bibliography/table/ASCII/metadata/TeX/CR leaks across 56 articles', leakedOrientations.length === 0, leakedOrientations.join(', '));
-    assert('KaTeX Integrity: Zero .katex-error elements across all 56 built pages', katexErrorsFound.length === 0, katexErrorsFound.join(', '));
-    assert('Fonts: Zero Google Fonts links across all 56 built pages', leakedGoogleFonts.length === 0, leakedGoogleFonts.join(', '));
+    const bilingualCount = noteSlugs.length * 2;
+    assert(`Language Links: All ${bilingualCount} Header & Mirror switches point opposite-language matching ID`, brokenMirrorLinks.length === 0, brokenMirrorLinks.join(', '));
+    assert(`Lesson Content: All ${bilingualCount} articles open directly into teaching flow`, emptyLessons.length === 0, emptyLessons.join(', '));
+    assert(`Body Cleanliness: Zero duplicate language banners or .md hrefs across all ${bilingualCount} articles`, leakedBodyBanners.length === 0, leakedBodyBanners.join(', '));
+    assert(`Study Orientations: Zero bibliography/table/ASCII/metadata/TeX/CR leaks across ${bilingualCount} articles`, leakedOrientations.length === 0, leakedOrientations.join(', '));
+    assert(`KaTeX Integrity: Zero .katex-error elements across all ${bilingualCount} built pages`, katexErrorsFound.length === 0, katexErrorsFound.join(', '));
+    assert(`Fonts: Zero Google Fonts links across all ${bilingualCount} built pages`, leakedGoogleFonts.length === 0, leakedGoogleFonts.join(', '));
 
     // Check explicit Mermaid error fallback helper directly via TypeScript module import
     const { renderMermaidBlockHtml } = await import('../src/lib/library.ts');
@@ -258,7 +260,7 @@ async function runTests() {
     await page.goto('http://localhost:4321/library/zh/');
     await page.waitForLoadState('networkidle');
     assert('Home ZH: Grand Library hero rendered', (await page.textContent('.hero-title'))?.includes('Grand Library'));
-    assert('Home ZH: Editorial meta strip displays 28 volumes & 56 editions', (await page.textContent('.atlas-meta-strip'))?.includes('28') && (await page.textContent('.atlas-meta-strip'))?.includes('56'));
+    assert(`Home ZH: Editorial meta strip displays ${noteSlugs.length} volumes & ${bilingualCount} editions`, (await page.textContent('.atlas-meta-strip'))?.includes(String(noteSlugs.length)) && (await page.textContent('.atlas-meta-strip'))?.includes(String(bilingualCount)));
     assert('Home ZH: No legacy KPI dashboard .metric-card boxes', (await page.locator('.metric-card').count()) === 0);
     assert('Home ZH: 10 Knowledge Halls displayed', (await page.locator('.hall-card').count()) === 10);
     assert('Home ZH: 6 Featured articles displayed', (await page.locator('.featured-section .article-card').count()) === 6);
@@ -408,7 +410,7 @@ async function runTests() {
     // 7. Catalog Search & Filters
     await page.goto('http://localhost:4321/library/zh/library/');
     await page.waitForLoadState('networkidle');
-    assert('Catalog ZH: Initial 28 articles rendered cleanly with zero overflow', (await page.locator('#catalog-grid .grid-item:visible').count()) === 28 && await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+    assert(`Catalog ZH: Initial ${noteSlugs.length} articles rendered cleanly with zero overflow`, (await page.locator('#catalog-grid .grid-item:visible').count()) === noteSlugs.length && await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
     await page.fill('#catalog-search', '質心');
     await page.waitForTimeout(200);
     assert('Catalog ZH: Search "質心" filters to 2 volumes', (await page.locator('#catalog-grid .grid-item:visible').count()) === 2);

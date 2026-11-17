@@ -28,7 +28,8 @@ prerequisites:
   - "[[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]"
   - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
   - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
-successors: []
+successors:
+  - "[[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-906%20%E5%B0%8D%E8%A9%B1%E8%B3%AA%E7%96%91%E4%B8%8B%E7%9A%84%E9%81%B8%E6%93%87%E6%80%A7%E8%AA%8D%E7%9F%A5%E4%BF%AE%E8%A8%82%EF%BC%9A%E7%A0%94%E7%A9%B6%E5%9F%BA%E6%BA%96%E8%88%87%E5%AF%A6%E9%A9%97%E8%97%8D%E5%9C%96%20%28LLM%20Conversational%20Epistemic%20Revision%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -37,7 +38,7 @@ successors: []
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]], [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]].
-- **Successors**: None (Terminal capstone node).
+- **Successors**: [[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]].
 
 **Chinese title:** 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (Selective Epistemic Revision under Conversational Pushback)  
 **Document role:** Research Source of Truth / Agent Handoff / Experimental Design Baseline  

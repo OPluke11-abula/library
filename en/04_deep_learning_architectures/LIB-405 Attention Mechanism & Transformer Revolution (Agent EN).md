@@ -30,6 +30,7 @@ prerequisites:
 successors:
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
   - "[[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]]"
+  - "[[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
   - "[[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]]"
 ---
@@ -40,7 +41,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-203 Computer Architecture & Hardware-Aware Deep Learning (Agent EN)]].
-- **Successors**: [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]].
+- **Successors**: [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-703 LLM Agent Cognitive Architecture & Protocols (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 

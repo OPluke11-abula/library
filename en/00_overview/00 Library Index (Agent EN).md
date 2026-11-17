@@ -39,9 +39,12 @@ Primary Navigator:
 - **05 Computer Vision & High-Dimensional Sensing**:
   - [[LIB-501 CV Preprocessing & Center of Mass Alignment (Agent EN)]]
   - [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]
+  - [[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]]
   - [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]
   - [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]
   - [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]
+  - [[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]]
+  - [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]]
 - **06 Natural Language Processing & Large Language Models**:
   - [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]
   - [[LIB-603 Dense Retrieval, RAG & Cache-Augmented Generation Architecture (Agent EN)]]
@@ -57,4 +60,5 @@ Primary Navigator:
   - [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]
   - [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]
   - [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]]
+  - [[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]]
 

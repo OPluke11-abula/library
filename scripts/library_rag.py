@@ -3,7 +3,7 @@
 scripts/library_rag.py
 ======================
 Executable DAG-Aware Hybrid RAG, Lexical Subword MaxSim Reranking, and CAG Compiler Engine
-for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 114 invariants).
+for the CS & Deep Learning Knowledge Base (32 bilingual volumes, 64 files, 130 invariants).
 
 Implements the mathematical and systems contracts of LIB-603 ([RULE-603-01..04]),
 LIB-000 ([RULE-000-01]), LIB-703, and LIB-906 using zero-dependency standard-library
@@ -15,7 +15,7 @@ algorithms (explicitly distinguishing lightweight approximations from neural mod
      (ColBERT-inspired token/n-gram late-interaction heuristic weighted by BM25 IDF; non-neural).
   4. 1-Hop & Transitive DAG Prerequisite Invariant Expansion (Topological GraphRAG).
   5. Cache-Augmented Generation (CAG) Topological Subgraph Bundle Compiler & KV-Cache HBM Calculator.
-  6. Reproducible Dual-Suite Benchmark (16-Query Smoke Regression + 24-Query Zero-Leakage Holdout Suite).
+  6. Reproducible Dual-Suite Benchmark (16-Query Smoke Regression + 32-Query Zero-Leakage Holdout Suite).
   7. Spec-Compliant JSON-RPC 2.0 Model Context Protocol (MCP) Stdio Server (--mcp).
 
 Usage:
@@ -140,6 +140,21 @@ BILINGUAL_TERM_BRIDGES: Dict[str, List[str]] = {
     "仿射校正": ["affine", "rectification", "affinegs", "monocular"],
     "主動視角": ["active", "viewpoint", "transmittance", "hemisphere"],
     "校準拒答": ["calibrated", "abstention", "auroc", "unsatisfiable"],
+    "物件偵測": ["detection", "rt-detr", "d-fine", "deim", "fdr"],
+    "遮擋": ["occlusion", "crowdhuman", "amodal", "mega-box"],
+    "遮擋條件覆蓋": ["occlusion-conditional", "mondrian", "marginal", "stratified"],
+    "邊際覆蓋": ["marginal", "coverage", "conformal", "exchangeability"],
+    "共形": ["conformal", "prediction", "intervals", "coverage", "timans", "ries", "od-cp", "raps"],
+    "推論掛鉤": ["forward_hook", "pred_corners", "dfine_decoder", "postprocessor"],
+    "微目標": ["tiny", "small-object", "nwd", "rfla", "dq-detr", "ai-tod"],
+    "校準誤差": ["laece", "d-ece", "lrp", "isotonic", "calibration"],
+    "看板": ["billboard", "spherical harmonics", "first-hit", "parallax", "real-world"],
+    "反光解耦": ["specular", "ref-gs", "spec-gaussian", "envgs", "pgsr", "rade-gs"],
+    "稀疏視角": ["sparse-view", "affinegs", "depthgs", "gdofs", "p2"],
+    "深度先驗": ["monocular", "depth", "prior", "dim", "gal"],
+    "稠密化": ["densification", "mcmc", "taming-3dgs", "dashgaussian", "absgs", "birth-death", "coreset", "edgs"],
+    "撞題": ["collision", "novelty", "substitution", "prior-work"],
+    "先導實驗": ["minimal", "pilot", "stop-loss", "go", "no-go"],
 }
 
 
@@ -186,7 +201,7 @@ class LibraryChunk:
 
 
 def get_git_commit_sha(root: Path = ROOT) -> str:
-    """Returns the latest Git commit SHA that modified the 56 bilingual corpus volumes (avoiding self-referential commit hash churn)."""
+    """Returns the latest Git commit SHA that modified the 64 bilingual corpus volumes (avoiding self-referential commit hash churn)."""
     try:
         sha = subprocess.check_output(
             ["git", "log", "-n", "1", "--pretty=format:%H", "--", ":(glob)**/LIB-*.md"],
@@ -477,7 +492,7 @@ def reciprocal_rank_fusion(
 
 class LibraryGraphRAGEngine:
     """
-    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 114 invariants).
+    DAG-Aware Hybrid RAG & CAG Engine over the 32 bilingual volumes (64 files, 130 invariants).
     """
 
     def __init__(self, root: Path = ROOT):
@@ -1387,7 +1402,7 @@ class LibraryGraphRAGEngine:
         """
         Evaluates Dense-Only (Feature Hashing) vs. BM25-Only vs. Hybrid-RRF+MaxSim+DAG across:
           1. `golden_regression_suite` (16 legacy queries; 7 with explicit RULE-ID tokens, 9 without)
-          2. `independent_holdout_suite` (24 zero-leakage queries across 6 categories from tests/holdout_rag_benchmark.json)
+          2. `independent_holdout_suite` (32 zero-leakage queries across 6 categories from tests/holdout_rag_benchmark.json)
         All ablation modes are scored with identical chunk-level and volume-level rules.
         """
         if not self.chunks:
@@ -1532,7 +1547,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                     "tools": [
                         {
                             "name": "library_hybrid_search",
-                            "description": "Search the 28-volume CS/DL Library (114 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
+                            "description": "Search the 32-volume CS/DL Library (130 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {
@@ -1575,7 +1590,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                         },
                         {
                             "name": "library_verify_integrity",
-                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (28 volumes, 114 invariants).",
+                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (32 volumes, 130 invariants).",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {},

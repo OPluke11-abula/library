@@ -30,6 +30,7 @@ successors:
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
   - "[[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]]"
   - "[[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]]"
+  - "[[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]]"
   - "[[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]]"
   - "[[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]]"
 ---
@@ -40,7 +41,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-101 Linear Algebra & High-Dimensional Geometry (Agent EN)]], [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]].
-- **Successors**: [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
+- **Successors**: [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]], [[LIB-406 Generative Frontiers - SDE Diffusion to Flow Matching (Agent EN)]], [[LIB-502 Camera Projective Geometry, Epipolar Geometry & Structure-from-Motion (Agent EN)]], [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]], [[LIB-602 Modern LLM Architecture & Scaling Laws (Agent EN)]], [[LIB-801 Model Calibration & Uncertainty Estimation (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 

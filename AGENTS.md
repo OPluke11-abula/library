@@ -141,7 +141,7 @@ The interface should be concise without becoming ambiguous. Removing words is no
 ## 4. 命名、路由與搜尋規範 (Naming, Routing & Search)
 
 ### 4.1 核心文章 ID
-- 所有 28 篇核心典籍皆擁有唯一的格式代號：`LIB-###`（例如 `LIB-000` 至 `LIB-906`）。
+- 所有 32 篇核心典籍皆擁有唯一的格式代號：`LIB-###`（例如 `LIB-000` 至 `LIB-907`）。
 - 任何與文章相關之邏輯、資料索引與錨點，均以此 ID 作為 Canonical Key。
 
 ### 4.2 URL 結構對稱性與語意導覽完整性 (URL Symmetry & Semantic Navigation)
@@ -168,7 +168,7 @@ The interface should be concise without becoming ambiguous. Removing words is no
    - 嚴禁在 `site/` 內部重複建立或複製 `LIB-###.md`。
 3. **Markdown / LaTeX 編譯品質守則**：
    - **零星號洩漏 (Zero Leaked Asterisks)**：CommonMark 對 CJK 標點（如 `是**「...」**`）有左側界定限制。`src/lib/library.ts` 透過自研 `cjkStrong` 內聯語彙分析器擴充 Marked，確保中文粗體 100% 正確解析為 `<strong>`，內文嚴禁殘留裸露星號 `**`。
-   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 頁面僅保留 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，避免重複顯示或雙重標記；同時 Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，保障全站 56 篇雙語典籍之 H1 唯一性。
+   - **單一主要 H1 守則 (Single Primary H1 Invariant)**：Reader 頁面僅保留 Header 之唯一文章大標題；Markdown 原始內文之第一行標題（`# 標題`）由渲染器在語意前置解析期消除，避免重複顯示或雙重標記；同時 Heading Renderer 針對 `depth === 1` 一律返回空字串並不計入目錄，保障全站 64 篇雙語典籍之 H1 唯一性。
    - **零雙重跳脫與實體外洩防護 (Zero Double Escaping)**：Marked 內建之 `parseInline` 會將 `&` 轉化為 `&amp;`、`'` 轉化為 `&#39;`。在生成目錄（TOC）與標題錨點 ID 前，必須精確還原為乾淨純文字（`plainText`），再由 Astro 範本進行安全單次跳脫，杜絕 `&amp;amp;` 或 `&amp;#39;` 等實體編碼洩漏在網頁可見文字中。
    - **KaTeX 嚴格原樣優先與精準例外處理 (Verbatim-First & Explicit KaTeX Error Policy)**：數學渲染優先以原始 TeX 執行嚴格編譯（`throwOnError: true`），確保所有合法公式與轉義百分比符號 `\%` 100% 原樣輸出不被改寫；僅當原始 LaTeX 解析失敗時允許以下兩項安全／明確稽核之顯示回復：
      1. 自動轉義 `\text{...}` 內部未跳脫之底線（例如 `LIB-506` 的 `\text{[SAFETY_BOUND]}` 修正為 `\text{[SAFETY\_BOUND]}`）。
@@ -234,7 +234,7 @@ flowchart TD
 
 - **對稱雙語實作檔案**：`site/src/pages/zh/paths.astro` 與 `site/src/pages/en/paths.astro` 皆透過薄路由包裝共用元件 `site/src/components/PathsPage.astro`（同樣模式亦完整應用於 `HomePage.astro`、`CatalogPage.astro`、`AboutPage.astro` 與 `ReaderPage.astro`），確保雙語結構同步演進且零重複樣板。
 - **模板與圖標規範**：繼承 `BaseLayout.astro` 並互設 `alternateUrl`（`/library/zh/paths/` ↔ `/library/en/paths/`），介面圖標全面採用 `Icon.astro`（零 Emoji）。
-- **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 56 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
+- **SSOT 資料整合**：透過 `loadLibraryArticles()` 即時讀取根目錄 64 篇筆記之 `title`、`status`、`hall` 與 `callNumber`，並結合 `CURATED_LEARNING_PATHS`（3 條路線、23 節點、20 條直接拓樸邊）渲染，絕不複製或修改原始筆記。
 - **品質與回歸保障**：單一 `<h1>`、CSS Grid 採 `minmax(0, 1fr)` 與 `min-width: 0`（Desktop 1440px / Mobile 390px 零橫向溢出），並受 `npm run verify-paths`、`npm run build` 與 Playwright `npm test` 持續守門。
 
 ### 7.2 AI 新增雙語頁面示意範本（Blueprint — 尚未建立之示意程式）
@@ -315,14 +315,14 @@ const alternateUrl = `${base}/en/example/`;
    ```bash
    cd site && npm run build
    ```
-   - 預期結果：65 頁靜態 HTML 產出完畢，0 錯誤。
+   - 預期結果：73 頁靜態 HTML 產出完畢，0 錯誤。
 5. **Markdown 與 KaTeX 渲染品質檢測**：
    - 抽驗 `LIB-405`、`LIB-104`、`LIB-703`、`LIB-000` 等篇目，確認內文無殘留 `**`、無裝飾性 Emoji 噪音，KaTeX 數學式與 Mermaid 圖表均正確解析渲染。
 6. **端對端瀏覽器與靜態語料實測 (Playwright)**：
    ```bash
    cd site && npm test
    ```
-   - 預期結果：53 項靜態語料與桌機（1440x900）／手機（390x844）瀏覽器實測全數 PASS（涵蓋全 56 篇雙向語言切換與正文無衝突、56 篇導引純淨度、Mermaid 視覺 SVG 與失敗警訊 Fallback、零 Google Fonts 外部請求、WCAG AA 對比度 `>= 4.5:1`、Learning Paths 3 路線首屏切換、Reader 漸進教學階層與 `#research-details`／可收合 TOC、手機首屏密度、單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、`LIB-504` 真實性）。
+   - 預期結果：靜態語料（依實際建置之 32 卷／64 雙語／73 頁）與桌機（1440x900）／手機（390x844）瀏覽器實測全數 PASS（涵蓋全 64 篇雙向語言切換與正文無衝突、64 篇導引純淨度、Mermaid 視覺 SVG 與失敗警訊 Fallback、零 Google Fonts 外部請求、WCAG AA 對比度 `>= 4.5:1`、Learning Paths 3 路線首屏切換、Reader 漸進教學階層與 `#research-details`／可收合 TOC、手機首屏密度、單一 H1、0 KaTeX 錯誤、0 雙重跳脫、0 橫向溢出、`LIB-504` 真實性）。
 7. **核心視覺驗收截圖產出（於 `site/tests/screenshots/`，不提交至 Git）**：
    - `homepage-zh-desktop-1440-top.png` / `homepage-zh-mobile-390-top.png`
    - `paths-zh-desktop-1440-top.png` / `paths-zh-mobile-390-top.png`

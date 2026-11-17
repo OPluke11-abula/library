@@ -35,9 +35,11 @@ tags:
   - 測試時增強
   - 自學體系
 prerequisites:
+  - "[[LIB-503 現代物件偵測架構、定位不確定性與遮擋校準 (Modern Object Detection, Localization & Occlusion Reliability)]]"
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 successors:
   - "[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]"
+  - "[[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20%26%20Literature%20Synthesis%20%28Agent%20EN%29.md)
@@ -45,8 +47,8 @@ successors:
 # 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 
 ## 🧭 拓樸導航與概念座標
-- **前置依賴**：[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
-- **後續節點**：[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
+- **前置依賴**：[[LIB-503 現代物件偵測架構、定位不確定性與遮擋校準 (Modern Object Detection, Localization & Occlusion Reliability)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **後續節點**：[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]、[[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]]。
 - **學術定位**：建立獨立研究員（Luke）研讀頂級會議與同行評審權威期刊論文的系統化方法論。以電腦視覺、神經渲染（3DGS）、高維幾何點雲序列化、度量學習（Metric Learning）與測試時增強（TTA）等前沿研究為實戰範例，架構從理論形式化、消融實驗分析、GPU 硬體映射到代碼復現之完整學術研讀閉環：
 
 ```

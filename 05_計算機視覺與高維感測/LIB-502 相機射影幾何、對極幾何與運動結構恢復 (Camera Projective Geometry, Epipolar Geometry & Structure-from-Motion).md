@@ -36,6 +36,7 @@ prerequisites:
 successors:
   - "[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]"
   - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
+  - "[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]"
 ---
 
 > 🌐 **語言切換 / Language**: 🇹🇼 **繁體中文** | [🇺🇸 English (AI Agent & Research Edition)](../en/05_computer_vision/LIB-502%20Camera%20Projective%20Geometry,%20Epipolar%20Geometry%20%26%20Structure-from-Motion%20%28Agent%20EN%29.md)
@@ -44,7 +45,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-101 線性代數與高維幾何變換本質 (Linear Algebra & High-Dimensional Geometry)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-501 計算機視覺前處理規範與影像質心定位演算法 (CV Preprocessing & Center of Mass Alignment)]]。
-- **後續節點**：[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]。
+- **後續節點**：[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]。
 - **核心定位**：從 2D 數位影像前處理（LIB-501）邁向 3D 高斯潑濺（LIB-504）與三維空間透視合成（LIB-408），中間絕非一步登天，而是必須跨越**「3D 世界如何壓扁成 2D 像素，以及如何從多張 2D 照片反推 3D 相機位姿與稀疏點雲」**的射影幾何橋樑。無論是 NeRF 還是 3DGS，其訓練起點都完全依賴 **COLMAP 運動結構恢復（Structure-from-Motion, SfM）** 解出的相機內外參矩陣 $\mathbf{K}[\mathbf{R}\mid\mathbf{t}]$ 與初始稀疏點雲。本卷從射影空間 $\mathbb{P}^3$ 第一性原理出發，完整貫通針孔相機模型、透視投影雅可比矩陣 $\mathbf{J}$、對極幾何八點法與光束法平差（Bundle Adjustment）。
 
 ---

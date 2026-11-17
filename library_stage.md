@@ -260,6 +260,16 @@
   - 於 `LIB-504` 匯入 `D-project` T-01 少視角固定 RGB 3DGS 之單目深度先驗仿射歧義與防誤信邊界、參數不唯一 $\neq$ 幾何錯誤之解耦、三分級姿態協定（`P1 Precomputed` / `P2 Train-Only SfM` / `P3 Pose-Perturbed`）與 2026 先行文獻（AffineGS, In Depth We Trust, DepthGS）。
   - 於 `LIB-505` 與 `LIB-506` 匯入 2024–2026 前沿文獻盤點（OpenGaussian, 3DAffordSplat, GenSplat, ReLaGS, SplatTalk, POp-GS, CoV, GLMap）、`L1–L8` 八級查詢階梯、純 Python 可執行 **3D 高斯協方差法向量與淨空支撐體積門控 (`extract_smallest_eigenvector_3x3` / $\Phi_{\mathrm{geom}} \cdot \Psi_{\mathrm{free}}$) + `L8` 校準拒答**，以及 **兩階段高斯 $\alpha$-穿透率主動視角求解器 (`optimize_active_viewpoint_two_stage`)** 與 `RAGAS-3D` 評測規範；並同步更新 `LIB-905` 真實算力校準與演進邊界。全庫正式推進至 **114 條決策合約不變量**。
 
+### 24. P1 科研擴館升級：補齊現代物件偵測、少視角深度先驗、3DGS 表面／最佳化理論與低算力選題方法論（32 卷 / 64 檔 / 130 條不變量）
+- **新增四卷雙語核心典籍（8 個鏡像 `.md` 檔案，+16 條合約規則 `RULE-503/507/508/907-01..04`）**：
+  - `LIB-503`：涵蓋 NMS-free DETR 譜系（`RT-DETR`、`D-FINE FDR/GO-LSD`、`DEIM/DEIMv2`、`RF-DETR`）、官方 `Peterande/D-FINE` 推論預設丟棄 `pred_corners` 之 Hook 限制、2D Box 遮擋偵測與 Amodal 分割邊界隔離、`NWD/RFLA/DQ-DETR` 微目標理論，以及 `LaECE / Timans / Ries (COPA 2026 OD-CP)` 共形區間（明確區分 `Marginal` vs. `Occlusion-Conditional / Mondrian` 覆蓋率與 FN 漏檢邊界）。
+  - `LIB-507`：系統彙整 `AffineGS` 官方實作驗證（梯度範數比非負場 + `guidedFilter(d_mono, radius=600)` + `P1` 預設全域 COLMAP）、`In Depth We Trust`（DIM + GAL）、`DepthGS`（深度差自適應法向正則）、`GDoFS / CoR-GS / DropGaussian / Sparse2DGS / StereoGS`，並建立 `P1/P2/P3` 姿態協議與參數不可辨識性 vs. 真實幾何誤差分離檢驗（不因預期算力先驗淘汰再現性查證）。
+  - `LIB-508`：收錄 `AbsGS / Pixel-GS / Revising Densification`、`3DGS-MCMC`、`Taming-3DGS`、`DashGaussian`、`Birth-Death 3DGS`、`Provable Pruning via Coresets`、`EDGS`；精確對照 ECCV 2026 *When 3DGS Recovers Real Surfaces*（人工合成高頻視差看板失效 vs. 真實世界拍攝設定維持表面一致性之雙面實證）與既存鏡面/反光幾何解耦先行文獻（`Ref-GS`、`Spec-Gaussian`、`EnvGS`、`PGSR`、`RaDe-GS`）及 `StopThePop`。
+  - `LIB-907`：沉澱通用型 Pass 1–4 + 15 欄一手撞題矩陣、Representation Substitution Test、Failure-First 門檻遞進（`P0 -> G1 -> G2 -> G3 -> Novelty Gate`）、嚴格區分 `AUTHOR_REPORTED / TEAM_ESTIMATE / REPRODUCED_BY_TEAM / NOT_RUN`，嚴禁未實跑實驗標記為實測過關。
+- **系統與網站同步升級（Eliminate Hardcoding）**：
+  - 全數完成 13 卷雙向 DAG 依賴接線、`LIB-504` §6 與 `LIB-905` §5 一手 DOI/arXiv 補齊、`LIB-903`/`LIB-905` 歷史 RTX 4090 目標配置 vs 受限硬體基線顯式區隔。
+  - 靜態網站（`site/`）重構消除元件內 `28 / 56 / 65` 硬編碼，升級至動態計算 **32 卷 / 64 雙語典籍 / 73 頁** 並擴充 RAG 雙語橋接詞與 Holdout 評估題庫。全庫正式推進至 **130 條決策合約不變量**。
+
 ---
 
 ## 🛡️ 四、核心規範與系統不變量約束 (System Invariants)

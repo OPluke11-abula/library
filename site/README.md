@@ -76,7 +76,7 @@ npm run preview
 
 3. **Mermaid 本地視覺圖表與 Render QA**
    - **Mermaid 本地預渲染＋動態備援**：`LIB-000` (ZH/EN) 與 `LIB-001` (ZH) 等 ```` ```mermaid ```` 圖表於建置期渲染為 SVG 並快取於 `src/data/mermaid-cache/`，支援縮放、`Full height` 切換與「查看原始碼」次要抽屜；未知區塊由本地打包 `mermaid` 動態渲染，解析失敗顯式回報錯誤警訊，全程零外部 CDN。
-   - **零星號、單一 H1、零雙重跳脫與 KaTeX 原樣優先**：支援 `cjkStrong` 中文粗體解析、單一頂部 `<h1>`、`splitMarkdownByH2` 多行 `$$` 塊精確追蹤、`texToReadablePlain` 純文字轉換與嚴格 `throwOnError: true` KaTeX 編譯（僅安全跳脫 `\text{...}` 內底線及已稽核 `LIB-802` 顯式例外）；全館 56 篇 **0 個 `katex-error`**。
+   - **零星號、單一 H1、零雙重跳脫與 KaTeX 原樣優先**：支援 `cjkStrong` 中文粗體解析、單一頂部 `<h1>`、`splitMarkdownByH2` 多行 `$$` 塊精確追蹤、`texToReadablePlain` 純文字轉換與嚴格 `throwOnError: true` KaTeX 編譯（僅安全跳脫 `\text{...}` 內底線及已稽核 `LIB-802` 顯式例外）；全館 64 篇雙語典籍 **0 個 `katex-error`**。
 
 4. **方向優先學習路徑與精簡首頁 (Direction-First Learning Paths & Editorial Homepage)**
    - **學習路徑第一屏方向選擇矩陣**：桌面首屏（1440x900）立即呈現 3 張差異化方向卡片（Deep Learning、Computer Vision & 3D、AI Agents），先選方向或直達第 1 步，再展開 23 個步驟詳情；全館巨大 SVG 拓樸圖移至頁面底部並預設折疊，驗證全館 3 條路徑、23 節點與 20 條直接 DAG 拓樸邊。
@@ -122,6 +122,6 @@ Playwright 端對端測試自動產出下列核心驗收截圖於 `site/tests/sc
 5. **執行可重現自動化驗證**：
    ```bash
    npm run verify-paths   # 20 條直接 DAG 拓樸邊 100% 通過
-   npm run build          # 靜態 HTML 編譯產出（65 頁），0 錯誤
-   npm test               # 53 項靜態語料＋桌面/手機 Playwright 瀏覽器驗收 100% 通過
+   npm run build          # 靜態 HTML 編譯產出（73 頁），0 錯誤
+   npm test               # 完整靜態語料＋桌面/手機 Playwright 瀏覽器驗收 100% 通過
    ```

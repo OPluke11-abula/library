@@ -31,8 +31,8 @@ const alternateUrl = isZh ? `${base}/en/library/` : `${base}/zh/library/`;
         <h1 class="catalog-title">{isZh ? '圖書館典籍目錄' : 'Knowledge Atlas Catalog'}</h1>
         <p class="catalog-desc">
           {isZh
-            ? '收錄全館 28 篇核心知識典籍，包含理論基石、計算機體系、深度神經網路與頂尖專題工程。支援文章篇名、編號、標籤與摘要即時檢索。'
-            : 'Encompassing all 28 core knowledge volumes across theoretical foundations, systems engineering, deep neural architectures, and frontier projects. Supports article-level search by title, ID, tag, and excerpt.'}
+            ? `收錄全館 ${articles.length} 篇核心知識典籍，包含理論基石、計算機體系、深度神經網路與頂尖專題工程。支援文章篇名、編號、標籤與摘要即時檢索。`
+            : `Encompassing all ${articles.length} core knowledge volumes across theoretical foundations, systems engineering, deep neural architectures, and frontier projects. Supports article-level search by title, ID, tag, and excerpt.`}
         </p>
       </header>
 
@@ -54,7 +54,7 @@ const alternateUrl = isZh ? `${base}/en/library/` : `${base}/zh/library/`;
         <div class="filters-row">
           <span class="filter-label">{isZh ? '分館過濾' : 'Wing Filter'}</span>
           <div class="hall-pills" id="hall-filters">
-            <button class="pill-btn active" data-hall="all">{isZh ? '全部分館 (28)' : 'All Halls (28)'}</button>
+            <button class="pill-btn active" data-hall="all">{isZh ? `全部分館 (${articles.length})` : `All Halls (${articles.length})`}</button>
             {KNOWLEDGE_HALLS.map(hall => {
               const count = articles.filter(a => a.hall.code === hall.code).length;
               return (
@@ -70,7 +70,7 @@ const alternateUrl = isZh ? `${base}/en/library/` : `${base}/zh/library/`;
 
         <div class="meta-row">
           <div id="results-count" class="results-count">
-            {isZh ? '顯示 28 篇典籍' : 'Showing 28 Volumes'}
+            {isZh ? `顯示 ${articles.length} 篇典籍` : `Showing ${articles.length} Volumes`}
           </div>
           <div class="tag-shortcuts">
             <span class="tag-label">{isZh ? '熱門標籤' : 'Topics'}</span>

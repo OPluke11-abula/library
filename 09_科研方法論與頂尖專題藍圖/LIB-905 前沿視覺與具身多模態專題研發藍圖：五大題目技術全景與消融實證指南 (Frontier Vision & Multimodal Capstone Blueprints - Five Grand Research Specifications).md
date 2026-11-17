@@ -14,7 +14,8 @@ math_foundations:
   - End-to-End System Evaluation Metrics (mAP, LPIPS, CLIP-Score, Navigation SLA)
   - Full-Stack Pipeline Decomposition & Hardware Budgeting
 hardware_target:
-  - Workstation with Single/Dual NVIDIA RTX 4090 (24GB)
+  - Historical Target Workstation Config (RTX 4090 / 24GB — Not Constrained Student Hardware)
+  - Constrained Repro & Pilot Tier (4GB–8GB VRAM Laptop / Single-GPU Cloud Quota; see LIB-907)
   - Unity 3D Engine & WebXR / Mobile Edge Deployment
 created: 2026-09-24
 author: Luke
@@ -31,6 +32,7 @@ prerequisites:
   - "[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]"
   - "[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]"
   - "[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]"
+  - "[[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]]"
   - "[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]"
 successors: []
 ---
@@ -40,21 +42,23 @@ successors: []
 # 前沿視覺與具身多模態專題研發藍圖：五大題目技術全景與消融實證指南 (Frontier Vision & Multimodal Capstone Blueprints - Five Grand Research Specifications)
 
 ## 導讀與概念座標
-- **前置依賴**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
+- **前置依賴**：[[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]]、[[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]]、[[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]]、[[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]]、[[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]、[[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]]、[[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]。
 - **後續節點**：無。
-- **核心定位**：本卷冊直接對齊指導教授提出之「五大專題研究題目建議」，將 5 份研發海報與規格書，結構化提煉為大專生專題實作、國科會大專生研究計畫（C801）以及學術競賽與推甄之核心作戰藍圖。
+- **核心定位**：本卷冊整理自「五大專題研究歷史參考藍圖」（*註：下表硬體規格屬於早期目標工作站假設，非多數受限學生筆電基線；最新多方向選題審查與低算力撞題排除方法請見 [[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]]*）。
 
 ---
 
 ## 一、五大專題全景矩陣與技術維度對照
 
+> **硬體假設隔離警語 (`Historical Reference Spec`)**：下表右欄 `RTX 4090 / 24GB`、`RTX 4080+` 等規格屬於 **歷史目標工作站建議配置 (`HISTORICAL_WORKSTATION_TARGET`)，並非團隊或受限實驗之實機基準硬體**；在 4GB–8GB 筆電與單卡雲端環境進行研發時，必須切換至 [[LIB-508 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 (Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration)]] 之預算封頂原則與 [[LIB-907 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 (Research Gap Discovery, Novelty Collision & Topic Selection)]] 分階段先導驗證。
+
 | 題目編號 | 題目名稱 (中/英) | 核心技術基底 | 關鍵學術痛點 | 對應旗艦典籍 | 難度與推薦配置 |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Topic 01** | **基於文字語意查詢之 3DGS 場景物件搜尋方法**<br>*(Text-Guided Object Retrieval in 3DGS Scenes)* | 3DGS + CLIP + SAM + 跨視角共識 | 傳統 3DGS 缺乏語意；開放詞彙檢索維度爆炸與多視角邊界漂移 | [[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]] | ★★★★☆<br>RTX 4090 / 24GB |
-| **Topic 02** | **結合大語言模型與 3DGS 之智慧場景問答導覽系統**<br>*(Intelligent Scene QA & Navigation using LLMs and 3DGS)* | 3DGS + LLM + 3D 場景圖 + A* 拓樸導航 | 純文字 LLM 無空間幾何感知；神經輻射場缺乏符號邏輯與路徑規劃能力 | [[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]] | ★★★★☆<br>RTX 4090 + Unity |
-| **Topic 03** | **基於 3DGS 之智慧虛擬校園導覽系統**<br>*(Intelligent Virtual Campus Tour System Using 3DGS)* | 大規模空拍/地面 3DGS + 階層式校園圖 + Unity MR | 戶外大規模場景重建顯存溢出；多棟館舍跨樓層導覽與即時渲染流暢度 | [[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]] | ★★★☆☆<br>RTX 4080+ / Unity |
-| **Topic 04** | **基於區域感知與非目標內容保持之細粒度文字指令影像編輯方法**<br>*(Fine-Grained Instruction-Based Image Editing with Non-Target Preservation)* | 擴散模型 + 跨注意力調製 + 潛空間反演 | 指令編輯容易產生牽一髮動全身的「過度編輯」，非目標背景與物體結構崩塌 | [[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]] | ★★★★☆<br>單卡 16GB+ VRAM |
-| **Topic 05** | **基於場景語意與光照一致性之情境感知物件生成與影像融合方法**<br>*(Context-Aware Object Generation & Compositing with Illumination Consistency)* | 條件擴散 (ControlNet) + 深度法線 + 球諧光照 + 陰影合成 | 新生成插入之實體缺乏真實感，透視比例失調、光源方向矛盾、無接觸陰影（生硬貼圖感） | [[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]] | ★★★★★<br>單卡 24GB VRAM |
+| **Topic 01** | **基於文字語意查詢之 3DGS 場景物件搜尋方法**<br>*(Text-Guided Object Retrieval in 3DGS Scenes)* | 3DGS + CLIP + SAM + 跨視角共識 | 傳統 3DGS 缺乏語意；開放詞彙檢索維度爆炸與多視角邊界漂移 | [[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]] | ★★★★☆<br>歷史參考：`RTX 4090 / 24GB` |
+| **Topic 02** | **結合大語言模型與 3DGS 之智慧場景問答導覽系統**<br>*(Intelligent Scene QA & Navigation using LLMs and 3DGS)* | 3DGS + LLM + 3D 場景圖 + A* 拓樸導航 | 純文字 LLM 無空間幾何感知；神經輻射場缺乏符號邏輯與路徑規劃能力 | [[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]] | ★★★★☆<br>歷史參考：`RTX 4090 + Unity` |
+| **Topic 03** | **基於 3DGS 之智慧虛擬校園導覽系統**<br>*(Intelligent Virtual Campus Tour System Using 3DGS)* | 大規模空拍/地面 3DGS + 階層式校園圖 + Unity MR | 戶外大規模場景重建顯存溢出；多棟館舍跨樓層導覽與即時渲染流暢度 | [[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]] | ★★★☆☆<br>歷史參考：`RTX 4080+ / Unity` |
+| **Topic 04** | **基於區域感知與非目標內容保持之細粒度文字指令影像編輯方法**<br>*(Fine-Grained Instruction-Based Image Editing with Non-Target Preservation)* | 擴散模型 + 跨注意力調製 + 潛空間反演 | 指令編輯容易產生牽一髮動全身的「過度編輯」，非目標背景與物體結構崩塌 | [[LIB-407 指令引導擴散影像編輯與跨注意力非目標內容保持 (Instruction-Guided Diffusion Editing, Cross-Attention Control & Non-Target Preservation)]] | ★★★★☆<br>歷史參考：`16GB+ VRAM` |
+| **Topic 05** | **基於場景語意與光照一致性之情境感知物件生成與影像融合方法**<br>*(Context-Aware Object Generation & Compositing with Illumination Consistency)* | 條件擴散 (ControlNet) + 深度法線 + 球諧光照 + 陰影合成 | 新生成插入之實體缺乏真實感，透視比例失調、光源方向矛盾、無接觸陰影（生硬貼圖感） | [[LIB-408 情境感知擴散物件生成、幾何光照分析與無縫影像融合 (Context-Aware Object Generation, Illumination Estimation & Image Compositing)]] | ★★★★★<br>歷史參考：`24GB VRAM` |
 
 ---
 
@@ -163,11 +167,11 @@ successors: []
 
 ## 五、標準參考文獻庫 (Canonical Research Corpus)
 
-1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**.
-2. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024**.
-3. **Gu, J., et al.** (2024). *ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Robot Perception*. **ICRA 2024**.
-4. **Brooks, T., et al.** (2023). *InstructPix2Pix: Learning to Follow Image Editing Instructions*. **CVPR 2023**.
-5. **Cao, M., et al.** (2023). *MasaCtrl: Tuning-Free Mutual Self-Attention Control for Consistent Image Synthesis and Editing*. **ICCV 2023**.
-6. **Yang, L., et al.** (2024). *Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data*. **CVPR 2024**.
-7. **Zhang, L., et al.** (2023). *Adding Conditional Control to Text-to-Image Diffusion Models*. **ICCV 2023**.
-8. **Lin, C., et al.** (2024). *VastGaussian: Vast 3D Gaussians for Large Scene Reconstruction*. **CVPR 2024**.
+1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**, DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
+2. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024** ([arXiv:2312.16084](https://arxiv.org/abs/2312.16084)).
+3. **Gu, J., et al.** (2024). *ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Robot Perception*. **ICRA 2024** ([arXiv:2309.16650](https://arxiv.org/abs/2309.16650)).
+4. **Brooks, T., et al.** (2023). *InstructPix2Pix: Learning to Follow Image Editing Instructions*. **CVPR 2023** ([arXiv:2211.09800](https://arxiv.org/abs/2211.09800)).
+5. **Cao, M., et al.** (2023). *MasaCtrl: Tuning-Free Mutual Self-Attention Control for Consistent Image Synthesis and Editing*. **ICCV 2023** ([arXiv:2304.08465](https://arxiv.org/abs/2304.08465)).
+6. **Yang, L., et al.** (2024). *Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data*. **CVPR 2024** ([arXiv:2401.10891](https://arxiv.org/abs/2401.10891)).
+7. **Zhang, L., et al.** (2023). *Adding Conditional Control to Text-to-Image Diffusion Models*. **ICCV 2023** ([arXiv:2302.05543](https://arxiv.org/abs/2302.05543)).
+8. **Lin, C., et al.** (2024). *VastGaussian: Vast 3D Gaussians for Large Scene Reconstruction*. **CVPR 2024** ([arXiv:2402.17427](https://arxiv.org/abs/2402.17427)).

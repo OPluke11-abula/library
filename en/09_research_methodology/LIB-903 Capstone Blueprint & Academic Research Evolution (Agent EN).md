@@ -14,7 +14,8 @@ math_foundations:
   - Rigorous Ablation Study Design
   - Academic Paper 8-Stage Lifecycle
 hardware_target:
-  - Academic HPC Cluster & Research Workstations
+  - Target Benchmark Tier (Academic HPC / RTX 4090 / A100 — Reference Cluster)
+  - Constrained Repro Tier (4GB–8GB Consumer Laptop VRAM / Single-GPU Cloud Quota)
 created: 2026-09-17
 author: Luke
 tags:
@@ -30,6 +31,7 @@ prerequisites:
 successors:
   - "[[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]]"
   - "[[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]]"
+  - "[[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]]"
 ---
 
 > 🌐 **Language / 語言**: [🇹🇼 繁體中文 (Traditional Chinese)](../../09_%E7%A7%91%E7%A0%94%E6%96%B9%E6%B3%95%E8%AB%96%E8%88%87%E9%A0%82%E5%B0%96%E5%B0%88%E9%A1%8C%E8%97%8D%E5%9C%96/LIB-903%20%E5%B0%88%E9%A1%8C%E5%9F%BA%E7%9F%B3%E8%97%8D%E5%9C%96%E3%80%81%E5%AD%B8%E8%A1%93%E6%8E%A8%E7%94%84%E8%88%87%E5%A4%9A%E6%A8%A1%E6%85%8B%E7%A0%94%E7%A9%B6%E6%BC%94%E9%80%B2%20%28Capstone%20Blueprint%20%26%20Academic%20Research%20Evolution%29.md) | 🇺🇸 **English (AI Agent & Research Edition)**
@@ -38,7 +40,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]].
-- **Successors**: [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]].
+- **Successors**: [[LIB-904 Academic Research Corpus & Literature Synthesis (Agent EN)]], [[LIB-905 Frontier Vision & Multimodal Capstone Blueprints (Agent EN)]], [[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 

@@ -28,6 +28,8 @@ prerequisites:
   - "[[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]]"
   - "[[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]]"
 successors:
+  - "[[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]]"
+  - "[[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]]"
   - "[[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]]"
   - "[[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]]"
   - "[[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]]"
@@ -40,7 +42,7 @@ successors:
 
 ## Conceptual Coordinates & Topological Navigation
 - **Prerequisites**: [[LIB-102 Probability, Information Theory & Variational Inference (Agent EN)]], [[LIB-104 Convex Optimization & Gradient Descent (Agent EN)]], [[LIB-301 Dataset Bias, Domain Shift & Spatial Penalties (Agent EN)]].
-- **Successors**: [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
+- **Successors**: [[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]], [[LIB-507 Sparse-View 3DGS Geometry, Depth Priors & Reliability (Agent EN)]], [[LIB-704 Dual-Process Neural Agent S1-Jev & Reflex CUA-S1 (Agent EN)]], [[LIB-802 Quantization Mathematics & Low-Precision Inference (Agent EN)]], [[LIB-901 Classic Project Post-Mortem - Production MNIST (Agent EN)]], [[LIB-906 LLM Conversational Epistemic Revision (Agent EN)]].
 
 ## 1. Conceptual Mental Model
 
@@ -162,3 +164,4 @@ class TemperatureScaler(nn.Module):
 2. **Angelopoulos, A. N., & Bates, S.** (2023). "Conformal Prediction: A Gentle Introduction." *Foundations and Trends in Machine Learning*, 16(4), 494–591. DOI: [10.1561/2200000101](https://doi.org/10.1561/2200000101).
 3. **Platt, J.** (1999). "Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized Likelihood Methods." *Advances in Large Margin Classifiers*, 10(3), 61–74.
 4. **Naeini, M. P., Cooper, G., & Hauskrecht, M.** (2015). "Obtaining Well Calibrated Probabilities Using Bayesian Binning." *Proceedings of the AAAI Conference on Artificial Intelligence (AAAI 2015)*, 29(1), 2901–2907.
+5. **Object Detection Calibration & Conformal Boxes (Cross-Volume Extension)**: For spatial localization reliability beyond image classification (`D-ECE`, `LaECE`, loss-attenuation scaled Conformal Boxes `OD-CP`, two-step RAPS + Conformal intervals, and discrete edge distributions `FDR`), continue directly to [[LIB-503 Modern Object Detection, Localization & Occlusion Reliability (Agent EN)]] (Kuzucu et al. ECCV 2024 Oral; Timans et al. ECCV 2024 Oral; Ries et al. COPA 2026 Oral `arXiv:2605.07549`).

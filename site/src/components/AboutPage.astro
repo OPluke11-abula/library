@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from './Icon.astro';
+import { loadLibraryArticles } from '../lib/library';
 
 interface Props {
   lang: 'zh' | 'en';
@@ -9,6 +10,7 @@ interface Props {
 const { lang } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const isZh = lang === 'zh';
+const { zh, en } = loadLibraryArticles();
 const alternateUrl = isZh ? `${base}/en/about/` : `${base}/zh/about/`;
 
 const quadCards = isZh
@@ -91,8 +93,8 @@ const quadCards = isZh
         <ul class="principles-list">
           <li>
             {isZh
-              ? <><strong>原始 Markdown 筆記是唯一真理來源 (SSOT)</strong>：位於儲存庫根目錄的 10 個分館資料夾與 <code>en/</code> 鏡像資料夾，包含全館 28 篇繁中與 28 篇英文核心筆記。</>
-              : <><strong>Original Markdown Notes are the Single Source of Truth (SSOT)</strong>: Preserved directly in the 10 root hall directories and <code>en/</code> mirrored directories.</>}
+              ? <><strong>原始 Markdown 筆記是唯一真理來源 (SSOT)</strong>：位於儲存庫根目錄的 10 個分館資料夾與 <code>en/</code> 鏡像資料夾，包含全館 {zh.size} 篇繁中與 {en.size} 篇英文核心筆記。</>
+              : <><strong>Original Markdown Notes are the Single Source of Truth (SSOT)</strong>: Preserved directly in the 10 root hall directories and <code>en/</code> mirrored directories ({zh.size} TC / {en.size} EN core volumes).</>}
           </li>
           <li>
             {isZh

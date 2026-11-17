@@ -119,9 +119,21 @@ successors: []
 3. 預期成果與消融驗證 (Expected Deliverables & Ablation Studies)
    - 定量表格對比：與 baseline (LERF / InstructPix2Pix / Inpainting) 進行橫向消融。
    - 可交互展示之原型系統（Unity 3DGS 導覽 Demo / Gradio 編輯畫板）。
-4. 經費與設備需求 (Resource Justification)
-   - 單張或雙張 NVIDIA RTX 4090 算力伺服器、手持雲台相機、VR 頭顯。
+4. **經費與設備需求 (Resource Justification)**
+   - **真實算力邊界校準 (`D-project` 實戰修正)**：區分早期工作站假設（`RTX 4090 24GB`）與團隊本機實機限制（如 `4 GB / 8 GB VRAM` 筆電及獨立受限雲端配額，`CCU != GPU 小時數`），採 **System Carrier / Paper Kernel 解耦**（見 [[LIB-903 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)]]）與先做小型 Smoke Test 再決定題目規模，不事先假設未經教授核准的伺服器資源 `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
 ```
+
+---
+
+## 三點五、🔄 `D-project` 研究演進聚焦：單題深度提案 (`T-01 Sparse-RGB 3DGS`) 與 Active 3D-RAG 突破
+
+在 `D-project` 從「五大歷史海報候選（Topics 1–5）」邁向可寫出頂會／SCI 論文之深水區研究過程中，沉澱出兩項關鍵戰略與演算法演進 `[DESIGN_DECISION]`：
+1. **單題深度提案聚焦（Fixed Sparse-View RGB 3DGS 幾何可靠性，`T-01` 研究軸線）**：
+   - 依嚴格碰撞審查（`ReLaGS (CVPR'26)`、`GenSplat (CVPR'26)`、`SplatTalk (ICCV'25)`、`FireEdit (CVPR'25)`、`KV-Edit (ICCV'25)`）收斂為單一探索主線：**在固定少量 RGB 照片、不可補拍、無額外深度感測器條件下，剖析單目深度先驗失真與局部仿射校正（如 `AffineGS`、`In Depth We Trust`、`DepthGS`）何時導致 3DGS 幾何與可用視角證據衝突**（詳見 [[LIB-504 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)]] 第 2.6 節與 `RULE-504-04`）。
+   - **認識論誠信狀態鎖定**：該線嚴格遵守 **Failure-First Hard Gates**（`P0 Source Audit -> G1 Synthetic Identifiability -> G2 Real Failure -> G3 Ablated Distinctness`），尚未執行真實 GPU 消融或通過 Novelty Gate 前，所有改善目標一律維持 `[HYPOTHESIS]` / `NOT_RUN` 標記，絕不提前宣稱「已提出新 Loss」或「已定題」 `[SAFETY_BOUND]`。
+2. **三層 Active 3D-RAG 論文演算法核（`ActiveSpatialRAGKernel` × `RAGAS-3D`）**：
+   - 針對原 Topic 1（`L1–L8` 查詢階梯與 `L8` 不可滿足查詢校準拒答 `Calibrated Abstention`）與 Topic 2（遮擋與高熵主動視角檢索），設計純幾何原生門控 $\Phi_{\mathrm{geom}} \cdot \Psi_{\mathrm{free}}$（通過 **Representation Substitution Test**）與兩階段 $\alpha$-穿透率視角規劃器（詳見 [[LIB-505 開放詞彙 3D 高斯潑濺與語意場景圖檢索 (Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval)]] 及 [[LIB-506 大語言模型驅動之 3DGS 空間問答、階層場景圖與具身導航 (LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation)]]） `[DERIVATION]` `[EMPIRICAL_RESULT]`。
+   - **合成基準預驗證**：六大單元／消融測試於合成 Lab 311B 場景驗證了法向量水平對齊、淨空佔用懲罰、`L8` 拒答 `Abstention AUROC = 1.0` 與前景遮擋主動視角恢復（實機 ScanNet / Replica 與 3DGS GPU 基準尚待真實資料集驗證） `[EMPIRICAL_RESULT]` `[SAFETY_BOUND]`。
 
 ---
 

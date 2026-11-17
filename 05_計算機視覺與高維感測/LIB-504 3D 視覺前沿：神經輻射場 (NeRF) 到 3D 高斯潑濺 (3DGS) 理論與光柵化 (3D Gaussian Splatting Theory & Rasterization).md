@@ -1,7 +1,7 @@
 ---
 call_number: LIB-504
 status: source-verified
-invariants_count: 3
+invariants_count: 4
 title: 3D 視覺前沿：神經輻射場 (NeRF) 到 3D 高斯潑濺 (3DGS) 理論與光柵化 (3D Gaussian Splatting Theory & Rasterization)
 module: Computer-Vision
 category: 3D-Neural-Rendering
@@ -109,6 +109,23 @@ $$P(u, v) = \exp\left(-\frac{u^2}{2\sigma_u^2} - \frac{v^2}{2\sigma_v^2}\right)$
 - 將高斯中心坐標擴展為時間函數：$\mu(t) = \mu_0 + \Delta \mu(t)$。
 - 利用 HexPlane（空間-時間六平面分解）或輕量級 MLP 預測高斯點的位移場 $\Delta \mu$、旋轉變化 $\Delta q$ 與尺度變化 $\Delta s$。
 - **前沿應用對齊**：這為「手繪 2D 草圖引導之 3D 動態虛擬試衣」前沿研究提供了最佳的實時動態渲染理論支撐！
+
+### 6. 前沿突破三：固定少視角 RGB (Sparse-View 3DGS) 之幾何可靠性與單目深度先驗識別性邊界 (`D-project` T-01 研究軸線) `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
+當輸入從密集數十張照片極限縮減為 **固定少量 RGB 照片（如 $K \in [2, 8]$ 視角）、不可補拍、且不追加任何實體深度感測器（LiDAR / RGB-D）** 時，標準 3DGS 會在欠約束區域產生嚴重過擬合與「浮空偽影（Floaters）」，使渲染新視角 PSNR 與真實 3D 表面幾何雙雙崩潰。近期研究常引入單目深度先驗（Monocular Depth Prior）提供幾何監督，但這帶來三大致命識別性與實驗協定問題：
+1. **單目深度先驗之仿射歧義與局部失真（Affine Ambiguity & Prior Fallibility）** `[DERIVATION]`：
+   單目深度估計模型僅輸出相對深度 $d_{\mathrm{mono}}(u, v)$，與真實度量深度 $Z_{\mathrm{true}}(u, v)$ 之間至少存在局部／全域空間變化之仿射校正（Spatially Varying Affine Rectification，參見 AffineGS `arXiv:2611.07709`）：
+   $$\hat{Z}(u, v) = a(u, v) \cdot d_{\mathrm{mono}}(u, v) + b(u, v)$$
+   **關鍵認識論防線**：AI 從既有 RGB 推估之 Depth Prior **僅是可錯誤的候選監督訊號，絕非幾何真值（Ground Truth）** `[SAFETY_BOUND]`！
+2. **參數可辨識性 $\neq$ 幾何正確性（Identifiability vs. Correctness）** `[FACT]` `[HYPOTHESIS]`：
+   當觀測視角稀疏時，局部仿射參數 $(a, b)$ 在低紋理或單視角覆蓋區域可能出現零空間非唯一性（Non-Uniqueness）；然而：
+   - **不可混淆命題 A**：參數不唯一 $\not\implies$ 幾何必定錯誤（平面在不同 $(a, b)$ 組合下可能張成相同表面）。
+   - **不可混淆命題 B**：局部參數可辨識 $\not\implies$ 幾何必定正確（若預訓練深度先驗在反光／透射區產生系統性錯誤，過度擬合該先驗反而會製造錯誤表面）。
+3. **少視角資料協定三分級（避免隱形額外觀測洩漏）** `[DESIGN_DECISION]` `[SAFETY_BOUND]`：
+   - **`P1` (`Precomputed-Pose`)**：使用既定基準資料庫預計算之高精度相機外參，僅作跨演算法受控對照，**嚴禁宣稱為純固定少視角 RGB 重建**。
+   - **`P2` (`Training-View-Only SfM`)**：相機姿態與稀疏初始化點雲僅由選定的 $K$ 張固定 RGB 訓練視角單獨推得（宣稱嚴格 sparse-RGB-only 時之必要條件，即使失敗率上升亦須如實保留負面結果）。
+   - **`P3` (`Pose-Perturbed Sensitivity`)**：在 `P1/P2` 姿態施加受控雜訊擾動，量化方法對 SfM 估測誤差之敏感度。
+4. **2026 少視角深度監督先行研究版圖** `[FACT]`：
+   **AffineGS (2026)**（空間變化仿射深度校正）、**In Depth We Trust (CVPR Workshops 2026)**（含噪單目深度先驗與選擇性深度監督）、**DepthGS (IEEE TPAMI 2026, DOI: `10.1109/TPAMI.2026.3751295`)**（基於深度差異之自適應法向量正則化與跨視角深度一致性）。任何新提出的少視角幾何正則項或選通機制，皆須與上述方法完成三維碰撞審查並先於受控反例證實 Baseline 失效 `[SAFETY_BOUND]`。
 
 ---
 
@@ -220,6 +237,14 @@ assert det > 0.0, f"2D 協方差行列式非正: det={det}"
   - 累積透射率：$T_i = \prod_{j=1}^{i-1} (1 - \alpha_j)$。
   - 早停閾值：當 $T_i < 10^{-4}$（即光線遮蔽率超過 99.99%）時，立即終止後續所有高斯點之著色計算。
 - **執行保證**: 節省超過 40% 的 CUDA 核心計算開銷，達成 100+ FPS 即時渲染。
+
+### [RULE-504-04] 少視角 3DGS 深度先驗防誤信與姿態協定隔離合約 (Sparse-View 3DGS Depth-Prior Fallibility & Pose-Protocol Isolation Invariant)
+- **合約等級**: `SAFETY_CRITICAL`
+- **前置條件 (Pre-conditions)**: 執行固定少量 RGB 照片（$K \in [2, 8]$ 視角、無補拍、無實體深度感測器）之少視角 3DGS 幾何重建或消融評估。
+- **量化決策邊界 (Decision Thresholds)**:
+  - **深度先驗非真值原則**：由預訓練單目模型推估之深度先驗 $d_{\mathrm{mono}}$ 一律視為具仿射尺度歧義且可能失真之候選監督線索，嚴禁視為 Geometric Ground Truth，且必須完整揭露預訓練模型版本與外部資料依賴 `[SAFETY_BOUND]`。
+  - **姿態協定隔離 (`P1` / `P2` / `P3`)**：凡使用既有預計算高精度相機姿態（`P1`）者，嚴禁宣稱為 strict sparse-RGB-only 重建；宣稱純少視角 RGB 管線必須於 **`P2` (`Training-View-Only SfM`)** 協定實測並保留低視角失敗紀錄，且嚴禁讓幾何 GT 流入訓練或超參數挑選 `[SAFETY_BOUND]`。
+- **執行保證**: 消除少視角重建中未揭露之 SfM/姿態先驗作弊，並防止將參數不可辨識性誤推為必然幾何錯誤。
 ---
 
 ## 六、📚 權威論文、經典著作與同行評審文獻 (Canonical & Peer-Reviewed References)
@@ -239,3 +264,7 @@ assert det > 0.0, f"2D 協方差行列式非正: det={det}"
 5. **EWA 橢球加權平均光柵化經典 (IEEE Visualization 歷史經典)**
    - *Paper*: Zwicker, M., Pfister, H., van Baar, J., & Gross, M. (2001). "EWA Volume Splatting." *IEEE Visualization 2001*, pp. 29-36. DOI: [10.1109/VISUAL.2001.964490](https://doi.org/10.1109/VISUAL.2001.964490).
    - *Core Contribution*: 奠定 3D 高斯協方差矩陣向 2D 螢幕坐標系投影 Jacobian 近似轉換之數學公式 $\Sigma' = J W \Sigma W^T J^T$。
+6. **少視角 3DGS 單目深度監督與幾何可靠性前沿 (2026)**
+   - *Paper*: **DepthGS** (2026). *IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI)*. DOI: [10.1109/TPAMI.2026.3751295](https://doi.org/10.1109/TPAMI.2026.3751295) (depth-discrepancy-guided adaptive normal regularization & cross-view depth consistency).
+   - *Paper*: Xiao et al. (2026). "In Depth We Trust: Reliable Monocular Depth Supervision for 3D Gaussian Splatting." *CVPR Workshops (3DMV 2026)* (CVF Open Access).
+   - *Preprint*: **AffineGS** (2026). Spatially varying affine depth rectification for sparse-view 3DGS. [arXiv:2611.07709](https://arxiv.org/abs/2611.07709) (`arXiv preprint`).

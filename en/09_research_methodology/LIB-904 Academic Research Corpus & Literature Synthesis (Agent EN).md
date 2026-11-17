@@ -1,7 +1,7 @@
 ---
 call_number: LIB-904
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: Academic Research Corpus & Literature Synthesis (Agent Edition)
 module: Literature-Synthesis-Methodology
 category: Methodology-Practice
@@ -43,7 +43,17 @@ successors:
 
 Scientific inquiry is fundamentally cumulative. High-velocity independent learning requires mastering the methodology of reading, synthesizing, dissecting, and reproducing peer-reviewed academic literature. A common failure mode in technical learning is treating algorithms as disconnected black-box packages without understanding the physical and mathematical constraints that forced their invention.
 
-This volume establishes a rigorous framework for decomposing top-tier academic papers (CVPR, ICCV, NeurIPS, ICML, ICLR, MDPI Electronics, IEEE TPAMI) into formal mathematical invariants, hardware execution bounds, and reproducible codebase implementations.
+This volume establishes a rigorous framework for decomposing top-tier academic papers (CVPR, ICCV, NeurIPS, ICML, ICLR, MDPI Electronics, IEEE TPAMI) into formal mathematical invariants, hardware execution bounds, reproducible codebase implementations, and `D-project`'s **Method-Level Collision Audit & Scientific Guardrails**.
+
+### 1.1 Three-Dimensional Collision Audit & Five Scientific Guardrails `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+- **Four-Pass Literature & Source Verification**: Extend Keshav's three-pass reading with **Pass 4 (Code-vs-Paper Provenance Audit)** to expose undisclosed clamping, tensor `.detach()` boundaries, linear solver conditioning, and SfM/pose dependencies; strictly separate peer-reviewed Versions of Record (with verified DOI/venue) from explicit `arXiv preprint` versions, prohibiting secondary summaries as primary evidence `[SAFETY_BOUND]`.
+- **3D Nearest Prior Work Collision Audit**: Before locking any novel contribution, evaluate $\ge 2$ closest prior works across **(1) Task Collision**, **(2) Mechanism Collision** (mathematical operator equivalence beyond notation renaming), and **(3) Evaluation Collision** (failure mode already solved on target benchmarks), classifying the gap honestly as `CLEAR_GAP`, `PARTIAL_OVERLAP_REQUIRES_SCOPING`, or `DIRECT_COLLISION_DO_NOT_PURSUE`.
+- **Five Methodological Guardrails & Failure-First Hard Gates (`P0 -> G1 -> G2 -> G3 -> N`)**:
+  1. `Task != Method`;
+  2. **`Representation Substitution Test`**: Methods claiming native 3DGS novelty MUST explicitly depend on Gaussian parameters ($\alpha_i, T_i, \Sigma_i$, splatting Jacobians) such that swapping to raw point clouds/meshes breaks the formulation `[DESIGN_DECISION]`;
+  3. `Zero-Shot Semantic Association (CLIP) != Physical Affordance Reasoning`;
+  4. `Virtual View Synthesis (World Model) != Physical Active Perception`;
+  5. **Failure-First Gates**: Never introduce a new loss or gating weight before reproducing an unambiguous baseline failure in synthetic (`G1`) and real (`G2`) tests and distinguishing parameter non-uniqueness from genuine geometric error `[SAFETY_BOUND]`.
 
 ```
                               ┌────────────────────────────────────────────────────────┐
@@ -201,6 +211,11 @@ def compute_ca_jaccard_distance(
 - **Contract Level**: `SAFETY_CRITICAL`
 - **Specification**: Real-time lip or facial biometric verification pipelines MUST combine spatial keypoint/appearance features with adjacent frame-difference liveness detection ($\Delta I_t = |I_t - I_{t-1}|$ and keypoint velocity vectors), guaranteeing Half Total Error Rate $\text{HTER} \le 9.0\%$.
 - **Violation Consequence**: Relying solely on static frames or un-differenced image sequences exposes the system to photo/replay presentation attacks (up to $84\%$ False Acceptance Rate).
+
+### [RULE-904-05] 3D Literature Collision Audit, Representation Substitution & Failure-First Invariant
+- **Contract Level**: `CRITICAL_INVARIANT`
+- **Specification**: Prior to locking a manuscript methodology, researchers MUST audit primary DOI/venue provenance (never trusting secondary summaries), score $\ge 2$ Nearest Prior Works across Task, Mechanism, and Evaluation collision axes (`CLEAR_GAP` / `PARTIAL_OVERLAP_REQUIRES_SCOPING` / `DIRECT_COLLISION_DO_NOT_PURSUE`), verify native mathematical dependency via the **Representation Substitution Test** for geometry-specific claims, and satisfy **Failure-First Hard Gates** (`P0` source audit $\to$ `G1` synthetic distinction of identifiability vs. error $\to$ `G2` reproducible baseline failure $\to$ `G3` ablated distinctness) before designing novel losses `[DESIGN_DECISION]` `[SAFETY_BOUND]`.
+- **Violation Consequence**: Unaudited proposals rediscover solved problems (direct collision), submit representation-agnostic heuristics as 3DGS innovations, or add unjustified regularization terms.
 
 ## 6. Canonical Literature References
 

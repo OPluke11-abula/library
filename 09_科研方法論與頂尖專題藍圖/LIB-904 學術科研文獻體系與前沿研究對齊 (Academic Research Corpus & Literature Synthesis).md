@@ -1,7 +1,7 @@
 ---
 call_number: LIB-904
 status: source-verified
-invariants_count: 4
+invariants_count: 5
 title: 學術科研文獻體系與前沿研究對齊 (Academic Research Corpus & Literature Synthesis)
 module: Research-Methodology-Capstone
 category: Academic-Literature-Synthesis
@@ -95,6 +95,20 @@ successors:
 - **點雲幾何無序**：光達掃描的 3D 點雲數量高達數十萬，傳統自注意力複雜度爆炸？（提出 **Hilbert 空間填充曲線序列化**，自注意力計算複雜度降至線性 $\mathcal{O}(M \cdot P)$）。
 - **風格擴散過度破壞語意**：文字生圖風格微調常導致主體嚴重變形？（提出 **EAAF 資訊熵動態注入** 與 **PFR 漸進重加權**）。
 - **光照與照片欺騙**：傳統生物特徵辨識易受靜態照片攻擊攻破？（提出 **動態訊框差分 + 雙特徵流**，HTER 降至 8.86%）。
+
+### 4. `D-project` 方法層級三維撞題審查與五大科研方法防線 `[DESIGN_DECISION]` `[SAFETY_BOUND]`
+研讀論文的終極目的，是確保自身研究選題具備不可替代之學術增量（Novelty），避開「做好幾個月才發現頂會早已發表」的致命風險。依 `D-project` 建立之論文審查工作流，所有候選方法在實作前須通過以下防線：
+1. **三階來源核實與第四步程式碼稽核（Pass 1–4 + DOI Provenance）**：
+   - 嚴格核對出版場域（Main Track vs. Workshop vs. Findings）、DOI／Version of Record 與預印本（明確標記 `arXiv:xxxx.xxxxx` 版本號），**禁止僅憑 AI 摘要或二手解讀宣稱論文限制**（未檢視原文一律標記 `UNVERIFIED`） `[SAFETY_BOUND]`。
+   - **Pass 4（開源程式碼 vs. 論文正文稽核）**：逐行核查作者開源程式中未寫進正文的工程預設（例如 Double Clamp、Guided Filter `detach()`、Linear Solver 條件數保護、稀疏點雲初始化與姿態來源）。
+2. **三維方法層級撞題審查矩陣（3D Nearest Prior Work Collision Audit）**：
+   - 針對至少 2–3 篇最接近先行研究（Nearest Prior Work），在三個正交維度逐項判定：**Task Collision（任務與輸出入撞題）**、**Mechanism Collision（數學算子／Loss 是否僅為符號更名）**、**Evaluation Collision（既有方法是否已於同資料集解決該失效模式）**，並誠實裁決為 `CLEAR_GAP`、`PARTIAL_OVERLAP_REQUIRES_SCOPING` 或 `DIRECT_COLLISION_DO_NOT_PURSUE`。
+3. **五大科學認識論防線與「先證實失效再設計機制 (`Failure-First Hard Gates`)」**：
+   - **`Task != Method`**：區分問題設定（Task）與架構解法（Method）。
+   - **`Representation Substitution Test`（表徵替換檢驗）**：任何宣稱 3DGS 或特定幾何表徵之創新方法，其數學目標必須顯式依賴該表徵之原生幾何性質（如高斯不透明度 $\alpha_i$、累計透射率 $T_i$、協方差 $\Sigma_i$）；若可不改數學直接替換成 Mesh 或點雲，則不具備表徵新穎性 `[DESIGN_DECISION]`。
+   - **`Zero-Shot Semantic Association != Physical Affordance Reasoning`**：區分 CLIP 詞彙關聯相似度與幾何支撐／淨空可用性推理。
+   - **`Virtual View Synthesis (World Model) != Physical Active Perception`**：區分在預重建 3D 場景合成新視角與實體機器人感測器主動感知。
+   - **先證失效門檻（`P0 Source Audit -> G1 Synthetic Distinction -> G2 Real Failure -> G3 Ablated Distinctness -> N Novelty Gate`）**：在提出新 Loss 或新模組前，必須先在受控合成反例（`G1`）與真實場景（`G2`）證明可控、可重現的 Baseline 失效，且必須區分「參數不唯一（Identifiability Non-Uniqueness）」與「幾何實質錯誤（Geometric Error）」 `[SAFETY_BOUND]`。
 
 ---
 
@@ -327,6 +341,14 @@ def verify_small_object_pipeline(img_w, img_h, target_px, use_grid_cropping):
 - **量化決策邊界**:
   - 驗證管線中嚴禁僅依賴單張靜態照片或未經差分的序列影像（靜態序列易受照片播放攻擊，誤接受率 FAR 高達 84%）。
   - 必須強制計算相鄰訊框差分 $\Delta I_t = |I_{t} - I_{t-1}|$ 與關鍵點速度向量，並實施唇部特徵點與外觀影像雙模態融合，保證 HTER $\le 9.0\%$。
+
+### [RULE-904-05] 三維文獻撞題審查、表徵替換檢驗與先證失效門檻合約 (3D Literature Collision Audit, Representation Substitution & Failure-First Invariant)
+- **合約等級**: `CRITICAL_INVARIANT`
+- **前置條件**: 立項新研究題目、撰寫 Related Work 貢獻定位或提出新型幾何／多模態演算法核心。
+- **量化決策邊界**:
+  - **出版來源真實性與三維撞題裁決**：引用先行研究必須核對正式出版版 (DOI) 或明確標註預印本 (`arXiv` 版本)，嚴禁以二手摘要充當檢驗；立項前須對至少 2 篇最接近先行研究執行 `Task / Mechanism / Evaluation` 三維撞題審查並裁決 `CLEAR_GAP` / `PARTIAL_OVERLAP_REQUIRES_SCOPING` / `DIRECT_COLLISION_DO_NOT_PURSUE` `[SAFETY_BOUND]`。
+  - **表徵替換檢驗**：主張特定幾何表徵（如 3DGS）之原創貢獻者，其目標函數必須顯式使用原生物理參數（$\alpha_i, T_i, \Sigma_i$）；並遵守 **Failure-First Hard Gates**（`P0 Source Audit -> G1 Synthetic -> G2 Real Failure -> G3 Ablation -> Novelty`），未確認真實失效與區分參數不可辨識性與幾何錯誤前，嚴禁倉促開發新 Loss `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
+- **執行保證**: 徹底杜絕選題與已發表頂會文獻重疊（Direct Collision）或方法不具表徵專屬創新性而遭同行評審拒稿。
 
 ---
 

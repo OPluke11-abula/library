@@ -1,7 +1,7 @@
 ---
 call_number: LIB-903
 status: reviewed
-invariants_count: 4
+invariants_count: 6
 title: 專題基石藍圖、學術推甄與多模態研究演進 (Capstone Blueprint & Academic Research Evolution)
 module: Research-Methodology-Capstone
 category: Academic-Research
@@ -171,51 +171,78 @@ successors:
 | **資料管線與實驗評測** | **Luke** | • 負責大規模手寫資料集（MNIST, EMNIST, IAM）收集、清理與質心動差校準<br>• 設計嚴格的消融實驗 (Ablation Study) 與基準對比測試<br>• 監控模型校準指標 (ECE) 與損失曲面收斂動態 |
 | **系統工程與邊緣加速部署** | **Luke** | • 負責 ONNX / TensorRT 模型量化 (AWQ, INT4/FP8) 與微秒級硬體加速<br>• 研發高互動性 Gradio 即時手繪推論畫板與 3D 渲染展示服務<br>• 維護開源程式碼倉庫的 CI/CD、Docker 與性能基準測試 |
 
-## 五、📝 國科會大專學生研究計畫 (C801) 申請攻略與奪榜心法
+## 五、📝 國科會大專學生研究計畫 (`C801–C804`) 申請攻略與 `D-project` 論文級科研方法論突破
 
-國科會大專生研究計畫（表格編號 C801）每年 2 月由學校統一申報，是頂大資工研究所推甄最具殺傷力的黃金籌碼（全國通過率約 30%）：
+國科會大專生研究計畫每年由學校彙整申報，是頂大資工研究所推甄最具說服力的研究資歷之一（歷史通過率依當年度公告為準，團隊不得預先保證通過率或錄取結果）。從 `D-project` 研究工作系統實戰演化出的 **「`Carrier–Kernel` 解耦 × `T/P/N/C` 四維邊界 × 21 欄證據追溯協議」**，提供了一套可寫出具備頂會／SCI 期刊可信度論文的標準基礎設施：
 
-### 1. 計畫書黃金五大段落結構
-1. **研究動機與背景 (Background & Motivation)**：
-   - 指出目前真實場景中的核心痛點（例如：傳統手繪與 2D 輸入在形變、文化偏差下的脆弱性，以及 3D 重建中即時渲染與微細形變對齊的瓶頸）。
-2. **文獻探討與關鍵文獻分析 (Literature Review)**：
-   - 引用最新國際頂會論文（CVPR, ICCV, ECCV, NeurIPS, ICML）與實驗室指標成果。精準指出既有方法的局限性（Gap）。
-3. **研究方法與創新技術路徑 (Proposed Methodology)**：
-   - 繪製高規格的**系統架構總覽圖 (System Framework Overview)**。
-   - 分層清晰說明：幾何前處理 $\to$ 神經骨幹提取 $\to$ 空間變換對齊 $\to$ 3D 高斯投影或邊緣推論。
-4. **預期完成之工作項目與具體成果 (Deliverables)**：
-   - 明列量化指標：例如模型推論 FPS $\ge 60$、在形變測試集準確率提升 15%、預期投稿國內外學術會議（如 CVGIP 2027）。
-5. **參考文獻 (References)**：精選 20~30 篇高影響因子文獻，格式嚴格遵照 IEEE 規範。
+### 1. 國科會官方四表件正名與計畫書五大段落結構 `[FACT]`
+必須精確區分國科會《補助大專學生研究計畫作業要點》（113 年 11 月 1 日修正生效版）之官方表件，不可將整份計畫混稱為 `C801`：
+- **`表 C801`（大專學生研究計畫綜合資料表）**：線上基本資料、中英文計畫名稱、研究領域代碼與中英文摘要。
+- **`表 C802`（研究計畫內容正文）**：包含 **(1) 研究動機與問題意識、(2) 文獻探討與缺口定位、(3) 研究方法與進行步驟、(4) 預期完成工作項目與成果（甘特圖，預計 7 月至翌年 2 月共 8 個月，遇閏年 2 月計至 29 日）、(5) 參考文獻（IEEE/ACM 規範）**（頁數與格式以當年度官方系統規定為準，通常以 10 頁為上限原則）。
+- **`表 C803`（耗材、物品、圖書及雜項費用明細表）**：研究經費編列。
+- **`表 C804`（指導教授初評意見表）**：由指導教授登入系統填寫初評意見並上傳個人資料表。
+- **法定倫理訓練要件（作業要點第 16 點第 4 款）**：申請學生於學校函送國科會前，須完成教育部臺灣學術倫理教育資源中心 (AREE) **至少 6 小時**學術倫理課程訓練並檢附完訓證明；未經查驗前一律標記為 `UNVERIFIED` `[SAFETY_BOUND]`。
 
-### 2. 審查委員評分五大向度解析 (C801 Review Dimensions)
-根據國科會大專學生研究計畫實質評審要點，審查委員依以下五大向度給予綜合評分：
-1. **研究主題之創新性與前瞻性 (30%)**：
-   - 杜絕炒冷飯或套件教學；必須明確提出「本計畫欲解決國際文獻尚未克服之 XX 物理痛點」。
-2. **研究方法與步驟之可行性與嚴謹度 (25%)**：
-   - 具備清楚的數學形式化定義與演算法偽代碼，研究期程（8 個月，每年 7 月至翌年 2 月）甘特圖規劃合理。
-3. **預期完成工作項目與成果之具體性 (20%)**：
-   - 明確承諾可量化交付物（專案 GitHub 倉庫、模型 Checkpoint、原型展示系統、學術會議論文草稿）。
-4. **申請人之研究潛力與先修課程表現 (15%)**：
-   - 著重資工核心科目（數學基石、演算法、機器學習、系統架構）之修課成績與大一至大三實作專案表現。
-5. **研究主題相關性與運算資源完備度 (10%)**：
-   - 與近三年頂會/期刊前沿成果（3DGS、點雲序列化、智慧交通、Bunch TTA）緊密扣合，並獲得高效能 GPU 伺服器算力（RTX 4090 / A100）全力奧援。
+### 2. 審查評估面向解析 (`RECOMMENDED_PRACTICE`)
+> **誠信釐清**：過往經驗常見之百分比（如 30/25/20/15/10 或 40/30/30）僅屬**內部寫作配重建議 (`RECOMMENDED_PRACTICE`)**，並非國科會法定固定評分權重；實際評審概以審查委員專業裁量與當年度官方要點為準 `[FACT]`。撰寫 `表 C802` 應聚焦：
+1. **研究問題與文獻缺口真實性**：明確指出既有頂會方法在特定物理、幾何或系統邊界下的可驗證失效模式，嚴禁僅做套件教學。
+2. **方法論與算力可行性**：提供符號與張量維度明確的演算法形式化與偽代碼，並對齊團隊真實可用硬體（如 `4 GB / 8 GB VRAM` 筆電或受限雲端額度），預先定義 OOM／超時降階與停損條件 `[DESIGN_DECISION]`。
+3. **具體量化交付物**：承諾開源程式碼（不含未授權第三方原始資料）、可重現消融日誌、展示系統載體與學術論文草稿。
 
 ---
 
-## 六、🎯 叩關頂大（台清交成）推甄書審突破點
+## 六、🧪 `D-project` 論文級科研工程突破：雙層解耦、`T/P/N/C`、證據追溯與統計防線
+
+要把大學專題或課程實作寫成能通過頂會／SCI 審稿的論文，最大障礙通常不在程式寫不出來，而在 **實驗設計邏輯漏洞（偽重複、資料洩漏、HARKing）** 與 **成果宣稱不可追溯**。以下為 `D-project` 建立的系統化論文工程準則：
+
+### 1. `System Carrier` vs. `Paper Kernel` 解耦與 `T / P / N / C` 治理架構 `[DESIGN_DECISION]`
+- **雙層架構解耦**：
+  - **`System Carrier`（展示載體，對應 `C` Capstone）**：Unity / Web / Gradio 互動介面，以流暢度、FPS 與操作體驗服務專題展示，**嚴禁將 UI 狀態邏輯混入核心演算法**。
+  - **`Paper Kernel`（論文演算法核心，對應 `P` 與 `N`）**：純 PyTorch/Python 無頭模組（`kernel(inputs, config) -> outputs, diagnostics`），暴露獨立消融布林開關（如 `use_geom_gate`、`use_calibrated_abstention`），可直接在公開資料集上進行可重現批次基準評測。
+- **`T / P / N / C` 四維研究範疇與誠實揭露**：
+  - **`T` (Research Theme)**：貫穿專題與論文的共同研究主線。
+  - **`P` (Pre-NSTC Research)**：補助執行期開始前之先導驗證與首波論文實驗（若引述於 `表 C802`，必須誠實標記為「申請前先導基礎」，**嚴禁在計畫核定後將補助前已完成之成果冒充為 `N` 期間新工作**）。
+  - **`N` (NSTC Research)**：核定補助期間之深化與泛化實驗；**`P` 與 `N` 不強制拆為兩篇論文，亦不強制設計為「假說 A 必須成功、方法 B 才能成立」的序列相依結構**。
+  - **`C` (Capstone)**：大學部畢業專題展示載體。
+
+### 2. 21 欄研究協定與 `Claim-to-Evidence` 全鏈路追溯矩陣 `[SAFETY_BOUND]`
+任何寫入論文摘要、貢獻點、實驗表格或 `表 C802` 的科學主張，必須通過六元組全鏈路追溯：
+$$\text{Research Claim} \longrightarrow \text{Experiment ID} \longrightarrow \text{Dataset Split \& Version} \longrightarrow \text{Code Commit SHA} \longrightarrow \text{Quantitative Result} \longrightarrow \text{Statistical Evidence}$$
+- **成果來源三態嚴格隔離**：強制區分 **`AUTHOR_REPORTED`**（引用原論文表格，註明表次）、**`REPRODUCED_BY_TEAM`**（團隊於確定硬體與 Commit 實測結果）與 **`NOT_RUN / UNVERIFIED`**（未執行測試預設值）。**嚴禁將原論文作者數值混寫為團隊實測，亦嚴禁將 `[TARGET]` 或假說寫成已達成數據** `[SAFETY_BOUND]`。
+- **論文生命週期與 `CRediT` 貢獻追蹤**：對外文書與履歷必須嚴格區分 `Manuscript (Draft)`、`Submitted / Under Review`（附投稿收件紀錄）、`Accepted` 與 `Published` 四態；團隊協作依 **CRediT (`ANSI/NISO Z39.104-2022`)** 14 項標準角色及實質 Commit 紀錄決定作者資格與排序（**AI 絕不可列為共同作者**） `[FACT]`。
+- **各學會獨立之 AI 使用揭露準則 (`VENUE_SPECIFIC`)**：嚴格隔離不同學會規範——**ACM 2026 (`2026-05-14`)** 要求於方法章節詳述輔助生成實驗程式／圖表／合成資料之模型與驗證（純文字潤飾另依最新規範）；**NeurIPS 2026** 僅於 LLM/AI Agent 構成研究方法核心、原創或非標準組件時須於規定段落詳實揭露（常規程式寫作輔助或拼寫文法修正不屬核心方法揭露範疇）；**IEEE / CVF** 各自遵循當年度最新 Author Guidelines `[FACT]`。
+
+### 3. CV 與 AI 實驗統計嚴謹防線（對抗 Reviewer 常見拒稿理由） `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
+1. **獨立實驗分析單位與防偽重複（Experimental Unit & Anti-Pseudoreplication）**：
+   - **致命陷阱**：在 3DGS 新視角合成、3D 場景問答或影片物件偵測中，同一物理場景的 $N=300$ 張渲染影格或多個查詢共享幾何重建誤差與相機軌跡，**絕非 300 個獨立樣本**！若直接以影格數計算標準誤 $\text{SE} = s/\sqrt{N}$，將人為大幅窄化信賴區間並製造虛假顯著性。
+   - **正確解法**：以獨立物理場景（Scene-level）或獨立掃描（Scan-level）為主要統計單位（先在場景內聚合指標），再跨場景計算中位數／IQR 與 **配對叢集拔靴法（Paired Cluster Bootstrap, 建議 $B \ge 1,000$）95% 信賴區間**或階層混合效果模型 `[DERIVATION]`。
+2. **雙典範資料集切分防漏（Dual-Paradigm Dataset Split）**：
+   - **單場景 NVS 任務（Per-Scene NVS，如 3DGS/NeRF）**：同場景之 `1-in-8` 視角級切分屬任務標準定義（不可誤判為跨場景洩漏），但測試視角影像、深度與姿態標籤**嚴禁參與高斯最佳化、稠密化／剪枝決策或超參數搜尋**。
+   - **跨場景泛化任務（Detection / Segmentation / Retrieval）**：強制執行 **Scene-disjoint / Scan-disjoint 切分**，確保同一物理房間絕不同時跨入 Train/Val 與 Test。
+   - 同步排查閾值調校洩漏（`Threshold Tuning on Test`）、基礎模型預訓練重疊與特徵標準化洩漏 `[SAFETY_BOUND]`。
+3. **假說對稱、效應量優先與防 HARKing**：
+   - 依研究問題設定合適假說（如最小實質重要差異 $H_0: \Delta \le \Delta_{\min}$ vs. $H_1: \Delta > \Delta_{\min}$，或非劣性／等效性／資源節約假說）。
+   - **核心統計鐵律**：**「未能拒絕 $H_0$，不等於證明無效應或效果為零（*Absence of evidence is not evidence of absence*）」**。拒絕無根據的固定隨機種子數（應依真實算力預算與 run-to-run vs. scene-to-scene 變異決定）及單一機械式 $p < 0.05$ 宣稱，改報 **Absolute Effect Size + 95% CI**，並在多指標比較時套用 **Holm–Bonferroni** 或 **Benjamini–Hochberg** 校正 `[FACT]`。
+   - 嚴格隔離預先定義之 **Confirmatory Analysis** 與觀察數據後才提出的 **Exploratory / Post-hoc Observation**（禁止 HARKing）；完整保留 **Negative Results**（作為 `Limitations & Failure Mode Analysis` 證據）與 **Protocol Deviations** `[SAFETY_BOUND]`。
+
+### 4. 資料再散布邊界與臺灣人體研究倫理四路徑分流 `[FACT]`
+- **資料集授權邊界**：**`Publicly Accessible != Redistributable`**。即使學術資料集（如 ScanNet、Matterport3D）公開開放研究人員申請下載，其 EULA 通常禁止再散布；程式碼儲存庫僅應發布輕量切分索引（Split Indices）、SHA-256 校驗碼與評測腳本，嚴禁轉傳受限原始影像包 `[SAFETY_BOUND]`。
+- **人體研究倫理審查四路徑（臺灣《人體研究法》第 5、8、12 條）**：不得一律宣稱電腦視覺研究自動免審，亦不得將審查流程誤寫為線性階段，而應依個案性質分流為：(1) **Not Subject to Review**（純去識別化公開基準或無人類參與物體幾何）；(2) **Exemption from Ethics Review**（依法或經機構委員會核發免審證明——未核實機構程序前標記 `INSTITUTIONAL_PROCEDURE_UNVERIFIED`）；(3) **Expedited Review**（微小風險如主觀 UI 體驗評測）；(4) **Full Board Review**。且**「得免倫理審查 (`Exemption`)」、「審查核准 (`IRB Approval`)」與「知情同意／免除同意 (`Consent / Waiver`)」分屬三種不同法律概念，嚴禁混淆** `[SAFETY_BOUND]`。
+
+---
+
+## 七、🎯 叩關頂大（台清交成）推甄書審突破點
 
 ### 1. 審查委員最重視的三大指標
-1. **在學排名 (Rank %)**：前 5%~15% 是硬門檻。
-2. **專題研究深度與學術成果**：
-   - 有無國科會大專生計畫？有無論文發表？
-   - 專題代碼與展示的工程完成度是否達到工業級水準？
-3. **指導教授推薦信 (Recommendation Letter)**：
-   - 平庸推薦信：「該生認真負責，成績優良...」（在頂大書審被直接歸為一般信件）。
-   - **極致推薦信**：「該生於大三期間主導本實驗室關鍵課題，針對本人 2025 年發表於頂級期刊之 3DGS 視角生成與幾何變形架構進行重大突破，解決了 XX 核心瓶頸，獨立撰寫國科會大專生研究計畫 (C801) 並榮獲通過，其科研思維與工程實踐能力已達碩士二年級頂尖水準...」。
+1. **在學成績表現與修課紀錄**：依各校系當年度**正式招生簡章**規範呈現歷年成績與核心科目修課表現（不將非官方經驗百分比猜測當作法定門檻）。
+2. **專題研究深度、可追溯成果與論文狀態誠信**：
+   - 具備可重現 GitHub 倉庫、`Claim-to-Evidence` 消融矩陣、負面結果分析與明確核實的論文進度（嚴格區分 `Manuscript` / `Submitted` / `Accepted` / `Published`）。
+3. **指導教授獨立評估與推薦信基礎**：
+   - 推薦信內容完全屬於指導教授之獨立學術裁量；學生團隊所能提供的最佳支撐，就是嚴謹的實驗紀錄、`CRediT` 具體工程貢獻與可驗證的原型展示（`System Carrier` + `Paper Kernel`）。
 
 ---
 
-## 七、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
+## 八、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
 ### [RULE-903-01] 科研消融實驗變因單一隔離合約 (Ablation Study Controlled Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`
@@ -255,19 +282,60 @@ def verify_reproducibility(metric_run1: float, metric_run2: float, tolerance: fl
   - 方法論陳述必須嚴格體現「現有方法缺陷 $\to$ 核心思想 $\to$ 數學形式化定義 $\to$ 消融實驗驗證」的閉環證明鏈。
 - **執行保證**: 確保研究成果經得起頂級學術同儕評審，杜絕假大空的學術包裝。
 
+### [RULE-903-05] 論文主張對證據全鏈路追溯與防偽重複統計合約 (Claim-to-Evidence Traceability & Anti-Pseudoreplication Invariant)
+- **合約等級**: `CRITICAL_INVARIANT`
+- **前置條件**: 撰寫研究計畫、論文實驗比較表、消融實驗報告或統計檢定推論。
+- **決策邊界**:
+  - **六元組追溯與三態隔離**：任何寫入論文的主張必須綁定 `Research Claim -> Experiment ID -> Dataset Split/Hash -> Code Commit -> Quantitative Result -> Statistical Evidence`，且強制區分 `AUTHOR_REPORTED`、`REPRODUCED_BY_TEAM` 與預設 `NOT_RUN / UNVERIFIED`（未執行測試嚴禁標為 PASS 或填入推測數據） `[SAFETY_BOUND]`。
+  - **獨立實驗分析單位與防偽重複**：同一 3D 場景之多張影格或同一影片序列影格不得視為獨立統計樣本；必須先按獨立場景／掃描聚合，再以 Scene-level Paired Cluster Bootstrap 計算 95% 信賴區間與效果量 `[DERIVATION]` `[SAFETY_BOUND]`。
+  - **禁止 HARKing 與邏輯誤判**：嚴格隔離 Confirmatory Analysis 與 Post-hoc Exploratory Analysis；堅守「未能拒絕 $H_0$ 不等於證明無效應」，且完整保留負面結果與協定偏離紀錄 `[FACT]` `[SAFETY_BOUND]`。
+- **可執行斷言**:
+```python
+def verify_claim_to_evidence_and_cluster_unit(
+    claim_entry: dict, per_scene_deltas: list[float]
+) -> dict:
+    """驗證論文主張之六元組追溯完整性與場景級獨立聚合統計 (防偽重複)。"""
+    required = ("claim_id", "experiment_id", "dataset_split", "commit_sha", "source_tag")
+    for k in required:
+        assert claim_entry.get(k), f"追溯鏈缺漏欄位: {k}"
+    assert claim_entry["source_tag"] in {
+        "AUTHOR_REPORTED",
+        "REPRODUCED_BY_TEAM",
+        "NOT_RUN / UNVERIFIED",
+    }, "非法的來源狀態標記"
+    assert len(per_scene_deltas) >= 2, "場景級獨立分析單位至少需跨 >= 2 個獨立場景聚合"
+    mean_delta = sum(per_scene_deltas) / len(per_scene_deltas)
+    var = sum((d - mean_delta) ** 2 for d in per_scene_deltas) / (len(per_scene_deltas) - 1)
+    se = (var / len(per_scene_deltas)) ** 0.5
+    return {"mean_effect": mean_delta, "scene_level_se": se, "ci95_half_width": 1.96 * se}
+```
+- **執行保證**: 杜絕影格級偽重複假顯著、跨場景洩漏及無實驗根據的幻覺宣稱進入論文手稿。
+
+### [RULE-903-06] 系統載體與論文核心解耦暨研究倫理誠信合約 (Carrier-Kernel Decoupling & Research Disclosure Integrity Invariant)
+- **合約等級**: `SAFETY_CRITICAL`
+- **前置條件**: 將大學部專題系統工程延伸為國科會大專生計畫 (`表 C801–C804`)、學術論文與推甄研究報告。
+- **決策邊界**:
+  - **雙層架構解耦**：互動展示前端（`System Carrier` / Capstone `C`）與純演算法研究核（`Paper Kernel` / `P & N`）必須以明確介面解耦；`P`（補助前先導基礎）與 `N`（補助期間工作）必須誠實劃分且不強制為「A 成功 B 才成立」之序列相依 `[DESIGN_DECISION]`。
+  - **資料授權與倫理審查邊界**：嚴禁以「公開可得」推斷「允許再散布（`Publicly Accessible != Redistributable`）」；涉及自然人參與之視覺／互動評估須依適用人體研究法規四路徑分流，並嚴格區分免審（Exemption）、核准（Approval）與知情同意（Consent / Waiver） `[FACT]` `[SAFETY_BOUND]`。
+  - **學會專屬揭露與作者誠信**：AI 嚴禁列為作者；論文與申請書須分別遵循目標出版機構（ACM 2026 / NeurIPS 2026 / IEEE / CVF）之獨立 AI 揭露規則，並依 `CRediT` 紀錄貢獻及誠實標示 `Manuscript / Submitted / Accepted / Published` 四態 `[FACT]` `[SAFETY_BOUND]`。
+- **執行保證**: 確保專題展示、國科會計畫書與國際論文投稿完全符合學術倫理、智慧財產與雙盲／公開審查規範。
+
 ---
 
-## 八、📚 權威指導規範、頂會範本與學術論文 (Canonical Guidelines & Top-Tier Literature)
+## 九、📚 權威指導規範、頂會範本與學術論文 (Canonical Guidelines & Top-Tier Literature)
 
-1. **國科會大專學生研究計畫作業要點**
-   - *Official Guideline*: 國家科學及技術委員會 (NSTC). (2024). *國家科學及技術委員會補助大專學生研究計畫作業要點 (C801 表格審查規程)*. 國科會行政法規.
-   - *Application*: 專題題目擬定、文獻評述、研究方法、預期成果與經費編列之法定審查標準。
-2. **深度殘差學習開創巨作 (CVPR 頂會 Best Paper / 史上最高引用之一)**
+1. **國科會補助大專學生研究計畫作業要點**
+   - *Official Guideline*: 國家科學及技術委員會 (NSTC). (2024). *國家科學及技術委員會補助大專學生研究計畫作業要點（113 年 11 月 1 日修正生效版，第 3、4、6、16 點）與正式表件 C801/C802/C803/C804*. 國科會行政法規.
+   - *Application*: 申請資格、至少 6 小時學術倫理教育訓練 (AREE)、補助前成果揭露及表件審查合規依據。
+2. **CRediT 貢獻者角色分類標準與 COS 開放科學促進指南**
+   - *Standards*: NISO (2022). *ANSI/NISO Z39.104-2022 Contributor Roles Taxonomy (CRediT)*; Center for Open Science (COS). *Transparency and Openness Promotion (TOP) Guidelines*.
+   - *Application*: 團隊實質研究貢獻歸屬、Confirmatory vs. Exploratory 分析隔離與可重現性稽核。
+3. **深度殘差學習開創巨作 (CVPR 頂會 Best Paper)**
    - *Paper*: He, K., Zhang, X., Ren, S., & Sun, J. (2016). "Deep Residual Learning for Image Recognition." *IEEE Conference on Computer Vision and Pattern Recognition (CVPR 2016)*, pp. 770-778. DOI: [10.1109/CVPR.2016.90](https://doi.org/10.1109/CVPR.2016.90).
    - *Application*: 本專題消融實驗與特徵跳躍連接架構之經典標竿。
-3. **CLIP 多模態對比學習奠基作 (ICML 頂會)**
+4. **CLIP 多模態對比學習奠基作 (ICML 頂會)**
    - *Paper*: Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., ... & Sutskever, I. (2021). "Learning Transferable Visual Models From Natural Language Supervision." *International Conference on Machine Learning (ICML 2021)*, PMLR 139, pp. 8748-8763.
    - *Application*: 跨模態語意對齊、Zero-shot 遷移與下游手寫字元語意校驗之理論依歸。
-4. **國立臺灣大學 / 國立清華大學 / 國立陽明交通大學 資訊工程研究所推甄簡章**
-   - *Official Guideline*: 各校研究生招生委員會. (2025/2026). *碩士班推甄入學招生簡章及書面審查評分指標*.
-   - *Application*: 研究計畫書撰寫、在校成績權重評析與專題展示防衛戰術。
+5. **國際學會 AI 政策與國內人體研究法規依據**
+   - *Guidelines*: ACM (2026, rev. 2026-05-14). *ACM Policy on Authorship*; NeurIPS (2026). *NeurIPS 2026 Main Track Handbook & Paper Checklist*; 我國《人體研究法》（第 5、8、12 條）與教育部臺灣學術倫理教育資源中心 (AREE).
+   - *Application*: 論文研究性 AI 使用揭露邊界、作者資格與人體研究倫理審查分流合規檢核。

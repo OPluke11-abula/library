@@ -3,7 +3,7 @@
 scripts/library_rag.py
 ======================
 Executable DAG-Aware Hybrid RAG, Lexical Subword MaxSim Reranking, and CAG Compiler Engine
-for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 108 invariants).
+for the CS & Deep Learning Knowledge Base (28 bilingual volumes, 56 files, 114 invariants).
 
 Implements the mathematical and systems contracts of LIB-603 ([RULE-603-01..04]),
 LIB-000 ([RULE-000-01]), LIB-703, and LIB-906 using zero-dependency standard-library
@@ -134,6 +134,12 @@ BILINGUAL_TERM_BRIDGES: Dict[str, List[str]] = {
     "雙審核": ["double-review", "reviser", "fail-closed", "uncertain"],
     "瓶頸層": ["bottleneck", "1x1", "roofline", "inception"],
     "佇列": ["queueing", "gradio", "latency", "snapshot"],
+    "偽重複": ["pseudoreplication", "cluster", "bootstrap", "scene-level"],
+    "表徵替換": ["representation", "substitution", "gaussian-native"],
+    "少視角": ["sparse-view", "affinegs", "depthgs", "identifiability"],
+    "仿射校正": ["affine", "rectification", "affinegs", "monocular"],
+    "主動視角": ["active", "viewpoint", "transmittance", "hemisphere"],
+    "校準拒答": ["calibrated", "abstention", "auroc", "unsatisfiable"],
 }
 
 
@@ -471,7 +477,7 @@ def reciprocal_rank_fusion(
 
 class LibraryGraphRAGEngine:
     """
-    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 108 invariants).
+    DAG-Aware Hybrid RAG & CAG Engine over the 28 bilingual volumes (56 files, 114 invariants).
     """
 
     def __init__(self, root: Path = ROOT):
@@ -1526,7 +1532,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                     "tools": [
                         {
                             "name": "library_hybrid_search",
-                            "description": "Search the 28-volume CS/DL Library (108 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
+                            "description": "Search the 28-volume CS/DL Library (114 invariants) using BM25 + Feature-Hash RRF + Subword MaxSim + Multi-Hop Planning + Self-Reflective Second Pass + 1-Hop Bidirectional DAG Expansion.",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {
@@ -1569,7 +1575,7 @@ def run_mcp_stdio_server(engine: LibraryGraphRAGEngine) -> None:
                         },
                         {
                             "name": "library_verify_integrity",
-                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (28 volumes, 108 invariants).",
+                            "description": "Deterministically verify live corpus SHA-256 provenance, DAG acyclicity, bilingual rule parity, and invariant count (28 volumes, 114 invariants).",
                             "inputSchema": {
                                 "type": "object",
                                 "properties": {},

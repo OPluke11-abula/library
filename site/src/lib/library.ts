@@ -541,9 +541,12 @@ export const CONCISE_VOLUME_LABELS: Readonly<Record<string, { zh: string; en: st
   'lib-408': { zh: 'LIB-408 · 情境感知生成與融合', en: 'LIB-408 · Context-Aware Object Insertion' },
   'lib-501': { zh: 'LIB-501 · 視覺前處理與質心對齊', en: 'LIB-501 · CV Center-of-Mass Alignment' },
   'lib-502': { zh: 'LIB-502 · 相機射影幾何與 SfM', en: 'LIB-502 · Projective Geometry & SfM' },
+  'lib-503': { zh: 'LIB-503 · 物件偵測與遮擋校準', en: 'LIB-503 · Object Detection & Calibration' },
   'lib-504': { zh: 'LIB-504 · NeRF 與 3D 高斯潑濺', en: 'LIB-504 · NeRF & 3D Gaussian Splatting' },
   'lib-505': { zh: 'LIB-505 · 開放詞彙 3DGS 語意檢索', en: 'LIB-505 · Open-Vocab 3DGS Retrieval' },
   'lib-506': { zh: 'LIB-506 · LLM + 3DGS 空間問答導覽', en: 'LIB-506 · LLM + 3DGS Scene QA' },
+  'lib-507': { zh: 'LIB-507 · 少視角 3DGS 深度先驗', en: 'LIB-507 · Sparse-View 3DGS Reliability' },
+  'lib-508': { zh: 'LIB-508 · 高斯最佳化與表面定理', en: 'LIB-508 · 3DGS Opt & Surface Theory' },
   'lib-602': { zh: 'LIB-602 · 現代 LLM 與縮放定律', en: 'LIB-602 · Modern LLM & Scaling Laws' },
   'lib-603': { zh: 'LIB-603 · 密集檢索、RAG 與 CAG', en: 'LIB-603 · Dense Retrieval, RAG & CAG' },
   'lib-703': { zh: 'LIB-703 · LLM Agent 認知與協議', en: 'LIB-703 · LLM Agent Architecture' },
@@ -555,6 +558,7 @@ export const CONCISE_VOLUME_LABELS: Readonly<Record<string, { zh: string; en: st
   'lib-904': { zh: 'LIB-904 · 學術文獻體系與對齊', en: 'LIB-904 · Research Literature Synthesis' },
   'lib-905': { zh: 'LIB-905 · 前沿視覺多模態專題藍圖', en: 'LIB-905 · Multimodal Capstone Blueprints' },
   'lib-906': { zh: 'LIB-906 · 對話質疑認知修訂基準', en: 'LIB-906 · Conversational Epistemic Revision' },
+  'lib-907': { zh: 'LIB-907 · 科研缺口與撞題審查方法論', en: 'LIB-907 · Research Gap & Collision Audit' },
 };
 
 function escapeHtml(text: string): string {

@@ -14,7 +14,8 @@ math_foundations:
   - End-to-End System Evaluation Metrics (mAP, LPIPS, CLIP-Score, Navigation SLA)
   - Full-Stack Pipeline Decomposition & Hardware Budgeting
 hardware_target:
-  - Workstation with Single/Dual NVIDIA RTX 4090 (24GB)
+  - Historical Target Workstation Config (RTX 4090 / 24GB — Not Constrained Student Hardware)
+  - Constrained Repro & Pilot Tier (4GB–8GB VRAM Laptop / Single-GPU Cloud Quota; see LIB-907)
   - Unity 3D Engine & WebXR / Mobile Edge Deployment
 created: 2026-09-24
 author: Luke
@@ -31,6 +32,7 @@ prerequisites:
   - "[[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]]"
   - "[[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]]"
   - "[[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]]"
+  - "[[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]]"
   - "[[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]]"
 successors: []
 ---
@@ -40,21 +42,23 @@ successors: []
 # Frontier Vision & Multimodal Capstone Blueprints: Five Grand Research Specifications
 
 ## Conceptual Coordinates & Dependencies
-- **Prerequisites**: [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
+- **Prerequisites**: [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]], [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]], [[LIB-504 3D Gaussian Splatting Theory & Rasterization (Agent EN)]], [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]], [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]], [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]], [[LIB-903 Capstone Blueprint & Academic Research Evolution (Agent EN)]].
 - **Successors**: None (Terminal capstone node).
-- **Core Scope**: Translates five faculty capstone research proposals into production-grade systems architectures, mathematical models, ablation matrices, and competitive research grant proposals (e.g., NSTC Undergraduate Research Projects).
+- **Core Scope**: Translates five historical faculty capstone blueprints into systems architectures (*Note: hardware specs below represent `HISTORICAL_WORKSTATION_TARGET` configs rather than constrained student hardware; for active multi-direction collision auditing and low-compute pilots, consult [[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]]*).
 
 ---
 
 ## 1. Five Grand Capstone Projects Matrix
 
-| Topic ID | Topic Title | Core Technical Stack | Key Academic Pain Points | Corresponding Flagship Volume | Hardware & Difficulty |
+> **Hardware Provenance Guardrail**: Entries such as `RTX 4090 / 24GB` below describe `HISTORICAL_WORKSTATION_TARGET` configurations—not current constrained student laptops (`4GB–8GB` VRAM) or single-GPU cloud quotas. See [[LIB-508 Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration (Agent EN)]] and [[LIB-907 Research Gap Discovery, Novelty Collision & Topic Selection (Agent EN)]] for budget-capped execution protocols.
+
+| Topic ID | Topic Title | Core Technical Stack | Key Academic Pain Points | Corresponding Flagship Volume | Historical Hardware & Difficulty |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Topic 01** | **Text-Guided Object Retrieval in 3DGS Scenes** | 3DGS + CLIP + SAM + Cross-View Consensus | Standard 3DGS lacks semantic descriptors; open-vocabulary queries suffer from feature dimension explosion and cross-view boundary drift. | [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]] | ★★★★☆<br>RTX 4090 / 24GB |
-| **Topic 02** | **Intelligent Scene QA & Navigation using LLMs and 3DGS** | 3DGS + LLM + 3D Scene Graphs + A* Topological Navigation | Pure text LLMs lack spatial geometric embodiment; radiance fields lack symbolic reasoning and collision-free path planning. | [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] | ★★★★☆<br>RTX 4090 + Unity |
-| **Topic 03** | **Intelligent Virtual Campus Tour System Using 3DGS** | Aerial/Ground Large-Scale 3DGS + Hierarchical Campus Graph + Unity MR | Memory overflow in large-scale outdoor reconstruction; multi-building cross-floor transitions and real-time high-FPS rendering. | [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] | ★★★☆☆<br>RTX 4080+ / Unity |
-| **Topic 04** | **Fine-Grained Instruction-Based Image Editing with Non-Target Preservation** | Diffusion Models + Mutual Self-Attention + Latent Inversion | Instruction editing causes unintended cascading alterations ("over-editing"), collapsing background textures and non-target geometry. | [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]] | ★★★★☆<br>16GB+ VRAM |
-| **Topic 05** | **Context-Aware Object Generation & Compositing with Illumination Consistency** | Conditional Diffusion (ControlNet) + Depth/Normal Estimation + Spherical Harmonics + Shadow Synthesis | Newly inserted objects lack photorealism, showing perspective distortion, conflicting lighting angles, and floating artifacts (missing contact shadows). | [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]] | ★★★★★<br>24GB VRAM |
+| **Topic 01** | **Text-Guided Object Retrieval in 3DGS Scenes** | 3DGS + CLIP + SAM + Cross-View Consensus | Standard 3DGS lacks semantic descriptors; open-vocabulary queries suffer from feature dimension explosion and cross-view boundary drift. | [[LIB-505 Open-Vocabulary 3D Gaussian Splatting & Semantic Retrieval (Agent EN)]] | ★★★★☆<br>Historical: `RTX 4090 / 24GB` |
+| **Topic 02** | **Intelligent Scene QA & Navigation using LLMs and 3DGS** | 3DGS + LLM + 3D Scene Graphs + A* Topological Navigation | Pure text LLMs lack spatial geometric embodiment; radiance fields lack symbolic reasoning and collision-free path planning. | [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] | ★★★★☆<br>Historical: `RTX 4090 + Unity` |
+| **Topic 03** | **Intelligent Virtual Campus Tour System Using 3DGS** | Aerial/Ground Large-Scale 3DGS + Hierarchical Campus Graph + Unity MR | Memory overflow in large-scale outdoor reconstruction; multi-building cross-floor transitions and real-time high-FPS rendering. | [[LIB-506 LLM-Grounded 3D Scene QA, Hierarchical Scene Graphs & Embodied Navigation (Agent EN)]] | ★★★☆☆<br>Historical: `RTX 4080+ / Unity` |
+| **Topic 04** | **Fine-Grained Instruction-Based Image Editing with Non-Target Preservation** | Diffusion Models + Mutual Self-Attention + Latent Inversion | Instruction editing causes unintended cascading alterations ("over-editing"), collapsing background textures and non-target geometry. | [[LIB-407 Fine-Grained Instruction Image Editing & Cross-Attention Preservation (Agent EN)]] | ★★★★☆<br>Historical: `16GB+ VRAM` |
+| **Topic 05** | **Context-Aware Object Generation & Compositing with Illumination Consistency** | Conditional Diffusion (ControlNet) + Depth/Normal Estimation + Spherical Harmonics + Shadow Synthesis | Newly inserted objects lack photorealism, showing perspective distortion, conflicting lighting angles, and floating artifacts (missing contact shadows). | [[LIB-408 Context-Aware Object Generation, Illumination Estimation & Image Compositing (Agent EN)]] | ★★★★★<br>Historical: `24GB VRAM` |
 
 ---
 
@@ -160,11 +164,11 @@ Advancing beyond the five legacy poster specifications while preserving Carrier�
 
 ## 5. Canonical Research Literature & Peer-Reviewed References
 
-1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**.
-2. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024**.
-3. **Gu, J., et al.** (2024). *ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Robot Perception*. **ICRA 2024**.
-4. **Brooks, T., et al.** (2023). *InstructPix2Pix: Learning to Follow Image Editing Instructions*. **CVPR 2023**.
-5. **Cao, M., et al.** (2023). *MasaCtrl: Tuning-Free Mutual Self-Attention Control for Consistent Image Synthesis and Editing*. **ICCV 2023**.
-6. **Yang, L., et al.** (2024). *Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data*. **CVPR 2024**.
-7. **Zhang, L., et al.** (2023). *Adding Conditional Control to Text-to-Image Diffusion Models*. **ICCV 2023**.
-8. **Lin, C., et al.** (2024). *VastGaussian: Vast 3D Gaussians for Large Scene Reconstruction*. **CVPR 2024**.
+1. **Kerbl, B., et al.** (2023). *3D Gaussian Splatting for Real-Time Radiance Field Rendering*. **ACM TOG / SIGGRAPH 2023**, DOI: [10.1145/3592433](https://doi.org/10.1145/3592433).
+2. **Qin, M., et al.** (2024). *LangSplat: 3D Language Gaussian Splatting*. **CVPR 2024** ([arXiv:2312.16084](https://arxiv.org/abs/2312.16084)).
+3. **Gu, J., et al.** (2024). *ConceptGraphs: Open-Vocabulary 3D Scene Graphs for Robot Perception*. **ICRA 2024** ([arXiv:2309.16650](https://arxiv.org/abs/2309.16650)).
+4. **Brooks, T., et al.** (2023). *InstructPix2Pix: Learning to Follow Image Editing Instructions*. **CVPR 2023** ([arXiv:2211.09800](https://arxiv.org/abs/2211.09800)).
+5. **Cao, M., et al.** (2023). *MasaCtrl: Tuning-Free Mutual Self-Attention Control for Consistent Image Synthesis and Editing*. **ICCV 2023** ([arXiv:2304.08465](https://arxiv.org/abs/2304.08465)).
+6. **Yang, L., et al.** (2024). *Depth Anything: Unleashing the Power of Large-Scale Unlabeled Data*. **CVPR 2024** ([arXiv:2401.10891](https://arxiv.org/abs/2401.10891)).
+7. **Zhang, L., et al.** (2023). *Adding Conditional Control to Text-to-Image Diffusion Models*. **ICCV 2023** ([arXiv:2302.05543](https://arxiv.org/abs/2302.05543)).
+8. **Lin, C., et al.** (2024). *VastGaussian: Vast 3D Gaussians for Large Scene Reconstruction*. **CVPR 2024** ([arXiv:2402.17427](https://arxiv.org/abs/2402.17427)).

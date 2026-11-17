@@ -6,7 +6,7 @@
         "scripts/library_rag.py",
         "--mcp"
       ],
-      "description": "CS & Deep Learning Library (28 Bilingual Volumes, 114 Invariants) Hybrid GraphRAG & CAG Engine"
+      "description": "CS & Deep Learning Library (32 Bilingual Volumes, 130 Invariants) Hybrid GraphRAG & CAG Engine"
     }
   }
 }

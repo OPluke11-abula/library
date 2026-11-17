@@ -31,6 +31,8 @@ prerequisites:
   - "[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]"
   - "[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]"
 successors:
+  - "[[LIB-503 現代物件偵測架構、定位不確定性與遮擋校準 (Modern Object Detection, Localization & Occlusion Reliability)]]"
+  - "[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]"
   - "[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]"
   - "[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]"
   - "[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]"
@@ -43,7 +45,7 @@ successors:
 
 ## 🧭 拓樸導航與概念座標
 - **前置依賴**：[[LIB-102 機率統計、資訊理論與變分推論基石 (Probability, Information Theory & Variational Inference)]]、[[LIB-104 凸最佳化理論與一階二階梯度下降幾何 (Optimization Theory & Gradient Descent)]]、[[LIB-301 資料分佈偏差、領域漂移與空間權重懲罰幾何 (Dataset Bias, Domain Shift & Spatial Penalties)]]。
-- **後續節點**：[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
+- **後續節點**：[[LIB-503 現代物件偵測架構、定位不確定性與遮擋校準 (Modern Object Detection, Localization & Occlusion Reliability)]]、[[LIB-507 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 (Sparse-View 3DGS Geometry, Depth Priors & Reliability)]]、[[LIB-704 雙進程神經代理人：S1 非自迴歸型態決策引擎 (Jev) 與字節級介面反射模型 (CUA-S1) 深度解剖 (Dual-Process Neural Agent - S1 Non-Autoregressive Typed Decision Engine (Jev) & Byte-Level Interface Reflex Model (CUA-S1))]]、[[LIB-802 現代深度學習模型量化理論與低精度推論架構 (Quantization Mathematics & Low-Precision Inference)]]、[[LIB-901 經典專案實證復盤：從課堂作業到生產級 MNIST 手寫辨識系統 (Classic Project Post-Mortem - From Class Assignment to Production MNIST System)]]、[[LIB-906 對話質疑下的選擇性認知修訂：研究基準與實驗藍圖 (LLM Conversational Epistemic Revision)]]。
 - **主要文獻與官方來源**：
   - Guo, Pleiss, Sun, Weinberger (Cornell University, ICML 2017) *On Calibration of Modern Neural Networks*.
   - Angelopoulos & Bates (UC Berkeley, Foundations and Trends in Machine Learning 2023) *Conformal Prediction: A Gentle Introduction*.
@@ -245,3 +247,5 @@ assert ece_val <= 0.05, f"模型校準度不足: ECE={ece_val:.4f} 超出 0.05 �
 4. **期望校準誤差 (ECE) 形式化指標作**
    - *Paper*: Naeini, M. P., Cooper, G., & Hauskrecht, M. (2015). "Obtaining well calibrated probabilities using Bayesian binning into quantiles." *AAAI Conference on Human Computation and Crowdsourcing (AAAI 2015)*.
    - *Core Contribution*: 提出將預測機率分箱以計算準確率與置信度絕對殘差之 ECE 指標，成為所有 AI 系統可靠性評估之工業標準。
+5. **從影像分類 ECE 延伸至物件偵測定位校準與共形邊界框 (Cross-Volume Extension)**
+   - 本卷聚焦影像分類與純機率輸出校準；若應用於**物件偵測邊界定位（`D-ECE`、`LaECE`、Loss-Attenuation 異質方差共形預測 `OD-CP`、兩階段共形邊界框與 `D-FINE` 離散分佈 `FDR`）**，請銜接閱讀 [[LIB-503 現代物件偵測架構、定位不確定性與遮擋校準 (Modern Object Detection, Localization & Occlusion Reliability)]]（Kuzucu et al. ECCV 2024 Oral; Timans et al. ECCV 2024 Oral; Ries et al. COPA 2026 Oral `arXiv:2605.07549`）。

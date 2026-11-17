@@ -1,14 +1,14 @@
 {
   "summary": {
-    "git_commit_sha": "c124702bcc09932c4c3c23167134a921dc12b142",
-    "corpus_sha256": "b29cca853bb91b1925c2e8d140469e306c90b620dd24a6092ffec19f5b0db590",
-    "volumes_indexed": 28,
-    "bilingual_files_indexed": 56,
-    "parent_sections_count": 458,
-    "child_chunks_count": 965,
-    "rules_indexed_zh": 114,
-    "rules_indexed_en": 114,
-    "avg_chunk_tokens": 411.7
+    "git_commit_sha": "f9fdc2ad8f3c34e331a42090ee7f3ba82bf115fd",
+    "corpus_sha256": "4822d140cd76d9d104f50112ccd47b1523aedee4f48f5be5217428f090aabef8",
+    "volumes_indexed": 32,
+    "bilingual_files_indexed": 64,
+    "parent_sections_count": 522,
+    "child_chunks_count": 1074,
+    "rules_indexed_zh": 130,
+    "rules_indexed_en": 130,
+    "avg_chunk_tokens": 418.7
   },
   "dag_prerequisites": {
     "LIB-000": [],
@@ -66,19 +66,37 @@
       "LIB-104",
       "LIB-501"
     ],
+    "LIB-503": [
+      "LIB-401",
+      "LIB-405",
+      "LIB-501",
+      "LIB-801"
+    ],
     "LIB-504": [
       "LIB-101",
       "LIB-203",
       "LIB-502"
     ],
     "LIB-505": [
-      "LIB-504"
+      "LIB-504",
+      "LIB-507"
     ],
     "LIB-506": [
       "LIB-504",
       "LIB-505",
       "LIB-602",
       "LIB-703"
+    ],
+    "LIB-507": [
+      "LIB-502",
+      "LIB-504",
+      "LIB-508",
+      "LIB-801"
+    ],
+    "LIB-508": [
+      "LIB-104",
+      "LIB-203",
+      "LIB-504"
     ],
     "LIB-602": [
       "LIB-102",
@@ -123,6 +141,7 @@
       "LIB-901"
     ],
     "LIB-904": [
+      "LIB-503",
       "LIB-903"
     ],
     "LIB-905": [
@@ -131,6 +150,7 @@
       "LIB-504",
       "LIB-505",
       "LIB-506",
+      "LIB-508",
       "LIB-903"
     ],
     "LIB-906": [
@@ -138,6 +158,13 @@
       "LIB-603",
       "LIB-801",
       "LIB-904"
+    ],
+    "LIB-907": [
+      "LIB-503",
+      "LIB-507",
+      "LIB-903",
+      "LIB-904",
+      "LIB-906"
     ]
   },
   "dag_successors": {
@@ -171,6 +198,7 @@
       "LIB-301",
       "LIB-406",
       "LIB-502",
+      "LIB-508",
       "LIB-602",
       "LIB-801"
     ],
@@ -178,6 +206,7 @@
       "LIB-401",
       "LIB-405",
       "LIB-504",
+      "LIB-508",
       "LIB-602",
       "LIB-704",
       "LIB-802",
@@ -189,11 +218,13 @@
     ],
     "LIB-401": [
       "LIB-501",
+      "LIB-503",
       "LIB-901"
     ],
     "LIB-405": [
       "LIB-406",
       "LIB-407",
+      "LIB-503",
       "LIB-602",
       "LIB-703"
     ],
@@ -211,15 +242,23 @@
     "LIB-501": [
       "LIB-408",
       "LIB-502",
+      "LIB-503",
       "LIB-901"
     ],
     "LIB-502": [
       "LIB-408",
-      "LIB-504"
+      "LIB-504",
+      "LIB-507"
+    ],
+    "LIB-503": [
+      "LIB-904",
+      "LIB-907"
     ],
     "LIB-504": [
       "LIB-505",
       "LIB-506",
+      "LIB-507",
+      "LIB-508",
       "LIB-905"
     ],
     "LIB-505": [
@@ -227,6 +266,14 @@
       "LIB-905"
     ],
     "LIB-506": [
+      "LIB-905"
+    ],
+    "LIB-507": [
+      "LIB-505",
+      "LIB-907"
+    ],
+    "LIB-508": [
+      "LIB-507",
       "LIB-905"
     ],
     "LIB-602": [
@@ -248,6 +295,8 @@
       "LIB-903"
     ],
     "LIB-801": [
+      "LIB-503",
+      "LIB-507",
       "LIB-704",
       "LIB-802",
       "LIB-901",
@@ -261,13 +310,18 @@
     ],
     "LIB-903": [
       "LIB-904",
-      "LIB-905"
+      "LIB-905",
+      "LIB-907"
     ],
     "LIB-904": [
-      "LIB-906"
+      "LIB-906",
+      "LIB-907"
     ],
     "LIB-905": [],
-    "LIB-906": []
+    "LIB-906": [
+      "LIB-907"
+    ],
+    "LIB-907": []
   },
   "chunks_meta": {
     "LIB-000:zh:S00:C00": {
@@ -499,12 +553,12 @@
       "section_h3": "Section Overview",
       "rule_ids": [
         "RULE-000-01",
-        "RULE-906-03"
+        "RULE-907-04"
       ],
       "defined_rule_ids": [],
       "contract_levels": [
         "CRITICAL_INVARIANT",
-        "CRITICAL_INVARIANT"
+        "RESOURCE_CONSTRAINT"
       ],
       "evidence_tags": [],
       "epistemic_weight": 1.0
@@ -6270,6 +6324,429 @@
       "evidence_tags": [],
       "epistemic_weight": 1.0
     },
+    "LIB-503:zh:S00:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S01:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "🧭 拓樸導航與概念座標",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S02:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：為什麼「猜對類別」卻「畫錯框」比想像中更危險？",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S03:C01": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：端對端分佈精修、微目標 Wasserstein 度量與定位感知校準",
+      "section_h3": "1. 即時 DETR 演化譜系與 `D-FINE` 邊界機率分佈（FDR）",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S03:C02": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：端對端分佈精修、微目標 Wasserstein 度量與定位感知校準",
+      "section_h3": "2. 微小物件 `IoU` 崩塌與常態化高斯 Wasserstein 距離 (`NWD`) `[FACT]` `[DERIVATION]`",
+      "rule_ids": [
+        "RULE-904-03"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S03:C03": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：端對端分佈精修、微目標 Wasserstein 度量與定位感知校準",
+      "section_h3": "3. 2D 遮擋框偵測 vs. Amodal 分割邊界辨析 `[FACT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S03:C04": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：端對端分佈精修、微目標 Wasserstein 度量與定位感知校準",
+      "section_h3": "4. 偵測器校準陷阱與共形邊界框風險控制 (`ECCV 2024 Orals`) `[LITERATURE_RESULT]` `[DERIVATION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S04:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體資源分析：官方程式推論掛鉤與計算成本邊界",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S05:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "四、💻 工業級工程實作：FDR 邊界熵、NWD 與定位感知 LaECE 檢驗核心",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:zh:S06:C01": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-503-01] 2D 遮擋偵測框與 Amodal 分割邊界隔離合約 (Occlusion Detection vs. Amodal Segmentation Boundary)",
+      "rule_ids": [
+        "RULE-503-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-01"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:zh:S06:C02": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-503-02] 微小目標 IoU 崩塌防護與滑動切片邊界合約 (Tiny-Object Distribution Matching & Grid-Slicing Guard)",
+      "rule_ids": [
+        "RULE-503-02",
+        "RULE-904-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-02"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD",
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:zh:S06:C03": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-503-03] 偵測器定位感知校準與強基準檢驗合約 (Localization-Aware Calibration & Baseline Integrity Invariant)",
+      "rule_ids": [
+        "RULE-503-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-03"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-503:zh:S06:C04": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-503-04] 共形邊界框統計覆蓋語意與漏檢誠實揭露合約 (Conformal Bounding Box Coverage & FN Transparency Invariant)",
+      "rule_ids": [
+        "RULE-503-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-04"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:zh:S07:C00": {
+      "call_number": "LIB-503",
+      "lang": "zh",
+      "section_h2": "六、📚 權威論文與同行評審文獻 (Canonical & Peer-Reviewed References)",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S00:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S01:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "Conceptual Coordinates & Topological Navigation",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S02:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "1. Conceptual Mental Model: Asymmetric Boundary Risk & Sub-Pixel Fragility",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S03:C01": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "1. Real-Time DETR Evolution & `D-FINE` Edge Distribution Refinement (FDR)",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S03:C02": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "2. Tiny-Object Normalized Gaussian Wasserstein Distance (`NWD`) `[DERIVATION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S03:C03": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "3. 2D Occlusion-Aware Box Detection vs. Amodal Instance Segmentation `[FACT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S03:C04": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "4. Detection Calibration Pitfalls (`LaECE`) & Two-Step Conformal Box Bounds `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S04:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "3. Systems & Hardware Microarchitecture Alignment (`D-FINE` Eval Hook & Provenance)",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-503-02"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S05:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "4. Executable Verification Kernel: Edge Entropy, NWD & LaECE",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-503:en:S06:C01": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-503-01] Occlusion Detection vs. Amodal Segmentation Boundary",
+      "rule_ids": [
+        "RULE-503-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-01"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:en:S06:C02": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-503-02] Tiny-Object Distribution Matching & Grid-Slicing Guard",
+      "rule_ids": [
+        "RULE-503-02",
+        "RULE-904-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-02"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD",
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:en:S06:C03": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-503-03] Localization-Aware Calibration & Baseline Integrity Invariant",
+      "rule_ids": [
+        "RULE-503-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-03"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-503:en:S06:C04": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-503-04] Conformal Bounding Box Coverage & FN Transparency Invariant",
+      "rule_ids": [
+        "RULE-503-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-503-04"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-503:en:S07:C00": {
+      "call_number": "LIB-503",
+      "lang": "en",
+      "section_h2": "6. Peer-Reviewed References & Literature",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
     "LIB-504:zh:S00:C00": {
       "call_number": "LIB-504",
       "lang": "zh",
@@ -7506,6 +7983,810 @@
       "call_number": "LIB-506",
       "lang": "en",
       "section_h2": "5. Canonical References",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S00:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S01:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "🧭 拓樸導航與概念座標",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S02:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：請「沒帶尺的畫家」當老師會發生什麼事？",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT",
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S03:C01": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：局部仿射校準、選擇性監督與可辨識界",
+      "section_h3": "1. 從全域對齊到空間變化分段仿射校正 (`DNGaussian` ➔ `AffineGS`) `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S03:C02": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：局部仿射校準、選擇性監督與可辨識界",
+      "section_h3": "2. 三大選擇性監督／正則與多視角先驗對比 `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:zh:S03:C03": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：局部仿射校準、選擇性監督與可辨識界",
+      "section_h3": "3. 更新方向控制、共正則與非參數擾動機制 `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:zh:S03:C04": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：局部仿射校準、選擇性監督與可辨識界",
+      "section_h3": "4. 姿態協議隔離 (`P1/P2/P3`) 與「參數不可辨識 $\\neq$ 幾何錯誤」定理 `[DERIVATION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S04:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 硬體算力、環境依賴與最小先導驗證架構",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:zh:S05:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "四、💻 工業級工程實作：零 GPU 依賴之「仿射校正邊界與假誤差識別」驗證器",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S06:C01": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-507-01] 少視角姿態來源與外部立體先驗強制揭露合約 (Pose & Prior Provenance Disclosure Invariant)",
+      "rule_ids": [
+        "RULE-507-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-01"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-507:zh:S06:C02": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-507-02] 獨立幾何真值強制評估門檻 (Independent Geometry Truth Verification Gate)",
+      "rule_ids": [
+        "RULE-507-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-507:zh:S06:C03": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-507-03] 參數不可辨識性與真實表面誤差強制隔離合約 (Non-Identifiability vs. Geometry Error Disentanglement)",
+      "rule_ids": [
+        "RULE-507-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-03"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "DERIVATION"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:zh:S06:C04": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-507-04] 少視角先驗方法消融必測強基準合約 (Mandatory Selective-Supervision & Stereo Baseline Matrix)",
+      "rule_ids": [
+        "RULE-507-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-04"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:zh:S07:C00": {
+      "call_number": "LIB-507",
+      "lang": "zh",
+      "section_h2": "六、📚 權威論文與同行評審文獻 (Canonical & Peer-Reviewed References)",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S00:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S01:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "Conceptual Coordinates & Topological Navigation",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S02:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "1. Conceptual Mental Model: Monocular Depth Priors Under Extreme Sparsity",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "FACT",
+        "HYPOTHESIS",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S03:C01": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "1. From Global Alignment to Local Spatially Varying Affine Rectification `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S03:C02": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "2. Selective Supervision & Stereo Prior Landscape (2024–2026) `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:en:S03:C03": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "3. Update DoF Separation, Co-Regularization & Dropout `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:en:S03:C04": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "4. Pose Provenance Protocols (`P1/P2/P3`) & Parameter Non-Identifiability `[DERIVATION]` `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S04:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "3. Compute, VRAM & Verification Architecture",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-507:en:S05:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "4. Executable Python Implementation: CPU Affine Bound & Identifiability Verifier",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S06:C01": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-507-01] Pose & Prior Provenance Disclosure Invariant",
+      "rule_ids": [
+        "RULE-507-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-01"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-507:en:S06:C02": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-507-02] Independent Geometry Truth Verification Gate",
+      "rule_ids": [
+        "RULE-507-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-507:en:S06:C03": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-507-03] Non-Identifiability vs. Geometry Error Disentanglement",
+      "rule_ids": [
+        "RULE-507-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-03"
+      ],
+      "contract_levels": [
+        "BOUNDARY_GUARD"
+      ],
+      "evidence_tags": [
+        "DERIVATION"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-507:en:S06:C04": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-507-04] Mandatory Selective-Supervision & Stereo Baseline Matrix",
+      "rule_ids": [
+        "RULE-507-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-507-04"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-507:en:S07:C00": {
+      "call_number": "LIB-507",
+      "lang": "en",
+      "section_h2": "6. Peer-Reviewed References & Literature",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:zh:S00:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:zh:S01:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "🧭 拓樸導航與概念座標",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:zh:S02:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：為何「高畫質照片」與「精準 3D 形狀」常常打架？",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:zh:S03:C01": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：稠密化動力學、假看板可辨識界與表面場模型",
+      "section_h3": "1. Adaptive Density Control (ADC) 的失效與 2024–2025 四條修正理論 `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:zh:S03:C02": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：稠密化動力學、假看板可辨識界與表面場模型",
+      "section_h3": "2. 何時 3DGS 才能恢復真實幾何表面？（ECCV 2026 定理雙面性與鏡面解耦先行體系） `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:zh:S03:C03": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級數學形式化推導：稠密化動力學、假看板可辨識界與表面場模型",
+      "section_h3": "3. 抗混疊與視角一致光柵排序穩定性 `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:zh:S04:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 計算機體系結構與硬體資源約束：8GB VRAM 原語上限與優化器比較",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:zh:S05:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "四、💻 工業級工程實作：First-Hit 視差與 SH 角向「看板偽裝」數值驗證核心",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:zh:S06:C01": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-508-01] 消費級顯存與原語上限強制封頂合約 (VRAM & Primitive Cap Budget Invariant)",
+      "rule_ids": [
+        "RULE-508-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-01"
+      ],
+      "contract_levels": [
+        "RESOURCE_CONSTRAINT"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:zh:S06:C02": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-508-02] 角向球諧容量與假看板表面分離檢驗合約 (SH Angular Capacity & Surface Disentanglement Invariant)",
+      "rule_ids": [
+        "RULE-508-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:zh:S06:C03": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-508-03] 漫反射／強鏡面場景隔離與反光解耦既有文獻檢查合約 (Diffuse vs. Specular & Prior-Art Check)",
+      "rule_ids": [
+        "RULE-508-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-03"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:zh:S06:C04": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-508-04] 等品質點加速基準對齊合約 (Iso-Quality Convergence Benchmarking Invariant)",
+      "rule_ids": [
+        "RULE-508-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-04"
+      ],
+      "contract_levels": [
+        "PERFORMANCE_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-508:zh:S07:C00": {
+      "call_number": "LIB-508",
+      "lang": "zh",
+      "section_h2": "六、📚 權威論文與同行評審文獻 (Canonical & Peer-Reviewed References)",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S00:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S01:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "Conceptual Coordinates & Topological Navigation",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S02:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "1. Conceptual Mental Model: Photometric Fidelity vs. Geometric Identifiability",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:en:S03:C01": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "1. Densification Paradigms (2024–2025) `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "HYPOTHESIS",
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:en:S03:C02": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "2. When 3DGS Recovers Real Surfaces & Specular Prior Art `[LITERATURE_RESULT]` `[DERIVATION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S03:C03": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "2. Mathematical Formalization",
+      "section_h3": "3. Anti-Aliasing & View-Consistent Sorting `[LITERATURE_RESULT]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:en:S04:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "3. Systems & Hardware Microarchitecture Alignment (`<= 8 GB` Budgets)",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-508-04"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "PERFORMANCE_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S05:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "4. Executable Verification Kernel: Parallax-Induced Billboard Illusion",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-508:en:S06:C01": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-508-01] VRAM & Primitive Cap Budget Invariant",
+      "rule_ids": [
+        "RULE-508-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-01"
+      ],
+      "contract_levels": [
+        "RESOURCE_CONSTRAINT"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:en:S06:C02": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-508-02] SH Angular Capacity & Surface Disentanglement Invariant",
+      "rule_ids": [
+        "RULE-508-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT"
+      ],
+      "epistemic_weight": 0.95
+    },
+    "LIB-508:en:S06:C03": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-508-03] Diffuse vs. Specular Split & Decoupling Prior-Art Audit",
+      "rule_ids": [
+        "RULE-508-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-03"
+      ],
+      "contract_levels": [
+        "QUALITY_BOUND"
+      ],
+      "evidence_tags": [
+        "LITERATURE_RESULT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-508:en:S06:C04": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-508-04] Iso-Quality Convergence Benchmarking Invariant",
+      "rule_ids": [
+        "RULE-508-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-508-04"
+      ],
+      "contract_levels": [
+        "PERFORMANCE_CRITICAL"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-508:en:S07:C00": {
+      "call_number": "LIB-508",
+      "lang": "en",
+      "section_h2": "6. Peer-Reviewed References & Literature",
       "section_h3": "Section Overview",
       "rule_ids": [],
       "defined_rule_ids": [],
@@ -13264,6 +14545,419 @@
       "rule_ids": [],
       "defined_rule_ids": [],
       "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S00:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S01:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "🧭 拓樸導航與概念座標",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-904-05"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S02:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "一、💡 學士直觀心智模型：為何「靈感很強」常常變成「花三個月幫別人復現」？",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S03:C01": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級形式化框架：四階段驗證、15 欄撞題矩陣與停損閘門",
+      "section_h3": "1. Pass 1–4 論文核對與 15 欄來源驗證矩陣 `[DESIGN_DECISION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:zh:S03:C02": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級形式化框架：四階段驗證、15 欄撞題矩陣與停損閘門",
+      "section_h3": "2. 三維撞題裁決與表徵替換檢驗 (`Representation Substitution Test`) `[DERIVATION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S03:C03": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級形式化框架：四階段驗證、15 欄撞題矩陣與停損閘門",
+      "section_h3": "3. Failure-First 漸進式驗證閘門 (`P0 -> G1 -> G2 -> G3 -> Novelty`) `[DESIGN_DECISION]`",
+      "rule_ids": [
+        "RULE-904-05"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:zh:S03:C04": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "二、🎓 博士級形式化框架：四階段驗證、15 欄撞題矩陣與停損閘門",
+      "section_h3": "4. 認識論標籤隔離矩陣（嚴禁未執行偽裝實證） `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:zh:S04:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "三、⚙️ 低算力異質硬體調度設計原則 (`4GB / 8GB / 單卡雲端配額`)",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:zh:S05:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "四、💻 工業級工程實作：`DecisionGateValidator` 認識論與撞題停損守衛",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:zh:S06:C01": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-907-01] 未核實來源與未實測算力嚴禁偽裝實證合約 (Zero Unverified Source & Compute Fabrication Invariant)",
+      "rule_ids": [
+        "RULE-907-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-01"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:zh:S06:C02": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-907-02] 三維撞題審查與非重新包裝硬門檻合約 (Three-Dimensional Novelty Collision & Non-Repackaging Gate)",
+      "rule_ids": [
+        "RULE-907-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:zh:S06:C03": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-907-03] 最小先導實驗必備數值停損合約 (Minimal Pilot Numerical Stop-Loss Invariant)",
+      "rule_ids": [
+        "RULE-907-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-03"
+      ],
+      "contract_levels": [
+        "HIGH_INVARIANT"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:zh:S06:C04": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)",
+      "section_h3": "[RULE-907-04] 算力預算來源標記與低顯存硬體真實性合約 (Compute Provenance & Constrained Hardware Truth Invariant)",
+      "rule_ids": [
+        "RULE-907-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-04"
+      ],
+      "contract_levels": [
+        "RESOURCE_CONSTRAINT"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:zh:S07:C00": {
+      "call_number": "LIB-907",
+      "lang": "zh",
+      "section_h2": "六、📚 權威論文與科研方法論基石文獻 (Canonical References)",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-904-05"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S00:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "Overview & Topological Coordinates",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S01:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "Conceptual Coordinates & Topological Navigation",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-904-05"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S02:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "1. Conceptual Mental Model: Avoiding Sunk-Cost Collisions Under Compute Constraints",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION",
+        "FACT",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S03:C01": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "2. Formal Methodology",
+      "section_h3": "1. Four-Pass Verification & The 15-Column Literature Collision Matrix `[DESIGN_DECISION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:en:S03:C02": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "2. Formal Methodology",
+      "section_h3": "2. Three-Dimensional Collision Verdict & Representation Substitution Test `[DERIVATION]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DERIVATION",
+        "DESIGN_DECISION",
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S03:C03": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "2. Formal Methodology",
+      "section_h3": "3. Failure-First Gate Progression & Epistemic Firewall `[SAFETY_BOUND]`",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:en:S04:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "3. Constrained-Compute Scheduling Principles (`4GB / 8GB / Single-GPU Cloud`)",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:en:S05:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "4. Executable Python Implementation: `ResearchGateAuditor`",
+      "section_h3": "Section Overview",
+      "rule_ids": [],
+      "defined_rule_ids": [],
+      "contract_levels": [],
+      "evidence_tags": [],
+      "epistemic_weight": 1.0
+    },
+    "LIB-907:en:S06:C01": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-907-01] Zero Unverified Source & Compute Fabrication Invariant",
+      "rule_ids": [
+        "RULE-907-01"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-01"
+      ],
+      "contract_levels": [
+        "SAFETY_CRITICAL"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:en:S06:C02": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-907-02] Three-Dimensional Novelty Collision & Non-Repackaging Gate",
+      "rule_ids": [
+        "RULE-907-02"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-02"
+      ],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:en:S06:C03": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-907-03] Minimal Pilot Numerical Stop-Loss Invariant",
+      "rule_ids": [
+        "RULE-907-03"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-03"
+      ],
+      "contract_levels": [
+        "HIGH_INVARIANT"
+      ],
+      "evidence_tags": [
+        "DESIGN_DECISION"
+      ],
+      "epistemic_weight": 0.85
+    },
+    "LIB-907:en:S06:C04": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "5. AI Agent Inference Contracts & System Invariants",
+      "section_h3": "[RULE-907-04] Compute Provenance & Constrained Hardware Truth Invariant",
+      "rule_ids": [
+        "RULE-907-04"
+      ],
+      "defined_rule_ids": [
+        "RULE-907-04"
+      ],
+      "contract_levels": [
+        "RESOURCE_CONSTRAINT"
+      ],
+      "evidence_tags": [
+        "SAFETY_BOUND"
+      ],
+      "epistemic_weight": 0.98
+    },
+    "LIB-907:en:S07:C00": {
+      "call_number": "LIB-907",
+      "lang": "en",
+      "section_h2": "6. Peer-Reviewed References & Literature",
+      "section_h3": "Section Overview",
+      "rule_ids": [
+        "RULE-904-05"
+      ],
+      "defined_rule_ids": [],
+      "contract_levels": [
+        "CRITICAL_INVARIANT"
+      ],
       "evidence_tags": [],
       "epistemic_weight": 1.0
     }

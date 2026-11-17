@@ -14,6 +14,8 @@ const isZh = lang === 'zh';
 
 const { zh, en } = loadLibraryArticles();
 const articlesMap = isZh ? zh : en;
+const volumeCount = zh.size;
+const bilingualCount = zh.size + en.size;
 const alternateUrl = isZh ? `${base}/en/` : `${base}/zh/`;
 
 const featuredSlugs = ['lib-000', 'lib-001', 'lib-101', 'lib-405', 'lib-501', 'lib-703'];
@@ -85,9 +87,9 @@ const showcaseItems = [
 
       <!-- Editorial Corpus Strip -->
       <ul class="atlas-meta-strip" aria-label={isZh ? '館藏規模摘要' : 'Library Scope'}>
-        <li><strong>28</strong> {isZh ? '核心典籍' : 'Volumes'}</li>
+        <li><strong>{volumeCount}</strong> {isZh ? '核心典籍' : 'Volumes'}</li>
         <li class="strip-sep" aria-hidden="true">/</li>
-        <li><strong>56</strong> {isZh ? '雙語鏡像篇章' : 'Bilingual Editions'}</li>
+        <li><strong>{bilingualCount}</strong> {isZh ? '雙語鏡像篇章' : 'Bilingual Editions'}</li>
         <li class="strip-sep" aria-hidden="true">/</li>
         <li><strong>{KNOWLEDGE_HALLS.length}</strong> {isZh ? '專業分館' : 'Knowledge Halls'}</li>
         <li class="strip-sep" aria-hidden="true">/</li>
@@ -211,7 +213,7 @@ const showcaseItems = [
 
       <div class="featured-all-cta">
         <a href={`${base}/${lang}/library/`} class="btn-outline">
-          <span>{isZh ? '查看全部 28 篇典籍' : 'View All 28 Volumes'}</span>
+          <span>{isZh ? `查看全部 ${volumeCount} 篇典籍` : `View All ${volumeCount} Volumes`}</span>
           <Icon name="arrow-right" size={14} />
         </a>
       </div>

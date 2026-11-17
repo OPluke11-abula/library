@@ -10,7 +10,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![Hardware Alignment](https://img.shields.io/badge/Hardware-CUDA_Warp--32-76B900.svg?logo=nvidia&logoColor=white)](https://developer.nvidia.com/cuda-toolkit)
 [![Obsidian Vault](https://img.shields.io/badge/Obsidian-Verified-7C3AED.svg?logo=obsidian&logoColor=white)](https://obsidian.md/)
-[![System Invariants](https://img.shields.io/badge/System_Rules-114_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
+[![System Invariants](https://img.shields.io/badge/System_Rules-130_Invariants-0ea5e9.svg)](00_overview/LIB-000%20Grand%20Library%20Index%20&%20Navigator%20%28Agent%20EN%29.md)
 
 <p align="center">
   <b>Technical Notes on Mathematical Foundations, GPU Systems, and Production Deep Learning</b>
@@ -135,9 +135,12 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-408** | **04 Architectures** | [Context-Aware Object Generation & Compositing](04_deep_learning_architectures/LIB-408%20Context-Aware%20Object%20Generation,%20Illumination%20Estimation%20&%20Image%20Compositing%20%28Agent%20EN%29.md) | Metric depth perspective, Spherical Harmonics lighting, contact shadows |
 | **LIB-501** | **05 Vision** | [CV Preprocessing & Center of Mass Alignment](05_computer_vision/LIB-501%20CV%20Preprocessing%20&%20Center%20of%20Mass%20Alignment%20%28Agent%20EN%29.md) | Bounding box clamping, ink moment center-of-mass centering |
 | **LIB-502** | **05 Vision** | [Camera Projective Geometry, Epipolar Geometry & SfM](05_computer_vision/LIB-502%20Camera%20Projective%20Geometry,%20Epipolar%20Geometry%20&%20Structure-from-Motion%20%28Agent%20EN%29.md) | Pinhole model, SE(3)/SO(3), epipolar geometry, Bundle Adjustment |
+| **LIB-503** | **05 Vision** | [Modern Object Detection, Localization & Occlusion Reliability](05_computer_vision/LIB-503%20Modern%20Object%20Detection,%20Localization%20&%20Occlusion%20Reliability%20%28Agent%20EN%29.md) | RT-DETR, D-FINE (FDR), DEIM, NWD tiny objects, LaECE & Conformal boxes |
 | **LIB-504** | **05 Vision** | [3D Gaussian Splatting Theory & Rasterization](05_computer_vision/LIB-504%203D%20Gaussian%20Splatting%20Theory%20&%20Rasterization%20%28Agent%20EN%29.md) | Continuous radiance fields vs 3D Gaussians, GPU tile rasterization |
 | **LIB-505** | **05 Vision** | [Open-Vocabulary 3DGS & Semantic Retrieval](05_computer_vision/LIB-505%20Open-Vocabulary%203D%20Gaussian%20Splatting%20&%20Semantic%20Retrieval%20%28Agent%20EN%29.md) | 2D-to-3D language distillation, multi-view consensus, open-vocabulary queries |
 | **LIB-506** | **05 Vision** | [LLM-Grounded 3D Scene QA & Navigation](05_computer_vision/LIB-506%20LLM-Grounded%203D%20Scene%20QA,%20Hierarchical%20Scene%20Graphs%20&%20Embodied%20Navigation%20%28Agent%20EN%29.md) | ConceptGraphs, spatial reasoning ReAct loops, hierarchical campus tour |
+| **LIB-507** | **05 Vision** | [Sparse-View 3DGS Geometry, Depth Priors & Reliability](05_computer_vision/LIB-507%20Sparse-View%203DGS%20Geometry,%20Depth%20Priors%20&%20Reliability%20%28Agent%20EN%29.md) | AffineGS local affine bounds, DIM/GAL, DepthGS, P1/P2/P3 pose provenance |
+| **LIB-508** | **05 Vision** | [Gaussian Optimization, Densification & Surface Fidelity](05_computer_vision/LIB-508%20Gaussian%20Optimization,%20Densification,%20Surface%20Fidelity%20&%20Fast%20Iteration%20%28Agent%20EN%29.md) | 3DGS-MCMC, Taming/Birth-Death/Coreset, DashGaussian, Ref-GS/Spec-Gaussian, SH surface bounds |
 | **LIB-602** | **06 NLP & LLMs** | [Modern LLM Architecture & Scaling Laws](06_nlp_and_llms/LIB-602%20Modern%20LLM%20Architecture%20&%20Scaling%20Laws%20%28Agent%20EN%29.md) | Chinchilla scaling laws, SwiGLU, RMSNorm, Grouped-Query Attention (GQA), MoE |
 | **LIB-603** | **06 NLP & LLMs** | [Dense Retrieval, RAG & Cache-Augmented Generation Architecture](06_nlp_and_llms/LIB-603%20Dense%20Retrieval,%20RAG%20&%20Cache-Augmented%20Generation%20Architecture%20%28Agent%20EN%29.md) | InfoNCE mutual information bound, Bi-Encoder vs Cross-Encoder, RAG vs CAG, LLM Wiki |
 | **LIB-703** | **07 Agents** | [LLM Agent Cognitive Architecture & Protocols](07_reinforcement_learning_and_agents/LIB-703%20LLM%20Agent%20Cognitive%20Architecture%20&%20Protocols%20%28Agent%20EN%29.md) | ReAct reasoning loops, Plan-and-Solve, structured tool schema |
@@ -149,6 +152,7 @@ Real-world user inputs typically suffer from severe scale and centering drift. N
 | **LIB-904** | **09 Methodology** | [Academic Research Corpus & Literature Synthesis](09_research_methodology/LIB-904%20Academic%20Research%20Corpus%20&%20Literature%20Synthesis%20%28Agent%20EN%29.md) | Literature review methodology, metric verification, and reproduction |
 | **LIB-905** | **09 Methodology** | [Frontier Vision & Multimodal Capstone Blueprints](09_research_methodology/LIB-905%20Frontier%20Vision%20&%20Multimodal%20Capstone%20Blueprints%20%28Agent%20EN%29.md) | Five capstone specifications, full pipelines, NSTC grant templates |
 | **LIB-906** | **09 Methodology** | [LLM Conversational Epistemic Revision](09_research_methodology/LIB-906%20LLM%20Conversational%20Epistemic%20Revision%20%28Agent%20EN%29.md) | Epistemic calibration under conversational challenge, sycophancy vs stubbornness |
+| **LIB-907** | **09 Methodology** | [Research Gap Discovery, Novelty Collision & Topic Selection](09_research_methodology/LIB-907%20Research%20Gap%20Discovery,%20Novelty%20Collision%20&%20Topic%20Selection%20%28Agent%20EN%29.md) | 15-col collision audit, substitution test, low-compute pilot gates |
 
 ---
 

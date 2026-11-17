@@ -13,6 +13,7 @@ const isZh = lang === 'zh';
 
 const { zh, en } = loadLibraryArticles();
 const articlesMap = isZh ? zh : en;
+const volumeCount = articlesMap.size;
 const alternateUrl = isZh ? `${base}/en/paths/` : `${base}/zh/paths/`;
 
 const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string; span: string }> = {
@@ -228,8 +229,8 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
                 <h2 class="roadmap-title">{isZh ? '全館知識依賴總覽圖 (Global Knowledge Map)' : 'Global Knowledge Dependency Map'}</h2>
                 <span class="roadmap-desc">
                   {isZh
-                    ? '點擊展開全館 28 篇典籍之完整先後相依全景圖（參考用）。'
-                    : 'Expand to view the complete 28-volume prerequisite topology diagram.'}
+                    ? `點擊展開全館 ${volumeCount} 篇典籍之完整先後相依全景圖（參考用）。`
+                    : `Expand to view the complete ${volumeCount}-volume prerequisite topology diagram.`}
                 </span>
               </div>
             </div>
@@ -246,10 +247,10 @@ const trackMeta: Record<string, { shortZh: string; shortEn: string; icon: string
       <!-- Catalog CTA -->
       <div class="paths-bottom-cta">
         <h3>{isZh ? '想依主題自由檢索全部典籍？' : 'Looking for a specific topic?'}</h3>
-        <p>{isZh ? '可至典籍目錄依分館、關鍵字或編號探索全館 28 篇課程。' : 'Browse the full 28-volume catalog by wing, tag, or call number.'}</p>
+        <p>{isZh ? `可至典籍目錄依分館、關鍵字或編號探索全館 ${volumeCount} 篇課程。` : `Browse the full ${volumeCount}-volume catalog by wing, tag, or call number.`}</p>
         <a href={`${base}/${lang}/library/`} class="btn-track-primary" style="margin-top: 0.75rem;">
           <Icon name="book-open" size={16} />
-          <span>{isZh ? '前往典籍目錄 (28 篇)' : 'Browse Catalog (28 Volumes)'}</span>
+          <span>{isZh ? `前往典籍目錄 (${volumeCount} 篇)` : `Browse Catalog (${volumeCount} Volumes)`}</span>
         </a>
       </div>
     </div>

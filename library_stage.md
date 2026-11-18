@@ -30,7 +30,11 @@
 
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
-- **交接基準 Commit SHA**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（隨每次 PR 合併自動同步更新於 `reports/library_integrity.json`）
+- **版本溯源與基準區隔（不硬編碼流動 HEAD）**：
+  - **Historical Snapshot Commit**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（僅為早期 28 卷階段歷史基準快照，非現行 32 卷版本）。
+  - **Current Repository HEAD**：執行驗證或建置當下之工作樹頂端（動態由 `git rev-parse HEAD` 取得，不於本交接文件硬編碼以免後續提交失效；執行 Benchmark 時另記錄於 `reports/library_rag_benchmark.json` 之 `benchmark_execution_commit_sha`）。
+  - **Corpus Source Commit**：最後一次修改 `LIB-*.md` 知識本體的 Commit SHA（由 `git log -n 1 --pretty=format:%H -- :(glob)**/LIB-*.md` 取得，固定記錄於三份報告之 `corpus_source_commit_sha`，同時以 `corpus_working_tree_dirty` 與 `+dirty` 後綴阻絕未提交狀態冒充已提交版）。
+  - **Deterministic Corpus SHA-256**：由全庫 64 份 `LIB-*.md` 位元組決定性計算並寫入 `reports/library_integrity.json`、`reports/library_rag_index.json` 與 `reports/library_rag_benchmark.json` 之 `corpus_sha256` 欄位供即時雜湊比對。
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：32 卷（繁體中文 32 卷，英文對齊 32 卷，共 64 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
 - **決策合約不變量**：精確維持 130 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。

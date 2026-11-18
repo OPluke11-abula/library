@@ -21,3 +21,7 @@ jobs:
       - name: Run Library Integrity Validator
         run: |
           python scripts/validate_library.py
+
+      - name: Run Provenance Regression Test
+        run: |
+          python -m unittest tests/test_provenance_regression.py

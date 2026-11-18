@@ -115,8 +115,8 @@ $$P(u, v) = \exp\left(-\frac{u^2}{2\sigma_u^2} - \frac{v^2}{2\sigma_v^2}\right)$
 ### 6. 前沿突破三：固定少視角 RGB (Sparse-View 3DGS) 之幾何可靠性與單目深度先驗識別性邊界 (`D-project` T-01 研究軸線) `[FACT]` `[DERIVATION]` `[SAFETY_BOUND]`
 當輸入從密集數十張照片極限縮減為 **固定少量 RGB 照片（如 $K \in [2, 8]$ 視角）、不可補拍、且不追加任何實體深度感測器（LiDAR / RGB-D）** 時，標準 3DGS 會在欠約束區域產生嚴重過擬合與「浮空偽影（Floaters）」，使渲染新視角 PSNR 與真實 3D 表面幾何雙雙崩潰。近期研究常引入單目深度先驗（Monocular Depth Prior）提供幾何監督，但這帶來三大致命識別性與實驗協定問題：
 1. **單目深度先驗之仿射歧義與局部失真（Affine Ambiguity & Prior Fallibility）** `[DERIVATION]`：
-   單目深度估計模型僅輸出相對深度 $d_{\mathrm{mono}}(u, v)$，與真實度量深度 $Z_{\mathrm{true}}(u, v)$ 之間至少存在局部／全域空間變化之仿射校正（Spatially Varying Affine Rectification，參見 AffineGS `arXiv:2611.07709`）：
-   $$\hat{Z}(u, v) = a(u, v) \cdot d_{\mathrm{mono}}(u, v) + b(u, v)$$
+   單目深度估計模型僅輸出相對深度或視差 $d_{\mathrm{mono}}(u, v)$，與真實度量深度 $\mathcal{D}(u, v)$ 之間須透過空間變化之局部仿射場校正——例如 `AffineGS` (`arXiv:2611.07709`) 對逆視差建模 $\frac{1}{d_{\mathrm{mono}}(u,v)} = \alpha(u,v)\mathcal{D}(u,v) + \beta(u,v)$（換算校正深度 $\hat{\mathcal{D}} = \frac{1 - \beta_{\mathrm{smooth}} d_{\mathrm{mono}}}{\alpha_{\mathrm{smooth}} d_{\mathrm{mono}}}$），或於深度空間建模 $\hat{Z}(u, v) = a(u, v)\,Z_{\mathrm{rel}}(u, v) + b(u, v)$（詳見 `LIB-507` 數學條件剖析）：
+   $$\hat{\mathcal{D}}(u, v) = \frac{1 - \beta_{\mathrm{smooth}}(u, v)\, d_{\mathrm{mono}}(u, v)}{\alpha_{\mathrm{smooth}}(u, v)\, d_{\mathrm{mono}}(u, v)}$$
    **關鍵認識論防線**：AI 從既有 RGB 推估之 Depth Prior **僅是可錯誤的候選監督訊號，絕非幾何真值（Ground Truth）** `[SAFETY_BOUND]`！
 2. **參數可辨識性 $\neq$ 幾何正確性（Identifiability vs. Correctness）** `[FACT]` `[HYPOTHESIS]`：
    當觀測視角稀疏時，局部仿射參數 $(a, b)$ 在低紋理或單視角覆蓋區域可能出現零空間非唯一性（Non-Uniqueness）；然而：

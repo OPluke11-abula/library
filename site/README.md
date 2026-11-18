@@ -6,7 +6,7 @@
 
 ## 1. 架構定位與真理原則 (Architectural SSOT)
 
-- **單一真理來源 (Single Source of Truth, SSOT)**：儲存庫根目錄的 10 個知識分館（`00_*` 至 `09_*`）與 `en/` 鏡像資料夾中的 28 對（共 56 篇）核心 Markdown 筆記為不可動搖的內容本體。
+- **單一真理來源 (Single Source of Truth, SSOT)**：儲存庫根目錄的 10 個知識分館（`00_*` 至 `09_*`）與 `en/` 鏡像資料夾中的 32 對（共 64 個雙語檔案）核心 Markdown 筆記為不可動搖的內容本體。
 - **純靜態呈現層 (Presentation Layer)**：`site/` 不複製、不修改、不分裂原始筆記，而是透過 `src/lib/library.ts` 直接讀取根目錄 Markdown 來源，動態解析 YAML Frontmatter、KaTeX 數學式、Obsidian 雙括號 WikiLinks 與 SVG 圖表，輸出純靜態 HTML。
 
 ---

@@ -5,7 +5,7 @@
   "git_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
   "corpus_source_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
   "corpus_working_tree_dirty": false,
-  "corpus_sha256": "8a845c1f3bd6e1a0da5315ddc84b029a1d3b82f71f2aa533ee1b0f212dd85321",
+  "corpus_sha256": "249647dae92379ebffd7fb97c551fbe9f80b6704b20e362e8a097af5257a32d2",
   "volume_count": 32,
   "bilingual_file_count": 64,
   "topological_order": [

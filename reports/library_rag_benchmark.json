@@ -1,10 +1,10 @@
 {
-  "benchmark_timestamp": "2026-11-18T15:43:38Z",
+  "benchmark_timestamp": "2026-11-18T17:03:06Z",
   "provenance_version": "2.0",
   "generation_mode": "clean_committed_corpus",
-  "benchmark_execution_commit_sha": "64845c50e6b341567c2f5f4f2fa2ebd8a1281589",
-  "git_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
-  "corpus_source_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
+  "benchmark_execution_commit_sha": "666b43c2835ab4b9108f94a372a61dc6af3b0b4b",
+  "git_commit_sha": "62178eccb7424e52e1c5484d3bff8d93df20e6fa",
+  "corpus_source_commit_sha": "62178eccb7424e52e1c5484d3bff8d93df20e6fa",
   "corpus_working_tree_dirty": false,
   "corpus_sha256": "249647dae92379ebffd7fb97c551fbe9f80b6704b20e362e8a097af5257a32d2",
   "corpus_volumes": 32,
@@ -34,8 +34,8 @@
       "exact_rule_recall_at_5": 0.625,
       "chunk_rule_mrr_at_5": 0.5938,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 23.6,
-      "p95_latency_ms": 43.76
+      "mean_latency_ms": 22.57,
+      "p95_latency_ms": 39.67
     },
     "bm25_only": {
       "queries_evaluated": 16,
@@ -47,8 +47,8 @@
       "exact_rule_recall_at_5": 0.9375,
       "chunk_rule_mrr_at_5": 0.875,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 23.89,
-      "p95_latency_ms": 41.69
+      "mean_latency_ms": 22.34,
+      "p95_latency_ms": 47.89
     },
     "hybrid_rrf": {
       "queries_evaluated": 16,
@@ -60,8 +60,8 @@
       "exact_rule_recall_at_5": 1.0,
       "chunk_rule_mrr_at_5": 0.9375,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 48.63,
-      "p95_latency_ms": 97.41
+      "mean_latency_ms": 42.43,
+      "p95_latency_ms": 78.75
     }
   },
   "golden_non_leaked_subset_q8_q16": {
@@ -75,8 +75,8 @@
       "exact_rule_recall_at_5": 0.3333,
       "chunk_rule_mrr_at_5": 0.3333,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 23.07,
-      "p95_latency_ms": 38.88
+      "mean_latency_ms": 19.64,
+      "p95_latency_ms": 30.45
     },
     "bm25_only": {
       "queries_evaluated": 9,
@@ -88,8 +88,8 @@
       "exact_rule_recall_at_5": 0.8889,
       "chunk_rule_mrr_at_5": 0.8333,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 34.02,
-      "p95_latency_ms": 91.45
+      "mean_latency_ms": 20.19,
+      "p95_latency_ms": 30.75
     },
     "hybrid_rrf": {
       "queries_evaluated": 9,
@@ -101,8 +101,8 @@
       "exact_rule_recall_at_5": 1.0,
       "chunk_rule_mrr_at_5": 0.9444,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 46.06,
-      "p95_latency_ms": 142.82
+      "mean_latency_ms": 37.14,
+      "p95_latency_ms": 78.51
     }
   },
   "independent_holdout_results": {
@@ -119,8 +119,8 @@
         "exact_rule_recall_at_5": 0.5,
         "chunk_rule_mrr_at_5": 0.5,
         "volume_invariant_recall_at_5": 0.8214,
-        "mean_latency_ms": 26.61,
-        "p95_latency_ms": 46.08,
+        "mean_latency_ms": 24.23,
+        "p95_latency_ms": 42.78,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -134,8 +134,8 @@
         "exact_rule_recall_at_5": 0.8929,
         "chunk_rule_mrr_at_5": 0.8304,
         "volume_invariant_recall_at_5": 1.0,
-        "mean_latency_ms": 26.67,
-        "p95_latency_ms": 50.43,
+        "mean_latency_ms": 24.52,
+        "p95_latency_ms": 37.88,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -149,8 +149,8 @@
         "exact_rule_recall_at_5": 0.9643,
         "chunk_rule_mrr_at_5": 0.9018,
         "volume_invariant_recall_at_5": 1.0,
-        "mean_latency_ms": 74.43,
-        "p95_latency_ms": 101.86,
+        "mean_latency_ms": 69.74,
+        "p95_latency_ms": 96.79,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       }
@@ -167,8 +167,8 @@
           "exact_rule_recall_at_5": 0.875,
           "chunk_rule_mrr_at_5": 0.875,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 30.98,
-          "p95_latency_ms": 48.57
+          "mean_latency_ms": 28.87,
+          "p95_latency_ms": 37.96
         },
         "hybrid_rrf": {
           "queries_evaluated": 8,
@@ -180,8 +180,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9375,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 81.65,
-          "p95_latency_ms": 105.64
+          "mean_latency_ms": 77.52,
+          "p95_latency_ms": 99.97
         }
       },
       "synonym_paraphrase": {
@@ -195,8 +195,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 22.13,
-          "p95_latency_ms": 34.32
+          "mean_latency_ms": 23.17,
+          "p95_latency_ms": 35.35
         },
         "hybrid_rrf": {
           "queries_evaluated": 5,
@@ -208,8 +208,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 70.86,
-          "p95_latency_ms": 94.02
+          "mean_latency_ms": 69.88,
+          "p95_latency_ms": 98.23
         }
       },
       "multi_hop": {
@@ -223,8 +223,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.5625,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 27.67,
-          "p95_latency_ms": 39.97,
+          "mean_latency_ms": 26.34,
+          "p95_latency_ms": 37.48,
           "multi_hop_subgraph_recall_at_5": 1.0
         },
         "hybrid_rrf": {
@@ -237,8 +237,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.5625,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 81.26,
-          "p95_latency_ms": 99.19,
+          "mean_latency_ms": 73.28,
+          "p95_latency_ms": 90.87,
           "multi_hop_subgraph_recall_at_5": 1.0
         }
       },
@@ -253,8 +253,8 @@
           "exact_rule_recall_at_5": 0.8,
           "chunk_rule_mrr_at_5": 0.7,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 23.9,
-          "p95_latency_ms": 37.34
+          "mean_latency_ms": 23.72,
+          "p95_latency_ms": 37.09
         },
         "hybrid_rrf": {
           "queries_evaluated": 5,
@@ -266,8 +266,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 77.8,
-          "p95_latency_ms": 107.05
+          "mean_latency_ms": 69.16,
+          "p95_latency_ms": 94.06
         }
       },
       "unanswerable": {
@@ -281,8 +281,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 24.59,
-          "p95_latency_ms": 33.97,
+          "mean_latency_ms": 23.31,
+          "p95_latency_ms": 33.1,
           "unanswerable_abstain_accuracy": 1.0
         },
         "hybrid_rrf": {
@@ -295,8 +295,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 74.1,
-          "p95_latency_ms": 104.22,
+          "mean_latency_ms": 66.58,
+          "p95_latency_ms": 86.82,
           "unanswerable_abstain_accuracy": 1.0
         }
       },
@@ -311,8 +311,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9167,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 25.93,
-          "p95_latency_ms": 32.09
+          "mean_latency_ms": 23.4,
+          "p95_latency_ms": 30.98
         },
         "hybrid_rrf": {
           "queries_evaluated": 6,
@@ -324,8 +324,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 64.82,
-          "p95_latency_ms": 92.35
+          "mean_latency_ms": 59.88,
+          "p95_latency_ms": 89.08
         }
       }
     }

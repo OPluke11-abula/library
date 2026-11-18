@@ -15,8 +15,8 @@ math_foundations:
   - First-Hit Rendering Abstraction & SH Angular Capacity Billboard Failure Theorem
   - Planar Surfel / Continuous Opacity Fields & View-Consistent Alpha Sorting
 hardware_target:
-  - Consumer 8GB GPU Memory-Capped Primitives (N <= 300k) & Sparse Adam Kernels
-  - Single-GPU 200-Second Multi-Resolution Training Schedules
+  - Low-VRAM Local Execution Profile (e.g., 8GB Laptop Profile Capped at N <= 300k; NOT a Global Research Ceiling)
+  - Single-GPU Cloud Environments (16GB T4 / 24GB L4) & 200-Second Multi-Resolution Schedules
 created: 2026-11-17
 author: Luke
 tags:
@@ -52,7 +52,7 @@ successors:
 
 1. **原始克隆／分裂的梯度抵消盲區**：原始 3DGS 靠追蹤位置梯度大小決定高斯要不要一分為二。若一顆大高斯覆蓋高頻細節區，左半邊被拉向右、右半邊被拉向左——兩股大小相等方向相反的梯度加總接近零！大高斯因此永遠拒絕分裂，留下模糊殘影（**Gradient Collision**，`AbsGS`, CVPR 2024） `[LITERATURE_RESULT]`。
 2. **「會變魔術的錯誤看板（Billboard Illusion）」與真實場景界線**：在合成或受控高頻紋理視差條件下，若給予錯位平坦高斯牆面過高「隨視角變色能力」（高階球諧函數 SH），模型可靠角向變色背誦空間紋理，在**高 PSNR 下隱藏錯誤 3D 形狀**；**然而原論文（Wang & Miller, ECCV 2026）亦明確報告：在多數真實世界拍攝資料集與一般空間紋理下，即使開啟高階 SH，重建仍能維持表面一致性（未普遍觀察到看板塌陷）** `[LITERATURE_RESULT]`。因此「真實高光/細結構場景下是否仍存在特定 billboard 可辨識失效」屬待驗證假說，不得將合成反例直接宣稱為真實場景普遍失效 `[SAFETY_BOUND]`。
-3. **失控繁殖與顯存炸彈**：原始 3DGS 對原語總數沒有硬上限，複雜場景隨便長到 300 萬～500 萬顆高斯，直接撐爆 8GB 筆電顯存；反之若強行暴力刪點（Coreset 理論已證明一般設定下不存在非平凡乘法 Coreset），細小電線與高曲率結構極易率先流失 `[LITERATURE_RESULT]`。
+3. **無上限繁殖與低顯存本地 Profile 差異**：原始 3DGS 對原語總數沒有硬上限，高解析複雜場景可增長至數百萬顆高斯而超出消費級 `8GB` 筆電本地執行邊界（**此僅為本機執行條件限制，非淘汰 3DGS 研究題目之全域規則，實際研究可於 `16GB/24GB` 單卡雲端執行** `[DESIGN_DECISION]`）；反之在受限顯存下若強行暴力刪點（Coreset 理論已證明一般設定下不存在非平凡乘法 Coreset），細小電線與高曲率結構極易率先流失 `[LITERATURE_RESULT]`。
 
 ---
 
@@ -91,13 +91,15 @@ Wang & Miller（ECCV 2026, *When 3D Gaussian Splatting Recovers Real Surfaces*, 
 
 ---
 
-## 三、⚙️ 計算機體系結構與硬體資源約束：8GB VRAM 原語上限與優化器比較
+## 三、⚙️ 計算機體系結構與硬體資源約束：低顯存執行剖面（Non-Global）與優化器比較
 
-| 優化範式 / 基準 | 顯存關鍵瓶頸 | 原語數量與時間尺度（區分作者回報 vs. 估算 / 未實測） | 8GB 筆電／單卡雲端執行守則 |
+> **算力範圍限定聲明 `[DESIGN_DECISION]` `[SAFETY_BOUND]`**：**Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** 下表中 $N_{\max} \le 300\text{k}$ 與 `8 GB` 顯存封頂**僅適用於受限低顯存本機執行 Profile（Low-VRAM Execution Profile）**；若研究演算法本身需 `12 / 16 / 24 GB` VRAM 而可於單張雲端 GPU（如 Colab T4/L4）驗證，不得以低顯存本機剖面作為所有 3DGS 研究的通用上限或淘汰門檻。
+
+| 優化範式 / 基準 | 顯存關鍵瓶頸 | 原語數量與時間尺度（區分 `AUTHOR_REPORTED` vs. `TEAM_ESTIMATE` / `NOT_RUN / UNVERIFIED`） | 低顯存本地 Profile vs. 單卡雲端執行守則 |
 | :--- | :--- | :--- | :--- |
-| **Vanilla 3DGS / 2DGS** | 無限制 Clone/Split 導致數百萬點梯度緩衝 + Radix Sort 爆顯存 | 數百萬點；文獻估計視場景約 `10–40 min`（本機環境 **`UNVERIFIED`**） | 必須手動設定原語總數軟硬上限（例如 $N_{\max} \le 300\text{k}$）或降解析評估 `[SAFETY_BOUND]` |
-| **Taming 3DGS / MCMC** | 固定張量陣列可預先配置 VRAM，Sparse Adam 減少零梯度寫回頻寬 | 固定預算（可低至數十萬點），作者回報約 `~4–5×` 快於原版 `[LITERATURE_RESULT]` | **友善 `<= 8GB` 環境**：顯存用量穩定可預測；實際單卡跑時仍須標註為實測或估算 `[DESIGN_DECISION]` |
-| **DashGaussian** | 前期低解析度節省 Rasterizer Tile Shared Memory 與梯度張量尺寸 | 作者論文報告於單卡消費級 GPU 約 **`~200 秒`**（`AUTHOR_REPORTED`）`[LITERATURE_RESULT]` | 快速迭代消融理想基線，須額外檢驗早期低頻混疊錯誤固化 |
+| **Vanilla 3DGS / 2DGS** | 無限制 Clone/Split 導致數百萬點梯度緩衝 + Radix Sort 高顯存壓力 | 依場景複雜度劇烈變化：LLFF 3-view 於 `RTX 3090 Ti` 報告 **`2.5 min / 2 GB`**（`CoR-GS` Table 5, `AUTHOR_REPORTED`）；較大型密集場景常見 **`10–40 min`** 範圍屬 **`TEAM_ESTIMATE` / 本機 `NOT_RUN / UNVERIFIED`** `[DESIGN_DECISION]` | 僅於 **`<= 8GB` 受限執行剖面** 建議設定原語上限（例如 $N_{\max} \le 300\text{k}$）或降解析運行 `[SAFETY_BOUND]`；不限制 `16–24GB` 單卡雲端完整重現 |
+| **Taming 3DGS / MCMC** | 固定張量陣列可預先配置 VRAM，Sparse Adam 減少零梯度寫回頻寬 | 固定預算（視場景配置），原論文於 budgeted setting 報告約 **`4–5×`** 精簡與加速（`AUTHOR_REPORTED` `[LITERATURE_RESULT]`） | **對低顯存執行剖面特別友善**：顯存用量穩定可預測；實際單卡跑時仍須標註實測或估算 `[DESIGN_DECISION]` |
+| **DashGaussian** | 前期低解析度節省 Rasterizer Tile Shared Memory 與梯度張量尺寸 | 作者論文報告（`arXiv:2503.18402`）於單張消費級 GPU 達成 **`~200 秒`（平均加速 `45.7%`）**（`AUTHOR_REPORTED` `[LITERATURE_RESULT]`） | 快速迭代消融參考基線，須額外檢驗早期低頻混疊錯誤固化；本機／Colab 實際跑時未實跑前維持 `NOT_RUN / UNVERIFIED` |
 | **3DGS-LM (二階優化)** | Levenberg-Marquardt Jacobian Cache 需額外 HBM 容量（採 Matrix-free 緩解） | 局部極速收斂 | 稀疏初始化或極大相機位移下容易陷入不良非凸局部極小 `[LITERATURE_RESULT]` |
 
 ---
@@ -146,7 +148,7 @@ def simulate_billboard_parallax_signature(
 
 
 def check_vram_primitive_budget(n_gaussians: int, sh_degree: int, vram_limit_gb: float = 8.0) -> float:
-    """估算 3DGS + Adam 一階/二階動量在訓練期之原語狀態顯存佔用 (GB) 並強制封頂保護。"""
+    """依可配置 VRAM 上限（預設 8GB 為低顯存本地 Profile 示例）估算 3DGS + Adam 原語狀態顯存佔用 (GB)。"""
     sh_coeffs = (sh_degree + 1) ** 2 * 3
     params_per_gs = 3 + 4 + 3 + 1 + sh_coeffs  # mu, quat, scale, opacity, SH
     # FP32 權重 + 梯度 + Adam (m, v) 共 4 份拷貝
@@ -172,12 +174,12 @@ if __name__ == "__main__":
 
 ## 五、🤖 AI Agent 推論協議與決策不變量 (Agent Invariants & Actionable Contracts)
 
-### [RULE-508-01] 消費級顯存與原語上限強制封頂合約 (VRAM & Primitive Cap Budget Invariant)
+### [RULE-508-01] 受限低顯存執行剖面原語預算與顯存記錄合約 (Scoped Low-VRAM Execution Profile & Peak VRAM Guard)
 - **合約等級**: `RESOURCE_CONSTRAINT`
-- **前置條件**: 在 `<= 8 GB VRAM` 筆電或受限雲端單卡環境執行 3DGS 訓練或稠密化消融實驗。
+- **前置條件**: 僅當刻意在 **受限低顯存本機剖面（`<= 8 GB VRAM` Local Execution Profile）** 執行 3DGS 訓練或稠密化消融實驗（本規則**不**限制可於 `16–24 GB` 單卡雲端執行的 3DGS 研究，亦非選題淘汰標準）。
 - **量化決策邊界**:
-  - 訓練腳本必須顯式配置最大原語數量上限（例如標準場 $N_{\max} \le 300{,}000$，參見 `Taming-3DGS` / `3DGS-MCMC` 預算原則）並記錄峰值 GPU 記憶體佔用（Peak Allocated VRAM） `[SAFETY_BOUND]`。
-  - 禁止未加預算封頂直接運行無上限克隆分裂腳本。
+  - 於低顯存執行剖面運行時，訓練腳本必須顯式配置該剖面適用之原語數量上限（例如 $N_{\max} \le 300{,}000$，參見 `Taming-3DGS` / `3DGS-MCMC` 預算原則）並記錄峰值 GPU 記憶體佔用（Peak Allocated VRAM） `[SAFETY_BOUND]`。
+  - 若需不加 $N_{\max} \le 300{,}000$ 封頂之完整場景重建以確保科學效度，應依 `LIB-907` 規劃遷移至單張雲端 GPU 執行，而非草率判定 `NO-GO` `[DESIGN_DECISION]`。
 
 ### [RULE-508-02] 角向球諧容量與假看板表面分離檢驗合約 (SH Angular Capacity & Surface Disentanglement Invariant)
 - **合約等級**: `CRITICAL_INVARIANT`

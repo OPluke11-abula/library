@@ -52,7 +52,7 @@ successors: []
 研究新手與 AI 研究助理最容易犯三個致命錯誤 `[FACT]`：
 1. **讀完一篇基準論文就以為找到世界唯一缺口**：把某篇 Anchor Paper 的限制條件當作「學界還沒解決」，卻沒去查同年 CVPR/ECCV/NeurIPS 是否已經發了兩篇專修此坑的論文——直接產生 **Novelty Collision（撞題沈沒成本）** `[DESIGN_DECISION]`。
 2. **先想「要改哪個 Loss / 加什麼模組」，不先證偽失效是否存在**：把假設性退化當既成事實，砸數週寫好複雜正則項與新網路，跑起來才發現原始方法根本沒出現宣稱的那個錯，或者基準開源程式自己就修掉了 `[FACT]`。
-3. **用「頂會大伺服器」的假設幫只有 4–8GB 顯存的機器排程**：忘記單場訓練要 2 小時或 24GB VRAM 的真實瓶頸，導致一個消融矩陣還沒跑完，雲端配額與學期截止日就先耗盡 `[SAFETY_BOUND]`。
+3. **混淆「本機筆電顯存現況」與「研究選題可行性」**：既不能忽略本機 `4GB–8GB VRAM` 的實作條件盲排重算力掃描，**亦嚴禁將本機顯存直接當作全域題目淘汰門檻（`Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold`）** `[SAFETY_BOUND]`。
 
 ---
 
@@ -103,12 +103,22 @@ successors: []
 
 ---
 
-## 三、⚙️ 低算力異質硬體調度設計原則 (`4GB / 8GB / 單卡雲端配額`)
+## 三、⚙️ 異質硬體調度原則與算力淘汰防錯邊界 (`4GB / 8GB 本機` vs. `單卡雲端`)
 
-針對多成員異質受限算力池（輕量 4GB 筆電、中階 8GB 獨顯筆電、純 CPU 文書機與每月約 200 計算點上限的免費／基礎雲端單卡），高效率研究管線必須採 **「運算任務嚴格分級流（Tiered Offloading）」** `[DESIGN_DECISION]`：
-1. **零重訓特徵／張量快取分離（Inference-Cache-then-CPU-Ablation）**：大型 2D 偵測器或基礎模型僅做極少次數前向推論並匯出輕量張量（`logits` / `edge_dists` / `depths`），後續統計校準、Bootstrap 與超參數搜尋全面降維回 CPU `NumPy/PyTorch` 進行（每日可跑 `20+` 次無損實驗，`0` 雲端配額消耗） `[DESIGN_DECISION]`。
-2. **CUDA 重編譯任務隔離在單一驗證節點**：如自訂 3DGS 光柵器只在能編譯之雲端 16GB T4/L4 或 8GB 縮減預算環境跑單種子驗證，每回合須設計明確的 **壁鐘時間熔斷閾值（如單場預期 `> 60 min` 即判不可快速迭代而調整規模或轉向）** `[SAFETY_BOUND]`。
-3. **停止規則三態契約 (`GO / HOLD / NO-GO`)**：每個 Minimal Pilot 在啟動前必須預設數值化轉向線——避免無限加參數挽救一個方向錯的點子 `[DESIGN_DECISION]`。
+> **核心算力政策準則（Compute Policy Principle） `[DESIGN_DECISION]` `[SAFETY_BOUND]`**：
+> **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.**
+> 研究需要 `12GB`、`16GB` 或 `24GB VRAM` 並不代表可直接判定 `NO-GO`。凡擬以算力／成本為由做出任何 `NO-GO` 結論前，必須**依可追溯資源與實驗成本分析**完整回答以下六題（**嚴禁** `VRAM > 8GB => NO_GO`、`Cannot run locally => REJECT`、`3DGS training is expensive => REJECT`、`Colab required => REJECT`）：
+> 1. **雲端單卡取得性**：是否可在實際取得的單張雲端 GPU（如 Colab T4 / L4）執行？
+> 2. **權重複用評估**：是否一定要從頭完整訓練，抑或可採用 Checkpoint 或 Pretrained Models？
+> 3. **全套消融總成本**：Baseline 與必要關鍵 Ablation 的總算力與配額成本為何？
+> 4. **縮減實驗可行性**：能否合理縮減資料規模、場景數、解析度或實驗設定進行先導檢驗？
+> 5. **科學效度保持性**：縮減設定是否仍保留核心機制的科學可驗證性（未破壞研究問題本身）？
+> 6. **時程與配額足額度**：研究團隊剩餘時程與實際雲端配額是否足以支撐？
+
+針對多成員異質算力池（輕量 4GB／中階 8GB 本機筆電與雲端單卡配額，未實跑測試一律維持 `NOT_RUN / UNVERIFIED`），高效率研究管線可採 **「運算任務分級調度流（Tiered Offloading）」** `[DESIGN_DECISION]`：
+1. **零重訓特徵／張量快取分離（Inference-Cache-then-CPU-Ablation）**：大型 2D 偵測器或基礎模型僅做極少次數前向推論並匯出輕量張量（`logits` / `edge_dists` / `depths`），後續統計校準、Bootstrap 與超參數搜尋降維回 CPU `NumPy/PyTorch` 進行（可高頻迭代且節省雲端配額） `[DESIGN_DECISION]`。
+2. **CUDA 重編譯任務配置與「示例性先導預算」**：自訂 3DGS 光柵器可在能編譯之雲端單卡（如 16GB T4 / 24GB L4）或低顯存縮減配置執行單種子驗證；每回先導實驗可依任務特性自訂**示例性／可調整的實驗時間預算（Illustrative / Configurable Pilot Budget，例如僅作參考示意的 `60 min` 單回熔斷閾值——其目的為提醒縮減設定或改至雲端單卡執行，絕非適用於所有研究題目的固定 Hard Gate）** `[SAFETY_BOUND]`。
+3. **停止規則三態契約 (`GO / HOLD / NO-GO`)**：每個 Minimal Pilot 在啟動前應預設明確的數值化失敗訊號檢驗規則；超時預算觸發 **`HOLD`（調整規模或遷移單卡雲端）** 而非未經六問評估即草率 `NO-GO` `[DESIGN_DECISION]`。
 
 ---
 
@@ -180,9 +190,9 @@ class ResearchGateAuditor:
         if pilot.collision_verdict == "DIRECT_COLLISION_DO_NOT_PURSUE":
             return {"decision": "NO_GO", "reason": "三維方法撞題，禁止強行重新包裝"}
 
-        # Rule 3: 超出低算力迭代時間預算
+        # Rule 3: 超出當次預設之示例性／可調整時間預算 -> 僅觸發 HOLD（縮減規模或移至雲端單卡），絕不直接淘汰研究題目
         if pilot.estimated_minutes_per_run > pilot.max_budget_minutes_per_run:
-            return {"decision": "HOLD", "reason": "單回預估超時，須縮減預算或移至單卡雲端分階段驗證"}
+            return {"decision": "HOLD", "reason": "超出預設先導時間預算，應評估縮減設定或改於雲端單卡執行（非題目 NO-GO）"}
 
         # Rule 4: 實證尚未執行前只准處於待啟動或有條件核准籌備態
         if pilot.execution_state != "REPRODUCED_BY_TEAM":
@@ -280,12 +290,12 @@ if __name__ == "__main__":
   - 每個 Minimal Pilot 必須於執行前寫明 Baseline、無洩漏數據切分、主要失敗訊號指標、可重現相依清單以及精確之 `GO / HOLD / NO-GO` 數值翻盤閾值 `[DESIGN_DECISION]`。
   - 須嚴格遵守 `P0 -> G1 -> G2 -> G3 -> Novelty Gate` 次序；若 `G2` 顯示目標失效並不存在或已被強基準涵蓋，立即執行 `NO-GO` 停損。
 
-### [RULE-907-04] 算力預算來源標記與低顯存硬體真實性合約 (Compute Provenance & Constrained Hardware Truth Invariant)
+### [RULE-907-04] 算力預算來源標記、硬體事實與禁止過早淘汰合約 (Compute Provenance, Hardware Truth & Non-Elimination Invariant)
 - **合約等級**: `RESOURCE_CONSTRAINT`
-- **前置條件**: 為研究團隊規劃多場景訓練排程、消融次數或評估實驗迭代速度。
+- **前置條件**: 評估多場景訓練排程、消融成本或團隊本機／雲端單卡算力可行性。
 - **量化決策邊界**:
-  - 嚴禁私自假設具備 `RTX 4090 (24GB)` 或無上限叢集資源（必須精確核對當前可用的 `4GB–8GB` 筆電或單卡有限雲端配額）`[SAFETY_BOUND]`。
-  - 應優先設計「推理張量一次緩存＋CPU／輕量 GPU 快速統計消融」架構，確保持續快速迭代（每日可驗假說且不耗盡月度算力配額）。
+  - **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold**：嚴禁私自假設無限叢集或把實機狀態寫為 `REPRODUCED_BY_TEAM`，**亦嚴禁因本機僅有 `4GB–8GB` VRAM、需使用 Colab 單卡、或需 `12–24GB` VRAM 即直接輸出研究題目 `NO-GO`**；任何資源性 `NO-GO` 必須附帶雲端取得性、Checkpoint 重用、總消融成本與科學保真縮減評估表 `[SAFETY_BOUND]`。
+  - Pilot 時間上限（如 `60 min`）僅作依場景可調整之示例預算（Configurable Budget），超預算只應觸發 `HOLD` 調整驗證剖面，未實跑 GPU 實驗一律維持 `NOT_RUN / UNVERIFIED`；若屬後處理統計分析則優先採「張量一次快取＋CPU 消融」降低配額消耗 `[DESIGN_DECISION]`。
 
 ---
 

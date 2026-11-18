@@ -525,31 +525,47 @@ def validate_all():
                 corpus_hasher.update((rel_p + chr(10)).encode('utf-8'))
                 corpus_hasher.update(docs_map[cid]['path'].read_bytes())
     corpus_sha256 = corpus_hasher.hexdigest()
+    corpus_dirty = False
+    repo_head_sha = 'UNKNOWN'
+    corpus_commit_sha = 'UNKNOWN'
     try:
-        git_sha = subprocess.check_output(
+        repo_head_sha = subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'], cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
+        ).strip() or 'UNKNOWN'
+        corpus_commit_sha = subprocess.check_output(
             ['git', 'log', '-n', '1', '--pretty=format:%H', '--', ':(glob)**/LIB-*.md'],
             cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
-        ).strip() or subprocess.check_output(
-            ['git', 'rev-parse', 'HEAD'], cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
+        ).strip() or repo_head_sha
+        dirty_out = subprocess.check_output(
+            ['git', 'status', '--porcelain', '--', ':(glob)**/LIB-*.md'],
+            cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
         ).strip()
+        corpus_dirty = bool(dirty_out)
     except Exception:
         head_file = ROOT / '.git' / 'HEAD'
-        git_sha = 'UNKNOWN'
         if head_file.exists():
             ref_txt = head_file.read_text(encoding='utf-8').strip()
             if ref_txt.startswith('ref: '):
                 ref_path = ROOT / '.git' / ref_txt[5:]
                 if ref_path.exists():
-                    git_sha = ref_path.read_text(encoding='utf-8').strip()
+                    repo_head_sha = ref_path.read_text(encoding='utf-8').strip()
             elif len(ref_txt) == 40:
-                git_sha = ref_txt
+                repo_head_sha = ref_txt
+        corpus_commit_sha = repo_head_sha
+
+    generation_mode = 'uncommitted_working_tree' if corpus_dirty else 'clean_committed_corpus'
+    effective_commit_sha = f"{corpus_commit_sha}+dirty" if corpus_dirty else corpus_commit_sha
 
     # Output report
     rep_dir = ROOT / 'reports'
     rep_dir.mkdir(exist_ok=True)
     report_data = {
         'status': 'PASS' if not errors else 'FAIL',
-        'git_commit_sha': git_sha,
+        'provenance_version': '2.0',
+        'generation_mode': generation_mode,
+        'git_commit_sha': effective_commit_sha,
+        'corpus_source_commit_sha': corpus_commit_sha,
+        'corpus_working_tree_dirty': corpus_dirty,
         'corpus_sha256': corpus_sha256,
         'volume_count': len(all_call_numbers),
         'bilingual_file_count': len(zh_docs) + len(en_docs),

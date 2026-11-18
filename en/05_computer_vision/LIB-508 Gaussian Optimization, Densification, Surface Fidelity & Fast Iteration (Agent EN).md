@@ -15,8 +15,8 @@ math_foundations:
   - First-Hit Rendering Abstraction & SH Angular Capacity Billboard Failure Theorem
   - Planar Surfel / Continuous Opacity Fields & View-Consistent Alpha Sorting
 hardware_target:
-  - Consumer 8GB GPU Memory-Capped Primitives (N <= 300k) & Sparse Adam Kernels
-  - Single-GPU 200-Second Multi-Resolution Training Schedules
+  - Low-VRAM Local Execution Profile (e.g., 8GB Profile Capped at N <= 300k; NOT a Universal 3DGS Ceiling)
+  - Single-GPU Cloud Environments (16GB T4 / 24GB L4) & 200-Second Multi-Resolution Schedules
 created: 2026-11-17
 author: Luke
 tags:
@@ -51,7 +51,7 @@ successors:
 
 1. **Gradient Collision in Heuristic ADC**: When an oversized Gaussian spans fine textures, opposing view-space pixel gradients cancel vectorially before reaching the splitting threshold, leaving blurry over-reconstructed blobs (`AbsGS`, CVPR 2024) `[LITERATURE_RESULT]`.
 2. **The Displaced Billboard Illusion & Its Real-World Boundary**: Under synthetic/controlled high-frequency parallax setups with unrestricted view-dependent capacity (high SH degree), misplaced opaque Gaussian billboards can memorize spatial texture variations as high-frequency angular functions—achieving high NVS PSNR despite corrupted 3D geometry; **crucially, however, Wang & Miller (ECCV 2026) observed surface-consistent reconstructions on evaluated real-world scenes under standard capture protocols (`[LITERATURE_RESULT]`)**, meaning real-scene failure must be empirically reproduced rather than assumed (`[SAFETY_BOUND]`).
-3. **Unbounded Memory Explosion vs. Structure Starvation**: Vanilla ADC spawns millions of Gaussians unconstrainedly, crashing 8GB VRAM GPUs; Coreset theory (`arXiv:2607.02721`) proves no non-trivial multiplicative 3DGS coreset exists in unrestricted settings, while naive pruning starves thin geometry `[LITERATURE_RESULT]`.
+3. **Unbounded Growth vs. Scoped Low-VRAM Profiles**: Vanilla ADC spawns millions of Gaussians unconstrainedly, exceeding an 8GB laptop execution profile (`Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold`; full-scale baselines can run on `16–24GB` single cloud GPUs `[DESIGN_DECISION]`); Coreset theory (`arXiv:2607.02721`) proves no non-trivial multiplicative 3DGS coreset exists in unrestricted settings, while naive pruning starves thin geometry `[LITERATURE_RESULT]`.
 
 ---
 
@@ -79,9 +79,11 @@ Wang & Miller (`arXiv:2608.30054`, ECCV 2026) formalize a **First-Hit Rendering 
 
 ---
 
-## 3. Systems & Hardware Microarchitecture Alignment (`<= 8 GB` Budgets)
+## 3. Systems & Hardware Microarchitecture Alignment (`Scoped Low-VRAM Profile` vs. `Single Cloud GPU`)
 
-- **State Memory Footprint & Compute Provenance**: Storing 3DGS FP32 weights, gradients, and Adam first/second moments (`(m, v)`) multiplies parameter size by `4x`. Bounding active primitives to $N_{\max} \le 300{,}000$ via constructive budgeting (`Taming-3DGS`) or Sparse Adam keeps state tensors well under consumer 8GB GPU ceilings `[SAFETY_BOUND]` `[DESIGN_DECISION]`. Author-reported speedups (`~200s` DashGaussian, `~4–5x` Taming) vs. unverified single-GPU timings (e.g. `10–40 min` Vanilla estimates) must remain explicitly tagged (`[LITERATURE_RESULT]` vs. `ESTIMATED`/`UNVERIFIED`).
+> **Compute Policy Scope `[DESIGN_DECISION]` `[SAFETY_BOUND]`**: **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** Primitive caps such as $N_{\max} \le 300{,}000$ apply strictly to constrained `<= 8 GB` low-VRAM execution profiles, NOT as a universal ceiling blocking 3DGS topics that require `12–24 GB` on a single cloud GPU.
+
+- **State Memory Footprint & Compute Provenance**: Storing 3DGS FP32 weights, gradients, and Adam first/second moments (`(m, v)`) multiplies parameter size by `4x`. Inside a constrained `<= 8 GB` low-VRAM local execution profile, bounding active primitives (e.g., $N_{\max} \le 300{,}000$ via `Taming-3DGS` or Sparse Adam) prevents local OOM `[SAFETY_BOUND]` `[DESIGN_DECISION]`. Author-reported speedups (`~200s` / `45.7%` avg speedup `DashGaussian`, `4–5x` size & time reduction `Taming 3DGS`, `2.5 min / 2 GB` LLFF 3-view Vanilla 3DGS in `CoR-GS` Table 5 on `RTX 3090 Ti`) MUST be separated from unmeasured heuristic ranges (e.g., general multi-view `10–40 min` Vanilla estimates remain `TEAM_ESTIMATE` / `NOT_RUN / UNVERIFIED` on local/Colab hardware) `[SAFETY_BOUND]`.
 - **Sorting & Rasterization Bottlenecks**: Multi-layer sorting (`StopThePop`) or second-order Jacobian caches (`3DGS-LM`) shift bottlenecks back onto GPU Shared Memory and DRAM bandwidth, requiring strict iso-PSNR runtime comparisons (`RULE-508-04`) `[FACT]`.
 
 ---
@@ -123,7 +125,7 @@ def simulate_billboard_parallax_signature(
 
 
 def check_vram_primitive_budget(n_gaussians: int, sh_degree: int, vram_limit_gb: float = 8.0) -> float:
-    """Estimate 3DGS + Adam FP32 state VRAM footprint (GB) with safety ceiling guard."""
+    """Estimate 3DGS + Adam FP32 state VRAM (GB); default 8.0 GB models a constrained local profile, configurable for 16/24 GB cloud GPUs."""
     sh_coeffs = (sh_degree + 1) ** 2 * 3
     params_per_gs = 3 + 4 + 3 + 1 + sh_coeffs
     total_gb = (n_gaussians * params_per_gs * 4 * 4) / (1024 ** 3)
@@ -148,9 +150,9 @@ if __name__ == "__main__":
 
 ## 5. AI Agent Inference Contracts & System Invariants
 
-### [RULE-508-01] VRAM & Primitive Cap Budget Invariant
+### [RULE-508-01] Scoped Low-VRAM Execution Profile & Peak VRAM Guard
 - **Contract Level**: `RESOURCE_CONSTRAINT`
-- **Specification**: Optimization ablations targeting `<= 8 GB VRAM` hardware MUST enforce explicit primitive upper caps (e.g., $N_{\max} \le 300{,}000$) and log Peak Allocated VRAM `[SAFETY_BOUND]`.
+- **Specification**: Specifically when running under a constrained **consumer `<= 8 GB VRAM` local execution profile**, optimization ablations MUST enforce profile-appropriate primitive caps (e.g., $N_{\max} \le 300{,}000$) and log Peak Allocated VRAM (`[SAFETY_BOUND]`). This scoped hardware profile NEVER serves as a universal ceiling or elimination gate rejecting valid `12–24 GB` 3DGS experiments executable on a single cloud GPU (`LIB-907` `RULE-907-04`) `[DESIGN_DECISION]`.
 
 ### [RULE-508-02] SH Angular Capacity & Surface Disentanglement Invariant
 - **Contract Level**: `CRITICAL_INVARIANT`

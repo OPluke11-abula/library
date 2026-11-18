@@ -200,20 +200,37 @@ class LibraryChunk:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-def get_git_commit_sha(root: Path = ROOT) -> str:
-    """Returns the latest Git commit SHA that modified the 64 bilingual corpus volumes (avoiding self-referential commit hash churn)."""
+def get_git_provenance(root: Path = ROOT) -> Dict[str, Any]:
+    """
+    Returns deterministic corpus-scoped Git provenance without circular commit hash churn.
+    Explicitly detects uncommitted working-tree changes to LIB-*.md (`+dirty`) so an older
+    ancestor commit can never be mistaken for an uncommitted corpus snapshot.
+    """
+    repo_head_sha = "UNKNOWN"
+    corpus_commit_sha = "UNKNOWN"
+    corpus_dirty = False
     try:
-        sha = subprocess.check_output(
-            ["git", "log", "-n", "1", "--pretty=format:%H", "--", ":(glob)**/LIB-*.md"],
+        repo_head_sha = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(root), stderr=subprocess.DEVNULL, text=True)
+            .strip()
+            or "UNKNOWN"
+        )
+        corpus_commit_sha = (
+            subprocess.check_output(
+                ["git", "log", "-n", "1", "--pretty=format:%H", "--", ":(glob)**/LIB-*.md"],
+                cwd=str(root),
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+            or repo_head_sha
+        )
+        dirty_out = subprocess.check_output(
+            ["git", "status", "--porcelain", "--", ":(glob)**/LIB-*.md"],
             cwd=str(root),
             stderr=subprocess.DEVNULL,
             text=True,
         ).strip()
-        if sha:
-            return sha
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=str(root), stderr=subprocess.DEVNULL, text=True
-        ).strip()
+        corpus_dirty = bool(dirty_out)
     except Exception:
         head_file = root / ".git" / "HEAD"
         if head_file.exists():
@@ -221,10 +238,26 @@ def get_git_commit_sha(root: Path = ROOT) -> str:
             if ref_txt.startswith("ref: "):
                 ref_path = root / ".git" / ref_txt[5:]
                 if ref_path.exists():
-                    return ref_path.read_text(encoding="utf-8").strip()
+                    repo_head_sha = ref_path.read_text(encoding="utf-8").strip()
             elif len(ref_txt) == 40:
-                return ref_txt
-        return "UNKNOWN"
+                repo_head_sha = ref_txt
+        corpus_commit_sha = repo_head_sha
+
+    generation_mode = "uncommitted_working_tree" if corpus_dirty else "clean_committed_corpus"
+    effective_sha = f"{corpus_commit_sha}+dirty" if corpus_dirty else corpus_commit_sha
+    return {
+        "provenance_version": "2.0",
+        "generation_mode": generation_mode,
+        "git_commit_sha": effective_sha,
+        "corpus_source_commit_sha": corpus_commit_sha,
+        "corpus_working_tree_dirty": corpus_dirty,
+        "repository_head_sha": repo_head_sha,
+    }
+
+
+def get_git_commit_sha(root: Path = ROOT) -> str:
+    """Backwards-compatible accessor returning explicit corpus-scoped commit SHA (`+dirty` if uncommitted)."""
+    return str(get_git_provenance(root)["git_commit_sha"])
 
 
 def parse_frontmatter(text: str) -> Tuple[Dict[str, Any], str]:
@@ -723,10 +756,14 @@ class LibraryGraphRAGEngine:
         total_docs = max(1, len(self.chunks))
         self.avgdl = sum(self.doc_lens.values()) / total_docs
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
-        git_sha = get_git_commit_sha(self.root)
+        prov = get_git_provenance(self.root)
 
         summary = {
-            "git_commit_sha": git_sha,
+            "provenance_version": prov["provenance_version"],
+            "generation_mode": prov["generation_mode"],
+            "git_commit_sha": prov["git_commit_sha"],
+            "corpus_source_commit_sha": prov["corpus_source_commit_sha"],
+            "corpus_working_tree_dirty": prov["corpus_working_tree_dirty"],
             "corpus_sha256": self.corpus_sha256,
             "volumes_indexed": len(self.dag_prereqs),
             "bilingual_files_indexed": len(files),
@@ -1254,9 +1291,14 @@ class LibraryGraphRAGEngine:
                 validator_errors = int(v_rep.get("error_count", 0))
             except Exception:
                 pass
+        prov = get_git_provenance(self.root)
         return {
             "status": "PASS" if (dag_acyclic and bilingual_rule_parity and validator_errors == 0) else "FAIL",
-            "git_commit_sha": get_git_commit_sha(self.root),
+            "provenance_version": prov["provenance_version"],
+            "generation_mode": prov["generation_mode"],
+            "git_commit_sha": prov["git_commit_sha"],
+            "corpus_source_commit_sha": prov["corpus_source_commit_sha"],
+            "corpus_working_tree_dirty": prov["corpus_working_tree_dirty"],
             "corpus_sha256": self.corpus_sha256,
             "volumes_count": len(self.dag_prereqs),
             "bilingual_files_count": len(self.volume_files),
@@ -1444,9 +1486,15 @@ class LibraryGraphRAGEngine:
                 cat_qs = [q for q in holdout_queries if q["category"] == cat]
                 holdout_by_category[cat] = self._evaluate_query_set(cat_qs, ["bm25_only", "hybrid_rrf"])
 
+        prov = get_git_provenance(self.root)
         report = {
             "benchmark_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "git_commit_sha": get_git_commit_sha(self.root),
+            "provenance_version": prov["provenance_version"],
+            "generation_mode": prov["generation_mode"],
+            "benchmark_execution_commit_sha": prov["repository_head_sha"],
+            "git_commit_sha": prov["git_commit_sha"],
+            "corpus_source_commit_sha": prov["corpus_source_commit_sha"],
+            "corpus_working_tree_dirty": prov["corpus_working_tree_dirty"],
             "corpus_sha256": self.corpus_sha256,
             "corpus_volumes": len(self.dag_prereqs),
             "corpus_chunks": len(self.chunks),

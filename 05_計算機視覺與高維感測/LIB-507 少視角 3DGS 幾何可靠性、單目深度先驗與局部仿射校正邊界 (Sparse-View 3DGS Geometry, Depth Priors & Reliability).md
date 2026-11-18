@@ -54,7 +54,7 @@ successors:
 當我們只有 `2` 到 `5` 張角度相差很大的照片，完全沒有雷射掃描儀（LiDAR）或深度相機時，原始 3DGS 只靠看照片顏色幾乎一定會塌陷或冒出大量浮在鏡頭前的「鬼影（Floaters）」 `[FACT]`。為了解救這個問題，研究界常請一位 **單目深度預測網路（如 Depth Anything V2）** 替每張照片畫出粗略的深度圖。但這位畫家有三大先天缺陷 `[FACT]`：
 
 1. **沒有實體公尺單位，且「各區塊比例尺不一樣」**：畫家只知左邊牆比右邊椅子遠一點，早期方法（如 `DNGaussian`）假設整張圖套同一組縮放倍率與平移 $(\alpha, \beta)$ 就能換算出真實深度；但實際上單目網路在前景桌面與遠景角落的伸縮比例常常不同（**Region-Dependent Distortion**，`AffineGS` 2026） `[LITERATURE_RESULT]`。
-2. **局部凹凸或物體邊界可能看錯（Local Shape Distortion / Edge Bleeding）**：如果這位畫家把鏡面桌誤判成凹下去的坑，且我們再用**單目畫家自己畫出來的邊界**當導引濾波器（Guided Filter）去平滑局部校正參數，錯誤的凹凸形狀就會被「平滑固化」進 3D 高斯裡 `[HYPOTHESIS]`。
+2. **局部非仿射形狀誤差與導引平滑限制（Local Shape Distortion Hypothesis）**：若這位畫家將光滑區域內的凹凸曲率反轉（非單純縮放／平移失真），我們再用原始單目視差當導引濾波器（Guided Filter）平滑局部仿射參數場，局部仿射校正對某些非仿射形狀失真可能存在限制；但是否最終在 3DGS 多視角光度耦合最佳化下導致可重現之 3D 幾何退化，目前仍屬待受控實驗驗證的研究假說（`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`） `[HYPOTHESIS]`。
 3. **「拍新照片看起來很美」不等於「模型形狀是真的」**：正如 `LIB-508` 所述，若具備高角向表徵能力（例如高階球諧函數 SH），在合成或受控稀疏視差設定下錯位看板亦能擬合出高 PSNR（儘管 `Wang & Miller, arXiv:2608.30054` 在真實場景中並未觀察到高階 SH 必然坍縮為看板）；加之參數存在多組等價解，評估幾何可靠性**必須使用獨立的真實三維形狀標準（如 Mesh Chamfer Distance / Normal MAE）** `[LITERATURE_RESULT]`。
 
 ---
@@ -62,16 +62,19 @@ successors:
 ## 二、🎓 博士級數學形式化推導：局部仿射校準、選擇性監督與可辨識界
 
 ### 1. 從全域對齊到空間變化分段仿射校正 (`DNGaussian` ➔ `AffineGS`) `[LITERATURE_RESULT]`
-設單目深度網路對視角 $v$ 輸出逆深度／視差圖 $d_{\mathrm{mono}}(u, v)$，真實度量視差為 $d^*(u, v)$：
+設單目深度網路對視角 $v$ 輸出相對視差／逆深度圖 $d(u, v) = d_{\mathrm{mono}}(u, v)$，3DGS 渲染深度為 $\mathcal{D}(u, v)$：
 - **全域仿射模型（例如 `DNGaussian`, CVPR 2024）**：僅估計全域標量 $(\alpha_v, \beta_v)$（輔以局部尺度正規化減緩局部波動）使 $\hat{d}_v = \alpha_v d_{\mathrm{mono}} + \beta_v$，面對非均勻相機焦段與大景深分層容易在遠近切換區扭曲 3D 結構 `[LITERATURE_RESULT]`。
-- **`AffineGS`（Tse, Peng, Chen, & Yao, NeurIPS 2026, `arXiv:2611.07709`）**：將誤差模型推廣為像素空間平滑變化的局部仿射場 $(\alpha(u, v), \beta(u, v))$：
-  $$\hat{d}_{\mathrm{rect}}(u, v) = \alpha(u, v) \, d_{\mathrm{mono}}(u, v) + \beta(u, v)$$
-  直接審計官方開源實作 `AffineGS-LLFF-public/utils/disparity_normal_loss.py`（L90–145）確認以下核心結構細節 `[FACT]`：
-  1. 局部尺度係數場係透過空間梯度範數比 `coefficients = d_gt_norm / (gt_safe**2 * d_render_norm + 1e-5)` 計算，數值**嚴格非負（$\ge 0$，僅對齊梯度大小而無法翻轉錯誤梯度符號）**。
-  2. 先對原始比值施加 **5th–95th 百分位雙向截斷**，再以未校正之原始單目視差 `gt_disparity` 作為 Guidance Image 執行 `cv2.ximgproc.guidedFilter(..., radius=600, eps=0.05)`（大半徑局部線性假設），濾波後再次對梯度範數與分母執行 `[p5, p95]` 與 `.clamp(min=1e-6)` 截斷，最終經由 `torch.no_grad()` 全域最小平方法重對齊 `(_fa, _fb)` 輸出校正視差。
-- **數學結構假設與潛在破口（區分已確認結構 vs. 待重現假說）**：
-  1. 由於係數場嚴格非負且 Guided Filter 在視窗 $\omega_k$ 內假設輸出與原始 $d_{\mathrm{mono}}$ 呈局部線性關係，當 $d_{\mathrm{mono}}$ 本身在同一光滑區域內出現**非仿射曲率反轉（local convexity-to-concavity flip）**且缺乏顯著邊界來切分視窗時，非負回歸與局部線性平滑在結構上無法逆轉錯誤的局部斜率符號 `[FACT]`；該類局部形狀錯誤是否必然通過 Normal Gradient Regularizer 導致無法以新視角渲染自我修正之可重現 3D 幾何退化，目前仍屬待實驗證偽之研究假說 `[HYPOTHESIS]`。
-  2. 此外，若 $d_{\mathrm{mono}}$ 的物體邊界發生邊界滲漏（edge bleeding），大視窗 Guided Filter 會同步把前景與背景的錯誤係數耦合連成一體 `[DERIVATION]`。
+- **`AffineGS`（Tse, Peng, Chen, & Yao, NeurIPS 2026, `arXiv:2611.07709`）**：依據原論文 Sec. 3.1–3.3 與官方原始碼雙倉庫（`eldentse/AffineGS` `dn_splatter/disparity_normal_loss.py` 與 `AffineGS-LLFF-public/utils/disparity_normal_loss.py`），逐一區分「原始碼已驗證行為（`SOURCE_VERIFIED_CODE_BEHAVIOR`）」、「數學推導條件（`MATHEMATICAL_DERIVATION`）」與「待驗證實機假說（`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`）」：
+  1. **完整逆深度仿射公式與各變數符號性質（`SOURCE_VERIFIED_CODE_BEHAVIOR`） `[FACT]`**：
+     `AffineGS` 將單目視差之倒數與渲染深度建模為空間變化仿射場：
+     $$\frac{1}{d(u, v)} = \alpha(u, v)\,\mathcal{D}(u, v) + \beta(u, v)$$
+     原始局部尺度場計算梯度範數比 `coefficients = d_gt_norm / (gt_safe**2 * d_render_norm + 1e-5)`（即 $\alpha_{\mathrm{raw}} = \|\nabla d\|_2 / (d^2 \|\nabla \mathcal{D}\|_2 + \epsilon)$，事前施加 **5th–95th 百分位截斷**，數值**嚴格非負 $\ge 0$**），而偏移場 `beta = 1/gt_safe - coefficients * rendered_depth` **未受非負約束（可為任意實數正負值）**。兩者皆隨後以未校正之原始 `gt_disparity` 作為 Guide 執行 `cv2.ximgproc.guidedFilter` 平滑為**空間隨像素變化的 $\alpha_{\mathrm{smooth}}(u, v)$ 與 $\beta_{\mathrm{smooth}}(u, v)$**（`AffineGS-LLFF-public` 採 `radius=600, eps=0.05`；`eldentse/AffineGS` 採 `radius=800, eps=1.0` 且濾波後重新將 `coefficients` 夾回 `[coef_lower, coef_upper]`，程式註解更明確指出 Guided Filter 局部線性擬合可能把 `coefficients` 推至 $\le 0$）。最終校正深度為 $\hat{\mathcal{D}}(u,v) = \frac{1 - \beta_{\mathrm{smooth}}(u,v)\,d(u,v)}{\alpha_{\mathrm{smooth}}(u,v)\,d(u,v)}$，並再經 `torch.no_grad()` 全域最小平方法擬合未強制正負號的純量 `(a, b)`（程式 `_fa, _fb`）以形成 $\mathcal{L}_{\mathrm{depth}} = |(a\hat{\mathcal{D}} + b) - \mathcal{D}|$；同時 $\mathcal{L}_{\mathrm{grad}}$ 與 $\mathcal{L}_{\mathrm{normal}}$ 採局部常數近似 $\nabla \hat{d} \approx -\alpha_{\mathrm{smooth}} d^2 \nabla \mathcal{D}$ 直接對齊未校正的原始單目視差梯度 $\nabla d$（`gt_dx, gt_dy`）。
+  2. **嚴禁由 `coefficients >= 0` 直接推論「校正結果必定無法反轉斜率」（`MATHEMATICAL_DERIVATION`） `[DERIVATION]`**：
+     對一般空間變化仿射校正 $\hat{d}(x) = \alpha(x)d(x) + \beta(x)$（同理適用於 $\hat{\mathcal{D}}(x) = \frac{1}{\alpha_{\mathrm{smooth}}(x)\,d(x)} - \frac{\beta_{\mathrm{smooth}}(x)}{\alpha_{\mathrm{smooth}}(x)}$ 及其全域線性縮放 $a\hat{\mathcal{D}} + b$），微積分乘積律給出完整空間導數：
+     $$\frac{d\hat{d}}{dx} = \alpha(x)\frac{dd}{dx} + d(x)\frac{d\alpha}{dx} + \frac{d\beta}{dx}$$
+     由於 **$\alpha_{\mathrm{smooth}}(u,v)$ 與未限制正負號的 $\beta_{\mathrm{smooth}}(u,v)$ 皆隨空間變化**、Guided Filter 會依 $\bar{a}_k d + \bar{b}_k$ 改變輸出空間梯度（甚至在無濾波後截斷時推動尺度為負）、且全域最小平方 `_fa` 亦可影響最終方向，**僅憑中間變數 $\alpha_{\mathrm{raw}} \ge 0$ 並不足以在數學上證明最終校正場的梯度符號不能改變** `[DERIVATION]`！方向不可翻轉僅在**額外嚴格條件**下成立：(i) 在 `AffineGS` 的 $\mathcal{L}_{\mathrm{grad}} / \mathcal{L}_{\mathrm{normal}}$ 目標項本身（忽略 $\nabla\alpha_{\mathrm{smooth}}$ 的局部常數梯度比對），若保證濾波後 $\alpha_{\mathrm{smooth}} > 0$，其目標梯度方向直接沿用原始 $\nabla d$ 而不具備翻轉機制 `[FACT]`；或 (ii) 對逐點校正深度 $\hat{\mathcal{D}}$ 須額外滿足 $\alpha_{\mathrm{smooth}}(x) > 0$、全域 $a > 0$，且場變異足夠平滑使得空間導數偏移項不壓過主導項 $|\alpha(x)d'(x)| > |d(x)\alpha'(x) + \beta'(x)|$（或分段常數 $\nabla\alpha = \nabla\beta = 0$） `[DERIVATION]`。
+  3. **結構限制與待驗證研究假說（`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`） `[HYPOTHESIS]`**：
+     局部仿射校正對某些非仿射形狀失真（如缺乏邊界線索的光滑區域曲率反轉，或物體邊界的 edge bleeding）可能存在限制，因 $\mathcal{L}_{\mathrm{grad}}/\mathcal{L}_{\mathrm{normal}}$ 直接對齊原始 $\nabla d$ 且大視窗 Guided Filter 以 $d$ 為導引維持視窗內局部線性耦合 `[HYPOTHESIS]`；然而具體失效條件、3DGS 光度損失能否在聯合最佳化中覆寫該先驗誤差、以及是否導致可重現的真實 3D 幾何退化，目前尚未在實機 3DGS 實驗完成證實，仍須受控實驗確認（不預先宣稱必然失效，亦不得反向宣稱 `AffineGS` 已解決全部形狀失真） `[SAFETY_BOUND]`。
 
 ### 2. 三大選擇性監督／正則與多視角先驗對比 `[LITERATURE_RESULT]`
 為避免錯誤的單目先驗破壞重建幾何，2024–2026 年文獻已沿著互異數學路徑推進：
@@ -101,12 +104,14 @@ successors:
 
 ## 三、⚙️ 硬體算力、環境依賴與最小先導驗證架構
 
-| 驗證基準 / 家族 | 核心程式／外部套件依賴 | 計算與顯存特徵（嚴格區分作者回報、估算與未實測） | 4GB–8GB 筆電 / 單卡雲端 T4 適用風險 |
+> **硬體與選題隔離核心原則（Compute Policy Principle） `[DESIGN_DECISION]` `[SAFETY_BOUND]`**：**Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** 本機筆電若只有 `4 GB` 或 `8 GB VRAM` 僅反映本地可編譯／執行節點條件，**絕不**構成對任何 3DGS 題目（或需 `12 / 16 / 24 GB` 單卡雲端 GPU 之方法）直接給出全域 `NO-GO` 的理由；資源限制只能通過可追溯之雲端取得性、縮減驗證可行性與總實驗成本評估處理。
+
+| 驗證基準 / 家族 | 核心程式／外部套件依賴 | 計算與顯存特徵（嚴格區分 `AUTHOR_REPORTED`、`TEAM_ESTIMATE` 與 `NOT_RUN / UNVERIFIED`） | 低顯存本機 vs. 單卡雲端執行規劃 |
 | :--- | :--- | :--- | :--- |
-| **`AffineGS` (`eldentse/AffineGS` & `AffineGS-LLFF-public`)** | `PyTorch`、`Nerfstudio / gsplat`（全版）或 `diff-gaussian-rasterization`、`opencv-contrib-python` (`ximgproc.guidedFilter`) | **作者報告（Author-Reported）**：全版 Nerfstudio 於 `1× RTX 3090` 單場約 `1.5–2.0 小時` `[LITERATURE_RESULT]`；`AffineGS-LLFF-public` 簡化版在本機／單卡雲端實際耗時目前為 **`UNVERIFIED`（尚未重現）** | `4GB` 顯存過低無法運行全流程；不得僅因預期算力較高即先驗淘汰 `AffineGS` 主線，須優先以最小可控消融確認核心失效能否重現後再評估成本權衡 |
-| **`CoR-GS` / `DropGaussian`** | PyTorch + 3DGS CUDA 擴充（須留意原版 Inria `LICENSE` 條款限制；`DropGaussian` 為雙授權含 `Apache-2.0`） | 作者論文報告：`CoR-GS` 於 `RTX 3090 Ti` 跑 LLFF 單場約 **`~6 分鐘`** `[LITERATURE_RESULT]` | `CoR-GS` 雙場模型會提高 VRAM 壓力；`DropGaussian` 單場結構較輕量，易於單卡 T4 快速複現基線 |
-| **`Sparse2DGS` / `StereoGS`** | `DUSt3R` / Foundation Stereo + `2DGS` / `3DGS` CUDA 光柵化 | 多視角基礎模型載入推論＋分階段表面最佳化；`Sparse2DGS` 比同級少視角 NeRF 約快 `~2×` | 雙重載入 Foundation 模型與 3DGS 容易佔滿 `8GB` 顯存，需顯式隔離兩階段（先匯出點雲釋放 VRAM，再跑 3DGS） |
-| **CPU 合成反例驗證台** | 僅需標準 Python / NumPy / PyTorch CPU | 毫秒至數秒內於任何純 CPU 筆電（含 `4GB` 顯存或無獨顯機台）跑完數千次幾何對照與可辨識檢查 | **最低成本硬閘門（Zero-GPU Cost）**：上雲燒配額前必先通過之數學證偽層 |
+| **`AffineGS` (`eldentse/AffineGS` & `AffineGS-LLFF-public`)** | `PyTorch`、`Nerfstudio / gsplat`（全版）或 `diff-gaussian-rasterization`、`opencv-contrib-python` (`ximgproc.guidedFilter`) | **`AUTHOR_REPORTED`（論文 Appendix C.3, `arXiv:2611.07709`）**：單張 `RTX 3090` 上訓練 `MuSHRoom` 單場約 **`1.5 小時`**、`ScanNet++` 半解析度約 **`65 分鐘`**（Guided Filter 於 CPU OpenCV 執行） `[LITERATURE_RESULT]`；`AffineGS-LLFF-public` 於單卡雲端實測目前為 **`NOT_RUN / UNVERIFIED`** | 若本地 `4GB` 顯存不敷運行完整管線，**不得**僅因預估成本高即淘汰該主線，應評估移至單張雲端 GPU（如 Colab T4/L4）先跑單場／縮減尺度最小復現以確認核心失效能否重現 |
+| **`CoR-GS` / `DropGaussian`** | PyTorch + 3DGS CUDA 擴充（須留意原版 Inria `LICENSE` 條款限制；`DropGaussian` 為雙授權含 `Apache-2.0`） | **`AUTHOR_REPORTED`（`CoR-GS` `arXiv:2405.12110` Table 5）**：`CoR-GS` 於 `RTX 3090 Ti` 跑 LLFF 3-view 單場 **`6 分鐘 / 3 GB`**（對照 Vanilla 3DGS 為 **`2.5 分鐘 / 2 GB`**） `[LITERATURE_RESULT]` | `CoR-GS` 雙場會倍增狀態 VRAM；`DropGaussian` 單場結構較輕量，可優先於單卡雲端／可用顯存環境評估基準再現 |
+| **`Sparse2DGS` / `StereoGS`** | `DUSt3R` / Foundation Stereo + `2DGS` / `3DGS` CUDA 光柵化 | 多視角基礎模型載入推論＋分階段表面最佳化；`Sparse2DGS` 原論文報告約比 `SparseNeus`（NeRF 基線）快 **`2×`**（`AUTHOR_REPORTED`） `[LITERATURE_RESULT]` | 同時載入 Foundation 模型與 3DGS 可能超出 `8GB` 筆電上限，於低顯存裝置可採兩階段離線快取點雲（先匯出釋放 VRAM，再跑 3DGS）或改於單卡雲端執行 |
+| **CPU 合成反例驗證台** | 僅需標準 Python / NumPy / PyTorch CPU | 毫秒至數秒內於任何純 CPU 筆電（含 `4GB` 顯存或無獨顯機台）跑完概念性反例檢驗 | **Zero-GPU 預檢工具**：快速驗證局部仿射近似邏輯邊界，作為上雲前之低成本前測（不能替代實機 3DGS 實驗） |
 
 ---
 
@@ -147,9 +152,10 @@ def simulated_guided_affine_fit_1d(
     eps: float = 1e-4,
 ) -> List[float]:
     """
-    重現無稠密真值下的稀疏 SfM 錨點 + Guided Filter 仿射場傳播：
-    僅在有 SfM 特徵錨點處 (anchor_mask=True) 估計局部仿射參數 (a, b)，
-    並以單目深度圖 guide 作為導引濾波平滑傳播至缺乏錨點的平滑區域。
+    教學用 1D 平滑仿射擬合玩具檢驗（採正下界裁剪 a >= 0.1 與簡易均值平滑，非位元等價之
+    OpenCV guidedFilter 或完整 3DGS 逆深度 1/d = alpha*D + beta 最佳化器）：
+    僅在有 SfM 特徵錨點處 (anchor_mask=True) 估計正斜率局部仿射 (a, b) 並平滑傳播，
+    用以示意平滑非仿射曲率反轉時的斜率錯配假說（真實 3DGS 耦合仍須實機實驗驗證）。
     """
     n = len(guide)
     a_est = 1.0
@@ -316,8 +322,8 @@ if __name__ == "__main__":
    - Li, J., Zhang, J., Bai, X., et al. (2024). *DNGaussian: Optimizing Sparse-View 3D Gaussian Radiance Fields with Global-Local Depth Normalization*. **CVPR 2024**.
 2. **自由度分離、共正則與隨機／結構擾動機制 (2024–2026)**
    - Kim, Y., Choi, J., & Yoon, S. (2026). *GDoFS: Gaussian DoF Separation for Plausible 3D Geometry in Sparse-View 3DGS*. **WACV 2026** (`arXiv:2412.13325`).
-   - Zhang, J., Li, J., Yu, X., Huang, L., Gu, L., Zheng, J., & Bai, X. (2024). *CoR-GS: Sparse-View 3D Gaussian Splatting via Co-Regularization*. **ECCV 2024**.
-   - Park, H., et al. (2025). *DropGaussian: Structural Regularization for Sparse-View Gaussian Splatting*. **CVPR 2025**.
+   - Zhang, J., Li, J., Yu, X., Huang, L., Gu, L., Zheng, J., & Bai, X. (2024). *CoR-GS: Sparse-View 3D Gaussian Splatting via Co-Regularization*. **ECCV 2024** (`arXiv:2405.12110`).
+   - Park, H., Ryu, G., & Kim, W. (2025). *DropGaussian: Structural Regularization for Sparse-View Gaussian Splatting*. **CVPR 2025** (`arXiv:2504.00773`).
    - Li, Z., et al. (2026). *DOC-GS: Depth-Guided Optimization and Dark-Channel Observation Pruning for Sparse-View 3DGS*. **ACM MM 2026** (`arXiv:2604.06739`).
    - Lian, X., Wang, Z., & Wang, H. (2026). *DGDO-GS: Depth-Gradient-Guided Decoupled Optimization for Sparse-View Gaussian Splatting*. **Applied Sciences 2026** (DOI: `10.3390/app16084026`).
    - Liu, X., et al. (2026). *SRUP-GS: Structure-Aware Rank and Uncertainty-Guided Perturbation for Sparse-View 3DGS*. **Computers & Graphics 2026** (DOI: `10.1016/j.cag.2026.104731`).

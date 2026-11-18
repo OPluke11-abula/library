@@ -91,18 +91,18 @@ $$\mathrm{NWD}(\mathcal{N}_a, \mathcal{N}_b) = \exp\left(-\frac{\sqrt{W_2^2(\mat
    - 傳統 `D-ECE` 先硬設分數門檻（如 `score >= 0.30`）過濾背景再以 `IoU >= 0.5` 二元判定命中。Kuzucu 等人證明不同架構的最優門檻截然不同，固定門檻會嚴重扭曲校準排名；且單純對分類機率做 Temperature Scaling 無法適應偵測中海量負樣本拒絕特性。
    - **定位感知校準（LaECE, Localization-aware ECE）** 以實例級精確率與定位重合度乘積取代純二元對錯，要求預測分數 $\hat{p}$ 同時校準「該框既屬正確類別 **且** 與真值存在高 IoU 重疊」之條件期望 `[LITERATURE_RESULT]`；實務強基準證實適切對接偵測標籤分配的 **Post-hoc Isotonic Regression / Platt Scaling** 可在無重訓前提下勝過複雜訓練期模型（如 `Cal-DETR`）。
 2. **兩階段共形邊界框與概率化座標校準（Timans et al., ECCV 2024 Oral；Ries et al., COPA 2026 Oral）**：
-   - **Timans et al. (2024, `arXiv:2403.07689`)** 先建構類別預測集合 $\mathcal{C}(X)$，再對已配對偵測框的四條座標施加殘差 $\hat{q}_\alpha$ 形成外擴安全區間 $\hat{\mathcal{B}}_\alpha$；**Ries et al. (COPA 2026 Oral, PMLR v329, `arXiv:2605.07549`, 程式碼 `mos-ks/OD-CP`)** 進一步在單物件與多物件偵測中，以 loss attenuation 訓練之**各向異性偶然不確定性（$\sigma_e$）** 直接縮放每條邊的 Split Conformal 殘差（搭配 Bonferroni $1-4\alpha$ 寬度擴展與兩階段 **RAPS** 類別集合），並於 **KITTI / BDD / CODA** 上執行類別分層校準 `[LITERATURE_RESULT]`。因此，以預測異方差縮放各向異性座標級共形殘差**已是既有公開研究，不得誤列為尚未解決之原始創新** `[SAFETY_BOUND]`。
-   - **邊際覆蓋 vs. 遮擋條件覆蓋（Marginal vs. Occlusion-Conditional Coverage）`[FACT]` `[DERIVATION]`**：上述標準 Split Conformal 方法在可交換（Exchangeable）驗證集上僅保證全域**邊際統計覆蓋** $\mathbb{P}(B_{\text{test}} \subseteq \hat{\mathcal{B}}_\alpha) \ge 1-\alpha$，實務上極易被低遮擋多數樣本掩蓋高遮擋子集僅 `60%–70%` 的嚴重覆蓋不足；逐點精確無分佈條件覆蓋已被證明不可達成 `[FACT]`，必須按遮擋程度分群採用 **Mondrian 分層共形校準（Group/Occlusion-Conditional Calibration）** 並承受有限樣本分位數變異上升之代價。此外，後處理共形調整**僅作用於已提出的配對預測框**（無法涵蓋 False Negatives 漏檢），且同圖預測框若跨 split 混用將破壞影像級可交換性，必須獨立追蹤 Recall 與 `LRP Error` `[SAFETY_BOUND]`。
-   - **與 `D-FINE FDR` 及 `Kuzucu (2025)` 的邊界區分 `[FACT]`**：`D-FINE` 原生於解碼器內計算四邊離散分佈（`pred_corners`），本質反映離散位置機率而非具有限樣本統計保證之共形安全集合；`Kuzucu et al. (2025)` 提出 `LaECE` 等局部化期望校準誤差指標以評估不確定性排序與區間校準度，三者分屬「原生特徵分佈」、「離散/回歸誤差診斷」與「後處理共形覆蓋保證」。
+   - **Timans et al. (2024, `arXiv:2403.07263`)** 先建構類別預測集合 $\mathcal{C}(X)$，再對已配對偵測框的四條座標施加殘差 $\hat{q}_\alpha$ 形成外擴安全區間 $\hat{\mathcal{B}}_\alpha$；**Ries et al. (COPA 2026 Oral, PMLR v329, `arXiv:2605.07549`, 程式碼 `mos-ks/OD-CP`)** 進一步在單物件與多物件偵測中，以 loss attenuation 訓練之**各向異性偶然不確定性（$\sigma_e$）** 直接縮放每條邊的 Split Conformal 殘差（搭配 Bonferroni $1-4\alpha$ 寬度擴展與兩階段 **RAPS** 類別集合），並於 **KITTI / BDD100K / CODA** 類別分層條件下達成相較未縮放 CP 基線 **`up to 19%` 較高 IoU 與 `39%` 較低 Interval Scores**（`AUTHOR_REPORTED`） `[LITERATURE_RESULT]`。因此，以預測異方差縮放各向異性座標級共形殘差**已是既有公開研究，不得誤列為尚未解決之原始創新** `[SAFETY_BOUND]`。
+   - **邊際覆蓋、條件覆蓋與所有前提邊界（Marginal vs. Conditional Coverage & Statistical Preconditions）`[FACT]` `[DERIVATION]`**：上述標準 Split Conformal 方法的保證僅在以下嚴格前提同時滿足時成立 `[SAFETY_BOUND]`：(1) **僅作用於「已成功偵測且與真值配對的 True Positive 目標」**（後處理座標區間**絕對無法涵蓋漏檢的 False Negatives**，故必須獨立追蹤 Recall 與 `LRP Error`）；(2) **影像／場景級可交換性（Exchangeability）與切分隔離**：同一張影像內的多個物件存在空間／脈絡相依性，不可直接打散單框充當獨立同分佈樣本跨越 Calibration Split 與 Test Split；(3) **分佈偏移敏感性（Distribution Shift）**：當測試域出現光照、天候或遮擋結構漂移時，可交換性即失效且保證退化；(4) **邊際 vs. 遮擋條件覆蓋**：全資料集邊際覆蓋 $\mathbb{P}(B_{\text{test}} \subseteq \hat{\mathcal{B}}_\alpha) \ge 1-\alpha$ 容易掩蓋少數難例（如高遮擋子群）的嚴重覆蓋不足，且逐點無分佈條件覆蓋已被證明不可達成 `[FACT]`，必須在獨立 `Image-/Scene-disjoint` 切分上對遮擋分層採用 **Mondrian 分層共形校準（Group/Occlusion-Conditional Calibration）** 並承受有限樣本分位數變異上升之代價 `[SAFETY_BOUND]`。
+   - **與 `D-FINE FDR` 及 `Kuzucu (2024)` 的邊界區分 `[FACT]`**：`D-FINE` 原生於解碼器內計算四邊離散分佈（`pred_corners`），本質反映離散位置機率而非具有限樣本統計保證之共形安全集合；`Kuzucu et al. (2024)`（`ECCV 2024 Oral`, `arXiv:2405.20459`）提出 `LaECE` 等局部化期望校準誤差指標以評估不確定性排序與區間校準度，三者分屬「原生特徵分佈」、「離散/回歸誤差診斷」與「後處理共形覆蓋保證」。
 
 ---
 
 ## 三、⚙️ 計算機體系結構與硬體資源分析：官方程式推論掛鉤與計算成本邊界
 
-在消費級 GPU（例如 `8 GB VRAM` 筆電或單張雲端 GPU）執行現代偵測研究時，須精確區分既有推論結構與實證量測狀態 `[FACT]`：
+在消費級 GPU（例如 `8 GB VRAM` 筆電或單張雲端 GPU）執行現代偵測研究時，須精確區分既有推論結構與實證量測狀態（本機 VRAM 僅為觀測硬體環境限制，非研究題目全域淘汰門檻） `[FACT]`：
 1. **官方 `D-FINE` 程式匯出限制與 Hook 機制 (`[FACT]`)**：檢視官方原始碼（`Peterande/D-FINE`: `src/zoo/dfine/dfine_decoder.py` L287–314, L428–456, L890–900 與 `postprocessor.py` L39–93），預訓練 `D-FINE` 雖可透過非均勻 `weighting_function`、`Integral` 與 `LQE` 計算四邊離散 `out_corners` 分佈，**然而在推論/評估模式（`not self.training`）下，`DFINETransformer.forward()` 的 `else` 分支預設丟棄 `pred_corners` 並僅回傳 `pred_logits` 與 `pred_boxes`，`DFINEPostProcessor.forward()` 預設亦不回傳 `topk` 索引或四邊分佈**。若要在不重新訓練骨幹權重下取得對齊後之 `[B, N_topk, 4, reg_max+1]` 張量，研究程式必須修改評估/後處理回傳或掛載 PyTorch `register_forward_hook` 並與解碼後 `pred_boxes` 校驗對齊 `[DESIGN_DECISION]`。
-2. **作者回報吞吐量 vs. 端對端耗時邊界**：原論文回報 `D-FINE-N/S` 於 NVIDIA T4 TensorRT FP16 下前向推論達 `78–124 FPS`（COCO）`[LITERATURE_RESULT]`，此數字**不包含**資料集解碼、Hook 對齊、GT 配對與 Mondrian 分層統計計算；消費級 `4–8 GB VRAM` 上對完整驗證集快取特徵並完成校準迴圈之總耗時目前仍屬 **`UNVERIFIED`**，凡 `NOT_RUN` 實驗**嚴禁**提前宣稱僅需數分鐘即可完成 `[SAFETY_BOUND]`。
-2. **微目標高解析記憶體牆**：將 $4000 \times 3000$ 影像直接高倍率輸入視覺 Transformer，其編碼器多尺度注意力與高解析度特徵圖激活值會隨面積二次／線性暴增突破 `8 GB VRAM`。工程上須採小批梯度累積或配合早期稀疏熱區導向之 **按需局部切片（Sparse Gated Grid Slicing）**，而非無差別全圖密集掃描 `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
+2. **作者回報吞吐量 vs. 端對端耗時邊界**：原論文（`arXiv:2410.13842`）回報 **`D-FINE-L / D-FINE-X`** 於 NVIDIA T4 TensorRT FP16 下達成 `54.0% / 55.8% AP` 與 **`124 / 78 FPS`**（COCO，另官方 README 報告輕量級 `D-FINE-N` 達 `472 FPS / 42.8% APval`，皆屬 `AUTHOR_REPORTED` 純前向推論） `[LITERATURE_RESULT]`；此數字**不包含**資料集解碼、Hook 對齊、GT 配對與 Mondrian 分層統計計算。團隊端於消費級 `4–8 GB VRAM` 或雲端單卡對完整驗證集快取特徵並完成校準迴圈之總耗時目前仍屬 **`NOT_RUN / UNVERIFIED`**，嚴禁提前宣稱僅需數分鐘即可完成 `[SAFETY_BOUND]`。
+3. **微目標高解析記憶體牆**：將 $4000 \times 3000$ 影像直接高倍率輸入視覺 Transformer，其編碼器多尺度注意力與高解析度特徵圖激活值會隨面積二次／線性暴增，於低顯存裝置易超過 `8 GB VRAM`。工程上可採小批梯度累積、單張雲端 GPU 或配合早期稀疏熱區導向之 **按需局部切片（Sparse Gated Grid Slicing）** 替代無差別全圖密集掃描 `[DESIGN_DECISION]` `[SAFETY_BOUND]`。
 
 ---
 
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 - **前置條件**: 輸入影像平均目標邊長 $< 16\text{ px}$（如 `AI-TOD` / `VisDrone` 空拍或遠距交通場景）。
 - **量化決策邊界**:
   - 嚴禁在極微目標二分圖匹配或正負樣本指派階段僅使用無平滑修正的純二元 `IoU` / `GIoU`（偏移 $1\text{–}2\text{ px}$ 即歸零）；應採用分佈距離（如 `NWD` / 感受野距離 `RFLA`）或重疊切片管線。
-  - 若採高解析網格切片（參照 `LIB-904` 之 `RULE-904-03`），切片重疊率須 $\ge 20\%$，並揭露切片導致之端到端推論延遲倍率（例如 `4×–9×`） `[SAFETY_BOUND]`。
+  - 若採高解析網格切片（參照 `LIB-904` 之 `RULE-904-03`），切片重疊率須 $\ge 20\%$，並實際量測且揭露切片導致之端到端推論延遲倍率（`Illustrative Example`：如 `2×2` 至 `3×3` 網格切片理論基準倍率可達 `4×–9×` 以上） `[SAFETY_BOUND]`。
 - **執行保證**: 防止微小目標訓練梯度歸零漏檢及隱藏切片計算成本之不公平速度比較。
 
 ### [RULE-503-03] 偵測器定位感知校準與強基準檢驗合約 (Localization-Aware Calibration & Baseline Integrity Invariant)
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 4. **偵測器校準陷阱與 LaECE 基準 (ECCV 2024 Oral)**
    - *Paper*: Kuzucu, S., Oksuz, K., Sadeghi, J., & Dokania, P. K. (2024). "On Calibration of Object Detectors: Pitfalls, Evaluation and Baselines." *European Conference on Computer Vision (ECCV 2024 Oral)*. [arXiv:2405.20459](https://arxiv.org/abs/2405.20459) | Code: [`fiveai/detection_calibration`](https://github.com/fiveai/detection_calibration).
 5. **兩階段共形邊界框與機率偵測校準 (ECCV 2024 Oral / COPA 2026 Oral)**
-   - *Paper*: Timans, A., Straehle, C.-N., Sakmann, K., & Nalisnick, E. (2024). "Adaptive Bounding Box Uncertainties via Two-Step Conformal Prediction." *ECCV 2024 Oral*. [arXiv:2403.07689](https://arxiv.org/abs/2403.07689).
+   - *Paper*: Timans, A., Straehle, C.-N., Sakmann, K., & Nalisnick, E. (2024). "Adaptive Bounding Box Uncertainties via Two-Step Conformal Prediction." *ECCV 2024 Oral*. [arXiv:2403.07263](https://arxiv.org/abs/2403.07263).
    - *Paper*: Ries, C., Kassem Sbeyti, M., Bianco, N., & Klein, N. (2026). "Probabilistic Object Detection with Conformal Prediction." Accepted Oral at *COPA 2026* (PMLR v329). [arXiv:2605.07549](https://arxiv.org/abs/2605.07549) | Code: [`mos-ks/OD-CP`](https://github.com/mos-ks/OD-CP).
    - *Preprint / Related*: Andéol, L., et al. (2025). "Conformal Object Detection by Sequential Risk Control." [arXiv:2505.24038](https://arxiv.org/abs/2505.24038); Conde, P., Lopes, R. L., & Premebida, C. (2024). [arXiv:2309.00464](https://arxiv.org/abs/2309.00464).
 6. **微小目標與擁擠遮擋偵測核心基準 (ICPR / ECCV / CVPR)**

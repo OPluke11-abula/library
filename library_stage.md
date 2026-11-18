@@ -1,9 +1,9 @@
 # 圖書館專案任務與進度交接報告 (Library Stage & Handoff Document)
 
 > **文檔名稱**: `library_stage.md`  
-> **更新時間**: 2026-11-17  
-> **當前交接基準 HEAD**: 最新 `main` 分支權威提交（詳見 `reports/library_integrity.json` 之 `git_commit_sha` 與 `corpus_sha256`）  
-> **專案狀態**: 28 卷雙語完備（共 56 份核心文件），114 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 24 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
+> **更新時間**: 2026-11-18  
+> **當前交接基準 HEAD**: 最新 `main` 分支權威提交（詳見 `reports/library_integrity.json` 之 `corpus_source_commit_sha` / `git_commit_sha`、`generation_mode` 與 `corpus_sha256`）  
+> **專案狀態**: 32 卷雙語完備（共 64 個核心雙語檔案），130 條決策合約不變量（100% 合約等級對稱與 Chunk 級權威映射），拓樸 DAG、雙套件 RAG 基準測試（16 題 Golden + 32 題零洩漏 Holdout）與 11 項自動化檢驗全數通過。
 
 ---
 
@@ -32,15 +32,15 @@
 以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
 - **交接基準 Commit SHA**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（隨每次 PR 合併自動同步更新於 `reports/library_integrity.json`）
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
-- **卷冊總數與結構對稱**：28 卷（繁體中文 28 卷，英文對齊 28 卷，共 56 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
-- **決策合約不變量**：精確維持 114 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
+- **卷冊總數與結構對稱**：32 卷（繁體中文 32 卷，英文對齊 32 卷，共 64 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
+- **決策合約不變量**：精確維持 130 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。
 - **DAG 拓樸結構**：嚴格有向無環圖，Kahn 演算法拓樸排序與內文 `前置依賴`/`後續節點` 100% 驗證通過，零循環、零孤島、零失效鏈接。
 - **自動化驗證保證**：執行 `python scripts/validate_library.py`（涵蓋 11 項檢查，含強制內文導航、證據分類學覆蓋、文獻引證完整性與 AST 語法）保證 Exit Code 恆為 `0`。
 
 ### 2.2 交接文件聲明與元指引 (Handover Document Declarations)
 本文件（`library_stage.md`）作為首席圖書館管理員之跨階段交接藍圖，負責記錄專案演進脈絡、里程碑會計、規範合約與後續維護指引。交接聲明本身隨版本演進持續維護，不影響核心知識庫卷冊之不可變合約。
 
-### 📚 現行 28 卷清單與對齊結構
+### 📚 現行 32 卷清單與對齊結構
 | 索書號 | 中文卷名 | 英文卷名 (Agent EN) | 核心範疇 |
 | :--- | :--- | :--- | :--- |
 | **LIB-000** | 圖書館總覽與拓樸導覽系統 | Grand Library Index & Navigator | 全庫 DAG 拓樸、決策樹、三大學習路徑 |
@@ -57,9 +57,12 @@
 | **LIB-408** | 情境感知物件生成與光照融合 | Context-Aware Object Generation & Compositing | 深度估計、球諧函數 (SH) 光照、接觸陰影合成 |
 | **LIB-501** | CV 前處理規範與質心定位演算法 | CV Preprocessing & Center of Mass Alignment | 邊界框安全截斷、墨跡動差質心、Bunch TTA 增強 |
 | **LIB-502** | 相機射影幾何、對極幾何與運動結構恢復 | Camera Projective Geometry, Epipolar Geometry & SfM | 針孔投影、$\mathrm{SO}(3)/\mathrm{SE}(3)$ 李代數、EWA 透視雅可比 $\mathbf{J}$、Hartley 八點法、舒爾補 BA |
+| **LIB-503** | 現代物件偵測架構、定位不確定性與遮擋校準 | Modern Object Detection, Localization & Occlusion Reliability | RT-DETR、D-FINE FDR、DEIM、NWD 微目標、LaECE、Two-Step Conformal (Mondrian) |
 | **LIB-504** | 3D 高斯潑濺 (3DGS) 理論與光柵化 | 3D Gaussian Splatting Theory & Rasterization | 連續輻射場離散化、3D 高斯投影、GPU Tile 光柵化 |
 | **LIB-505** | 開放詞彙 3DGS 與語意場景圖 | Open-Vocabulary 3DGS & Semantic Retrieval | 2D 語意蒸餾、跨視角共識、場景圖查詢 |
 | **LIB-506** | LLM 驅動之 3DGS 導航與問答 | LLM-Grounded 3D Scene QA & Navigation | ConceptGraphs、空間 ReAct 推論迴圈、具身導覽 |
+| **LIB-507** | 少視角 3DGS 幾何可靠性、單目深度先驗與局部仿射校正邊界 | Sparse-View 3DGS Geometry, Depth Priors & Reliability | AffineGS 逆視差局部仿射、In Depth We Trust、DepthGS、P1/P2/P3 姿態協議、非可辨識界 |
+| **LIB-508** | 高斯最佳化理論、MCMC 稠密化、表面不變量與快速收斂 | Gaussian Optimization, Densification, Surface Fidelity & Fast Iteration | AbsGS、3DGS-MCMC、Taming-3DGS、DashGaussian、First-Hit 表面界與鏡面解耦 |
 | **LIB-602** | 現代大語言模型架構解剖與縮放定律 | Modern LLM Architecture & Scaling Laws | Chinchilla 定律、Decoder-Only、RMSNorm、SwiGLU、GQA、稀疏 MoE |
 | **LIB-603** | 密集檢索、檢索增強生成 (RAG) 與緩存增強生成 (CAG) 系統架構 | Dense Retrieval, RAG & Cache-Augmented Generation Architecture | InfoNCE 互資訊下界、Bi-Encoder vs Cross-Encoder、BM25+RRF、ColBERT MaxSim、GraphRAG 拓樸展開、RAG vs CAG |
 | **LIB-703** | 大模型代理人認知架構與推論協議 | LLM Agent Cognitive Architecture & Protocols | ReAct 思考迴圈、結構化工具模式、動態規劃 |
@@ -71,6 +74,7 @@
 | **LIB-904** | 學術科研文獻體系與前沿研究對齊 | Academic Research Corpus & Literature Synthesis | 文獻檢索方法論、指標對齊、真實性核查矩陣 |
 | **LIB-905** | 前沿視覺與具身多模態五大專題藍圖 | Frontier Vision & Multimodal Capstone Blueprints | 五大專題系統架構、消融實驗矩陣、國科會經費規劃 |
 | **LIB-906** | 對話質疑下的選擇性認知修訂基準 | LLM Conversational Epistemic Revision | 諂媚性 (Sycophancy) 對抗、信念修訂、認知覆寫決策樹 |
+| **LIB-907** | 科研缺口發掘、方法層級撞題審查與低算力先導選題方法論 | Research Gap Discovery, Novelty Collision & Topic Selection | Pass 1–4 15 欄審查、三維撞題、P0–G3 閘門、算力非淘汰原則 |
 
 ---
 

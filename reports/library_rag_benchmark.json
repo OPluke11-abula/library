@@ -1,12 +1,12 @@
 {
-  "benchmark_timestamp": "2026-11-18T15:00:28Z",
+  "benchmark_timestamp": "2026-11-18T15:43:38Z",
   "provenance_version": "2.0",
   "generation_mode": "clean_committed_corpus",
-  "benchmark_execution_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
+  "benchmark_execution_commit_sha": "64845c50e6b341567c2f5f4f2fa2ebd8a1281589",
   "git_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
   "corpus_source_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
   "corpus_working_tree_dirty": false,
-  "corpus_sha256": "8a845c1f3bd6e1a0da5315ddc84b029a1d3b82f71f2aa533ee1b0f212dd85321",
+  "corpus_sha256": "249647dae92379ebffd7fb97c551fbe9f80b6704b20e362e8a097af5257a32d2",
   "corpus_volumes": 32,
   "corpus_chunks": 1074,
   "corpus_invariants": 130,
@@ -34,8 +34,8 @@
       "exact_rule_recall_at_5": 0.625,
       "chunk_rule_mrr_at_5": 0.5938,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 24.57,
-      "p95_latency_ms": 36.9
+      "mean_latency_ms": 23.6,
+      "p95_latency_ms": 43.76
     },
     "bm25_only": {
       "queries_evaluated": 16,
@@ -47,8 +47,8 @@
       "exact_rule_recall_at_5": 0.9375,
       "chunk_rule_mrr_at_5": 0.875,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 24.02,
-      "p95_latency_ms": 38.68
+      "mean_latency_ms": 23.89,
+      "p95_latency_ms": 41.69
     },
     "hybrid_rrf": {
       "queries_evaluated": 16,
@@ -60,8 +60,8 @@
       "exact_rule_recall_at_5": 1.0,
       "chunk_rule_mrr_at_5": 0.9375,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 46.82,
-      "p95_latency_ms": 94.94
+      "mean_latency_ms": 48.63,
+      "p95_latency_ms": 97.41
     }
   },
   "golden_non_leaked_subset_q8_q16": {
@@ -75,8 +75,8 @@
       "exact_rule_recall_at_5": 0.3333,
       "chunk_rule_mrr_at_5": 0.3333,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 21.84,
-      "p95_latency_ms": 33.23
+      "mean_latency_ms": 23.07,
+      "p95_latency_ms": 38.88
     },
     "bm25_only": {
       "queries_evaluated": 9,
@@ -88,8 +88,8 @@
       "exact_rule_recall_at_5": 0.8889,
       "chunk_rule_mrr_at_5": 0.8333,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 21.69,
-      "p95_latency_ms": 32.42
+      "mean_latency_ms": 34.02,
+      "p95_latency_ms": 91.45
     },
     "hybrid_rrf": {
       "queries_evaluated": 9,
@@ -101,8 +101,8 @@
       "exact_rule_recall_at_5": 1.0,
       "chunk_rule_mrr_at_5": 0.9444,
       "volume_invariant_recall_at_5": 1.0,
-      "mean_latency_ms": 38.48,
-      "p95_latency_ms": 84.7
+      "mean_latency_ms": 46.06,
+      "p95_latency_ms": 142.82
     }
   },
   "independent_holdout_results": {
@@ -119,8 +119,8 @@
         "exact_rule_recall_at_5": 0.5,
         "chunk_rule_mrr_at_5": 0.5,
         "volume_invariant_recall_at_5": 0.8214,
-        "mean_latency_ms": 25.98,
-        "p95_latency_ms": 39.81,
+        "mean_latency_ms": 26.61,
+        "p95_latency_ms": 46.08,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -134,8 +134,8 @@
         "exact_rule_recall_at_5": 0.8929,
         "chunk_rule_mrr_at_5": 0.8304,
         "volume_invariant_recall_at_5": 1.0,
-        "mean_latency_ms": 25.94,
-        "p95_latency_ms": 40.09,
+        "mean_latency_ms": 26.67,
+        "p95_latency_ms": 50.43,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       },
@@ -149,8 +149,8 @@
         "exact_rule_recall_at_5": 0.9643,
         "chunk_rule_mrr_at_5": 0.9018,
         "volume_invariant_recall_at_5": 1.0,
-        "mean_latency_ms": 75.59,
-        "p95_latency_ms": 103.34,
+        "mean_latency_ms": 74.43,
+        "p95_latency_ms": 101.86,
         "multi_hop_subgraph_recall_at_5": 1.0,
         "unanswerable_abstain_accuracy": 1.0
       }
@@ -167,8 +167,8 @@
           "exact_rule_recall_at_5": 0.875,
           "chunk_rule_mrr_at_5": 0.875,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 28.3,
-          "p95_latency_ms": 39.96
+          "mean_latency_ms": 30.98,
+          "p95_latency_ms": 48.57
         },
         "hybrid_rrf": {
           "queries_evaluated": 8,
@@ -180,8 +180,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9375,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 81.12,
-          "p95_latency_ms": 101.69
+          "mean_latency_ms": 81.65,
+          "p95_latency_ms": 105.64
         }
       },
       "synonym_paraphrase": {
@@ -195,8 +195,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 22.93,
-          "p95_latency_ms": 34.25
+          "mean_latency_ms": 22.13,
+          "p95_latency_ms": 34.32
         },
         "hybrid_rrf": {
           "queries_evaluated": 5,
@@ -208,8 +208,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 73.5,
-          "p95_latency_ms": 103.15
+          "mean_latency_ms": 70.86,
+          "p95_latency_ms": 94.02
         }
       },
       "multi_hop": {
@@ -223,8 +223,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.5625,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 26.34,
-          "p95_latency_ms": 38.16,
+          "mean_latency_ms": 27.67,
+          "p95_latency_ms": 39.97,
           "multi_hop_subgraph_recall_at_5": 1.0
         },
         "hybrid_rrf": {
@@ -237,8 +237,8 @@
           "exact_rule_recall_at_5": 0.75,
           "chunk_rule_mrr_at_5": 0.5625,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 76.99,
-          "p95_latency_ms": 99.69,
+          "mean_latency_ms": 81.26,
+          "p95_latency_ms": 99.19,
           "multi_hop_subgraph_recall_at_5": 1.0
         }
       },
@@ -253,8 +253,8 @@
           "exact_rule_recall_at_5": 0.8,
           "chunk_rule_mrr_at_5": 0.7,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 24.21,
-          "p95_latency_ms": 37.31
+          "mean_latency_ms": 23.9,
+          "p95_latency_ms": 37.34
         },
         "hybrid_rrf": {
           "queries_evaluated": 5,
@@ -266,8 +266,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 72.46,
-          "p95_latency_ms": 97.99
+          "mean_latency_ms": 77.8,
+          "p95_latency_ms": 107.05
         }
       },
       "unanswerable": {
@@ -281,8 +281,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 25.31,
-          "p95_latency_ms": 35.19,
+          "mean_latency_ms": 24.59,
+          "p95_latency_ms": 33.97,
           "unanswerable_abstain_accuracy": 1.0
         },
         "hybrid_rrf": {
@@ -295,8 +295,8 @@
           "exact_rule_recall_at_5": 0.0,
           "chunk_rule_mrr_at_5": 0.0,
           "volume_invariant_recall_at_5": 0.0,
-          "mean_latency_ms": 75.24,
-          "p95_latency_ms": 97.31,
+          "mean_latency_ms": 74.1,
+          "p95_latency_ms": 104.22,
           "unanswerable_abstain_accuracy": 1.0
         }
       },
@@ -311,8 +311,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 0.9167,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 24.69,
-          "p95_latency_ms": 33.41
+          "mean_latency_ms": 25.93,
+          "p95_latency_ms": 32.09
         },
         "hybrid_rrf": {
           "queries_evaluated": 6,
@@ -324,8 +324,8 @@
           "exact_rule_recall_at_5": 1.0,
           "chunk_rule_mrr_at_5": 1.0,
           "volume_invariant_recall_at_5": 1.0,
-          "mean_latency_ms": 63.83,
-          "p95_latency_ms": 95.84
+          "mean_latency_ms": 64.82,
+          "p95_latency_ms": 92.35
         }
       }
     }

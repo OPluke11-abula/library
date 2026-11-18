@@ -51,7 +51,7 @@ successors: []
 Three failure modes derail student teams and AI research agents alike `[FACT]`:
 1. **Single-Anchor Tunnel Vision**: Mistaking one baseline's limitation for an unsolved field gap without checking concurrent top-venue works, causing fatal **Novelty Collision** months later `[DESIGN_DECISION]`.
 2. **Solution-First Regularizer Engineering**: Designing new losses or architectural patches before running falsification pilots (`G1/G2`) to prove the hypothesized failure actually occurs `[FACT]`.
-3. **Phantom Workstation Planning**: Scheduling multi-hour RTX 4090/A100 sweeps when actual execution runs on 4GB–8GB consumer laptops and bounded cloud credits `[SAFETY_BOUND]`.
+3. **Conflating Local Laptop VRAM With Topic Viability**: Agents must neither ignore real local `4GB–8GB` laptop bounds nor wrongly turn local VRAM limits into universal topic rejection gates (`Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold`) `[SAFETY_BOUND]`.
 
 ---
 
@@ -91,10 +91,12 @@ Execute gates sequentially without skipping ahead to novel loss design:
 
 ---
 
-## 3. Constrained-Compute Scheduling Principles (`4GB / 8GB / Single-GPU Cloud`)
+## 3. Heterogeneous Compute Scheduling & Non-Elimination Policy (`Local Hardware` vs. `Single Cloud GPU`)
 
-- **Cache-Once, Ablate-on-CPU**: For post-hoc calibration, conformal bounds, or matching analysis, extract detector logits/distributions once on GPU into compact tensors, then execute rapid `20+/day` statistical ablations on CPU `[DESIGN_DECISION]`.
-- **Single-Node Timeout Circuit Breakers**: Set explicit per-run wall-clock ceilings before launching heavy 3DGS / CUDA builds on cloud quotas; enforce pre-declared numeric `GO / HOLD / NO-GO` thresholds `[DESIGN_DECISION]`.
+> **Core Compute Policy Principle `[DESIGN_DECISION]` `[SAFETY_BOUND]`**: **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** Needing `12GB`, `16GB`, or `24GB` VRAM does NOT imply an automatic `NO-GO`. Rules such as `VRAM > 8GB => NO_GO`, `Cannot run locally => REJECT`, `3DGS training is expensive => REJECT`, or `Colab required => REJECT` are strictly prohibited. Any compute-driven `NO-GO` MUST first document: (1) feasibility on an accessible single Colab/cloud GPU; (2) checkpoint or pretrained reuse vs. full training; (3) total baseline + critical ablation compute cost; (4) valid scene/scale/step downscaling; (5) whether downscaling preserves scientific validity; and (6) sufficiency of team timeline and cloud quotas.
+
+- **Cache-Once, Ablate-on-CPU**: For post-hoc calibration or statistical matching analysis, cache compact detector logits/distributions once on GPU and run rapid statistical ablations on CPU `[DESIGN_DECISION]`.
+- **Configurable Pilot Budgets (Non-Eliminating)**: Example per-run time ceilings (such as an illustrative, configurable `60 min` pilot threshold in `MinimalPilotGate`) serve only to trigger `HOLD` (downscaling or scheduling on a single cloud GPU), NEVER as a global hard gate rejecting a research direction; unexecuted GPU tests remain `NOT_RUN / UNVERIFIED` `[DESIGN_DECISION]` `[SAFETY_BOUND]`.
 
 ---
 
@@ -153,7 +155,7 @@ class ResearchGateAuditor:
         if pilot.collision_verdict == "DIRECT_COLLISION_DO_NOT_PURSUE":
             return {"decision": "NO_GO", "reason": "Direct 3D collision detected"}
         if pilot.estimated_minutes_per_run > pilot.max_budget_minutes_per_run:
-            return {"decision": "HOLD", "reason": "Exceeds per-run compute time ceiling"}
+            return {"decision": "HOLD", "reason": "Exceeds illustrative configurable pilot ceiling -> downscale or run on single cloud GPU (NOT topic NO-GO)"}
         if pilot.execution_state != "REPRODUCED_BY_TEAM":
             return {"decision": "HOLD", "reason": "Awaiting actual P0/G2 empirical run"}
         return {"decision": "GO", "reason": "Passed collision, compute budget, and empirical verification"}
@@ -201,9 +203,9 @@ if __name__ == "__main__":
 - **Contract Level**: `HIGH_INVARIANT`
 - **Specification**: Every pilot must pre-declare baselines, leak-free splits, dependencies, and numeric `GO / HOLD / NO-GO` thresholds, executing strictly along `P0 -> G1 -> G2 -> G3 -> Novelty Gate` with immediate pivot on negative `G2` `[DESIGN_DECISION]`.
 
-### [RULE-907-04] Compute Provenance & Constrained Hardware Truth Invariant
+### [RULE-907-04] Compute Provenance, Hardware Truth & Non-Elimination Invariant
 - **Contract Level**: `RESOURCE_CONSTRAINT`
-- **Specification**: Agents must NOT assume unverified `RTX 4090 (24GB)` hardware for constrained student pipelines (`4GB–8GB` laptops / bounded single-GPU cloud quotas); workflows should decouple GPU feature caching from rapid CPU statistical ablation `[SAFETY_BOUND]`.
+- **Specification**: **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** Agents must never invent unverified workstation capacity or reject a direction solely because it exceeds `4GB–8GB` local VRAM (`12–24GB`), requires a single cloud GPU / Colab, or lacks local compilation; any compute-based `NO-GO` requires traceable single-cloud-GPU, checkpoint-reuse, downscaling-validity, and total ablation cost evidence. Configurable pilot ceilings (e.g., `60 min` example) yield `HOLD`, unrun GPU runs stay `NOT_RUN / UNVERIFIED`, and inference-caching workflows are preferred where applicable `[SAFETY_BOUND]` `[DESIGN_DECISION]`.
 
 ---
 

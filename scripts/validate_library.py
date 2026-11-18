@@ -30,7 +30,8 @@ from pathlib import Path
 from collections import defaultdict, deque
 
 # Ensure UTF-8 output
-sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -131,12 +132,12 @@ def parse_frontmatter(text: str):
                 
     return data, body
 
-def find_library_files():
+def find_library_files(root: Path = ROOT):
     zh_files_multi = defaultdict(list)
     en_files_multi = defaultdict(list)
     
-    for p in ROOT.rglob('*.md'):
-        rel = p.relative_to(ROOT)
+    for p in root.rglob('*.md'):
+        rel = p.relative_to(root)
         rel_str = str(rel).replace('\\', '/')
         if any(part in p.parts for part in ('_archive_legacy', '.obsidian', 'node_modules', '.git', 'dist', '.astro')):
             continue
@@ -149,6 +150,103 @@ def find_library_files():
                 zh_files_multi[call_no].append(rel)
                 
     return zh_files_multi, en_files_multi
+
+
+def canonicalize_corpus_bytes(raw_bytes: bytes) -> bytes:
+    """Normalize CRLF line endings to canonical LF bytes for cross-platform hashing."""
+    return raw_bytes.replace(b"\r\n", b"\n")
+
+
+def compute_corpus_sha256_from_paths(ordered_entries) -> str:
+    """Compute cross-platform Canonical LF SHA-256 over sorted (rel_posix, abs_path) entries."""
+    corpus_hasher = hashlib.sha256()
+    for rel_p, fpath in ordered_entries:
+        corpus_hasher.update((rel_p + "\n").encode("utf-8"))
+        corpus_hasher.update(canonicalize_corpus_bytes(fpath.read_bytes()))
+    return corpus_hasher.hexdigest()
+
+
+def compute_canonical_corpus_sha256(root: Path = ROOT) -> str:
+    """Discover LIB-*.md pairs under root and compute Canonical LF SHA-256."""
+    zh_multi, en_multi = find_library_files(root)
+    all_cids = sorted(set(zh_multi.keys()) | set(en_multi.keys()))
+    ordered_entries = []
+    for cid in all_cids:
+        for files_map in (zh_multi, en_multi):
+            if cid in files_map:
+                rel = sorted(files_map[cid])[0]
+                ordered_entries.append((rel.as_posix(), root / rel))
+    return compute_corpus_sha256_from_paths(ordered_entries)
+
+
+def get_git_provenance(root: Path = ROOT) -> dict:
+    """Resolve corpus-scoped Git provenance without substituting shallow/unverified HEAD."""
+    repo_head_sha = 'UNKNOWN'
+    corpus_commit_sha = 'UNKNOWN'
+    corpus_dirty = False
+    try:
+        repo_head_sha = subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'], cwd=str(root), stderr=subprocess.DEVNULL, text=True
+        ).strip() or 'UNKNOWN'
+        is_shallow = subprocess.check_output(
+            ['git', 'rev-parse', '--is-shallow-repository'],
+            cwd=str(root), stderr=subprocess.DEVNULL, text=True
+        ).strip().lower() == 'true'
+        log_out = subprocess.check_output(
+            ['git', 'log', '-n', '1', '--pretty=format:%H|%P', '--', ':(glob)**/LIB-*.md'],
+            cwd=str(root), stderr=subprocess.DEVNULL, text=True
+        ).strip()
+        if log_out:
+            cand_sha, _, cand_parents = log_out.partition('|')
+            shallow_shas = set()
+            if is_shallow:
+                shallow_raw = subprocess.check_output(
+                    ['git', 'rev-parse', '--git-path', 'shallow'],
+                    cwd=str(root), stderr=subprocess.DEVNULL, text=True
+                ).strip()
+                if shallow_raw:
+                    shallow_path = Path(shallow_raw)
+                    if not shallow_path.is_absolute():
+                        shallow_path = root / shallow_path
+                    if shallow_path.exists():
+                        shallow_shas = set(shallow_path.read_text(encoding='utf-8').split())
+            if is_shallow and (cand_sha in shallow_shas or not cand_parents.strip()):
+                corpus_commit_sha = 'UNKNOWN'
+            else:
+                corpus_commit_sha = cand_sha
+        dirty_out = subprocess.check_output(
+            ['git', 'status', '--porcelain', '--', ':(glob)**/LIB-*.md'],
+            cwd=str(root), stderr=subprocess.DEVNULL, text=True
+        ).strip()
+        corpus_dirty = bool(dirty_out)
+    except Exception:
+        head_file = root / '.git' / 'HEAD'
+        if head_file.exists():
+            ref_txt = head_file.read_text(encoding='utf-8').strip()
+            if ref_txt.startswith('ref: '):
+                ref_path = root / '.git' / ref_txt[5:]
+                if ref_path.exists():
+                    repo_head_sha = ref_path.read_text(encoding='utf-8').strip()
+            elif len(ref_txt) == 40:
+                repo_head_sha = ref_txt
+        corpus_commit_sha = 'UNKNOWN'
+
+    if corpus_dirty:
+        generation_mode = 'uncommitted_working_tree'
+    elif corpus_commit_sha == 'UNKNOWN':
+        generation_mode = 'unverified_shallow_or_missing_git_history'
+    else:
+        generation_mode = 'clean_committed_corpus'
+    effective_commit_sha = f"{corpus_commit_sha}+dirty" if corpus_dirty else corpus_commit_sha
+    return {
+        'provenance_version': '2.0',
+        'generation_mode': generation_mode,
+        'git_commit_sha': effective_commit_sha,
+        'corpus_source_commit_sha': corpus_commit_sha,
+        'corpus_working_tree_dirty': corpus_dirty,
+        'repository_head_sha': repo_head_sha,
+    }
+
 
 def validate_all():
     errors = []
@@ -516,40 +614,26 @@ def validate_all():
         if not re.search(r'(?:References|Literature)', en_docs[cid]['body']):
             errors.append(f"[EN {cid}] Missing References / Literature section")
 
-    # Compute deterministic Corpus SHA-256 and Git Commit SHA for reproducibility provenance
-    corpus_hasher = hashlib.sha256()
-    for cid in sorted(all_call_numbers):
-        for docs_map in (zh_docs, en_docs):
-            if cid in docs_map:
-                rel_p = docs_map[cid]['path'].relative_to(ROOT).as_posix()
-                corpus_hasher.update((rel_p + chr(10)).encode('utf-8'))
-                corpus_hasher.update(docs_map[cid]['path'].read_bytes())
-    corpus_sha256 = corpus_hasher.hexdigest()
-    try:
-        git_sha = subprocess.check_output(
-            ['git', 'log', '-n', '1', '--pretty=format:%H', '--', ':(glob)**/LIB-*.md'],
-            cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
-        ).strip() or subprocess.check_output(
-            ['git', 'rev-parse', 'HEAD'], cwd=str(ROOT), stderr=subprocess.DEVNULL, text=True
-        ).strip()
-    except Exception:
-        head_file = ROOT / '.git' / 'HEAD'
-        git_sha = 'UNKNOWN'
-        if head_file.exists():
-            ref_txt = head_file.read_text(encoding='utf-8').strip()
-            if ref_txt.startswith('ref: '):
-                ref_path = ROOT / '.git' / ref_txt[5:]
-                if ref_path.exists():
-                    git_sha = ref_path.read_text(encoding='utf-8').strip()
-            elif len(ref_txt) == 40:
-                git_sha = ref_txt
+    # Compute deterministic Canonical LF Corpus SHA-256 and Git Commit SHA for reproducibility provenance
+    ordered_corpus_entries = [
+        (docs_map[cid]['path'].relative_to(ROOT).as_posix(), docs_map[cid]['path'])
+        for cid in sorted(all_call_numbers)
+        for docs_map in (zh_docs, en_docs)
+        if cid in docs_map
+    ]
+    corpus_sha256 = compute_corpus_sha256_from_paths(ordered_corpus_entries)
+    prov = get_git_provenance(ROOT)
 
     # Output report
     rep_dir = ROOT / 'reports'
     rep_dir.mkdir(exist_ok=True)
     report_data = {
         'status': 'PASS' if not errors else 'FAIL',
-        'git_commit_sha': git_sha,
+        'provenance_version': prov['provenance_version'],
+        'generation_mode': prov['generation_mode'],
+        'git_commit_sha': prov['git_commit_sha'],
+        'corpus_source_commit_sha': prov['corpus_source_commit_sha'],
+        'corpus_working_tree_dirty': prov['corpus_working_tree_dirty'],
         'corpus_sha256': corpus_sha256,
         'volume_count': len(all_call_numbers),
         'bilingual_file_count': len(zh_docs) + len(en_docs),

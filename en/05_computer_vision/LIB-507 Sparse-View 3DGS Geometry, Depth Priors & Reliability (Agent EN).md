@@ -52,7 +52,7 @@ successors:
 
 With only `2–5` uncalibrated or wide-baseline RGB views and zero LiDAR/RGB-D hardware, vanilla 3DGS fails via geometric collapse and camera-facing floaters `[FACT]`. Pretrained monocular depth networks (e.g., Depth Anything V2) provide dense priors, but suffer three structural pathologies `[FACT]`:
 1. **Region-Dependent Affine Distortion**: Early baselines (`DNGaussian`) normalize depth globally; modern networks actually exhibit spatially varying piecewise-linear scale-shift distortions across depth regimes (`AffineGS`, NeurIPS 2026) `[LITERATURE_RESULT]`.
-2. **Guided Filter Propagation of Non-Affine Local Shape Errors**: When monocular depth inverts local surface curvature within a smooth region lacking crisp edges, filtering affine fields using the monocular disparity itself as the guide image risks locking inverted slopes into Gaussian geometry `[HYPOTHESIS]`.
+2. **Guided Filter Propagation of Non-Affine Local Shape Errors (Open Hypothesis)**: When monocular depth inverts local surface curvature within a smooth region lacking crisp edges, local affine rectification may face structural limitations; however, whether 3DGS joint multi-view optimization fails to self-correct or suffers reproducible real 3D geometry degradation remains an open research hypothesis (`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`) requiring controlled validation `[HYPOTHESIS]`.
 3. **Photometric Deception vs. True Geometry**: As analyzed in `LIB-508`, high Spherical Harmonics (SH) capacity can sustain high NVS PSNR via displaced billboards under controlled/synthetic parallax setups (whereas `Wang & Miller, arXiv:2608.30054` observed surface-consistent reconstructions on evaluated real-world scenes); combined with multi-parameter equivalence, independent 3D geometry metrics (`Chamfer Distance` / `Normal MAE` / metric `AbsRel`) are mandatory `[SAFETY_BOUND]`.
 
 ---
@@ -60,12 +60,17 @@ With only `2–5` uncalibrated or wide-baseline RGB views and zero LiDAR/RGB-D h
 ## 2. Mathematical Formalization
 
 ### 1. From Global Alignment to Local Spatially Varying Affine Rectification `[LITERATURE_RESULT]`
-Given monocular disparity $d_{\mathrm{mono}}(u,v)$, **`AffineGS`** (Tse, Peng, Chen, & Yao, NeurIPS 2026, `arXiv:2611.07709`) estimates pixel-wise affine fields $(\alpha(u,v), \beta(u,v))$:
-$$\hat{d}_{\mathrm{rect}}(u, v) = \alpha(u, v)\,d_{\mathrm{mono}}(u, v) + \beta(u, v)$$
-Direct source inspection of `AffineGS-LLFF-public/utils/disparity_normal_loss.py` (L90–145) verifies the exact rectification pipeline `[FACT]`:
-1. The local scaling field is computed as `coefficients = d_gt_norm / (gt_safe**2 * d_render_norm + 1e-5)`—strictly **non-negative ($\ge 0$, sign-blind ratio of gradient L2 norms)**.
-2. Percentile clamping (`5th–95th`) is applied **before** running `cv2.ximgproc.guidedFilter(guide=gt_disparity.detach().cpu(), radius=600, eps=0.05)` guided by the unrectified monocular disparity $d_{\mathrm{mono}}$, followed by post-filter `[p5, p95]` gradient-norm & denominator clamping (`.clamp(min=1e-6)`) and `torch.no_grad()` global least-squares re-alignment (`_fa, _fb`) `[FACT]`.
-- *Structural Limits vs. Unverified Hypothesis*: Because `coefficients` is non-negative and Guided Filtering enforces piecewise linear affinity to raw $d_{\mathrm{mono}}$ across large windows, the filter structurally cannot invert a sign-flipped slope inside a smooth guide region where boundary contrast is weak `[FACT]`; whether such non-affine local shape errors consistently induce irreversible 3D geometric degradation after 3DGS joint optimization remains an open `[HYPOTHESIS]` requiring minimal reproduction testing rather than premature rejection. Edge bleeding across foreground-background boundaries can also propagate biased local coefficients `[DERIVATION]`.
+Given relative monocular disparity $d(u,v) = d_{\mathrm{mono}}(u,v)$ and rendered 3DGS depth $\mathcal{D}(u,v)$, **`AffineGS`** (Tse, Peng, Chen, & Yao, NeurIPS 2026, `arXiv:2611.07709`) separates strictly into `SOURCE_VERIFIED_CODE_BEHAVIOR`, `MATHEMATICAL_DERIVATION`, and `HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`:
+1. **Exact Inverse-Disparity Model & Variable Sign Properties (`SOURCE_VERIFIED_CODE_BEHAVIOR`) `[FACT]`**: Inspection of `arXiv:2611.07709` (Sec. 3.1–3.3) and both official repositories (`eldentse/AffineGS/dn_splatter/disparity_normal_loss.py` and `AffineGS-LLFF-public/utils/disparity_normal_loss.py`) verifies that AffineGS models $1/d(u,v) = \alpha(u,v)\,\mathcal{D}(u,v) + \beta(u,v)$. The raw local scale ratio `coefficients = d_gt_norm / (gt_safe**2 * d_render_norm + 1e-5)` is strictly **non-negative ($\ge 0$, clamped to 5th–95th percentiles)**, whereas `beta = 1/gt_safe - coefficients * rendered_depth` is **unconstrained in sign (can take positive or negative values)**. Both `coefficients` and `beta` are smoothed with `cv2.ximgproc.guidedFilter(guide=gt_disparity, ...)` into **spatially varying fields** $\alpha_{\mathrm{smooth}}(u,v)$ and $\beta_{\mathrm{smooth}}(u,v)$ (`radius=600, eps=0.05` in `AffineGS-LLFF-public`; `radius=800, eps=1.0` in `eldentse/AffineGS`, which explicitly re-clamps `coefficients` post-blur because Guided Filter local linear fits can push `coefficients <= 0`). Rectified depth $\hat{\mathcal{D}}(u,v) = \frac{1 - \beta_{\mathrm{smooth}}(u,v)\,d(u,v)}{\alpha_{\mathrm{smooth}}(u,v)\,d(u,v)}$ is then globally aligned via `torch.no_grad()` unconstrained OLS scalars `(_fa, _fb)` for $\mathcal{L}_{\mathrm{depth}} = |(a\hat{\mathcal{D}} + b) - \mathcal{D}|$, while $\mathcal{L}_{\mathrm{grad}}$ and $\mathcal{L}_{\mathrm{normal}}$ apply the local-constancy approximation $\nabla\hat{d} \approx -\alpha_{\mathrm{smooth}} d^2 \nabla\mathcal{D}$ directly against raw monocular disparity gradients (`gt_dx, gt_dy`).
+2. **Strict Distinction Between General Affine vs. `AffineGS` Inverse-Disparity Depth & 1D Directional Bounds (`MATHEMATICAL_DERIVATION`) `[DERIVATION]`**: Let $(\cdot)' = D_{\mathbf{e}}(\cdot)$ denote a derivative along a 1D slice or specified unit direction $\mathbf{e}$ (never conflate general affine vs. inverse-disparity fields):
+   - **(A) General Spatially Varying Affine Field** $\hat{y}(x) = \alpha(x)d(x) + \beta(x)$ obeys $\hat{y}' = \alpha d' + d\alpha' + \beta'$; for $\alpha > 0,\ d' \neq 0$, $|d\alpha' + \beta'| < |\alpha d'|$ preserves $\mathrm{sign}(d')$, **which MUST NOT be copied onto `AffineGS`'s inverse-disparity depth formula** `[FACT]`.
+   - **(B) `AffineGS` Inverse-Disparity Rectified Depth** $\hat{\mathcal{D}}(x) = \frac{1/d(x) - \beta(x)}{\alpha(x)} = \frac{1}{\alpha(x)d(x)} - \frac{\beta(x)}{\alpha(x)}$ (with optional global scale $a\hat{\mathcal{D}} + b$) differentiates along direction $x$ as:
+     $$\hat{\mathcal{D}}'(x) = -\frac{d'(x)}{\alpha(x)\,d(x)^2} - \frac{\beta'(x)}{\alpha(x)} - \frac{\left(\frac{1}{d(x)} - \beta(x)\right)\alpha'(x)}{\alpha(x)^2}$$
+     Because both $\alpha_{\mathrm{smooth}}(u,v)$ and signed $\beta_{\mathrm{smooth}}(u,v)$ vary spatially, Guided Filtering alters spatial gradients via local linear fits, and unconstrained OLS `_fa` can flip signs if negative, **`coefficients >= 0` alone does NOT mathematically prove slope-sign preservation** `[DERIVATION]`. Along that 1D slice or specified direction with $\alpha > 0,\ d > 0,\ d' \neq 0$ (and a global positive scale $a > 0$, which leaves derivative signs unchanged), a sufficient condition ensuring $\mathrm{sign}(\hat{\mathcal{D}}') = -\mathrm{sign}(d')$ is:
+     $$\left|\beta'(x) + \left(\frac{1}{d(x)} - \beta(x)\right)\frac{\alpha'(x)}{\alpha(x)}\right| < \frac{|d'(x)|}{d(x)^2}$$
+     (*Scope Restriction*: This bound protects only the checked 1D slice / directional derivative where $D_{\mathbf{e}}d \neq 0$; in 2D image coordinates $\nabla\hat{\mathcal{D}}$, directions nearly orthogonal to $\nabla d$ with $D_{\mathbf{e}}d \approx 0$ remain susceptible to rotation by $\beta', \alpha'$, so this MUST NOT be overstated as an arbitrary 2D vector-gradient guarantee `[SAFETY_BOUND]`.)
+   - **Verified Counterexample & Positive Check `[FACT]`**: At $x=0$ with $d(x)=2+x,\ \alpha(x)=1+0.4x,\ \beta(x)=-0.8x$, the erroneous general-affine condition $|d\alpha'+\beta'| = |0.8-0.8| = 0 < |\alpha d'| = 1$ passes falsely, yet $\hat{\mathcal{D}}'(0) = -0.25 + 0.80 - 0.20 = +0.35 > 0$, inverting the unrectified inverse-disparity direction ($-d'(0)/d(0)^2 = -0.25 < 0$); the corrected bound catches this ($|-0.8 + 0.5\cdot 0.4| = 0.60 \not< 0.25$). Conversely, with $\alpha(x)=1+0.1x,\ \beta(x)=-0.1x$ and global $a=2.5>0$, $|-0.1+0.05| = 0.05 < 0.25$ and $a\hat{\mathcal{D}}'(0) = -0.50 < 0$ preserves $-\mathrm{sign}(d')$. Separately, within `AffineGS`'s direct local-constancy gradient/normal losses ($\mathcal{L}_{\mathrm{grad}}/\mathcal{L}_{\mathrm{normal}}$ ignoring $\nabla\alpha_{\mathrm{smooth}}$), ensuring post-filter $\alpha_{\mathrm{smooth}} > 0$ keeps the loss target directly aligned with raw $\nabla d$ without inversion `[FACT]`.
+3. **Research Gap & Open Hypothesis (`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`) `[HYPOTHESIS]`**: Local affine rectification may exhibit limitations under non-affine local shape distortions (e.g., smooth-patch curvature inversion or foreground-background edge bleeding propagated by large `guide=d` Guided Filter windows); however, its concrete failure boundary and whether multi-view photometric loss overrides or preserves 3D geometric degradation require controlled real-3DGS experiments—neither asserting guaranteed failure as `[FACT]` nor falsely claiming `AffineGS` resolves all shape distortions `[SAFETY_BOUND]`.
 
 ### 2. Selective Supervision & Stereo Prior Landscape (2024–2026) `[LITERATURE_RESULT]`
 - **`In Depth We Trust`** (`arXiv:2604.05715`, CVPRW 3DMV 2026): Constructs a virtual-stereo **Depth-Inconsistency Mask (DIM)** to suppress noisy/contradictory monocular regions combined with **Gradient-Alignment Loss (GAL)** on locally consistent subsets.
@@ -86,8 +91,11 @@ Direct source inspection of `AffineGS-LLFF-public/utils/disparity_normal_loss.py
 
 ## 3. Compute, VRAM & Verification Architecture
 
-- **`AffineGS` (`eldentse/AffineGS` / `AffineGS-LLFF-public`, Apache-2.0)**: Author-reported full Nerfstudio version requires **`1.5–2.0 hr/scene` on 1× RTX 3090** (`[LITERATURE_RESULT]`); runtime of `AffineGS-LLFF-public` on single consumer/Colab GPUs remains **`UNVERIFIED`** locally (treat any timing estimate without logged runs strictly as `ESTIMATED`, and never discard core geometric failure hypotheses solely on unmeasured compute assumptions before checking reproducibility) `[DESIGN_DECISION]` `[SAFETY_BOUND]`.
-- **Zero-GPU CPU Counterexample Harness**: Synthetic local-affine vs. inverted-curvature diagnostics execute in milliseconds on CPU before burning cloud GPU quotas `[DESIGN_DECISION]`.
+> **Compute Policy Principle `[DESIGN_DECISION]` `[SAFETY_BOUND]`**: **Local GPU VRAM is an observed hardware fact, not a global research-topic elimination threshold.** Running a method requiring `12 / 16 / 24 GB` VRAM on a single cloud GPU (e.g., Colab T4/L4) does NOT trigger rejection; topic decisions require traceable cloud availability, downscaling validity, and total baseline+ablation cost assessment.
+
+- **`AffineGS` (`eldentse/AffineGS` & `AffineGS-LLFF-public`, Apache-2.0)**: `AUTHOR_REPORTED` (Paper Appendix C.3, `arXiv:2611.07709`) requires **`~1.5 hr` per MuSHRoom scene** and **`~65 min` per ScanNet++ scene at half resolution** on a single **RTX 3090** (with OpenCV Guided Filter on CPU `[LITERATURE_RESULT]`). Local/cloud runtime of `AffineGS-LLFF-public` remains **`NOT_RUN / UNVERIFIED`** (treat unmeasured estimates strictly as `TEAM_ESTIMATE`, and never reject `AffineGS` geometric failure hypotheses on local 4GB laptop constraints prior to minimal cloud/pilot falsification) `[DESIGN_DECISION]` `[SAFETY_BOUND]`.
+- **`CoR-GS` / `DropGaussian` / `Sparse2DGS`**: `CoR-GS` (`arXiv:2405.12110` Table 5, `AUTHOR_REPORTED`) runs LLFF 3-view in **`6 min / 3 GB`** on `RTX 3090 Ti` (vs. Vanilla 3DGS **`2.5 min / 2 GB`**); `Sparse2DGS` (`arXiv:2504.20378`, `AUTHOR_REPORTED`) runs **`~2x faster`** than NeRF baseline `SparseNeus` `[LITERATURE_RESULT]`.
+- **Zero-GPU CPU Counterexample Harness**: Synthetic 1D toy checks (illustrative bounded-slope proxy, NOT bit-exact 3DGS/GuidedFilter simulation) execute in milliseconds on CPU before cloud runs `[DESIGN_DECISION]`.
 
 ---
 
@@ -120,7 +128,11 @@ def simulated_guided_affine_fit_1d(
     radius: int = 4,
     eps: float = 1e-4,
 ) -> List[float]:
-    """Sparse-anchor affine fit + guided propagation into anchor-free smooth interior."""
+    """
+    Pedagogical 1D toy affine proxy (clamped slope a >= 0.1 + box mean smoothing, NOT a bit-exact
+    OpenCV guidedFilter or full 3DGS inverse-disparity solver 1/d = alpha*D + beta):
+    illustrates slope mismatch hypothesis under smooth non-affine curvature inversion.
+    """
     n = len(guide)
     anchor_idx = [i for i, m in enumerate(anchor_mask) if m]
     assert len(anchor_idx) >= 4
@@ -193,6 +205,28 @@ def verify_non_identifiable_plane_equivalence(
     return max(diff, err_gt), (len(coords) == len(true_plane) and diff < 1e-9)
 
 
+def verify_affinegs_1d_directional_derivative(
+    d: float,
+    d_prime: float,
+    alpha: float,
+    alpha_prime: float,
+    beta: float,
+    beta_prime: float,
+    global_positive_a: float = 1.0,
+) -> Tuple[float, bool, bool, bool]:
+    """Compute exact 1D directional derivative of D_hat=(1/d-beta)/alpha and check sufficient bound."""
+    assert alpha > 0.0 and d > 0.0 and d_prime != 0.0 and global_positive_a > 0.0
+    dhat_prime = global_positive_a * (
+        -d_prime / (alpha * d * d)
+        - beta_prime / alpha
+        - ((1.0 / d - beta) * alpha_prime) / (alpha * alpha)
+    )
+    old_wrong_cond = abs(d * alpha_prime + beta_prime) < abs(alpha * d_prime)
+    true_sufficient_cond = abs(beta_prime + ((1.0 / d - beta) * alpha_prime) / alpha) < abs(d_prime) / (d * d)
+    preserves_inv_disp_sign = (dhat_prime * (-d_prime)) > 0.0
+    return dhat_prime, old_wrong_cond, true_sufficient_cond, preserves_inv_disp_sign
+
+
 if __name__ == "__main__":
     xs = [-1.0 + 2.0 * i / 63 for i in range(64)]
     gt_curve = [2.0 + 0.6 * math.exp(-3.0 * x * x) for x in xs]
@@ -208,10 +242,16 @@ if __name__ == "__main__":
 
     geom_delta, eq_ok = verify_non_identifiable_plane_equivalence(xs, [2.5 + 0.4 * x for x in xs])
 
+    ce_dp, ce_old, ce_true, ce_preserves = verify_affinegs_1d_directional_derivative(2.0, 1.0, 1.0, 0.4, 0.0, -0.8)
+    assert ce_old and not ce_true and not ce_preserves and abs(ce_dp - 0.35) < 1e-12
+
+    ok_dp, _, ok_true, ok_preserves = verify_affinegs_1d_directional_derivative(2.0, 1.0, 1.0, 0.1, 0.0, -0.1, global_positive_a=2.5)
+    assert ok_true and ok_preserves and abs(ok_dp - (-0.50)) < 1e-12
+
     assert res_a.is_geometrically_faithful
     assert not res_b.is_geometrically_faithful and res_b.normal_sign_flip_rate > 0.25
     assert eq_ok and geom_delta < 1e-9
-    print(f"[LIB-507 Verified] CaseA_MAE={res_a.mean_surface_mae:.4f} | CaseB_flip={res_b.normal_sign_flip_rate:.2%} | EqDiff={geom_delta:.1e}")
+    print(f"[LIB-507 Verified] CaseA_MAE={res_a.mean_surface_mae:.4f} | CaseB_flip={res_b.normal_sign_flip_rate:.2%} | D1={ce_dp:+.2f} | D2={ok_dp:+.2f} | EqDiff={geom_delta:.1e}")
 ```
 
 ---
@@ -243,6 +283,6 @@ if __name__ == "__main__":
 3. Ren, X., Liu, Y., An, N., Cheng, J., Qiao, X., Li, Y.-F., & Kong, H. (2026). *DepthGS: Depth-Guided Gaussian Splatting with Adaptive Regularization for High-Quality Surface Reconstruction*. **IEEE TPAMI 2026** ([arXiv:2611.13628](https://arxiv.org/abs/2611.13628), DOI: `10.1109/TPAMI.2026.3751295`).
 4. Li, J., Zhang, J., Bai, X., et al. (2024). *DNGaussian: Optimizing Sparse-View 3D Gaussian Radiance Fields with Global-Local Depth Normalization*. **CVPR 2024**.
 5. Kim, Y., Choi, J., & Yoon, S. (2026). *GDoFS: Gaussian DoF Separation for Plausible 3D Geometry in Sparse-View 3DGS*. **WACV 2026** ([arXiv:2412.13325](https://arxiv.org/abs/2412.13325)).
-6. Zhang, J., et al. (2024). *CoR-GS: Sparse-View 3D Gaussian Splatting via Co-Regularization*. **ECCV 2024**.
-7. Park, H., et al. (2025). *DropGaussian: Structural Regularization for Sparse-View Gaussian Splatting*. **CVPR 2025**; Li, Z., et al. (2026). *DOC-GS*. **ACM MM 2026** ([arXiv:2604.06739](https://arxiv.org/abs/2604.06739)); Lian, X., et al. (2026). *DGDO-GS*. **Applied Sciences 2026** (`10.3390/app16084026`); Liu, X., et al. (2026). *SRUP-GS*. **Computers & Graphics 2026** (`10.1016/j.cag.2026.104731`).
+6. Zhang, J., Li, J., Yu, X., Huang, L., Gu, L., Zheng, J., & Bai, X. (2024). *CoR-GS: Sparse-View 3D Gaussian Splatting via Co-Regularization*. **ECCV 2024** ([arXiv:2405.12110](https://arxiv.org/abs/2405.12110)).
+7. Park, H., Ryu, G., & Kim, W. (2025). *DropGaussian: Structural Regularization for Sparse-View Gaussian Splatting*. **CVPR 2025** ([arXiv:2504.00773](https://arxiv.org/abs/2504.00773)); Li, Z., et al. (2026). *DOC-GS*. **ACM MM 2026** ([arXiv:2604.06739](https://arxiv.org/abs/2604.06739)); Lian, X., et al. (2026). *DGDO-GS*. **Applied Sciences 2026** (`10.3390/app16084026`); Liu, X., et al. (2026). *SRUP-GS*. **Computers & Graphics 2026** (`10.1016/j.cag.2026.104731`).
 8. Wu, J., et al. (2025). *Sparse2DGS*. **CVPR 2025** ([arXiv:2504.20378](https://arxiv.org/abs/2504.20378)); Yuan, W., Ge, Y., & Cai, D. (2026). *StereoGS*. **ECCV 2026** ([arXiv:2606.30545](https://arxiv.org/abs/2606.30545)).

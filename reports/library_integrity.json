@@ -1,7 +1,11 @@
 {
   "status": "PASS",
-  "git_commit_sha": "f9fdc2ad8f3c34e331a42090ee7f3ba82bf115fd",
-  "corpus_sha256": "4822d140cd76d9d104f50112ccd47b1523aedee4f48f5be5217428f090aabef8",
+  "provenance_version": "2.0",
+  "generation_mode": "clean_committed_corpus",
+  "git_commit_sha": "0919a17e2ea6ba8bdd7a153ce7d4eecd5f8c5022",
+  "corpus_source_commit_sha": "0919a17e2ea6ba8bdd7a153ce7d4eecd5f8c5022",
+  "corpus_working_tree_dirty": false,
+  "corpus_sha256": "617c2bfd046817691aa14ab1fe65c2598995dca9f0e3e975819b81da13806c65",
   "volume_count": 32,
   "bilingual_file_count": 64,
   "topological_order": [

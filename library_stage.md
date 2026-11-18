@@ -31,7 +31,7 @@
 ### 2.1 客觀已驗證狀態 (System Verified Ground Truth)
 以下為本知識庫經自動化驗證腳本 (`validate_library.py` 11 項嚴格檢查) 與 CI 嚴格把關之客觀技術指標：
 - **版本溯源與基準區隔（不硬編碼流動 HEAD）**：
-  - **Historical Snapshot Commit**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（僅為早期 28 卷階段歷史基準快照，非現行 32 卷版本）。
+  - **Historical Snapshot Commit**：`07b3ca273791ccc90d9de20f8251b7a875f047aa`（僅為早期 28 卷階段歷史基準快照，非現行 32 卷版本）。
   - **Current Repository HEAD**：執行驗證或建置當下之工作樹頂端（動態由 `git rev-parse HEAD` 取得，不於本交接文件硬編碼以免後續提交失效；執行 Benchmark 時另記錄於 `reports/library_rag_benchmark.json` 之 `benchmark_execution_commit_sha`）。
   - **Corpus Source Commit**：最後一次修改 `LIB-*.md` 知識本體的 Commit SHA（由 `git log -n 1 --pretty=format:%H -- :(glob)**/LIB-*.md` 取得；CI 設定 `fetch-depth: 0` 保留完整歷史，若處於 Shallow Boundary 或無法存取 Git 歷史則誠實標記 `UNKNOWN` 而絕不以未驗證 `HEAD` 冒充，固定記錄於三份報告之 `corpus_source_commit_sha`，同時以 `corpus_working_tree_dirty` 與 `+dirty` 後綴阻絕未提交狀態冒充已提交版）。
   - **Deterministic Corpus SHA-256 (Canonical LF Rule)**：以跨平台一致的 Canonical LF 規則計算全庫 64 份 `LIB-*.md` 語料雜湊——依 `(LIB-###, zh/en)` 排序讀取各檔原始位元組、僅於雜湊輸入緩衝區將 CRLF (`\r\n`) 正規化為 LF (`\n`)（不改寫磁碟原始檔案），再連同 POSIX 相對路徑與 `\n` 分隔符計算 SHA-256 並寫入 `reports/library_integrity.json`、`reports/library_rag_index.json` 與 `reports/library_rag_benchmark.json` 之 `corpus_sha256` 欄位供即時雜湊比對（確保 Windows CRLF 與 Linux LF 檢出得到相同雜湊，不於此檔硬編碼特定 SHA-256 值）。
@@ -89,25 +89,25 @@
 - 校準文獻會議標註（郭 et al. 2017 發表於 ICML 2017 PMLR）。
 - 嚴格界定標準證據標籤，維持全庫科研嚴謹性。
 
-### 2. 深度學習第一性原理與 GPU 系統優化 (PR #1: `cd421d1`)
+### 2. 深度學習第一性原理與 GPU 系統優化 (PR #1: `bea6398`)
 - **GPU SFU 運算優化**：`torch.rsqrt(x)` 取代 `1 / torch.sqrt(x)`，消減多餘 Memory I/O。
 - **Pointwise 編譯器融合**：`@torch.compile` 將乘法與截斷融合成單一 Kernel。
 - **Loss 梯度特性**：解析為何採用 `-log(P)`（交叉熵）而非 `1 - P`，揭示錯誤懲罰梯度的動態特性。
 - **Pre-Norm 架構優勢**：殘差流 (Residual Stream) 梯度直達性與數值穩定性。
 - **In-place 原地操作**：`add_`、`mul_` 省去中間張量分配的記憶體優化機制。
 
-### 3. 對話質疑下選擇性認知修訂基準入庫 (PR #2: `6ba66e2`)
+### 3. 對話質疑下選擇性認知修訂基準入庫 (PR #2: `8070471`)
 - 正式撰寫並納入 **LIB-906** 中英文完整卷冊。
 - 對稱掛載前置節點 `[LIB-602, LIB-801, LIB-904]` 與後續關聯。
 - 全庫總導覽 `LIB-000`、總覽索引與 `README` 雙語完整對齊。
-- 順利通過驗證並完成雙庫零漂移同步（HEAD SHA：`6ba66e2`）。
+- 順利通過驗證並完成雙庫零漂移同步（HEAD SHA：`8070471`）。
 
-### 4. 首席管理員交接藍圖文檔建立 (PR #3: `68571aa`)
+### 4. 首席管理員交接藍圖文檔建立 (PR #3: `4d38c7d`)
 - 正式建立全庫交接治理總綱 `library_stage.md`。
 - 完整盤點 25 卷冊架構、84 條決策合約不變量與雙庫零漂移協定。
-- 確立交接基準 HEAD 為 `68571aa27ab794fbfe7326ffb972d5897641d2c8`。
+- 確立交接基準 HEAD 為 `4d38c7dc511e2f1e2e8a1fcedc13da42bbbfd243`。
 
-### 5. 科研精確度校準、Taxonomy 規範化、CI 升級與文獻差距矩陣 (PR #4: `d838ed7`)
+### 5. 科研精確度校準、Taxonomy 規範化、CI 升級與文獻差距矩陣 (PR #4: `58ba0c7`)
 - **P0 科研精確度校準 (Scientific Accuracy Calibration)**：
   - `LIB-001`：界定 Softplus Logit 嚴格凸性範疇；釐清單層 GLM 參數凸性與多層神經網路非凸 Loss Landscape 之界線；說明線性可分資料之發散條件；澄清輸出層代數梯度相消性（$\frac{\partial \mathcal{L}}{\partial z} = P - y$）與 MSE 飽和高原之本質差異。
   - `LIB-203`：移除未經引證之「效能下降 40%」經驗宣稱，改以微架構 Predication Masking 及 Shared Memory Padding 幾何機制深度論證；將記憶體頻寬減半嚴格標註為 Memory-Bound 邊界條件下的理論上限；標準化標籤（`[DERIVATION]`, `[FACT]`, `[HEURISTIC]`）。
@@ -126,7 +126,7 @@
   - 新增可重現基準腳本 `scripts/benchmark_lib501_moments.py`，測量 x86-64 單線程環境下 $28 \times 28$ 影像之墨跡動差質心計算耗時。
   - 以實測數據（Python 走訪 NumPy: ~0.13ms–0.46ms；原生 List: ~0.06ms–0.09ms；NumPy SIMD: ~0.007ms–0.02ms，加速比 ~10x–25x，標記為 `[EMPIRICAL_RESULT]`）全面取代未受控之理想化宣稱（1.5ms, 0.02ms, 75x）。
 
-### 7. 正弦位置編碼幾何推導與無正規化 Transformer DyT 入庫 (PR #7: `297e23c`)
+### 7. 正弦位置編碼幾何推導與無正規化 Transformer DyT 入庫 (PR #7: `c0970ae`)
 - **P0: LIB-405 正弦位置編碼 (Sinusoidal PE) 與損失曲面平滑化閉環**：
   - 補足 Vaswani et al. (NeurIPS 2017) 經典加性正弦位置編碼的第一性原理推導，以多進位制頻率衰減詮釋角速度設計（$\omega_i = 10000^{-2i/d}$）。
   - 嚴密以和差化積三角恆等式證明子空間內積之相對平移不變性（$\langle PE_t^{(i)}, PE_{t+k}^{(i)} \rangle = \cos(\omega_i k)$），並剖析加性注入交叉項污染如何催生乘性正交 RoPE 之演進。
@@ -138,7 +138,7 @@
 - **P1: 文檔一致性與標準標籤收斂**：
   - 清理殘留之非規範標籤，嚴格恪守全庫 10 大標準證據分類學。
 
-### 8. 輸入輸出權重綁定 (Weight Tying) 架構與參數量化 (PR #8: `c65161b`)
+### 8. 輸入輸出權重綁定 (Weight Tying) 架構與參數量化 (PR #8: `94d0d32`)
 - **P0: LIB-602 權重綁定幾何直觀與記憶體壓縮**：
   - 基於 Press & Wolf (2017) 經典文獻，正式補足 Weight Tying（Token Embedding = LM Head，即 $W_{\text{out}} = W_{\text{emb}}^T$）架構設定。
   - 提出幾何層面之點積相似度空間（Dot-Product Similarity）詮釋，跳脫「分類器權重」思維。
@@ -146,7 +146,7 @@
 
 ---
 
-### 9. 滾動時域模型預測控制 (MPC) 與 GPU 批次路徑積分 (MPPI) 入庫 (PR #10: `4fa289d`)
+### 9. 滾動時域模型預測控制 (MPC) 與 GPU 批次路徑積分 (MPPI) 入庫 (PR #10: `7502380`)
 - **P0: LIB-506 機器人控制理論 vs. 教學簡化模型 6 大維度對比**：
   - 嚴格界定 State（全位姿、速度、關節狀態）、Dynamics（明確取樣週期 $\Delta t$）、Trajectory（Markov 遞迴前向推進）、Cost（狀態跟隨、控制能量、終端 Lyapunov 代價）、Constraints（致動器飽和與摩擦錐接觸條件）、Optimization（數值/採樣連續最佳化）之本質差異。
 - **P0: 生產級向量化控制器實作**：
@@ -154,7 +154,7 @@
 - **P1: 雙語對稱與規範引證**：
   - 中英雙語完全對齊，補足 Williams et al. (T-RO 2017) 與 Rawlings et al. (2017) 經典控制權威引證。
 
-### 10. 全庫深度審查與 P0 數學代碼修復、P1 中英雙語合約與內文 DAG 全面對齊 (PR #12: `e283d3b`)
+### 10. 全庫深度審查與 P0 數學代碼修復、P1 中英雙語合約與內文 DAG 全面對齊 (PR #12: `fbb2404`)
 - **P0: 核心演算法與科學精確度修復**：
   - `LIB-406`（ZH & EN）：修正 `AdaLNZeroBlock` 與 `OptimalTransportFlowMatchingTrainer` 忽略時間變數 $t$ 之重大缺陷，補齊正弦時間嵌入（Sinusoidal Timestep Embedding）與條件組合 $c_{\text{joint}} = c + \text{MLP}(t)$，使流匹配真正學習時變速度場 $v_\theta(x_t, t)$。
   - `LIB-506`（ZH & EN）：將 `BatchedMPPIController` 由純 CPU NumPy 全面升級為原生 PyTorch GPU 張量實現（`torch.Tensor` 支援 `cuda`/`cpu`），補齊李亞普諾夫終端代價 $\Phi(x_H)$、MPPI 重要性採樣交叉項 $\lambda u_{t-1, \tau}^\top \Sigma_\epsilon^{-1} \epsilon_{k, \tau}$ 與顯式加速度硬約束 `a_max`。
@@ -164,14 +164,14 @@
   - 修復 `LIB-104 EN`、`LIB-401 EN`、`LIB-802 EN` 因控制字元轉義造成的 LaTeX 語法損毀（`\nabla`、`\rfloor`、`\neq`）。
   - 全面校準 84 條 `RULE-xxx-xx` 的中英合約等級（Contract Level）與量化決策閾值，同步 16 卷內文 `前置依賴`/`後續節點` 與 YAML Frontmatter DAG，並將複合斜線標籤全數收斂至 10 大標準證據標籤。
 
-### 11. P2 自動化驗證器升級至 11 項嚴格檢查 (PR #13: `a945543`)
+### 11. P2 自動化驗證器升級至 11 項嚴格檢查 (PR #13: `fa71307`)
 - **P2: `scripts/validate_library.py` 擴充 Checks 8–11**：
   - **Check 8**：驗證全部 `RULE-xxx-xx` 均定義合法之合約等級，且中英雙語等級 100% 一致。
   - **Check 9**：驗證內文導覽區塊（`前置依賴`/`後續節點`/`Prerequisites`/`Successors`）與 YAML Frontmatter DAG 100% 對齊。
   - **Check 10**：強制執行 10 大標準證據分類學（Canonical Evidence Taxonomy），攔截自創或斜線複合標籤。
   - **Check 11**：使用 Python `ast.parse()` 對全庫所有 Python 程式碼區塊進行語法解析驗證，並強制檢驗中英雙語程式碼區塊對稱性。
 
-### 12. Phase 3 英文高密度標準化與 Phase 4 過渡基礎專卷擴建 (PR #15: `7f65131`, PR #16: `9138fba`)
+### 12. Phase 3 英文高密度標準化與 Phase 4 過渡基礎專卷擴建 (PR #15: `164d648`, PR #16: `c88d828`)
 - **P0: 新增兩大核心過渡基礎專卷（`LIB-102` 與 `LIB-502`）與 `LIB-906` 不變量形式化**：
   - **`LIB-102`（機率統計、資訊理論與變分推論基石，`RULE-102-01..03`）**：完整推導夏農熵、交叉熵分解、Gibbs 非負不等式嚴格證明、前向（Mode-Covering）與反向（Mode-Seeking）KL 散度幾何偏置、變分證據下界（ELBO）與重參數化技巧（Reparameterization Trick）、Fisher 資訊矩陣與自然梯度，以及 GPU SFU `F.log_softmax` 融合算子與 Online Softmax 單趟暫存器歸約。
   - **`LIB-502`（相機射影幾何、對極幾何與運動結構恢復，`RULE-502-01..03`）**：完整推導針孔透視投影、$\mathrm{SO}(3)/\mathrm{SE}(3)$ 李群與李代數指數映射、連結 3DGS（`LIB-504`）之 EWA 局部仿射透視雅可比矩陣 $\mathbf{J}$、對極幾何本質/基礎矩陣與 Hartley 各向同性正規化八點法（含 Eckart-Young 秩-2 流形投影），以及非線性光束法平差（Bundle Adjustment）之 $3 \times 3$ 分塊對角舒爾補（Schur Complement）消元。
@@ -180,7 +180,7 @@
   - 解除不自然的 `LIB-401 (CNN) -> LIB-405 (Transformer)` 硬性耦合；建立 `LIB-101 -> LIB-102 -> LIB-301/406/602/801` 與 `LIB-501 -> LIB-502 -> LIB-408/504` 由淺入深之過渡鏈路，54 份檔案之 YAML 與內文導覽 100% 雙向同步。
   - 為全部 27 份 `Agent EN` 英文卷補齊內文拓樸導覽、標準證據分類標籤、`Systems & Hardware Alignment` 硬體微架構對齊章節與 `Canonical & Peer-Reviewed References` 權威文獻引證。
 
-### 13. P2 驗證器完整性強制門檻升級 (PR #17: `12fb584`)
+### 13. P2 驗證器完整性強制門檻升級 (PR #17: `5cd9488`)
 - **P2: `scripts/validate_library.py` 強化完整性覆蓋檢查**：
   - 強制要求 `LIB-001` 至 `LIB-906` 所有中英文卷必須顯式宣告內文 `前置依賴`/`後續節點` 與 `Prerequisites`/`Successors`（禁止缺失跳過）。
   - 強制要求每一份中英文卷正文至少包含 1 個以上標準證據標籤（攔截 0 標籤卷冊）。

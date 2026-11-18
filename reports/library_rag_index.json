@@ -2,17 +2,17 @@
   "summary": {
     "provenance_version": "2.0",
     "generation_mode": "clean_committed_corpus",
-    "git_commit_sha": "0919a17e2ea6ba8bdd7a153ce7d4eecd5f8c5022",
-    "corpus_source_commit_sha": "0919a17e2ea6ba8bdd7a153ce7d4eecd5f8c5022",
+    "git_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
+    "corpus_source_commit_sha": "3f95644e8e95f7ae2324fb48637720ea9bc5b130",
     "corpus_working_tree_dirty": false,
-    "corpus_sha256": "617c2bfd046817691aa14ab1fe65c2598995dca9f0e3e975819b81da13806c65",
+    "corpus_sha256": "8a845c1f3bd6e1a0da5315ddc84b029a1d3b82f71f2aa533ee1b0f212dd85321",
     "volumes_indexed": 32,
     "bilingual_files_indexed": 64,
     "parent_sections_count": 522,
     "child_chunks_count": 1074,
     "rules_indexed_zh": 130,
     "rules_indexed_en": 130,
-    "avg_chunk_tokens": 422.6
+    "avg_chunk_tokens": 424.0
   },
   "dag_prerequisites": {
     "LIB-000": [],

@@ -203,8 +203,8 @@ class LibraryChunk:
 def get_git_provenance(root: Path = ROOT) -> Dict[str, Any]:
     """
     Returns deterministic corpus-scoped Git provenance without circular commit hash churn.
-    Explicitly detects uncommitted working-tree changes to LIB-*.md (`+dirty`) so an older
-    ancestor commit can never be mistaken for an uncommitted corpus snapshot.
+    Explicitly detects uncommitted working-tree changes to LIB-*.md (`+dirty`) and refuses
+    to masquerade an unverified shallow boundary or HEAD fallback as `corpus_source_commit_sha`.
     """
     repo_head_sha = "UNKNOWN"
     corpus_commit_sha = "UNKNOWN"
@@ -215,15 +215,43 @@ def get_git_provenance(root: Path = ROOT) -> Dict[str, Any]:
             .strip()
             or "UNKNOWN"
         )
-        corpus_commit_sha = (
+        is_shallow = (
             subprocess.check_output(
-                ["git", "log", "-n", "1", "--pretty=format:%H", "--", ":(glob)**/LIB-*.md"],
+                ["git", "rev-parse", "--is-shallow-repository"],
                 cwd=str(root),
                 stderr=subprocess.DEVNULL,
                 text=True,
-            ).strip()
-            or repo_head_sha
+            )
+            .strip()
+            .lower()
+            == "true"
         )
+        log_out = subprocess.check_output(
+            ["git", "log", "-n", "1", "--pretty=format:%H|%P", "--", ":(glob)**/LIB-*.md"],
+            cwd=str(root),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        if log_out:
+            cand_sha, _, cand_parents = log_out.partition("|")
+            shallow_shas: Set[str] = set()
+            if is_shallow:
+                shallow_raw = subprocess.check_output(
+                    ["git", "rev-parse", "--git-path", "shallow"],
+                    cwd=str(root),
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                ).strip()
+                if shallow_raw:
+                    shallow_path = Path(shallow_raw)
+                    if not shallow_path.is_absolute():
+                        shallow_path = root / shallow_path
+                    if shallow_path.exists():
+                        shallow_shas = set(shallow_path.read_text(encoding="utf-8").split())
+            if is_shallow and (cand_sha in shallow_shas or not cand_parents.strip()):
+                corpus_commit_sha = "UNKNOWN"
+            else:
+                corpus_commit_sha = cand_sha
         dirty_out = subprocess.check_output(
             ["git", "status", "--porcelain", "--", ":(glob)**/LIB-*.md"],
             cwd=str(root),
@@ -241,9 +269,14 @@ def get_git_provenance(root: Path = ROOT) -> Dict[str, Any]:
                     repo_head_sha = ref_path.read_text(encoding="utf-8").strip()
             elif len(ref_txt) == 40:
                 repo_head_sha = ref_txt
-        corpus_commit_sha = repo_head_sha
+        corpus_commit_sha = "UNKNOWN"
 
-    generation_mode = "uncommitted_working_tree" if corpus_dirty else "clean_committed_corpus"
+    if corpus_dirty:
+        generation_mode = "uncommitted_working_tree"
+    elif corpus_commit_sha == "UNKNOWN":
+        generation_mode = "unverified_shallow_or_missing_git_history"
+    else:
+        generation_mode = "clean_committed_corpus"
     effective_sha = f"{corpus_commit_sha}+dirty" if corpus_dirty else corpus_commit_sha
     return {
         "provenance_version": "2.0",
@@ -258,6 +291,11 @@ def get_git_provenance(root: Path = ROOT) -> Dict[str, Any]:
 def get_git_commit_sha(root: Path = ROOT) -> str:
     """Backwards-compatible accessor returning explicit corpus-scoped commit SHA (`+dirty` if uncommitted)."""
     return str(get_git_provenance(root)["git_commit_sha"])
+
+
+def canonicalize_corpus_bytes(raw_bytes: bytes) -> bytes:
+    """Normalize CRLF line endings to canonical LF bytes for cross-platform corpus hashing."""
+    return raw_bytes.replace(b"\r\n", b"\n")
 
 
 def parse_frontmatter(text: str) -> Tuple[Dict[str, Any], str]:
@@ -586,10 +624,11 @@ class LibraryGraphRAGEngine:
         for call_num, lang, fpath in files:
             rel_p = fpath.relative_to(self.root).as_posix()
             raw_bytes = fpath.read_bytes()
+            canonical_bytes = canonicalize_corpus_bytes(raw_bytes)
             corpus_hasher.update(f"{rel_p}\n".encode("utf-8"))
-            corpus_hasher.update(raw_bytes)
+            corpus_hasher.update(canonical_bytes)
 
-            text = raw_bytes.decode("utf-8")
+            text = canonical_bytes.decode("utf-8")
             fm, body = parse_frontmatter(text)
             vol_title = str(fm.get("title", fpath.stem))
             status = str(fm.get("status", "reviewed"))

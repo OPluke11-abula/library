@@ -33,8 +33,8 @@
 - **版本溯源與基準區隔（不硬編碼流動 HEAD）**：
   - **Historical Snapshot Commit**：`0d4cde7e9bac4822766dfb69ef726ac370d6c4f9`（僅為早期 28 卷階段歷史基準快照，非現行 32 卷版本）。
   - **Current Repository HEAD**：執行驗證或建置當下之工作樹頂端（動態由 `git rev-parse HEAD` 取得，不於本交接文件硬編碼以免後續提交失效；執行 Benchmark 時另記錄於 `reports/library_rag_benchmark.json` 之 `benchmark_execution_commit_sha`）。
-  - **Corpus Source Commit**：最後一次修改 `LIB-*.md` 知識本體的 Commit SHA（由 `git log -n 1 --pretty=format:%H -- :(glob)**/LIB-*.md` 取得，固定記錄於三份報告之 `corpus_source_commit_sha`，同時以 `corpus_working_tree_dirty` 與 `+dirty` 後綴阻絕未提交狀態冒充已提交版）。
-  - **Deterministic Corpus SHA-256**：由全庫 64 份 `LIB-*.md` 位元組決定性計算並寫入 `reports/library_integrity.json`、`reports/library_rag_index.json` 與 `reports/library_rag_benchmark.json` 之 `corpus_sha256` 欄位供即時雜湊比對。
+  - **Corpus Source Commit**：最後一次修改 `LIB-*.md` 知識本體的 Commit SHA（由 `git log -n 1 --pretty=format:%H -- :(glob)**/LIB-*.md` 取得；CI 設定 `fetch-depth: 0` 保留完整歷史，若處於 Shallow Boundary 或無法存取 Git 歷史則誠實標記 `UNKNOWN` 而絕不以未驗證 `HEAD` 冒充，固定記錄於三份報告之 `corpus_source_commit_sha`，同時以 `corpus_working_tree_dirty` 與 `+dirty` 後綴阻絕未提交狀態冒充已提交版）。
+  - **Deterministic Corpus SHA-256 (Canonical LF Rule)**：以跨平台一致的 Canonical LF 規則計算全庫 64 份 `LIB-*.md` 語料雜湊——依 `(LIB-###, zh/en)` 排序讀取各檔原始位元組、僅於雜湊輸入緩衝區將 CRLF (`\r\n`) 正規化為 LF (`\n`)（不改寫磁碟原始檔案），再連同 POSIX 相對路徑與 `\n` 分隔符計算 SHA-256 並寫入 `reports/library_integrity.json`、`reports/library_rag_index.json` 與 `reports/library_rag_benchmark.json` 之 `corpus_sha256` 欄位供即時雜湊比對（確保 Windows CRLF 與 Linux LF 檢出得到相同雜湊，不於此檔硬編碼特定 SHA-256 值）。
 - **雙庫同步狀態**：本機開發倉與 OneDrive Obsidian 主庫處於 100% 零漂移（Zero-Drift）一致狀態。
 - **卷冊總數與結構對稱**：32 卷（繁體中文 32 卷，英文對齊 32 卷，共 64 份主體文件），所有 YAML Frontmatter、內文拓樸導航、標準證據標籤、權威參考文獻與代碼實作 100% 對齊。
 - **決策合約不變量**：精確維持 130 條 `RULE-xxx-xx` 不變量，ID、合約等級（Contract Level）與量化決策閾值在中英雙語 100% 對稱（0 重複、0 缺失、0 等級漂移）。

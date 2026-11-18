@@ -69,10 +69,15 @@ successors:
      `AffineGS` 將單目視差之倒數與渲染深度建模為空間變化仿射場：
      $$\frac{1}{d(u, v)} = \alpha(u, v)\,\mathcal{D}(u, v) + \beta(u, v)$$
      原始局部尺度場計算梯度範數比 `coefficients = d_gt_norm / (gt_safe**2 * d_render_norm + 1e-5)`（即 $\alpha_{\mathrm{raw}} = \|\nabla d\|_2 / (d^2 \|\nabla \mathcal{D}\|_2 + \epsilon)$，事前施加 **5th–95th 百分位截斷**，數值**嚴格非負 $\ge 0$**），而偏移場 `beta = 1/gt_safe - coefficients * rendered_depth` **未受非負約束（可為任意實數正負值）**。兩者皆隨後以未校正之原始 `gt_disparity` 作為 Guide 執行 `cv2.ximgproc.guidedFilter` 平滑為**空間隨像素變化的 $\alpha_{\mathrm{smooth}}(u, v)$ 與 $\beta_{\mathrm{smooth}}(u, v)$**（`AffineGS-LLFF-public` 採 `radius=600, eps=0.05`；`eldentse/AffineGS` 採 `radius=800, eps=1.0` 且濾波後重新將 `coefficients` 夾回 `[coef_lower, coef_upper]`，程式註解更明確指出 Guided Filter 局部線性擬合可能把 `coefficients` 推至 $\le 0$）。最終校正深度為 $\hat{\mathcal{D}}(u,v) = \frac{1 - \beta_{\mathrm{smooth}}(u,v)\,d(u,v)}{\alpha_{\mathrm{smooth}}(u,v)\,d(u,v)}$，並再經 `torch.no_grad()` 全域最小平方法擬合未強制正負號的純量 `(a, b)`（程式 `_fa, _fb`）以形成 $\mathcal{L}_{\mathrm{depth}} = |(a\hat{\mathcal{D}} + b) - \mathcal{D}|$；同時 $\mathcal{L}_{\mathrm{grad}}$ 與 $\mathcal{L}_{\mathrm{normal}}$ 採局部常數近似 $\nabla \hat{d} \approx -\alpha_{\mathrm{smooth}} d^2 \nabla \mathcal{D}$ 直接對齊未校正的原始單目視差梯度 $\nabla d$（`gt_dx, gt_dy`）。
-  2. **嚴禁由 `coefficients >= 0` 直接推論「校正結果必定無法反轉斜率」（`MATHEMATICAL_DERIVATION`） `[DERIVATION]`**：
-     對一般空間變化仿射校正 $\hat{d}(x) = \alpha(x)d(x) + \beta(x)$（同理適用於 $\hat{\mathcal{D}}(x) = \frac{1}{\alpha_{\mathrm{smooth}}(x)\,d(x)} - \frac{\beta_{\mathrm{smooth}}(x)}{\alpha_{\mathrm{smooth}}(x)}$ 及其全域線性縮放 $a\hat{\mathcal{D}} + b$），微積分乘積律給出完整空間導數：
-     $$\frac{d\hat{d}}{dx} = \alpha(x)\frac{dd}{dx} + d(x)\frac{d\alpha}{dx} + \frac{d\beta}{dx}$$
-     由於 **$\alpha_{\mathrm{smooth}}(u,v)$ 與未限制正負號的 $\beta_{\mathrm{smooth}}(u,v)$ 皆隨空間變化**、Guided Filter 會依 $\bar{a}_k d + \bar{b}_k$ 改變輸出空間梯度（甚至在無濾波後截斷時推動尺度為負）、且全域最小平方 `_fa` 亦可影響最終方向，**僅憑中間變數 $\alpha_{\mathrm{raw}} \ge 0$ 並不足以在數學上證明最終校正場的梯度符號不能改變** `[DERIVATION]`！方向不可翻轉僅在**額外嚴格條件**下成立：(i) 在 `AffineGS` 的 $\mathcal{L}_{\mathrm{grad}} / \mathcal{L}_{\mathrm{normal}}$ 目標項本身（忽略 $\nabla\alpha_{\mathrm{smooth}}$ 的局部常數梯度比對），若保證濾波後 $\alpha_{\mathrm{smooth}} > 0$，其目標梯度方向直接沿用原始 $\nabla d$ 而不具備翻轉機制 `[FACT]`；或 (ii) 對逐點校正深度 $\hat{\mathcal{D}}$ 須額外滿足 $\alpha_{\mathrm{smooth}}(x) > 0$、全域 $a > 0$，且場變異足夠平滑使得空間導數偏移項不壓過主導項 $|\alpha(x)d'(x)| > |d(x)\alpha'(x) + \beta'(x)|$（或分段常數 $\nabla\alpha = \nabla\beta = 0$） `[DERIVATION]`。
+  2. **嚴格區分「一般仿射場」與「`AffineGS` 逆視差深度場」及一維方向性導數充分條件（`MATHEMATICAL_DERIVATION`） `[DERIVATION]`**：
+     先釐清兩類不同形式之空間變化模型在一維或給定單位方向 $\mathbf{e}$（以 $(\cdot)' = D_{\mathbf{e}}(\cdot)$ 表示沿該方向之方向導數）上的微分規則，切勿混用：
+     - **(A) 一般空間變化仿射場** $\hat{y}(x) = \alpha(x)d(x) + \beta(x)$：其單維方向導數為 $\hat{y}'(x) = \alpha(x)d'(x) + d(x)\alpha'(x) + \beta'(x)$。在該指定方向滿足 $\alpha > 0, d' \neq 0$ 時，保持 $\mathrm{sign}(\hat{y}') = \mathrm{sign}(d')$ 之充分條件為 $|d\alpha' + \beta'| < |\alpha d'|$；**此一般仿射場條件不可直接搬用至 `AffineGS` 的逆視差深度場** `[FACT]`。
+     - **(B) `AffineGS` 逆視差校正深度場** $\hat{\mathcal{D}}(x) = \frac{1/d(x) - \beta(x)}{\alpha(x)} = \frac{1}{\alpha(x)\,d(x)} - \frac{\beta(x)}{\alpha(x)}$（加上全域尺度 $a\hat{\mathcal{D}} + b$）：沿該指定一維方向微分可得：
+       $$\hat{\mathcal{D}}'(x) = -\frac{d'(x)}{\alpha(x)\,d(x)^2} - \frac{\beta'(x)}{\alpha(x)} - \frac{\left(\frac{1}{d(x)} - \beta(x)\right)\alpha'(x)}{\alpha(x)^2}$$
+       由於 $\alpha_{\mathrm{smooth}}$ 與無正負號限制的 $\beta_{\mathrm{smooth}}$ 皆隨空間變化、Guided Filter 會依 $\bar{a}_k d + \bar{b}_k$ 改變輸出梯度、且全域最小平方 `a` (`_fa`) 若為負亦可翻轉符號，**僅憑中間變數 $\alpha_{\mathrm{raw}} \ge 0$ 並不足以在數學上證明最終校正深度場無法反轉局部斜率符號** `[DERIVATION]`。在該指定一維方向滿足 $\alpha > 0,\ d > 0,\ d' \neq 0$ 時（且若乘上全域正尺度 $a > 0$ 不改變其導數符號），保證維持原本逆視差單調方向 $\mathrm{sign}(\hat{\mathcal{D}}') = -\mathrm{sign}(d')$ 的一維／指定方向充分條件為：
+       $$\left|\beta'(x) + \left(\frac{1}{d(x)} - \beta(x)\right)\frac{\alpha'(x)}{\alpha(x)}\right| < \frac{|d'(x)|}{d(x)^2}$$
+       （必須明確限定此式僅對所檢驗之**指定一維切片／方向導數**成立；在二維影像平面中，若存在垂直於 $\nabla d$ 的方向使 $D_{\mathbf{e}}d \approx 0$，空間變化項 $\beta', \alpha'$ 仍可旋轉二維梯度向量 $\nabla\hat{\mathcal{D}}$，故不得將一維充分條件擅自升級為任意二維向量梯度方向保證 `[SAFETY_BOUND]`。）
+     - **反例與正例核對（證明不可套用一般仿射條件） `[FACT]`**：取 $d(x)=2+x,\ \alpha(x)=1+0.4x,\ \beta(x)=-0.8x$ 於 $x=0$：此時 $d(0)=2,\ d'(0)=1,\ \alpha(0)=1,\ \alpha'(0)=0.4,\ \beta(0)=0,\ \beta'(0)=-0.8$。舊一般仿射條件給出 $|d\alpha'+\beta'| = |0.8-0.8| = 0 < |\alpha d'| = 1$ 而誤判通過，然而實際代入 `AffineGS` 公式得 $\hat{\mathcal{D}}'(0) = -0.25 + 0.80 - 0.20 = +0.35 > 0$，直接反轉了原本逆視差導數方向（$-d'(0)/d(0)^2 = -0.25 < 0$）；正確條件右側為 $0.25$、左側為 $|-0.8 + 0.5\times 0.4| = 0.60 \not< 0.25$，精準攔截此翻轉。另一方面，若改採微小擾動且 $a=2.5>0$ 搭配 $\alpha(x)=1+0.1x,\ \beta(x)=-0.1x$，則左側 $|-0.1+0.05| = 0.05 < 0.25$ 且 $\hat{\mathcal{D}}'(0) = -0.20 < 0$（全域縮放後 $-0.50 < 0$），維持逆視差單調方向。而在 `AffineGS` 的 $\mathcal{L}_{\mathrm{grad}} / \mathcal{L}_{\mathrm{normal}}$ 目標項本身（採局部常數梯度比對、忽略 $\nabla\alpha_{\mathrm{smooth}}$），當保證濾波後 $\alpha_{\mathrm{smooth}} > 0$ 時，該損失項目標梯度方向則直接沿用原始 $\nabla d$ 而不具備翻轉機制 `[FACT]`。
   3. **結構限制與待驗證研究假說（`HYPOTHESIS` / `UNVERIFIED_REAL_3DGS_FAILURE`） `[HYPOTHESIS]`**：
      局部仿射校正對某些非仿射形狀失真（如缺乏邊界線索的光滑區域曲率反轉，或物體邊界的 edge bleeding）可能存在限制，因 $\mathcal{L}_{\mathrm{grad}}/\mathcal{L}_{\mathrm{normal}}$ 直接對齊原始 $\nabla d$ 且大視窗 Guided Filter 以 $d$ 為導引維持視窗內局部線性耦合 `[HYPOTHESIS]`；然而具體失效條件、3DGS 光度損失能否在聯合最佳化中覆寫該先驗誤差、以及是否導致可重現的真實 3D 幾何退化，目前尚未在實機 3DGS 實驗完成證實，仍須受控實驗確認（不預先宣稱必然失效，亦不得反向宣稱 `AffineGS` 已解決全部形狀失真） `[SAFETY_BOUND]`。
 
@@ -245,6 +250,31 @@ def verify_non_identifiable_plane_equivalence(
     return max(diff, max_err_gt), (len(coords) == len(true_plane) and diff < 1e-9)
 
 
+def verify_affinegs_1d_directional_derivative(
+    d: float,
+    d_prime: float,
+    alpha: float,
+    alpha_prime: float,
+    beta: float,
+    beta_prime: float,
+    global_positive_a: float = 1.0,
+) -> Tuple[float, bool, bool, bool]:
+    """
+    依 AffineGS 校正深度 D_hat = (1/d - beta)/alpha 計算指定一維方向之精確導數，
+    並對比錯誤的「一般仿射場條件」與正確的「一維逆視差充分條件」。
+    """
+    assert alpha > 0.0 and d > 0.0 and d_prime != 0.0 and global_positive_a > 0.0
+    dhat_prime = global_positive_a * (
+        -d_prime / (alpha * d * d)
+        - beta_prime / alpha
+        - ((1.0 / d - beta) * alpha_prime) / (alpha * alpha)
+    )
+    old_wrong_cond = abs(d * alpha_prime + beta_prime) < abs(alpha * d_prime)
+    true_sufficient_cond = abs(beta_prime + ((1.0 / d - beta) * alpha_prime) / alpha) < abs(d_prime) / (d * d)
+    preserves_inv_disp_sign = (dhat_prime * (-d_prime)) > 0.0
+    return dhat_prime, old_wrong_cond, true_sufficient_cond, preserves_inv_disp_sign
+
+
 if __name__ == "__main__":
     n_pts = 64
     xs = [-1.0 + 2.0 * i / (n_pts - 1) for i in range(n_pts)]
@@ -267,6 +297,14 @@ if __name__ == "__main__":
     # Case C: 參數非唯一但表面全等
     geom_delta, eq_ok = verify_non_identifiable_plane_equivalence(xs, [2.5 + 0.4 * x for x in xs])
 
+    # Case D1 (反例): d(x)=2+x, alpha(x)=1+0.4x, beta(x)=-0.8x 於 x=0 -> 舊條件誤判通過，實際 D_hat'(0)=+0.35 翻轉方向
+    ce_dp, ce_old, ce_true, ce_preserves = verify_affinegs_1d_directional_derivative(2.0, 1.0, 1.0, 0.4, 0.0, -0.8)
+    assert ce_old and not ce_true and not ce_preserves and abs(ce_dp - 0.35) < 1e-12
+
+    # Case D2 (正例): 正確一維充分條件成立且全域正尺度 a=2.5>0 維持 -sign(d')
+    ok_dp, _, ok_true, ok_preserves = verify_affinegs_1d_directional_derivative(2.0, 1.0, 1.0, 0.1, 0.0, -0.1, global_positive_a=2.5)
+    assert ok_true and ok_preserves and abs(ok_dp - (-0.50)) < 1e-12
+
     assert res_a.is_geometrically_faithful, "純仿射失真下應能可靠回復幾何"
     assert not res_b.is_geometrically_faithful and res_b.normal_sign_flip_rate > 0.25, (
         "局部曲率反轉錯亂時，以該先驗為引導之局部仿射會遺留顯著斜率反號殘差"
@@ -274,9 +312,8 @@ if __name__ == "__main__":
     assert eq_ok and geom_delta < 1e-9, "參數多解性不等同幾何偏移錯誤"
 
     print(
-        f"[LIB-507 Verified] CaseA_MAE={res_a.mean_surface_mae:.4f} (faithful={res_a.is_geometrically_faithful}) | "
-        f"CaseB_MAE={res_b.mean_surface_mae:.4f}, flip_rate={res_b.normal_sign_flip_rate:.2%} | "
-        f"NonIdentifiability_GeomDiff={geom_delta:.1e}"
+        f"[LIB-507 Verified] CaseA_MAE={res_a.mean_surface_mae:.4f} | CaseB_flip={res_b.normal_sign_flip_rate:.2%} | "
+        f"D1_Counterexample_Dhatp={ce_dp:+.2f} | D2_Positive_Dhatp={ok_dp:+.2f} | EqDiff={geom_delta:.1e}"
     )
 ```
 
